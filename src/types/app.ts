@@ -8,7 +8,7 @@ type User = {
 type Poi = {
   id: string;
   name: string;
-  descrtiton?: string;
+  description?: string;
   location:{
     longitude:number,
     latitude:number
@@ -49,7 +49,8 @@ type GeoJsonPoi = {
     type:string,
     coordinates:Array<number>
   },
-  properties:Poi
+  properties:Poi,
+  id?:string
 }
 
 type Journey = {

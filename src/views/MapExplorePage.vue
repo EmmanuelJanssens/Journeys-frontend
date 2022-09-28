@@ -1,36 +1,61 @@
 <template>
   <ion-page>
-    <ion-split-pane when="md" content-id="main">
-      <map-journey-sidebar :start="startPoint" :end="endPoint" />
-      <div id="main">
-        <journeys-header />
-        <ion-loading v-if="isLoading == true" />
-        <ion-grid style="height: 100%;">
-          <ion-row style="height: 100%; ">
-            <ion-col size="3" class="scrollable-item" :hidden="hideSidebar">
-              <ion-item class="items" v-for="poi in usePoi.poiRef?.features" button
-                @click="panTo(poi.geometry.coordinates)">
-                <ion-icon slot="start" size="large" src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
-                <ion-label>{{poi.properties.name}}</ion-label>
-              </ion-item>
-            </ion-col>
-            <ion-col>
-              <ion-content class="map-wrap">
-                <section class="map" ref="mapContainer"></section>
-              </ion-content>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </div>
-    </ion-split-pane>
-  </ion-page>
+    <journeys-header />
 
+    <ion-content>
+      <ion-loading v-if="isLoading == true" />
+      <ion-grid style="height: 100%;">
+        <ion-row style="height: 100%; ">
+
+          <ion-col size="2" style="height: 100%;" class="journey-items ion-hide-sm-down">
+            <map-journey-sidebar :start="startPoint" :end="endPoint" />
+          </ion-col>
+          <ion-col size="2" :hidden="false" class="poi-list ion-hide-sm-down">
+            <ion-item v-for="poi in usePoi.poiRef?.features" button @click="panTo(poi.geometry.coordinates)">
+              <ion-icon slot="start" size="large" src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
+              <ion-label>{{poi.properties.name}}</ion-label>
+            </ion-item>
+<!--             <RecycleScrollView
+            style="height: 100%;"
+            key-field="id"
+            :items="usePoi.poiRef.features"
+            class="ion-content-scroll-host"
+            :items-size="usePoi.poiRef.features.length"
+            :prerender="10">
+
+              <template #default="{item}">
+                <ion-item button @click="panTo(item.geometry.coordinates)">
+                  <ion-icon slot="start" size="large" src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
+                  <ion-label>{{item.properties.name}}</ion-label>
+                </ion-item>
+              </template>
+            </RecycleScrollView> -->
+          </ion-col>
+          <ion-col style="height: 100%;">
+            <ion-content class="map-wrap">
+              <ion-fab vertical="top" horizontal="start" slot="fixed">
+                <ion-fab-button>salut</ion-fab-button>
+                <ion-fab-list side="end">
+                  <ion-fab-button>ça</ion-fab-button>
+                  <ion-fab-button>va</ion-fab-button>
+                  <ion-fab-button>bien</ion-fab-button>
+
+                </ion-fab-list>
+              </ion-fab>
+              <section class="map" ref="mapContainer"></section>
+            </ion-content>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts" setup>
 import {
   IonPage,
   IonContent,
+  IonButton,
   IonSplitPane,
   popoverController,
   onIonViewWillEnter,
@@ -42,8 +67,12 @@ import {
   IonLabel,
   IonLoading,
   onIonViewDidLeave,
+  IonFab,
+  IonFabButton,
+  IonFabList
 } from '@ionic/vue'
 
+import RecycleScrollView from 'vue-virtual-scroller'
 import MapJourneySidebar from '../components/MapJourneySidebar.vue';
 import JourneysHeader from '../components/JourneysHeader.vue';
 import PoiCard from '../components/PoiCard.vue';
@@ -53,7 +82,6 @@ import { Map, NavigationControl, Marker, LngLat, MapMouseEvent } from 'maplibre-
 import { ref  } from 'vue';
 
 import haversine from 'haversine';
-import router from '../router'
 
 
 const usePoi = usePoiStore()
@@ -64,11 +92,11 @@ var map = ref<Map>()
 var startPoint = ref({ text: "", coordinates: new LngLat(-1, -1) })
 var endPoint = ref({ text: "", coordinates: new LngLat(-1, -1) })
 var hideSidebar = ref(true)
-var isLoading = ref(true)
+var isLoading = ref(false)
 
 onIonViewWillEnter(() => {
+  /*
   const params = router.currentRoute.value.params
-
   useJourney.journeyRef = []
   if (params.start != undefined && params.end != undefined) {
     startPoint.value = JSON.parse(params.start as string) as {
@@ -80,6 +108,23 @@ onIonViewWillEnter(() => {
       coordinates: LngLat
     }
     load();
+  }*/
+
+  const dev = {
+    start: "{\"text\":\"Lausanne, Switzerland\",\"coordinates\":{\"lng\":6.6322734,\"lat\":46.5196535}}",
+    end: "{\"text\":\"Vevey, Switzerland\",\"coordinates\":{\"lng\":6.8419192,\"lat\":46.4628333}}"
+  }
+  useJourney.journeyRef = []
+  if (dev.start != undefined && dev.end != undefined) {
+    startPoint.value = JSON.parse(dev.start as string) as {
+      text: string,
+      coordinates: LngLat
+    }
+    endPoint.value = JSON.parse(dev.end as string) as {
+      text: string,
+      coordinates: LngLat
+    }
+    //load();
   }
 })
 
@@ -335,13 +380,17 @@ ion-grid {
   --ion-grid-margin: 0px;
 }
 
+.journeys-items{
+  min-width: 150px;
+}
 
-.scrollable-item {
-  overflow-y: scroll;
+.poi-list {
+  min-width: 150px;
+  overflow-y: scroll!important;
   height: 100%;
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox */
+}
+
+.scrollable-item{
+  height: 100%
 }
 </style>

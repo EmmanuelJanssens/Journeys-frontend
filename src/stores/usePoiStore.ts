@@ -45,7 +45,8 @@ export const usePoiStore = defineStore('poi', () => {
                 type:"Point",
                 coordinates:[poi.location.longitude,poi.location.latitude]
               },
-              properties:poi
+              properties:poi,
+              id:poi.id
             }
           )
         })

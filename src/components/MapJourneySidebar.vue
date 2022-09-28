@@ -1,8 +1,4 @@
 <template>
-  <ion-menu menu-id="journey-steps" content-id="main">
-    <ion-toolbar>
-      <ion-title>Journey</ion-title>
-    </ion-toolbar>
     <ion-content>
       <ion-item-sliding>
         <ion-item lines="full">
@@ -42,7 +38,6 @@
         </ion-item-options>
       </ion-item-sliding>
     </ion-content>
-  </ion-menu>
 </template>
 <script lang="ts" setup>
 import {
