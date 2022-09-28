@@ -1,8 +1,6 @@
 <template>
     <ion-header>
       <ion-toolbar>
-        <ion-button color="secondary" router-link="/home">Journeys</ion-button>
-
         <ion-buttons slot="end">
           <ion-button color="secondary" router-link="/home">Home</ion-button>
           <ion-button color="primary" id="open-login-modal" v-if="userStore.IsLoggedIn() == false">Login</ion-button>
@@ -30,8 +28,7 @@ const userStore = useUserStore()
 
 function toggleProfile()
 {
-  console.log('toggle')
-  menuController.toggle('profileMenu').then((b)=>{
+  menuController.toggle('profileMenu').then(()=>{
     menuController.isOpen('profileMenu').then((b)=>console.log(b))
   }
 )

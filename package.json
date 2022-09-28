@@ -28,7 +28,8 @@
     "url": "^0.11.0",
     "vue": "^3.2.36",
     "vue-axios": "^3.4.1",
-    "vue-router": "^4.0.13"
+    "vue-router": "^4.0.13",
+    "vue-virtual-scroller": "^2.0.0-alpha.1"
   },
   "devDependencies": {
     "@types/google.maps": "^3.50.2",

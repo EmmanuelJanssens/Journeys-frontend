@@ -4,7 +4,16 @@ import axios, { AxiosError } from 'axios';
 import url from "url";
 
 export const usePoiStore = defineStore('poi', () => {
-  const poiRef = ref<GeoJsonData>()
+  const poiRef = ref<GeoJsonData>({
+    crs:{
+      properties:{
+        name:""
+      },
+      type:""
+    },
+    features:[],
+    type:""
+  })
 
   function searchBetween(lat: number, lng: number,radius: number)
   {

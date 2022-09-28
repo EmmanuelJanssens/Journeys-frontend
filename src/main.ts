@@ -28,12 +28,17 @@ import './theme/variables.css';
 //map
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
+
+import VueVirtualScroller from 'vue-virtual-scroller';
 const pinia = createPinia()
 const app = createApp(App)
 app.use(IonicVue)
 app.use(router)
 app.use(pinia)
 app.use(VueAxios,axios)
+app.use(VueVirtualScroller)
+
 router.isReady().then(() => {
   app.mount('#app');
 });

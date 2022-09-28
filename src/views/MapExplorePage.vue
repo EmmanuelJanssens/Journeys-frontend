@@ -1,29 +1,26 @@
 <template>
   <ion-page>
-
     <ion-split-pane when="md" content-id="main">
-
-      <ion-menu menu-id="journey-steps" content-id="main">
-        <ion-toolbar>
-          <ion-title>Journey</ion-title>
-        </ion-toolbar>
-        <ion-content>
-          <ion-button>
-            this is a button
-          </ion-button>
-          <ion-button>
-            this is a button
-          </ion-button>
-          <ion-button>
-            this is a button
-          </ion-button>
-        </ion-content>
-      </ion-menu>
+      <map-journey-sidebar :start="startPoint" :end="endPoint" />
       <div id="main">
         <journeys-header />
-        <ion-content class="map-wrap">
-          <section class="map" ref="mapContainer"></section>
-        </ion-content>
+        <ion-loading v-if="isLoading == true" />
+        <ion-grid style="height: 100%;">
+          <ion-row style="height: 100%; ">
+            <ion-col size="3" class="scrollable-item" :hidden="hideSidebar">
+              <ion-item class="items" v-for="poi in usePoi.poiRef?.features" button
+                @click="panTo(poi.geometry.coordinates)">
+                <ion-icon slot="start" size="large" src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
+                <ion-label>{{poi.properties.name}}</ion-label>
+              </ion-item>
+            </ion-col>
+            <ion-col>
+              <ion-content class="map-wrap">
+                <section class="map" ref="mapContainer"></section>
+              </ion-content>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
       </div>
     </ion-split-pane>
   </ion-page>
@@ -35,28 +32,221 @@ import {
   IonPage,
   IonContent,
   IonSplitPane,
-  IonMenu,
-  IonToolbar,
-  IonTitle,
-  IonButton,
   popoverController,
-  onIonViewWillEnter
+  onIonViewWillEnter,
+  IonGrid,
+  IonCol,
+  IonRow,
+  IonItem,
+  IonIcon,
+  IonLabel,
+  IonLoading,
+  onIonViewDidLeave,
 } from '@ionic/vue'
 
+import MapJourneySidebar from '../components/MapJourneySidebar.vue';
 import JourneysHeader from '../components/JourneysHeader.vue';
 import PoiCard from '../components/PoiCard.vue';
 import { usePoiStore } from '../stores/usePoiStore'
+import { useJourneyStore } from '../stores/useJourneyStore';
 import { Map, NavigationControl, Marker, LngLat, MapMouseEvent } from 'maplibre-gl'
-import {  ref, onUnmounted, onActivated } from 'vue';
+import { ref  } from 'vue';
 
 import haversine from 'haversine';
 import router from '../router'
 
+
+const usePoi = usePoiStore()
+const useJourney = useJourneyStore()
+
 var mapContainer = ref()
 var map = ref<Map>()
-const usePoi = usePoiStore();
-var start = ref()
-var end = ref()
+var startPoint = ref({ text: "", coordinates: new LngLat(-1, -1) })
+var endPoint = ref({ text: "", coordinates: new LngLat(-1, -1) })
+var hideSidebar = ref(true)
+var isLoading = ref(true)
+
+onIonViewWillEnter(() => {
+  const params = router.currentRoute.value.params
+
+  useJourney.journeyRef = []
+  if (params.start != undefined && params.end != undefined) {
+    startPoint.value = JSON.parse(params.start as string) as {
+      text: string,
+      coordinates: LngLat
+    }
+    endPoint.value = JSON.parse(params.end as string) as {
+      text: string,
+      coordinates: LngLat
+    }
+    load();
+  }
+})
+
+onIonViewDidLeave(() => {
+  usePoi.poiRef.features = []
+  map.value?.remove()
+})
+
+function panTo(coordinates: Array<number>) {
+  map.value?.easeTo({
+    center: [coordinates[0], coordinates[1]],
+    zoom: 16
+  })
+}
+
+function load() {
+  isLoading.value = true;
+  const apiKey = import.meta.env.VITE_MAPTILER_API_KEY
+  getMidPoint(startPoint.value.coordinates, endPoint.value.coordinates)
+  const midPoint =
+  {
+    lng: getMidPoint(startPoint.value.coordinates, endPoint.value.coordinates).lng,
+    lat: getMidPoint(startPoint.value.coordinates, endPoint.value.coordinates).lat, zoom: 10
+  };
+
+
+  map.value = new Map({
+    container: mapContainer.value,
+    style: `https://api.maptiler.com/maps/voyager/style.json?key=${apiKey}`,
+    center: [midPoint.lng, midPoint.lat],
+    zoom: midPoint.zoom
+  })
+
+  map.value?.once('render', () => {
+    map.value?.resize();
+  });
+
+  map.value?.once('load', () => {
+    new Marker()
+      .setLngLat([startPoint.value.coordinates.lng, startPoint.value.coordinates.lat])
+      .addTo(map.value!)
+    new Marker()
+      .setLngLat([endPoint.value.coordinates.lng, endPoint.value.coordinates.lat])
+      .addTo(map.value!)
+
+    const dist = haversine(
+      {
+        latitude: startPoint.value.coordinates.lat,
+        longitude: startPoint.value.coordinates.lng
+      },
+      {
+        latitude: endPoint.value.coordinates.lat,
+        longitude: endPoint.value.coordinates.lng
+      },
+      { unit: 'meter' }
+    )
+
+    usePoi.searchBetween(midPoint.lat, midPoint.lng, dist / 2)
+      .then(
+        (response) => {
+          hideSidebar.value = usePoi.poiRef.features.length == 0;
+
+          if (hideSidebar.value != true && response === true) {
+            map.value?.addSource('poi', {
+              type: 'geojson',
+              data: usePoi.poiRef,
+              cluster: true,
+              clusterMaxZoom: 14,
+              clusterRadius: 50
+            })
+
+            map.value?.addLayer({
+              id: 'clusters',
+              type: 'circle',
+              source: 'poi',
+              filter: ['has', 'point_count'],
+              paint: {
+                'circle-color': [
+                  'step',
+                  ['get', 'point_count'],
+                  '#51bbd6',
+                  100,
+                  '#f1f075',
+                  750,
+                  '#f28cb1'
+                ],
+                'circle-radius': [
+                  'step',
+                  ['get', 'point_count'],
+                  20,
+                  100,
+                  30,
+                  750,
+                  40
+                ]
+              }
+            })
+
+            map.value?.addLayer({
+              id: 'cluster-count',
+              type: 'symbol',
+              source: 'poi',
+              filter: ['has', 'point_count'],
+              layout: {
+                'text-field': '{point_count_abbreviated}',
+                'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                'text-size': 12
+              }
+            })
+
+            map.value?.addLayer({
+              id: 'unclustered-point',
+              type: 'circle',
+              source: 'poi',
+              filter: ['!', ['has', 'point_count']],
+              paint: {
+                'circle-color': '#11b4da',
+                'circle-radius': 6,
+                'circle-stroke-width': 1,
+                'circle-stroke-color': '#fff'
+              }
+            });
+
+            map.value?.addSource('route', {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'LineString',
+                  coordinates: [
+                    [startPoint.value.coordinates.lng, startPoint.value.coordinates.lat],
+                    [endPoint.value.coordinates.lng, endPoint.value.coordinates.lat]
+                  ]
+                }
+              }
+            })
+
+            map.value?.addLayer({
+              id: 'route',
+              type: 'line',
+              source: 'route',
+              layout: {
+                'line-join': 'round',
+                'line-cap': 'round'
+              },
+              paint: {
+                "line-color": '#555',
+                "line-width": 2
+              }
+            })
+          }
+          //finish loading
+          isLoading.value = false;
+        })
+  })
+
+  map.value?.on('click', 'clusters', (e) => {
+    onClusterClick(e);
+  })
+
+  map.value?.on('click', 'unclustered-point', (e) => {
+    onPopOver(e.features![0].properties as Poi, e)
+  })
+
+  map.value?.addControl(new NavigationControl({}), 'top-right');
+}
 
 async function onPopOver(data: Poi, e: MapMouseEvent) {
 
@@ -72,162 +262,26 @@ async function onPopOver(data: Poi, e: MapMouseEvent) {
   await popover.present();
 }
 
-onIonViewWillEnter(() => {
-  const p = router.currentRoute.value.params
-  if (p.start != undefined && p.end != undefined) {
-    start.value = { longitude: p.start[0], latitude: p.start[1] }
-    end.value = { longitude: p.end[0], latitude: p.end[1] }
-    load();
-  }
-})
-
-function  load()
-{
-  const apiKey = import.meta.env.VITE_MAPTILER_API_KEY
-  const initialState = { lng: 6.5914, lat: 46.5338, zoom: 10 };
-
-
-  map.value = new Map({
-    container: mapContainer.value,
-    style: `https://api.maptiler.com/maps/voyager/style.json?key=${apiKey}`,
-    center: [initialState.lng, initialState.lat],
-    zoom: initialState.zoom
+function onClusterClick(e: MapMouseEvent) {
+  const features = map.value?.queryRenderedFeatures(e.point, {
+    layers: ['clusters']
   })
-  map.value.once('render', () => {
-    map.value?.resize();
-  });
-
-  map.value.once('load', () => {
-
-    const midPoint = getMidPoint(
-      new LngLat(start.value.longitude, start.value.latitude),
-      new LngLat(end.value.longitude, end.value.latitude)
-    )
-
-    new Marker()
-      .setLngLat([start.value.longitude, start.value.latitude])
-      .addTo(map.value!)
-    new Marker()
-      .setLngLat([end.value.longitude, end.value.latitude])
-      .addTo(map.value!)
-    const dist = haversine(start.value, end.value, { unit: 'meter' })
-    usePoi.searchBetween(midPoint.lat, midPoint.lng, dist / 2)
-      .then(
-        (response) => {
-          map.value?.addSource('poi', {
-            type: 'geojson',
-            data: usePoi.poiRef,
-            cluster: true,
-            clusterMaxZoom: 14,
-            clusterRadius: 50
-          })
-
-          map.value?.addLayer({
-            id: 'clusters',
-            type: 'circle',
-            source: 'poi',
-            filter: ['has', 'point_count'],
-            paint: {
-              'circle-color': [
-                'step',
-                ['get', 'point_count'],
-                '#51bbd6',
-                100,
-                '#f1f075',
-                750,
-                '#f28cb1'
-              ],
-              'circle-radius': [
-                'step',
-                ['get', 'point_count'],
-                20,
-                100,
-                30,
-                750,
-                40
-              ]
-            }
-          })
-          map.value?.addLayer({
-            id: 'cluster-count',
-            type: 'symbol',
-            source: 'poi',
-            filter: ['has', 'point_count'],
-            layout: {
-              'text-field': '{point_count_abbreviated}',
-              'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-              'text-size': 12
-            }
-          })
-          map.value?.addLayer({
-            id: 'unclustered-point',
-            type: 'circle',
-            source: 'poi',
-            filter: ['!', ['has', 'point_count']],
-            paint: {
-              'circle-color': '#11b4da',
-              'circle-radius': 6,
-              'circle-stroke-width': 1,
-              'circle-stroke-color': '#fff'
-            }
-          });
-          map.value?.addSource('route', {
-            type: 'geojson',
-            data: {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'LineString',
-                coordinates: [
-                  [start.value.longitude, start.value.latitude],
-                  [end.value.longitude, end.value.latitude]
-                ]
-              }
-            }
-          })
-          map.value?.addLayer({
-            id: 'route',
-            type: 'line',
-            source: 'route',
-            layout: {
-              'line-join': 'round',
-              'line-cap': 'round'
-            },
-            paint: {
-              "line-color": '#555',
-              "line-width": 2
-            }
-          })
+  const clusterId = features![0].properties.cluster_id
+  const source: maplibregl.GeoJSONSource = map.value?.getSource('poi') as maplibregl.GeoJSONSource
+  source.getClusterExpansionZoom(
+    clusterId,
+    (err: any, zoom: any) => {
+      if (err) return;
+      if (features![0].geometry.type === 'Point') {
+        map.value?.easeTo({
+          center: [features![0].geometry.coordinates[0], features![0].geometry.coordinates[1]],
+          zoom: zoom
         })
-  })
-
-  map.value.on('click', 'clusters', (e) => {
-    const features = map.value?.queryRenderedFeatures(e.point, {
-      layers: ['clusters']
-    })
-    const clusterId = features![0].properties.cluster_id
-    const source: maplibregl.GeoJSONSource = map.value?.getSource('poi') as maplibregl.GeoJSONSource
-    source.getClusterExpansionZoom(
-      clusterId,
-      (err: any, zoom: any) => {
-        if (err) return;
-        if (features![0].geometry.type === 'Point') {
-          map.value?.easeTo({
-            center: [features![0].geometry.coordinates[0], features![0].geometry.coordinates[1]],
-            zoom: zoom
-          })
-        }
       }
-    )
-  })
-
-  map.value.on('click', 'unclustered-point', (e) => {
-    const data = e.features![0].properties;
-    onPopOver(data as Poi, e)
-  })
-
-  map.value?.addControl(new NavigationControl({}), 'top-right');
+    }
+  )
 }
+
 function getMidPoint(start: maplibregl.LngLat, end: maplibregl.LngLat) {
   const lat1 = start.lat * Math.PI / 180
   const lon1 = start.lng * Math.PI / 180
@@ -256,10 +310,6 @@ function getMidPoint(start: maplibregl.LngLat, end: maplibregl.LngLat) {
     lng: lon
   }
 }
-
-onUnmounted(() => {
-  map.value?.remove();
-})
 </script>
 
 <style>
@@ -278,5 +328,20 @@ ion-split-pane {
   position: relative;
   width: 100%;
   height: 100%;
+}
+
+ion-grid {
+  --ion-grid-padding: 0px;
+  --ion-grid-margin: 0px;
+}
+
+
+.scrollable-item {
+  overflow-y: scroll;
+  height: 100%;
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 </style>

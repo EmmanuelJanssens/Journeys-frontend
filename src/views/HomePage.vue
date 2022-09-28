@@ -99,7 +99,7 @@ import { LngLat } from 'maplibre-gl';
 
 import LoginModal from '../components/LoginModal.vue'
 import JourneysHeader from '../components/JourneysHeader.vue';
-import GeocodingSuggestion from '../components/GeocodingSuggestion.vue';
+import GautoCompletePredictionList from '../components/GautoCompletePredictionList.vue';
 import router from '../router';
 
 
@@ -137,10 +137,11 @@ function gotoJourneyMap() {
     {
       name: 'map',
       params: {
-        start: start.value.coordinates.toArray(),
-        end: end.value.coordinates.toArray()
+        start: JSON.stringify(start.value),
+        end: JSON.stringify(end.value)
       }
     }
+    console.log(route.params)
     router.push(route)
   }
 }
@@ -148,7 +149,7 @@ function gotoJourneyMap() {
 async function showPopOver(ev: Event, collection: Array<google.maps.places.AutocompletePrediction>, point: string) {
 
   const popover = await popoverController.create({
-    component: GeocodingSuggestion,
+    component: GautoCompletePredictionList,
     componentProps: { predictions: collection },
     animated: false,
     event: ev,
@@ -157,14 +158,13 @@ async function showPopOver(ev: Event, collection: Array<google.maps.places.Autoc
     alignment: 'center',
     showBackdrop: false,
     keyboardClose: false,
-    dismissOnSelect: true,
     id: 'suggestionPopover'
   })
   await popover.present();
   popoverIsOpen = true;
   const { data, role } = await popover.onDidDismiss();
   const label = data as string
-  if (label.length > 0 && (label !== 'dismissPrevious' || role !== 'backdrop')) {
+  if (label !== undefined && label.length > 0 && (label !== 'dismissPrevious' || role !== 'backdrop')) {
     const request : google.maps.GeocoderRequest = {
         address: label,
         componentRestrictions: {country: 'ch'}

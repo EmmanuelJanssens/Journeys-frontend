@@ -8,27 +8,41 @@
           </ion-label>
         </ion-item>
       </ion-list>
-
+      <ion-item>
+          <ion-label>
+            <ion-icon src="/src/assets/icon/logo-google.svg"></ion-icon>
+            <ion-text class="google" color="medium"> Powered by google</ion-text>
+          </ion-label>
+        </ion-item>
     </section>
-
   </ion-content>
 </template>
 
 <script lang="ts" setup>
 import {
+  IonText,
+  IonIcon,
   IonContent,
   IonItem,
   IonLabel,
   IonList,
-  popoverController
+  popoverController,
+onIonViewDidEnter
 } from '@ionic/vue'
-import { LngLat } from 'maplibre-gl';
+import { onMounted } from 'vue';
 
 const suggestions = defineProps(['predictions'])
-
 function close(label: string){
-
-  //const latlng  = new LngLat(longitude,latitude)
   popoverController.dismiss(label)
 }
+
 </script>
+
+<style>
+ion-icon{
+  font-size: 10px;
+}
+.google{
+  font-size: 10px;
+}
+</style>

@@ -19,7 +19,7 @@
           </ion-row>
           <ion-row>
             <ion-col>
-              <ion-button>
+              <ion-button @click="addToJourney(data.poi)">
                 Add
               </ion-button>
             </ion-col>
@@ -40,13 +40,21 @@ import {
   IonRow,
   IonCol,
   IonButton,
-  IonImg
+  IonImg,
+  popoverController
 } from '@ionic/vue';
 import { onMounted } from 'vue';
 import axios, { AxiosError } from 'axios';
-
+import { useJourneyStore } from '../stores/useJourneyStore';
 const data = defineProps(['poi'])
 
+const useJourney = useJourneyStore()
+
+function addToJourney(poi: Poi)
+{
+  useJourney.addToJourney(poi)
+  popoverController.dismiss()
+}
 onMounted(() => {
   console.log(data)
   const poi = data.poi as Poi
