@@ -2,7 +2,7 @@
   <ion-app>
 
     <ion-router-outlet content-id="main-content"/>
-    <user-detail-menu/>
+    <!--<user-detail-menu/>-->
 
   </ion-app>
 </template>

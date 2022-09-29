@@ -1,49 +1,53 @@
 <template>
   <ion-page>
-    <journeys-header />
-
+    <JourneysHeader/>
+    <ion-loading v-if="isLoading" />
     <ion-content>
-      <ion-loading v-if="isLoading == true" />
       <ion-grid style="height: 100%;">
         <ion-row style="height: 100%; ">
 
-          <ion-col size="2" style="height: 100%;" class="journey-items ion-hide-sm-down">
-            <map-journey-sidebar :start="startPoint" :end="endPoint" />
-          </ion-col>
-          <ion-col size="2" :hidden="false" class="poi-list ion-hide-sm-down">
-            <ion-item v-for="poi in usePoi.poiRef?.features" button @click="panTo(poi.geometry.coordinates)">
-              <ion-icon slot="start" size="large" src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
-              <ion-label>{{poi.properties.name}}</ion-label>
-            </ion-item>
-<!--             <RecycleScrollView
+          <ion-col v-if="!isLoading"  :hidden="false" class="sidebar-items-list ion-hide-xl-down">
+             <RecycleScroller
             style="height: 100%;"
-            key-field="id"
             :items="usePoi.poiRef.features"
-            class="ion-content-scroll-host"
-            :items-size="usePoi.poiRef.features.length"
-            :prerender="10">
-
+            :item-size="50">
               <template #default="{item}">
                 <ion-item button @click="panTo(item.geometry.coordinates)">
                   <ion-icon slot="start" size="large" src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
                   <ion-label>{{item.properties.name}}</ion-label>
                 </ion-item>
               </template>
-            </RecycleScrollView> -->
+            </RecycleScroller>
           </ion-col>
-          <ion-col style="height: 100%;">
-            <ion-content class="map-wrap">
-              <ion-fab vertical="top" horizontal="start" slot="fixed">
-                <ion-fab-button>salut</ion-fab-button>
-                <ion-fab-list side="end">
-                  <ion-fab-button>ça</ion-fab-button>
-                  <ion-fab-button>va</ion-fab-button>
-                  <ion-fab-button>bien</ion-fab-button>
+          <ion-col class="map-col">
+            <ion-searchbar class="floating search"></ion-searchbar>
+            <ion-button size="small" class="ion-margin-start ion-margin-top floating icon-button">
+              <ion-icon class="icon-button" slot="icon-only" src="/src/assets/icon/filter-outline.svg"></ion-icon>
+            </ion-button>
 
-                </ion-fab-list>
+            <ion-content class="map-wrap">
+              <ion-fab v-if="!isLoading"  vertical="top" horizontal="end" slot="fixed">
+                <ion-fab-button>
+                  <ion-icon size="large" src="/src/assets/icon/chevron-down-outline.svg"></ion-icon>
+
+                </ion-fab-button>
+                <ion-fab-list>
+                    <ion-fab-button>
+                      <ion-icon  src="/src/assets/icon/save-outline.svg"></ion-icon>
+                    </ion-fab-button>
+                    <ion-fab-button>
+                      <ion-icon src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
+                    </ion-fab-button>
+                  </ion-fab-list>
               </ion-fab>
+
               <section class="map" ref="mapContainer"></section>
+
             </ion-content>
+
+          </ion-col>
+          <ion-col v-if="!isLoading"   class="journeys-items ion-hide-md-down">
+            <map-journey-sidebar :start="startPoint" :end="endPoint" />
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -54,6 +58,7 @@
 <script lang="ts" setup>
 import {
   IonPage,
+  IonMenu,
   IonContent,
   IonButton,
   IonSplitPane,
@@ -69,10 +74,11 @@ import {
   onIonViewDidLeave,
   IonFab,
   IonFabButton,
-  IonFabList
+  IonFabList,
+  IonSearchbar,
+  IonChip
 } from '@ionic/vue'
 
-import RecycleScrollView from 'vue-virtual-scroller'
 import MapJourneySidebar from '../components/MapJourneySidebar.vue';
 import JourneysHeader from '../components/JourneysHeader.vue';
 import PoiCard from '../components/PoiCard.vue';
@@ -82,6 +88,7 @@ import { Map, NavigationControl, Marker, LngLat, MapMouseEvent } from 'maplibre-
 import { ref  } from 'vue';
 
 import haversine from 'haversine';
+import router from '../router';
 
 
 const usePoi = usePoiStore()
@@ -95,8 +102,7 @@ var hideSidebar = ref(true)
 var isLoading = ref(false)
 
 onIonViewWillEnter(() => {
-  /*
-  const params = router.currentRoute.value.params
+/*   const params = router.currentRoute.value.params
   useJourney.journeyRef = []
   if (params.start != undefined && params.end != undefined) {
     startPoint.value = JSON.parse(params.start as string) as {
@@ -108,7 +114,7 @@ onIonViewWillEnter(() => {
       coordinates: LngLat
     }
     load();
-  }*/
+  } */
 
   const dev = {
     start: "{\"text\":\"Lausanne, Switzerland\",\"coordinates\":{\"lng\":6.6322734,\"lat\":46.5196535}}",
@@ -124,7 +130,7 @@ onIonViewWillEnter(() => {
       text: string,
       coordinates: LngLat
     }
-    //load();
+    load();
   }
 })
 
@@ -141,17 +147,29 @@ function panTo(coordinates: Array<number>) {
 }
 
 function load() {
-  isLoading.value = true;
-  const apiKey = import.meta.env.VITE_MAPTILER_API_KEY
   getMidPoint(startPoint.value.coordinates, endPoint.value.coordinates)
   const midPoint =
   {
     lng: getMidPoint(startPoint.value.coordinates, endPoint.value.coordinates).lng,
     lat: getMidPoint(startPoint.value.coordinates, endPoint.value.coordinates).lat, zoom: 10
   };
+  const dist = haversine(
+      {
+        latitude: startPoint.value.coordinates.lat,
+        longitude: startPoint.value.coordinates.lng
+      },
+      {
+        latitude: endPoint.value.coordinates.lat,
+        longitude: endPoint.value.coordinates.lng
+      },
+      { unit: 'meter' }
+    )
+    usePoi.searchBetween(midPoint.lat, midPoint.lng, dist / 2)
+      .then();
+  isLoading.value = false;
+  const apiKey = import.meta.env.VITE_MAPTILER_API_KEY
 
-
-  map.value = new Map({
+  /* map.value = new Map({
     container: mapContainer.value,
     style: `https://api.maptiler.com/maps/voyager/style.json?key=${apiKey}`,
     center: [midPoint.lng, midPoint.lat],
@@ -187,7 +205,7 @@ function load() {
         (response) => {
           hideSidebar.value = usePoi.poiRef.features.length == 0;
 
-          if (hideSidebar.value != true && response === true) {
+          if (hideSidebar.value != true && response) {
             map.value?.addSource('poi', {
               type: 'geojson',
               data: usePoi.poiRef,
@@ -290,7 +308,7 @@ function load() {
     onPopOver(e.features![0].properties as Poi, e)
   })
 
-  map.value?.addControl(new NavigationControl({}), 'top-right');
+  map.value?.addControl(new NavigationControl({}), 'top-right'); */
 }
 
 async function onPopOver(data: Poi, e: MapMouseEvent) {
@@ -358,11 +376,6 @@ function getMidPoint(start: maplibregl.LngLat, end: maplibregl.LngLat) {
 </script>
 
 <style>
-ion-split-pane {
-  --side-min-width: 300px;
-  --side-max-width: 300px;
-}
-
 .map-wrap {
   position: relative;
   width: 100%;
@@ -380,17 +393,54 @@ ion-grid {
   --ion-grid-margin: 0px;
 }
 
-.journeys-items{
-  min-width: 150px;
+.journeys-items,
+.sidebar-items-list {
+  height: 100%;
+  min-width: 200px;
+  max-width: 400px;
 }
+
 
 .poi-list {
   min-width: 150px;
-  overflow-y: scroll!important;
   height: 100%;
 }
 
-.scrollable-item{
-  height: 100%
+.scrollable-item {
+  height: 100%;
+}
+
+.layout {
+  height: 100%;
+  flex-wrap: nowrap;
+  min-width: 300px;
+}
+
+.scroller {
+  height: 100%;
+}
+
+.map-col{
+  background-color: red;
+}
+
+.floating{
+  position:absolute;
+  z-index: 999;
+
+}
+
+.icon-button{
+  padding:0;
+}
+.search{
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 40%;
+  min-width: 300px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 </style>
