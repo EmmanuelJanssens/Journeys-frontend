@@ -1,0 +1,15 @@
+{
+    "parser": "vue-eslint-parser",
+    "root": true,
+    "extends": [
+        "plugin:vue/essential",
+        "plugin:prettier/recommended",
+        "eslint:recommended",
+        "@vue/eslint-config-typescript"
+    ],
+    "globals": {
+        "google": "readonly",
+        "maplibregl": "readonly",
+        "Poi": "readonly"
+    }
+}

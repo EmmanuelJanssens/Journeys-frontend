@@ -1,63 +1,62 @@
+import type { AxiosError } from "axios";
+import axios from "axios";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import axios, { AxiosError } from 'axios';
-import url from "url";
 
-export const usePoiStore = defineStore('poi', () => {
-  const poiRef = ref<GeoJsonData>({
-    crs:{
-      properties:{
-        name:""
-      },
-      type:""
-    },
-    features:[],
-    type:""
-  })
+export const usePoiStore = defineStore("poi", () => {
+    const poiRef = ref<GeoJsonData>({
+        crs: {
+            properties: {
+                name: ""
+            },
+            type: ""
+        },
+        features: [],
+        type: ""
+    });
 
-  function searchBetween(lat: number, lng: number,radius: number)
-  {
-    return axios.get(`api/pois?lat=${lat}&lng=${lng}&radius=${radius}`)
-    .then(
-      response =>
-      {
-        if(poiRef.value?.features?.length! > 0)
-        {
-          poiRef.value!.features = [];
-        }
+    async function searchBetween(
+        lat: number,
+        lng: number,
+        radius: number
+    ): Promise<boolean> {
+        return await axios
+            .get(`api/pois?lat=${lat}&lng=${lng}&radius=${radius}`)
+            .then((response) => {
+                if (poiRef.value?.features?.length > 0) {
+                    poiRef.value.features = [];
+                }
 
-        poiRef.value =
-        {
-          type: 'FeatrureCollection',
-          crs: {
-            type: "name",
-            properties: { name: "urn:ogc:def:crs:OGC:1.3:CRS84" }
-          },
-          features:[]
-        };
+                poiRef.value = {
+                    type: "FeatrureCollection",
+                    crs: {
+                        type: "name",
+                        properties: { name: "urn:ogc:def:crs:OGC:1.3:CRS84" }
+                    },
+                    features: []
+                };
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                (response.data.data as Poi[]).forEach((poi) => {
+                    poiRef.value.features.push({
+                        type: "Feature",
+                        geometry: {
+                            type: "Point",
+                            coordinates: [
+                                poi.location.longitude,
+                                poi.location.latitude
+                            ]
+                        },
+                        properties: poi,
+                        id: poi.id
+                    });
+                });
+                return true;
+            })
+            .catch((error: AxiosError) => {
+                console.log((error.response?.data as ApiError).message);
+                return false;
+            });
+    }
 
-
-        (response.data.data as Array<Poi>).forEach((poi) => {
-          poiRef.value!.features.push(
-            {
-              type:"Feature",
-              geometry:{
-                type:"Point",
-                coordinates:[poi.location.longitude,poi.location.latitude]
-              },
-              properties:poi,
-              id:poi.id
-            }
-          )
-        })
-        return true;
-      }
-    )
-    .catch((error: AxiosError) => {
-      console.log((error.response?.data as ApiError).message)
-      return false;
-    })
-  }
-
-  return {poiRef, searchBetween}
-})
+    return { poiRef, searchBetween };
+});

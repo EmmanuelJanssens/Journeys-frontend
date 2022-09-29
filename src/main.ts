@@ -1,44 +1,44 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router';
-import VueAxios from 'vue-axios'
-import axios from 'axios'
-import {createPinia} from 'pinia'
-import { IonicVue } from '@ionic/vue';
+import { IonicVue } from "@ionic/vue";
+import axios from "axios";
+import { createPinia } from "pinia";
+import { createApp } from "vue";
+import VueAxios from "vue-axios";
+import { RecycleScroller } from "vue-virtual-scroller";
+
+import App from "./App.vue";
+import router from "./router";
 
 /* Core CSS required for Ionic components to work properly */
-import '@ionic/vue/css/core.css';
+import "@ionic/vue/css/core.css";
 
 /* Basic CSS for apps built with Ionic */
-import '@ionic/vue/css/normalize.css';
-import '@ionic/vue/css/structure.css';
-import '@ionic/vue/css/typography.css';
+import "@ionic/vue/css/normalize.css";
+import "@ionic/vue/css/structure.css";
+import "@ionic/vue/css/typography.css";
 
 /* Optional CSS utils that can be commented out */
-import '@ionic/vue/css/padding.css';
-import '@ionic/vue/css/float-elements.css';
-import '@ionic/vue/css/text-alignment.css';
-import '@ionic/vue/css/text-transformation.css';
-import '@ionic/vue/css/flex-utils.css';
-import '@ionic/vue/css/display.css';
+import "@ionic/vue/css/padding.css";
+import "@ionic/vue/css/float-elements.css";
+import "@ionic/vue/css/text-alignment.css";
+import "@ionic/vue/css/text-transformation.css";
+import "@ionic/vue/css/flex-utils.css";
+import "@ionic/vue/css/display.css";
 
 /* Theme variables */
-import './theme/variables.css';
+import "./theme/variables.css";
 
 //map
-import 'maplibre-gl/dist/maplibre-gl.css';
+import "maplibre-gl/dist/maplibre-gl.css";
 
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 
-import { RecycleScroller } from 'vue-virtual-scroller';
-
-const pinia = createPinia()
-const app = createApp(App)
-app.use(IonicVue)
-app.use(router)
-app.use(pinia)
-app.use(VueAxios,axios)
-app.component('RecycleScroller', RecycleScroller);
+const pinia = createPinia();
+const app = createApp(App);
+app.use(IonicVue);
+app.use(router);
+app.use(pinia);
+app.use(VueAxios, axios);
+app.component("RecycleScroller", RecycleScroller);
 router.isReady().then(() => {
-  app.mount('#app');
+    app.mount("#app");
 });
