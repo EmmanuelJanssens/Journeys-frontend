@@ -124,11 +124,12 @@ var map = ref<Map>();
 var startPoint = ref({ text: "", coordinates: new LngLat(-1, -1) });
 var endPoint = ref({ text: "", coordinates: new LngLat(-1, -1) });
 var hideSidebar = ref(true);
-var isLoading = ref(false);
+var isLoading = ref(true);
 
 onIonViewWillEnter(() => {
     const params = router.currentRoute.value.params;
-    useJourney.journeyRef = [];
+
+    useJourney.journeyRef.experiences = [];
     if (params.start != undefined && params.end != undefined) {
         startPoint.value = JSON.parse(params.start as string) as {
             text: string;
@@ -138,6 +139,10 @@ onIonViewWillEnter(() => {
             text: string;
             coordinates: LngLat;
         };
+        useJourney.setJourneyStartEnd(
+            startPoint.value.coordinates,
+            endPoint.value.coordinates
+        );
         load();
     }
 
@@ -425,11 +430,6 @@ function getMidPoint(start: maplibregl.LngLat, end: maplibregl.LngLat) {
     position: relative;
     width: 100%;
     height: 100%;
-}
-
-ion-grid {
-    --ion-grid-padding: 0px;
-    --ion-grid-margin: 0px;
 }
 
 .journeys-items,

@@ -1,24 +1,27 @@
 <template>
-    <ion-content ref="popover">
-        <section v-if="suggestions != null">
-            <ion-list
-                v-for="suggestion in (suggestions.predictions as Array<google.maps.places.AutocompletePrediction>)"
-                v-bind:key="suggestion">
-                <ion-item button @click="close(suggestion.description)">
-                    <ion-label>
-                        {{ suggestion.description }}
-                    </ion-label>
-                </ion-item>
-            </ion-list>
-            <ion-item>
+    <ion-content
+        ref="popover"
+        class="search"
+        v-if="props.predictions.length > 0">
+        <ion-list>
+            <ion-item
+                v-for="prediction in (props.predictions as Array<google.maps.places.AutocompletePrediction>)"
+                button
+                v-bind:key="prediction"
+                @click="$emit('predictionChosen', prediction.description)">
                 <ion-label>
-                    <ion-icon src="/src/assets/icon/logo-google.svg"></ion-icon>
-                    <ion-text class="google" color="medium">
-                        Powered by google</ion-text
-                    >
+                    {{ prediction.description }}
                 </ion-label>
             </ion-item>
-        </section>
+        </ion-list>
+        <ion-item>
+            <ion-label>
+                <ion-icon src="/src/assets/icon/logo-google.svg"></ion-icon>
+                <ion-text class="google" color="medium">
+                    Powered by google</ion-text
+                >
+            </ion-label>
+        </ion-item>
     </ion-content>
 </template>
 
@@ -29,17 +32,23 @@ import {
     IonContent,
     IonItem,
     IonLabel,
-    IonList,
-    popoverController
+    IonList
 } from "@ionic/vue";
 
-const suggestions = defineProps(["predictions"]);
-function close(label: string) {
-    popoverController.dismiss(label);
-}
+const props = defineProps(["predictions"]);
 </script>
 
 <style>
+.search {
+    position: absolute;
+    z-index: 999;
+    height: 200px;
+    width: 100%;
+    min-width: 200px;
+}
+.search-item {
+    width: 100%;
+}
 ion-icon {
     font-size: 10px;
 }

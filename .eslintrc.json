@@ -10,6 +10,8 @@
     "globals": {
         "google": "readonly",
         "maplibregl": "readonly",
-        "Poi": "readonly"
+        "Poi": "writable",
+        "Experience": "writable",
+        "Journey": "writable"
     }
 }

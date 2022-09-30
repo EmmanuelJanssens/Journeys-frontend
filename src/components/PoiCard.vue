@@ -50,7 +50,19 @@ const data = defineProps(["poi"]);
 const useJourney = useJourneyStore();
 
 function addToJourney(poi: Poi) {
-    useJourney.addToJourney(poi);
+    const experience: Experience = {
+        poi: {
+            name: poi.name,
+            poi_id: poi.id
+        },
+        experience: {
+            date: new Date(),
+            description: "",
+            images: [],
+            order: useJourney.journeyRef.experiences.length
+        }
+    };
+    useJourney.addToJourney(experience);
     popoverController.dismiss();
 }
 onMounted(() => {

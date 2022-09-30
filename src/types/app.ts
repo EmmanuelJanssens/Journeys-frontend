@@ -63,31 +63,34 @@ type GeoJsonPoi = {
     properties: Poi;
     id?: string;
 };
+type Experience = {
+    poi: {
+        poi_id: string;
+        name: string;
+    };
+    experience: {
+        description: string;
+        date: Date;
+        images: never[];
+        order: number;
+    };
+};
 
 type Journey = {
-    id: string;
-    title: string;
-    start: {
+    id?: string;
+    title?: string;
+    start?: {
         latitude: number;
         longitude: number;
     };
-    end: {
+    end?: {
         latitude: number;
         longitude: number;
     };
     creator?: {
         userName: string;
     };
-    experiencesConnection?: {
-        edge: [
-            {
-                date: string;
-                description?: string;
-                images?: string[];
-                order: number;
-            }
-        ];
-    };
+    experiences: Experience[];
 };
 
 type ApiAuthenticationResponse = {

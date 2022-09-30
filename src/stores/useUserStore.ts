@@ -14,6 +14,8 @@ export const useUserStore = defineStore("user", () => {
     const token = ref("");
     const loggedIn = ref(false);
 
+    const myJourneys = ref<Journey[]>();
+
     async function login(user: string, password: string): Promise<boolean> {
         console.log("Log " + user + " in");
         return await axios
@@ -36,9 +38,7 @@ export const useUserStore = defineStore("user", () => {
                 return false;
             });
     }
-    function logout(): void {
-        localStorage.removeItem("user");
-    }
+
     async function register(user: UserRegister): Promise<boolean> {
         console.log("Register " + user.userName);
         return await axios
@@ -58,9 +58,38 @@ export const useUserStore = defineStore("user", () => {
                 return false;
             });
     }
+
+    function fetchMyJourneys(): Promise<boolean> {
+        return axios
+            .get("/api/users/" + userRef.value.userName + "/journeys")
+            .then((response) => {
+                myJourneys.value = response.data.journeys as Journey[];
+                return true;
+            })
+            .catch((e) => {
+                return false;
+            });
+    }
+
     function IsLoggedIn(): boolean {
         return loggedIn.value;
     }
 
-    return { userRef, token, loggedIn, login, logout, register, IsLoggedIn };
+    function logout(): void {
+        userRef.value = userObj;
+        loggedIn.value = false;
+        localStorage.removeItem("user");
+    }
+
+    return {
+        userRef,
+        token,
+        loggedIn,
+        login,
+        logout,
+        register,
+        IsLoggedIn,
+        myJourneys,
+        fetchMyJourneys
+    };
 });

@@ -2,30 +2,42 @@
     <ion-page id="main-content">
         <journeys-header />
         <ion-content :fullscreen="true">
-            <ion-grid :fixed="true">
+            <ion-grid :fixed="true" class="ion-no-padding">
                 <ion-row
                     class="ion-align-items-center ion-justify-content-center ion-hide-sm-down journey">
-                    <ion-col size="3">
-                        <ion-row>
-                            <ion-searchbar
-                                placeholder="Starting point"
-                                debounce="500"
-                                id="start-point"
-                                :value="start.text"
-                                @ionChange="onPopOver($event, 'start')"
-                                @ionClear="start.text = ''" />
-                        </ion-row>
-                    </ion-col>
-                    <ion-col size="3">
+                    <ion-col size="3" class="ion-margin">
                         <ion-searchbar
+                            id="start-point"
+                            class="ion-no-padding"
+                            placeholder="Starting point"
+                            debounce="500"
+                            :value="startData.locationText"
+                            @ionChange="onPopOver($event, 'start')"
+                            @ionClear="startData.locationText = ''">
+                        </ion-searchbar>
+                        <GautoCompletePredictionList
+                            :predictions="startData.predictions"
+                            @prediction-chosen="
+                                setPredictionText($event, 'start')
+                            " />
+                    </ion-col>
+                    <ion-col size="3" class="ion-margin">
+                        <ion-searchbar
+                            id="end-point"
+                            class="ion-no-padding"
                             placeholder="Destination"
                             debounce="500"
-                            id="end-point"
-                            :value="end.text"
-                            @ionClear="end.text = ''"
-                            @ionChange="onPopOver($event, 'end')" />
+                            :value="endData.locationText"
+                            @ionClear="endData.locationText = ''"
+                            @ionChange="onPopOver($event, 'end')">
+                        </ion-searchbar>
+                        <GautoCompletePredictionList
+                            :predictions="endData.predictions"
+                            @prediction-chosen="
+                                setPredictionText($event, 'end')
+                            " />
                     </ion-col>
-                    <ion-col size="3">
+                    <ion-col size="3" class="ion-margin">
                         <ion-button color="primary" @click="gotoJourneyMap()"
                             >Start
                         </ion-button>
@@ -97,7 +109,7 @@
 
 <script lang="ts" setup>
 import { Loader } from "@googlemaps/js-api-loader";
-import type { SearchbarCustomEvent } from "@ionic/vue";
+import { SearchbarCustomEvent } from "@ionic/vue";
 import {
     IonContent,
     IonPage,
@@ -109,17 +121,19 @@ import {
     IonGrid,
     IonCol,
     IonRow,
-    popoverController,
     onIonViewWillEnter
 } from "@ionic/vue";
 import { LngLat } from "maplibre-gl";
 import { onMounted, ref } from "vue";
 
-import GautoCompletePredictionList from "../components/GautoCompletePredictionList.vue";
 import JourneysHeader from "../components/JourneysHeader.vue";
 import LoginModal from "../components/Modals/LoginModal.vue";
 import router from "../router";
 import RegisterModal from "../components/Modals/RegisterModal.vue";
+import GautoCompletePredictionList from "../components/GautoCompletePredictionList.vue";
+
+var service: google.maps.places.AutocompleteService;
+var geocoder: google.maps.Geocoder;
 
 const loader = new Loader({
     apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -127,13 +141,18 @@ const loader = new Loader({
     libraries: ["places", "geometry"]
 });
 
-var popoverIsOpen = false;
-var predictionsList = ref<google.maps.places.Autocomplete[]>();
-var start = ref({ text: "", coordinates: new LngLat(-1, -1) });
-var end = ref({ text: "", coordinates: new LngLat(-1, -1) });
-
-var service: google.maps.places.AutocompleteService;
-var geocoder: google.maps.Geocoder;
+const startData = ref({
+    locationText: "",
+    coordinates: new LngLat(-1, -1),
+    isOk: false,
+    predictions: new Array<google.maps.places.AutocompletePrediction>()
+});
+const endData = ref({
+    locationText: "",
+    coordinates: new LngLat(-1, -1),
+    isOk: false,
+    predictions: new Array<google.maps.places.AutocompletePrediction>()
+});
 
 onMounted(() => {
     loader.load().then((google) => {
@@ -143,84 +162,88 @@ onMounted(() => {
 });
 
 onIonViewWillEnter(() => {
-    predictionsList.value = [];
-    start.value = { text: "", coordinates: new LngLat(-1, -1) };
-    end.value = { text: "", coordinates: new LngLat(-1, -1) };
+    startData.value = {
+        locationText: "",
+        coordinates: new LngLat(-1, -1),
+        isOk: false,
+        predictions: []
+    };
+    endData.value = {
+        locationText: "",
+        coordinates: new LngLat(-1, -1),
+        isOk: false,
+        predictions: []
+    };
 });
 
-function gotoJourneyMap() {
-    if (start.value.coordinates.lat > 0 && end.value.coordinates.lat > 0) {
-        const route = {
-            name: "map",
-            params: {
-                start: JSON.stringify(start.value),
-                end: JSON.stringify(end.value)
-            }
-        };
-        console.log(route.params);
-        router.push(route);
+function setPredictionText(predictionText: string, point: string) {
+    if (point === "start") {
+        startData.value.locationText = predictionText;
+        startData.value.isOk = true;
+        startData.value.predictions = [];
+    } else {
+        endData.value.locationText = predictionText;
+        endData.value.isOk = true;
+        endData.value.predictions = [];
     }
 }
 
-async function showPopOver(
-    ev: Event,
-    collection: google.maps.places.AutocompletePrediction[],
-    point: string
-) {
-    const popover = await popoverController.create({
-        component: GautoCompletePredictionList,
-        componentProps: { predictions: collection },
-        animated: false,
-        event: ev,
-        size: "auto",
-        side: "bottom",
-        alignment: "center",
-        showBackdrop: false,
-        keyboardClose: false,
-        id: "suggestionPopover"
+function geocodeStartDest(point: string) {
+    const geo =
+        point === "start"
+            ? startData.value.locationText
+            : endData.value.locationText;
+    const request: google.maps.GeocoderRequest = {
+        address: geo,
+        componentRestrictions: { country: "ch" }
+    };
+    return geocoder.geocode(request).then((response) => {
+        const coords = new LngLat(
+            response.results[0].geometry.location.lng(),
+            response.results[0].geometry.location.lat()
+        );
+        if (point === "start") {
+            startData.value.coordinates = coords;
+        } else {
+            endData.value.coordinates = coords;
+        }
     });
-    await popover.present();
-    popoverIsOpen = true;
-    const { data, role } = await popover.onDidDismiss();
-    const label = data as string;
-    if (
-        label !== undefined &&
-        label.length > 0 &&
-        (label !== "dismissPrevious" || role !== "backdrop")
-    ) {
-        const request: google.maps.GeocoderRequest = {
-            address: label,
-            componentRestrictions: { country: "ch" }
-        };
-        geocoder.geocode(request).then((response) => {
-            const coords = new LngLat(
-                response.results[0].geometry.location.lng(),
-                response.results[0].geometry.location.lat()
-            );
-            if (point == "start") {
-                start.value = {
-                    text: label,
-                    coordinates: coords
-                };
-            } else if (point == "end") {
-                end.value = {
-                    text: label,
-                    coordinates: coords
-                };
-            }
-            popoverIsOpen = false;
-        });
+}
+async function gotoJourneyMap() {
+    console.log(startData);
+    console.log(endData);
+
+    if (startData.value.isOk && endData.value.isOk) {
+        await geocodeStartDest("start");
+        await geocodeStartDest("end");
+        if (
+            startData.value.coordinates.lat > 0 &&
+            endData.value.coordinates.lat > 0
+        ) {
+            const route = {
+                name: "map",
+                params: {
+                    start: JSON.stringify({
+                        text: startData.value.locationText,
+                        coordinates: startData.value.coordinates
+                    }),
+                    end: JSON.stringify({
+                        text: endData.value.locationText,
+                        coordinates: endData.value.coordinates
+                    })
+                }
+            };
+            router.push(route);
+        }
     }
 }
 
 function onPopOver(ev: SearchbarCustomEvent, point: string) {
-    if (popoverIsOpen) {
-        popoverController.dismiss("dismissPrevious");
-    }
     if (ev.detail.value?.length! >= 3) {
         if (
-            (point === "start" && ev.target.value !== start.value.text) ||
-            (point === "end" && ev.target.value !== end.value.text)
+            (point === "start" &&
+                ev.target.value !== startData.value.locationText) ||
+            (point === "end" && ev.target.value !== endData.value.locationText)
         ) {
             const request: google.maps.places.AutocompletionRequest = {
                 input: ev.detail.value!,
@@ -230,26 +253,43 @@ function onPopOver(ev: SearchbarCustomEvent, point: string) {
             service
                 .getPlacePredictions(request)
                 .then((resp) => {
-                    showPopOver(ev, resp.predictions, point);
+                    if (point === "start") {
+                        startData.value.predictions = resp.predictions;
+                    } else if (point === "end") {
+                        endData.value.predictions = resp.predictions;
+                    }
                 })
                 .catch(() => {
                     //Do something
                 });
+        }
+    } else if (ev.detail.value?.length! === 0) {
+        if (point === "start") {
+            startData.value.isOk = false;
+            startData.value.predictions = [];
+        } else {
+            endData.value.isOk = false;
+            endData.value.predictions = [];
         }
     }
 }
 </script>
 
 <style>
+.search {
+    position: absolute;
+    z-index: 999;
+    width: 100%;
+    min-width: 200px;
+}
+.search-item {
+    width: 100%;
+}
 .journey {
     height: 300px;
     background-image: url(../assets/hero-bg.jpg);
     background-repeat: no-repeat;
     background-size: cover;
-}
-
-ion-grid {
-    --ion-grid-padding: 0px;
 }
 
 ion-toolbar {

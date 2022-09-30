@@ -25,14 +25,14 @@
                                 </ion-row>
                                 <ion-row class="mid-page">
                                     <swiper
-                                        :slides-per-view="4"
+                                        :slides-per-view="slidesPerView"
                                         :space-between="30"
                                         :pagination="{ clickable: true }"
                                         navigation
                                         lazy
                                         :modules="modules">
                                         <swiper-slide
-                                            v-for="item in useJourney.userJourneysRef">
+                                            v-for="item in useUser.myJourneys">
                                             <JourneyCard
                                                 :journey="item"
                                                 class="card" />
@@ -63,8 +63,7 @@ import {
 } from "@ionic/vue";
 import JourneysHeader from "../components/JourneysHeader.vue";
 import JourneyCard from "../components/JourneyCard.vue";
-import { useJourneyStore } from "../stores/useJourneyStore";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { useUserStore } from "../stores/useUserStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy } from "swiper";
@@ -76,12 +75,20 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 
-const useJourney = useJourneyStore();
+const slidesPerView = ref(0);
 const useUser = useUserStore();
 const modules = ref([Pagination, Navigation, Lazy]);
 
 onIonViewWillEnter(() => {
-    useJourney.fetchJourneysFromUser(useUser.userRef.userName);
+    useUser.fetchMyJourneys().then((response) => {
+        if (response) {
+            if (useUser.myJourneys?.length! < 4) {
+                slidesPerView.value = useUser.myJourneys?.length!;
+            } else {
+                slidesPerView.value = 4;
+            }
+        }
+    });
 });
 </script>
 <style>

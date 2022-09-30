@@ -11,7 +11,6 @@ import { onBeforeMount } from "vue";
 
 import UserDetailMenu from "./components/UserDetailMenu.vue";
 import { useUserStore } from "./stores/useUserStore";
-
 const userStore = useUserStore();
 function readFromStorage() {
     if (localStorage.getItem("user")) {
