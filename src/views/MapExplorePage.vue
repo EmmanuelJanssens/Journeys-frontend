@@ -51,12 +51,16 @@
                                         src="/src/assets/icon/chevron-down-outline.svg"></ion-icon>
                                 </ion-fab-button>
                                 <ion-fab-list>
-                                    <ion-fab-button>
+                                    <ion-fab-button
+                                        id="open-save-journey-modal">
                                         <ion-icon
+                                            size="large"
                                             src="/src/assets/icon/save-outline.svg"></ion-icon>
                                     </ion-fab-button>
-                                    <ion-fab-button>
+                                    <ion-fab-button
+                                        id="open-save-journey-modal">
                                         <ion-icon
+                                            size="large"
                                             src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
                                     </ion-fab-button>
                                 </ion-fab-list>
@@ -75,6 +79,7 @@
                 </ion-row>
             </ion-grid>
         </ion-content>
+        <SaveJourneyModal />
     </ion-page>
 </template>
 
@@ -104,6 +109,7 @@ import { Map, MapMouseEvent, Marker, NavigationControl } from "maplibre-gl";
 import { LngLat } from "maplibre-gl";
 import { ref } from "vue";
 
+import SaveJourneyModal from "../components/SaveJourneyModal.vue";
 import JourneysHeader from "../components/JourneysHeader.vue";
 import MapJourneySidebar from "../components/MapJourneySidebar.vue";
 import PoiCard from "../components/PoiCard.vue";
@@ -118,7 +124,7 @@ var map = ref<Map>();
 var startPoint = ref({ text: "", coordinates: new LngLat(-1, -1) });
 var endPoint = ref({ text: "", coordinates: new LngLat(-1, -1) });
 var hideSidebar = ref(true);
-var isLoading = ref(true);
+var isLoading = ref(false);
 
 onIonViewWillEnter(() => {
     const params = router.currentRoute.value.params;
@@ -149,6 +155,10 @@ onIonViewWillEnter(() => {
             text: string;
             coordinates: LngLat;
         };
+        useJourney.setJourneyStartEnd(
+            startPoint.value.coordinates,
+            endPoint.value.coordinates
+        );
         load();
     } */
 });
@@ -157,6 +167,8 @@ onIonViewDidLeave(() => {
     usePoi.poiRef.features = [];
     map.value?.remove();
 });
+
+function openSaveModal() {}
 
 function panTo(coordinates: number[]) {
     map.value?.easeTo({
