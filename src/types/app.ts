@@ -75,8 +75,18 @@ type Journey = {
         latitude: number;
         longitude: number;
     };
-    creator: {
+    creator?: {
         userName: string;
+    };
+    experiencesConnection?: {
+        edge: [
+            {
+                date: string;
+                description?: string;
+                images?: string[];
+                order: number;
+            }
+        ];
     };
 };
 

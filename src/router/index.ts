@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from "@ionic/vue-router";
 import type { RouteRecordRaw } from "vue-router";
-const HomePage = async () => await import("../views/HomePage.vue");
-const MapExplorePage = async () => await import("../views/MapExplorePage.vue");
+import HomePage from "../views/HomePage.vue";
+import MapExplorePage from "../views/MapExplorePage.vue";
+import LogBook from "../views/LogBook.vue";
 
 const routes: RouteRecordRaw[] = [
     {
@@ -17,6 +18,11 @@ const routes: RouteRecordRaw[] = [
         path: "/map",
         name: "map",
         component: MapExplorePage
+    },
+    {
+        path: "/logbook",
+        name: "logbook",
+        component: LogBook
     }
 ];
 

@@ -20,6 +20,7 @@
                 <ion-button
                     color="secondary"
                     v-if="userStore.IsLoggedIn() == true"
+                    router-link="/logbook"
                     >Journeys</ion-button
                 >
                 <ion-button

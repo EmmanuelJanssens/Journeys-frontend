@@ -118,7 +118,7 @@ var map = ref<Map>();
 var startPoint = ref({ text: "", coordinates: new LngLat(-1, -1) });
 var endPoint = ref({ text: "", coordinates: new LngLat(-1, -1) });
 var hideSidebar = ref(true);
-var isLoading = ref(false);
+var isLoading = ref(true);
 
 onIonViewWillEnter(() => {
     const params = router.currentRoute.value.params;
@@ -179,7 +179,6 @@ function load() {
         zoom: 10
     };
 
-    isLoading.value = false;
     const apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
 
     map.value = new Map({

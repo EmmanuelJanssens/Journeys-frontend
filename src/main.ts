@@ -39,6 +39,7 @@ app.use(router);
 app.use(pinia);
 app.use(VueAxios, axios);
 app.component("RecycleScroller", RecycleScroller);
+
 router.isReady().then(() => {
     app.mount("#app");
 });
