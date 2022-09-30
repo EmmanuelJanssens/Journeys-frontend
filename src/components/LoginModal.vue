@@ -3,59 +3,51 @@
         <ion-header>
             <ion-toolbar>
                 <ion-title>Login</ion-title>
+                <ion-buttons slot="end">
+                    <ion-button @click="dismissLoginModal()">
+                        <ion-icon
+                            size="large"
+                            src="/src/assets/icon/close-outline.svg" />
+                    </ion-button>
+                </ion-buttons>
             </ion-toolbar>
         </ion-header>
-        <ion-content class="journey-login-modal">
-            <ion-grid>
-                <ion-row>
-                    <ion-col>
-                        <ion-item>
-                            <ion-label :color="userError" position="floating"
-                                >Username</ion-label
-                            >
-                            <ion-input
-                                type="text"
-                                v-model="state.userName"
-                                :ionFocus="clearForm()" />
-                        </ion-item>
-                        <ion-text color="danger" v-if="v$.userName.$error">{{
-                            v$.userName.$errors[0].$message
-                        }}</ion-text>
-                    </ion-col>
-                </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <ion-item>
-                            <ion-label
-                                :color="passwordError"
-                                position="floating"
-                                >Password</ion-label
-                            >
-                            <ion-input
-                                type="password"
-                                v-model="state.password" />
-                        </ion-item>
-                        <ion-text color="danger" v-if="v$.password.$error">{{
-                            v$.password.$errors[0].$message
-                        }}</ion-text>
-                    </ion-col>
-                </ion-row>
-                <ion-row class="ion-justify-content-around ion-margin-top">
-                    <ion-col size="2">
-                        <ion-button @click="submitForm()" color="primary"
-                            >login</ion-button
-                        >
-                    </ion-col>
-                    <ion-col size="2">
-                        <ion-button
-                            @click="dismissLoginModal()"
-                            color="secondary"
-                            >cancel</ion-button
-                        >
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
+        <ion-content>
+            <section class="modal-content">
+                <div class="form-field">
+                    <ion-item class="ion-margin">
+                        <ion-label position="floating">Username</ion-label>
+                        <ion-input type="text" v-model="state.userName" />
+                    </ion-item>
+                    <ion-text
+                        class="ion-margin"
+                        color="danger"
+                        v-if="v$.userName.$error"
+                        >{{ v$.userName.$errors[0].$message }}</ion-text
+                    >
+                </div>
+                <span class="separator"></span>
+                <div class="form-field">
+                    <ion-item class="ion-margin">
+                        <ion-label position="floating">Password</ion-label>
+                        <ion-input type="password" v-model="state.password" />
+                    </ion-item>
+                    <ion-text
+                        class="ion-margin"
+                        color="danger"
+                        v-if="v$.password.$error"
+                        >{{ v$.password.$errors[0].$message }}</ion-text
+                    >
+                </div>
+            </section>
         </ion-content>
+        <ion-footer>
+            <ion-toolbar>
+                <ion-button slot="end" @click="submitForm()" color="primary"
+                    >login</ion-button
+                >
+            </ion-toolbar>
+        </ion-footer>
     </ion-modal>
 </template>
 
@@ -64,9 +56,6 @@ import { modalController } from "@ionic/core";
 import {
     IonModal,
     IonInput,
-    IonGrid,
-    IonCol,
-    IonRow,
     IonButton,
     IonItem,
     IonLabel,
@@ -75,7 +64,9 @@ import {
     IonContent,
     IonTitle,
     toastController,
-    IonText
+    IonText,
+    IonButtons,
+    IonFooter
 } from "@ionic/vue";
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
@@ -91,9 +82,6 @@ const rules = {
     userName: { required },
     password: { required }
 };
-
-var userError = ref("primary");
-var passwordError = ref("primary");
 
 const userStore = useUserStore();
 
@@ -130,17 +118,13 @@ async function showToast(message: string, color: string) {
             {
                 text: "Dismiss",
                 role: "cancel",
-                handler: () => clearModal()
+                handler: () => {}
             }
         ]
     });
     await toast.present();
 }
 
-function clearForm() {
-    userError.value = "primary";
-    passwordError.value = "primary";
-}
 function clearModal() {
     state.value.userName = "";
     state.value.password = "";
@@ -155,19 +139,35 @@ function dismissLoginModal() {
 userStore.$subscribe((mutation) => {
     mutation.type;
     mutation.storeId;
-    localStorage.setItem(
-        "user",
-        JSON.stringify({
-            user: userStore.userRef,
-            token: userStore.token
-        })
-    );
+    console.log(userStore.userRef);
+    if (userStore.IsLoggedIn()) {
+        localStorage.setItem(
+            "user",
+            JSON.stringify({
+                user: userStore.userRef,
+                token: userStore.token
+            })
+        );
+    }
 });
 </script>
 
 <style>
-ion-modal {
-    --width: 500px;
-    --height: 300px;
+ion-footer {
+    position: absolute;
+    bottom: 0px;
+}
+.modal-content {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+    height: 300px;
+    width: 300px;
 }
 </style>

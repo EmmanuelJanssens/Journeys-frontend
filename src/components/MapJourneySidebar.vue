@@ -69,7 +69,6 @@ import {
     IonReorder,
     IonReorderGroup
 } from "@ionic/vue";
-import { defineProps } from "vue";
 
 import { useJourneyStore } from "../stores/useJourneyStore";
 

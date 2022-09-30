@@ -87,6 +87,7 @@
                 </ion-row>
             </ion-grid>
             <login-modal />
+            <RegisterModal />
         </ion-content>
         <ion-footer>
             <ion-title>footer</ion-title>
@@ -118,6 +119,7 @@ import GautoCompletePredictionList from "../components/GautoCompletePredictionLi
 import JourneysHeader from "../components/JourneysHeader.vue";
 import LoginModal from "../components/LoginModal.vue";
 import router from "../router";
+import RegisterModal from "../components/RegisterModal.vue";
 
 const loader = new Loader({
     apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,

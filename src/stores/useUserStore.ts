@@ -37,10 +37,26 @@ export const useUserStore = defineStore("user", () => {
             });
     }
     function logout(): void {
-        //
+        localStorage.removeItem("user");
     }
-    function register(): void {
-        //
+    async function register(user: UserRegister): Promise<boolean> {
+        console.log("Register " + user.userName);
+        return await axios
+            .post("/api/auth/register", user)
+            .then((response) => {
+                const result = response.data as ApiAuthenticationResponse;
+                userRef.value.userName = result.userName;
+                userRef.value.firstName = result.firstName;
+                userRef.value.lastName = result.lastName;
+                userRef.value.email = result.email;
+                token.value = result.token;
+                loggedIn.value = true;
+                return true;
+            })
+            .catch((error: AxiosError) => {
+                console.log((error.response?.data as ApiError).message);
+                return false;
+            });
     }
     function IsLoggedIn(): boolean {
         return loggedIn.value;

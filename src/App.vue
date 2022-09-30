@@ -27,7 +27,6 @@ function readFromStorage() {
             },
             loggedIn: true
         });
-        console.log(userStore.userRef);
     }
 }
 

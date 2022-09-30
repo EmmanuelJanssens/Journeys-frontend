@@ -79,6 +79,7 @@
 </template>
 
 <script lang="ts" setup>
+import router from "../router";
 import {
     IonPage,
     IonContent,
@@ -99,7 +100,7 @@ import {
     IonSearchbar
 } from "@ionic/vue";
 import haversine from "haversine";
-import type { Map, MapMouseEvent } from "maplibre-gl";
+import { Map, MapMouseEvent, Marker, NavigationControl } from "maplibre-gl";
 import { LngLat } from "maplibre-gl";
 import { ref } from "vue";
 
@@ -120,21 +121,21 @@ var hideSidebar = ref(true);
 var isLoading = ref(false);
 
 onIonViewWillEnter(() => {
-    /*   const params = router.currentRoute.value.params
-  useJourney.journeyRef = []
-  if (params.start != undefined && params.end != undefined) {
-    startPoint.value = JSON.parse(params.start as string) as {
-      text: string,
-      coordinates: LngLat
+    const params = router.currentRoute.value.params;
+    useJourney.journeyRef = [];
+    if (params.start != undefined && params.end != undefined) {
+        startPoint.value = JSON.parse(params.start as string) as {
+            text: string;
+            coordinates: LngLat;
+        };
+        endPoint.value = JSON.parse(params.end as string) as {
+            text: string;
+            coordinates: LngLat;
+        };
+        load();
     }
-    endPoint.value = JSON.parse(params.end as string) as {
-      text: string,
-      coordinates: LngLat
-    }
-    load();
-  } */
 
-    const dev = {
+    /*     const dev = {
         start: '{"text":"Lausanne, Switzerland","coordinates":{"lng":6.6322734,"lat":46.5196535}}',
         end: '{"text":"Vevey, Switzerland","coordinates":{"lng":6.8419192,"lat":46.4628333}}'
     };
@@ -149,7 +150,7 @@ onIonViewWillEnter(() => {
             coordinates: LngLat;
         };
         load();
-    }
+    } */
 });
 
 onIonViewDidLeave(() => {
@@ -177,161 +178,165 @@ function load() {
         ).lat,
         zoom: 10
     };
-    const dist = haversine(
-        {
-            latitude: startPoint.value.coordinates.lat,
-            longitude: startPoint.value.coordinates.lng
-        },
-        {
-            latitude: endPoint.value.coordinates.lat,
-            longitude: endPoint.value.coordinates.lng
-        },
-        { unit: "meter" }
-    );
-    usePoi.searchBetween(midPoint.lat, midPoint.lng, dist / 2).then();
+
     isLoading.value = false;
     const apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
 
-    /* map.value = new Map({
-    container: mapContainer.value,
-    style: `https://api.maptiler.com/maps/voyager/style.json?key=${apiKey}`,
-    center: [midPoint.lng, midPoint.lat],
-    zoom: midPoint.zoom
-  })
+    map.value = new Map({
+        container: mapContainer.value,
+        style: `https://api.maptiler.com/maps/voyager/style.json?key=${apiKey}`,
+        center: [midPoint.lng, midPoint.lat],
+        zoom: midPoint.zoom
+    });
 
-  map.value?.once('render', () => {
-    map.value?.resize();
-  });
+    map.value?.once("render", () => {
+        map.value?.resize();
+    });
 
-  map.value?.once('load', () => {
-    new Marker()
-      .setLngLat([startPoint.value.coordinates.lng, startPoint.value.coordinates.lat])
-      .addTo(map.value!)
-    new Marker()
-      .setLngLat([endPoint.value.coordinates.lng, endPoint.value.coordinates.lat])
-      .addTo(map.value!)
+    map.value?.once("load", () => {
+        new Marker()
+            .setLngLat([
+                startPoint.value.coordinates.lng,
+                startPoint.value.coordinates.lat
+            ])
+            .addTo(map.value!);
+        new Marker()
+            .setLngLat([
+                endPoint.value.coordinates.lng,
+                endPoint.value.coordinates.lat
+            ])
+            .addTo(map.value!);
 
-    const dist = haversine(
-      {
-        latitude: startPoint.value.coordinates.lat,
-        longitude: startPoint.value.coordinates.lng
-      },
-      {
-        latitude: endPoint.value.coordinates.lat,
-        longitude: endPoint.value.coordinates.lng
-      },
-      { unit: 'meter' }
-    )
+        const dist = haversine(
+            {
+                latitude: startPoint.value.coordinates.lat,
+                longitude: startPoint.value.coordinates.lng
+            },
+            {
+                latitude: endPoint.value.coordinates.lat,
+                longitude: endPoint.value.coordinates.lng
+            },
+            { unit: "meter" }
+        );
 
-    usePoi.searchBetween(midPoint.lat, midPoint.lng, dist / 2)
-      .then(
-        (response) => {
-          hideSidebar.value = usePoi.poiRef.features.length == 0;
+        usePoi
+            .searchBetween(midPoint.lat, midPoint.lng, dist / 2)
+            .then((response) => {
+                hideSidebar.value = usePoi.poiRef.features.length == 0;
 
-          if (hideSidebar.value != true && response) {
-            map.value?.addSource('poi', {
-              type: 'geojson',
-              data: usePoi.poiRef,
-              cluster: true,
-              clusterMaxZoom: 14,
-              clusterRadius: 50
-            })
+                if (hideSidebar.value != true && response) {
+                    map.value?.addSource("poi", {
+                        type: "geojson",
+                        data: usePoi.poiRef,
+                        cluster: true,
+                        clusterMaxZoom: 14,
+                        clusterRadius: 50
+                    });
 
-            map.value?.addLayer({
-              id: 'clusters',
-              type: 'circle',
-              source: 'poi',
-              filter: ['has', 'point_count'],
-              paint: {
-                'circle-color': [
-                  'step',
-                  ['get', 'point_count'],
-                  '#51bbd6',
-                  100,
-                  '#f1f075',
-                  750,
-                  '#f28cb1'
-                ],
-                'circle-radius': [
-                  'step',
-                  ['get', 'point_count'],
-                  20,
-                  100,
-                  30,
-                  750,
-                  40
-                ]
-              }
-            })
+                    map.value?.addLayer({
+                        id: "clusters",
+                        type: "circle",
+                        source: "poi",
+                        filter: ["has", "point_count"],
+                        paint: {
+                            "circle-color": [
+                                "step",
+                                ["get", "point_count"],
+                                "#51bbd6",
+                                100,
+                                "#f1f075",
+                                750,
+                                "#f28cb1"
+                            ],
+                            "circle-radius": [
+                                "step",
+                                ["get", "point_count"],
+                                20,
+                                100,
+                                30,
+                                750,
+                                40
+                            ]
+                        }
+                    });
 
-            map.value?.addLayer({
-              id: 'cluster-count',
-              type: 'symbol',
-              source: 'poi',
-              filter: ['has', 'point_count'],
-              layout: {
-                'text-field': '{point_count_abbreviated}',
-                'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-                'text-size': 12
-              }
-            })
+                    map.value?.addLayer({
+                        id: "cluster-count",
+                        type: "symbol",
+                        source: "poi",
+                        filter: ["has", "point_count"],
+                        layout: {
+                            "text-field": "{point_count_abbreviated}",
+                            "text-font": [
+                                "DIN Offc Pro Medium",
+                                "Arial Unicode MS Bold"
+                            ],
+                            "text-size": 12
+                        }
+                    });
 
-            map.value?.addLayer({
-              id: 'unclustered-point',
-              type: 'circle',
-              source: 'poi',
-              filter: ['!', ['has', 'point_count']],
-              paint: {
-                'circle-color': '#11b4da',
-                'circle-radius': 6,
-                'circle-stroke-width': 1,
-                'circle-stroke-color': '#fff'
-              }
-            });
+                    map.value?.addLayer({
+                        id: "unclustered-point",
+                        type: "circle",
+                        source: "poi",
+                        filter: ["!", ["has", "point_count"]],
+                        paint: {
+                            "circle-color": "#11b4da",
+                            "circle-radius": 6,
+                            "circle-stroke-width": 1,
+                            "circle-stroke-color": "#fff"
+                        }
+                    });
 
-            map.value?.addSource('route', {
-              type: 'geojson',
-              data: {
-                type: 'Feature',
-                properties: {},
-                geometry: {
-                  type: 'LineString',
-                  coordinates: [
-                    [startPoint.value.coordinates.lng, startPoint.value.coordinates.lat],
-                    [endPoint.value.coordinates.lng, endPoint.value.coordinates.lat]
-                  ]
+                    map.value?.addSource("route", {
+                        type: "geojson",
+                        data: {
+                            type: "Feature",
+                            properties: {},
+                            geometry: {
+                                type: "LineString",
+                                coordinates: [
+                                    [
+                                        startPoint.value.coordinates.lng,
+                                        startPoint.value.coordinates.lat
+                                    ],
+                                    [
+                                        endPoint.value.coordinates.lng,
+                                        endPoint.value.coordinates.lat
+                                    ]
+                                ]
+                            }
+                        }
+                    });
+
+                    map.value?.addLayer({
+                        id: "route",
+                        type: "line",
+                        source: "route",
+                        layout: {
+                            "line-join": "round",
+                            "line-cap": "round"
+                        },
+                        paint: {
+                            "line-color": "#555",
+                            "line-width": 2
+                        }
+                    });
                 }
-              }
-            })
+                //finish loading
+                isLoading.value = false;
+            });
+    });
 
-            map.value?.addLayer({
-              id: 'route',
-              type: 'line',
-              source: 'route',
-              layout: {
-                'line-join': 'round',
-                'line-cap': 'round'
-              },
-              paint: {
-                "line-color": '#555',
-                "line-width": 2
-              }
-            })
-          }
-          //finish loading
-          isLoading.value = false;
-        })
-  })
+    map.value?.on("click", "clusters", (e) => {
+        onClusterClick(e);
+    });
 
-  map.value?.on('click', 'clusters', (e) => {
-    onClusterClick(e);
-  })
+    map.value?.on("click", "unclustered-point", (e) => {
+        onPopOver(e.features![0].properties as Poi, e);
+    });
 
-  map.value?.on('click', 'unclustered-point', (e) => {
-    onPopOver(e.features![0].properties as Poi, e)
-  })
-
-  map.value?.addControl(new NavigationControl({}), 'top-right'); */
+    map.value?.addControl(new NavigationControl({}), "bottom-right");
 }
 
 async function onPopOver(data: Poi, e: MapMouseEvent) {

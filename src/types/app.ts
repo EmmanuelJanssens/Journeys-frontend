@@ -6,6 +6,14 @@ type User = {
     email: string;
 };
 
+type UserRegister = {
+    userName: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+};
+
 type Poi = {
     id: string;
     name: string;

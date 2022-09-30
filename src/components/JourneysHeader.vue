@@ -13,6 +13,7 @@
                 >
                 <ion-button
                     color="primary"
+                    id="open-register-modal"
                     v-if="userStore.IsLoggedIn() == false"
                     >Register</ion-button
                 >
