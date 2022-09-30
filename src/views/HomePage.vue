@@ -117,9 +117,9 @@ import { onMounted, ref } from "vue";
 
 import GautoCompletePredictionList from "../components/GautoCompletePredictionList.vue";
 import JourneysHeader from "../components/JourneysHeader.vue";
-import LoginModal from "../components/LoginModal.vue";
+import LoginModal from "../components/Modals/LoginModal.vue";
 import router from "../router";
-import RegisterModal from "../components/RegisterModal.vue";
+import RegisterModal from "../components/Modals/RegisterModal.vue";
 
 const loader = new Loader({
     apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,

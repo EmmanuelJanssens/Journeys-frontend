@@ -109,7 +109,7 @@ import { Map, MapMouseEvent, Marker, NavigationControl } from "maplibre-gl";
 import { LngLat } from "maplibre-gl";
 import { ref } from "vue";
 
-import SaveJourneyModal from "../components/SaveJourneyModal.vue";
+import SaveJourneyModal from "../components/Modals/SaveJourneyModal.vue";
 import JourneysHeader from "../components/JourneysHeader.vue";
 import MapJourneySidebar from "../components/MapJourneySidebar.vue";
 import PoiCard from "../components/PoiCard.vue";
@@ -165,10 +165,9 @@ onIonViewWillEnter(() => {
 
 onIonViewDidLeave(() => {
     usePoi.poiRef.features = [];
+    useJourney.clearMapView();
     map.value?.remove();
 });
-
-function openSaveModal() {}
 
 function panTo(coordinates: number[]) {
     map.value?.easeTo({

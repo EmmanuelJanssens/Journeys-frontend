@@ -33,7 +33,7 @@
     </ion-modal>
 </template>
 <script lang="ts" setup>
-import { useJourneyStore } from "../stores/useJourneyStore";
+import { useJourneyStore } from "../../stores/useJourneyStore";
 import {
     IonItem,
     IonInput,
@@ -58,5 +58,6 @@ function dismissModal() {
 
 function saveJourney() {
     useJourney.saveJourney(title.value);
+    modalController.dismiss();
 }
 </script>

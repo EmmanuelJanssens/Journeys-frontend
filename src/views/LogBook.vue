@@ -58,7 +58,8 @@ import {
     IonRow,
     IonButton,
     IonToolbar,
-    IonButtons
+    IonButtons,
+    onIonViewWillEnter
 } from "@ionic/vue";
 import JourneysHeader from "../components/JourneysHeader.vue";
 import JourneyCard from "../components/JourneyCard.vue";
@@ -78,7 +79,8 @@ import "swiper/css/scrollbar";
 const useJourney = useJourneyStore();
 const useUser = useUserStore();
 const modules = ref([Pagination, Navigation, Lazy]);
-onMounted(() => {
+
+onIonViewWillEnter(() => {
     useJourney.fetchJourneysFromUser(useUser.userRef.userName);
 });
 </script>

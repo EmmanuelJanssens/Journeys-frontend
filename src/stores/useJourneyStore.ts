@@ -3,7 +3,7 @@ import { ref } from "vue";
 import axios from "axios";
 import { LngLat } from "maplibre-gl";
 export const useJourneyStore = defineStore("journey", () => {
-    const journeyRef = ref<Poi[]>();
+    const poisInJourneyEdit = ref<Poi[]>();
 
     const journeyStartEnd = ref({
         start: new LngLat(-1, -1),
@@ -14,19 +14,20 @@ export const useJourneyStore = defineStore("journey", () => {
 
     function addToJourney(poi: Poi): void {
         if (!alreadyExists(poi)) {
-            journeyRef.value?.push(poi);
+            poisInJourneyEdit.value?.push(poi);
         }
     }
 
     function removeFromJourney(poi: Poi): void {
-        journeyRef.value = journeyRef.value?.filter(
+        poisInJourneyEdit.value = poisInJourneyEdit.value?.filter(
             (item) => item.id !== poi.id
         );
     }
 
     function alreadyExists(poi: Poi): boolean {
         return (
-            journeyRef.value?.find((item) => item.id === poi.id) !== undefined
+            poisInJourneyEdit.value?.find((item) => item.id === poi.id) !==
+            undefined
         );
     }
 
@@ -42,7 +43,7 @@ export const useJourneyStore = defineStore("journey", () => {
             };
         }[] = [];
         let id = 0;
-        journeyRef.value?.forEach((element) => {
+        poisInJourneyEdit.value?.forEach((element) => {
             experiences.push({
                 poi: { poi_id: element.id },
                 experience: {
@@ -94,14 +95,23 @@ export const useJourneyStore = defineStore("journey", () => {
             end: end
         };
     }
+
+    function clearMapView() {
+        journeyStartEnd.value = {
+            start: new LngLat(-1, -1),
+            end: new LngLat(-1, -1)
+        };
+        poisInJourneyEdit.value = [];
+    }
     return {
-        journeyRef,
+        journeyRef: poisInJourneyEdit,
         userJourneysRef,
         addToJourney,
         removeFromJourney,
         saveJourney,
         alreadyExists,
         fetchJourneysFromUser,
-        setJourneyStartEnd
+        setJourneyStartEnd,
+        clearMapView
     };
 });
