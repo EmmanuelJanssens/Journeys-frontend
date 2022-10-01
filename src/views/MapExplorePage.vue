@@ -52,13 +52,12 @@
                                 </ion-fab-button>
                                 <ion-fab-list>
                                     <ion-fab-button
-                                        id="open-save-journey-modal">
+                                        @click="openModal(SaveJourneyModal)">
                                         <ion-icon
                                             size="large"
                                             src="/src/assets/icon/save-outline.svg"></ion-icon>
                                     </ion-fab-button>
-                                    <ion-fab-button
-                                        id="open-save-journey-modal">
+                                    <ion-fab-button>
                                         <ion-icon
                                             size="large"
                                             src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
@@ -79,7 +78,6 @@
                 </ion-row>
             </ion-grid>
         </ion-content>
-        <SaveJourneyModal />
     </ion-page>
 </template>
 
@@ -102,7 +100,8 @@ import {
     IonFab,
     IonFabButton,
     IonFabList,
-    IonSearchbar
+    IonSearchbar,
+    modalController
 } from "@ionic/vue";
 import haversine from "haversine";
 import { Map, MapMouseEvent, Marker, NavigationControl } from "maplibre-gl";
@@ -174,6 +173,14 @@ onIonViewDidLeave(() => {
     map.value?.remove();
 });
 
+async function openModal(component: any) {
+    console.log("opn");
+    let modal = await modalController.create({
+        component: component,
+        keyboardClose: false
+    });
+    modal.present();
+}
 function panTo(coordinates: number[]) {
     map.value?.easeTo({
         center: [coordinates[0], coordinates[1]],

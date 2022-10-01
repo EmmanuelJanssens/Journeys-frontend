@@ -31,6 +31,13 @@ export const useUserStore = defineStore("user", () => {
                 userRef.value.email = result.email;
                 token.value = result.token;
                 loggedIn.value = true;
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify({
+                        user: userRef.value,
+                        token: token.value
+                    })
+                );
                 return true;
             })
             .catch((error: AxiosError) => {
@@ -51,6 +58,13 @@ export const useUserStore = defineStore("user", () => {
                 userRef.value.email = result.email;
                 token.value = result.token;
                 loggedIn.value = true;
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify({
+                        user: userRef.value,
+                        token: token.value
+                    })
+                );
                 return true;
             })
             .catch((error: AxiosError) => {
@@ -76,7 +90,14 @@ export const useUserStore = defineStore("user", () => {
     }
 
     function logout(): void {
-        userRef.value = userObj;
+        userRef.value = {
+            userName: "",
+            firstName: "",
+            lastName: "",
+            email: ""
+        };
+        myJourneys.value = [];
+        token.value = "";
         loggedIn.value = false;
         localStorage.removeItem("user");
     }

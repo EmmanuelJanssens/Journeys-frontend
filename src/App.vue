@@ -7,7 +7,7 @@
 
 <script lang="ts" setup>
 import { IonApp, IonRouterOutlet } from "@ionic/vue";
-import { onBeforeMount } from "vue";
+import { onBeforeMount, onMounted } from "vue";
 
 import UserDetailMenu from "./components/UserDetailMenu.vue";
 import { useUserStore } from "./stores/useUserStore";
@@ -30,6 +30,7 @@ function readFromStorage() {
 }
 
 onBeforeMount(() => {
+    console.log("read");
     readFromStorage();
 });
 </script>

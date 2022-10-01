@@ -1,5 +1,5 @@
 <template>
-    <ion-modal ref="modal" trigger="open-register-modal">
+    <ion-page>
         <ion-header>
             <ion-toolbar>
                 <ion-title>Register</ion-title>
@@ -113,16 +113,16 @@
                 >
             </ion-toolbar>
         </ion-footer>
-    </ion-modal>
+    </ion-page>
 </template>
 
 <script lang="ts" setup>
 import { modalController } from "@ionic/core";
 import {
+    IonPage,
     IonGrid,
     IonCol,
     IonRow,
-    IonModal,
     IonInput,
     IonButton,
     IonItem,
@@ -161,8 +161,6 @@ const rules = {
 };
 
 const userStore = useUserStore();
-
-const modal = ref<typeof IonModal>();
 
 const v$ = useVuelidate(rules, state);
 
@@ -207,18 +205,6 @@ function dismissRegisterModal() {
     modalController.dismiss();
     clearModal();
 }
-
-userStore.$subscribe((mutation) => {
-    mutation.type;
-    mutation.storeId;
-    localStorage.setItem(
-        "user",
-        JSON.stringify({
-            user: userStore.userRef,
-            token: userStore.token
-        })
-    );
-});
 </script>
 
 <style></style>

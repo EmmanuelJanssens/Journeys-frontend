@@ -38,7 +38,7 @@ import {
 const props = defineProps(["predictions"]);
 </script>
 
-<style>
+<style scoped>
 .search {
     position: absolute;
     z-index: 999;
@@ -46,12 +46,11 @@ const props = defineProps(["predictions"]);
     width: 100%;
     min-width: 200px;
 }
-.search-item {
-    width: 100%;
-}
+
 ion-icon {
     font-size: 10px;
 }
+
 .google {
     font-size: 10px;
 }

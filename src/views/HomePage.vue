@@ -12,8 +12,8 @@
                             placeholder="Starting point"
                             debounce="500"
                             :value="startData.locationText"
-                            @ionChange="onPopOver($event, 'start')"
-                            @ionClear="startData.locationText = ''">
+                            @ionClear="startData.locationText = ''"
+                            @ionChange="onPopOver($event, 'start')">
                         </ion-searchbar>
                         <GautoCompletePredictionList
                             :predictions="startData.predictions"
@@ -98,8 +98,6 @@
                     </ion-col>
                 </ion-row>
             </ion-grid>
-            <login-modal />
-            <RegisterModal />
         </ion-content>
         <ion-footer>
             <ion-title>footer</ion-title>
@@ -276,28 +274,10 @@ function onPopOver(ev: SearchbarCustomEvent, point: string) {
 </script>
 
 <style>
-.search {
-    position: absolute;
-    z-index: 999;
-    width: 100%;
-    min-width: 200px;
-}
-.search-item {
-    width: 100%;
-}
 .journey {
     height: 300px;
     background-image: url(../assets/hero-bg.jpg);
     background-repeat: no-repeat;
     background-size: cover;
-}
-
-ion-toolbar {
-    --background: #dccabf;
-    --padding-start: 10px;
-}
-
-ion-chip {
-    --background: var(--ion-color-primary);
 }
 </style>

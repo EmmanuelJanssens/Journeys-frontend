@@ -1,5 +1,5 @@
 <template>
-    <ion-modal trigger="open-save-journey-modal">
+    <ion-page>
         <ion-header>
             <ion-toolbar>
                 <ion-title> Save your journey </ion-title>
@@ -30,7 +30,7 @@
                 <ion-button slot="end" @click="saveJourney"> save </ion-button>
             </ion-toolbar>
         </ion-footer>
-    </ion-modal>
+    </ion-page>
 </template>
 <script lang="ts" setup>
 import { useJourneyStore } from "../../stores/useJourneyStore";
@@ -38,7 +38,7 @@ import {
     IonItem,
     IonInput,
     IonLabel,
-    IonModal,
+    IonPage,
     IonHeader,
     IonTitle,
     IonButton,
