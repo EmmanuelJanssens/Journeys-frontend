@@ -6,36 +6,18 @@
                 <ion-row
                     class="ion-align-items-center ion-justify-content-center ion-hide-sm-down journey">
                     <ion-col size="3" class="ion-margin">
-                        <ion-searchbar
-                            id="start-point"
-                            class="ion-no-padding"
-                            placeholder="Starting point"
-                            debounce="500"
-                            :value="startData.locationText"
-                            @ionClear="startData.locationText = ''"
-                            @ionChange="onPopOver($event, 'start')">
-                        </ion-searchbar>
                         <GautoCompletePredictionList
-                            :predictions="startData.predictions"
+                            placeholder="Start"
+                            :input="startData.locationText"
                             @prediction-chosen="
-                                setPredictionText($event, 'start')
+                                setStartPredictionText($event)
                             " />
                     </ion-col>
                     <ion-col size="3" class="ion-margin">
-                        <ion-searchbar
-                            id="end-point"
-                            class="ion-no-padding"
-                            placeholder="Destination"
-                            debounce="500"
-                            :value="endData.locationText"
-                            @ionClear="endData.locationText = ''"
-                            @ionChange="onPopOver($event, 'end')">
-                        </ion-searchbar>
                         <GautoCompletePredictionList
-                            :predictions="endData.predictions"
-                            @prediction-chosen="
-                                setPredictionText($event, 'end')
-                            " />
+                            placeholder="Destination"
+                            :input="endData.locationText"
+                            @prediction-chosen="setEndPredictionText($event)" />
                     </ion-col>
                     <ion-col size="3" class="ion-margin">
                         <ion-button color="primary" @click="gotoJourneyMap()"
@@ -106,14 +88,11 @@
 </template>
 
 <script lang="ts" setup>
-import { Loader } from "@googlemaps/js-api-loader";
-import { SearchbarCustomEvent } from "@ionic/vue";
 import {
     IonContent,
     IonPage,
     IonTitle,
     IonFooter,
-    IonSearchbar,
     IonButton,
     IonLabel,
     IonGrid,
@@ -125,36 +104,26 @@ import { LngLat } from "maplibre-gl";
 import { onMounted, ref } from "vue";
 
 import JourneysHeader from "../components/JourneysHeader.vue";
-import LoginModal from "../components/Modals/LoginModal.vue";
 import router from "../router";
-import RegisterModal from "../components/Modals/RegisterModal.vue";
 import GautoCompletePredictionList from "../components/GautoCompletePredictionList.vue";
+import googleLoader from "../googleLoader";
 
-var service: google.maps.places.AutocompleteService;
 var geocoder: google.maps.Geocoder;
-
-const loader = new Loader({
-    apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    version: "weekly",
-    libraries: ["places", "geometry"]
-});
 
 const startData = ref({
     locationText: "",
     coordinates: new LngLat(-1, -1),
-    isOk: false,
-    predictions: new Array<google.maps.places.AutocompletePrediction>()
+    isOk: false
 });
+
 const endData = ref({
     locationText: "",
     coordinates: new LngLat(-1, -1),
-    isOk: false,
-    predictions: new Array<google.maps.places.AutocompletePrediction>()
+    isOk: false
 });
 
 onMounted(() => {
-    loader.load().then((google) => {
-        service = new google.maps.places.AutocompleteService();
+    googleLoader.load().then((google) => {
         geocoder = new google.maps.Geocoder();
     });
 });
@@ -163,27 +132,22 @@ onIonViewWillEnter(() => {
     startData.value = {
         locationText: "",
         coordinates: new LngLat(-1, -1),
-        isOk: false,
-        predictions: []
+        isOk: false
     };
     endData.value = {
         locationText: "",
         coordinates: new LngLat(-1, -1),
-        isOk: false,
-        predictions: []
+        isOk: false
     };
 });
 
-function setPredictionText(predictionText: string, point: string) {
-    if (point === "start") {
-        startData.value.locationText = predictionText;
-        startData.value.isOk = true;
-        startData.value.predictions = [];
-    } else {
-        endData.value.locationText = predictionText;
-        endData.value.isOk = true;
-        endData.value.predictions = [];
-    }
+function setStartPredictionText(prediction: string) {
+    startData.value.locationText = prediction;
+    startData.value.isOk = true;
+}
+function setEndPredictionText(prediction: string) {
+    endData.value.locationText = prediction;
+    endData.value.isOk = true;
 }
 
 function geocodeStartDest(point: string) {
@@ -208,9 +172,6 @@ function geocodeStartDest(point: string) {
     });
 }
 async function gotoJourneyMap() {
-    console.log(startData);
-    console.log(endData);
-
     if (startData.value.isOk && endData.value.isOk) {
         await geocodeStartDest("start");
         await geocodeStartDest("end");
@@ -232,42 +193,6 @@ async function gotoJourneyMap() {
                 }
             };
             router.push(route);
-        }
-    }
-}
-
-function onPopOver(ev: SearchbarCustomEvent, point: string) {
-    if (ev.detail.value?.length! >= 3) {
-        if (
-            (point === "start" &&
-                ev.target.value !== startData.value.locationText) ||
-            (point === "end" && ev.target.value !== endData.value.locationText)
-        ) {
-            const request: google.maps.places.AutocompletionRequest = {
-                input: ev.detail.value!,
-                types: ["locality"],
-                componentRestrictions: { country: "ch" }
-            };
-            service
-                .getPlacePredictions(request)
-                .then((resp) => {
-                    if (point === "start") {
-                        startData.value.predictions = resp.predictions;
-                    } else if (point === "end") {
-                        endData.value.predictions = resp.predictions;
-                    }
-                })
-                .catch(() => {
-                    //Do something
-                });
-        }
-    } else if (ev.detail.value?.length! === 0) {
-        if (point === "start") {
-            startData.value.isOk = false;
-            startData.value.predictions = [];
-        } else {
-            endData.value.isOk = false;
-            endData.value.predictions = [];
         }
     }
 }

@@ -1,41 +1,90 @@
 <template>
-    <ion-content
-        ref="popover"
-        class="search"
-        v-if="props.predictions.length > 0">
-        <ion-list>
-            <ion-item
-                v-for="prediction in (props.predictions as Array<google.maps.places.AutocompletePrediction>)"
-                button
-                v-bind:key="prediction"
-                @click="$emit('predictionChosen', prediction.description)">
+    <section>
+        <ion-searchbar
+            id="end-point"
+            class="ion-no-padding"
+            :placeholder="props.placeholder"
+            debounce="500"
+            :value="props.input"
+            @ionClear="clearInput"
+            @ionChange="startAutocomplete($event)" />
+        <ion-content class="search" v-if="predictions.length">
+            <ion-list>
+                <ion-item
+                    v-for="prediction in predictions"
+                    button
+                    v-bind:key="prediction"
+                    @click="setPredictionText(prediction.description)">
+                    <ion-label>
+                        {{ prediction.description }}
+                    </ion-label>
+                </ion-item>
+            </ion-list>
+            <ion-item>
                 <ion-label>
-                    {{ prediction.description }}
+                    <ion-icon src="/src/assets/icon/logo-google.svg"></ion-icon>
+                    <ion-text class="google" color="medium">
+                        Powered by google</ion-text
+                    >
                 </ion-label>
             </ion-item>
-        </ion-list>
-        <ion-item>
-            <ion-label>
-                <ion-icon src="/src/assets/icon/logo-google.svg"></ion-icon>
-                <ion-text class="google" color="medium">
-                    Powered by google</ion-text
-                >
-            </ion-label>
-        </ion-item>
-    </ion-content>
+        </ion-content>
+    </section>
 </template>
 
 <script lang="ts" setup>
+import googleLoader from "../googleLoader";
+
 import {
     IonText,
     IonIcon,
     IonContent,
     IonItem,
     IonLabel,
-    IonList
+    IonList,
+    IonSearchbar,
+    SearchbarCustomEvent
 } from "@ionic/vue";
+import { onMounted, ref } from "vue";
 
-const props = defineProps(["predictions"]);
+const predictions = ref<google.maps.places.AutocompletePrediction[]>([]);
+const props = defineProps(["placeholder", "input"]);
+
+var service: google.maps.places.AutocompleteService;
+
+const emit = defineEmits(["predictionChosen"]);
+
+onMounted(() => {
+    googleLoader.load().then((google) => {
+        service = new google.maps.places.AutocompleteService();
+    });
+});
+
+function startAutocomplete(event: SearchbarCustomEvent) {
+    const searchContent = event.detail.value!;
+    if (searchContent.length > 3 && event.target.value !== props.input) {
+        const request: google.maps.places.AutocompletionRequest = {
+            input: searchContent,
+            types: ["locality"],
+            componentRestrictions: { country: "ch" }
+        };
+        service.getPlacePredictions(request).then((response) => {
+            predictions.value = response.predictions;
+        });
+    } else if (searchContent.length === 0) {
+        //clear if no text in textinput
+        predictions.value = [];
+    }
+}
+
+function setPredictionText(value: string) {
+    predictions.value = [];
+    emit("predictionChosen", value);
+}
+
+function clearInput() {
+    predictions.value = [];
+}
 </script>
 
 <style scoped>

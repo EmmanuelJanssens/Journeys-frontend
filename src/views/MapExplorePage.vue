@@ -189,6 +189,7 @@ function panTo(coordinates: number[]) {
 }
 
 function load() {
+    isLoading.value = true;
     getMidPoint(startPoint.value.coordinates, endPoint.value.coordinates);
     const midPoint = {
         lng: getMidPoint(
