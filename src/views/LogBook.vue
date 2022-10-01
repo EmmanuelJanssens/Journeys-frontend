@@ -12,7 +12,11 @@
                                 <ion-row class="">
                                     <ion-toolbar color="secondary">
                                         <ion-buttons slot="end">
-                                            <ion-button slot="primary">
+                                            <ion-button
+                                                slot="primary"
+                                                @click="
+                                                    openJourneyCreationModal
+                                                ">
                                                 create
                                             </ion-button>
                                         </ion-buttons>
@@ -59,7 +63,8 @@ import {
     IonButton,
     IonToolbar,
     IonButtons,
-    onIonViewWillEnter
+    onIonViewWillEnter,
+    modalController
 } from "@ionic/vue";
 import JourneysHeader from "../components/JourneysHeader.vue";
 import JourneyCard from "../components/JourneyCard.vue";
@@ -74,6 +79,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
+import CreateJourneyModalVue from "../components/Modals/CreateJourneyModal.vue";
 
 const slidesPerView = ref(0);
 const useUser = useUserStore();
@@ -90,6 +96,13 @@ onIonViewWillEnter(() => {
         }
     });
 });
+
+async function openJourneyCreationModal() {
+    const modal = await modalController.create({
+        component: CreateJourneyModalVue
+    });
+    modal.present();
+}
 </script>
 <style>
 .side {

@@ -88,12 +88,16 @@ function clearInput() {
 </script>
 
 <style scoped>
+modal-content {
+    height: 300px;
+}
 .search {
     position: absolute;
     z-index: 999;
     height: 200px;
     width: 100%;
     min-width: 200px;
+    max-width: 1280px;
 }
 
 ion-icon {

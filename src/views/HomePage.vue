@@ -101,14 +101,12 @@ import {
     onIonViewWillEnter
 } from "@ionic/vue";
 import { LngLat } from "maplibre-gl";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 
 import JourneysHeader from "../components/JourneysHeader.vue";
 import router from "../router";
 import GautoCompletePredictionList from "../components/GautoCompletePredictionList.vue";
-import googleLoader from "../googleLoader";
-
-var geocoder: google.maps.Geocoder;
+import { getGeocodedData } from "../googleGeocoder";
 
 const startData = ref({
     locationText: "",
@@ -122,11 +120,14 @@ const endData = ref({
     isOk: false
 });
 
-onMounted(() => {
-    googleLoader.load().then((google) => {
-        geocoder = new google.maps.Geocoder();
-    });
-});
+function setStartPredictionText(prediction: string) {
+    startData.value.locationText = prediction;
+    startData.value.isOk = true;
+}
+function setEndPredictionText(prediction: string) {
+    endData.value.locationText = prediction;
+    endData.value.isOk = true;
+}
 
 onIonViewWillEnter(() => {
     startData.value = {
@@ -141,55 +142,22 @@ onIonViewWillEnter(() => {
     };
 });
 
-function setStartPredictionText(prediction: string) {
-    startData.value.locationText = prediction;
-    startData.value.isOk = true;
-}
-function setEndPredictionText(prediction: string) {
-    endData.value.locationText = prediction;
-    endData.value.isOk = true;
-}
-
-function geocodeStartDest(point: string) {
-    const geo =
-        point === "start"
-            ? startData.value.locationText
-            : endData.value.locationText;
-    const request: google.maps.GeocoderRequest = {
-        address: geo,
-        componentRestrictions: { country: "ch" }
-    };
-    return geocoder.geocode(request).then((response) => {
-        const coords = new LngLat(
-            response.results[0].geometry.location.lng(),
-            response.results[0].geometry.location.lat()
-        );
-        if (point === "start") {
-            startData.value.coordinates = coords;
-        } else {
-            endData.value.coordinates = coords;
-        }
-    });
-}
 async function gotoJourneyMap() {
     if (startData.value.isOk && endData.value.isOk) {
-        await geocodeStartDest("start");
-        await geocodeStartDest("end");
+        const geocodedStart = await getGeocodedData(
+            startData.value.locationText
+        );
+        const geocodedEnd = await getGeocodedData(endData.value.locationText);
+
         if (
-            startData.value.coordinates.lat > 0 &&
-            endData.value.coordinates.lat > 0
+            geocodedStart.error === undefined &&
+            geocodedEnd.error === undefined
         ) {
             const route = {
                 name: "map",
                 params: {
-                    start: JSON.stringify({
-                        text: startData.value.locationText,
-                        coordinates: startData.value.coordinates
-                    }),
-                    end: JSON.stringify({
-                        text: endData.value.locationText,
-                        coordinates: endData.value.coordinates
-                    })
+                    start: JSON.stringify(geocodedStart),
+                    end: JSON.stringify(geocodedEnd)
                 }
             };
             router.push(route);
