@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-multiple-template-root -->
 <template>
     <ion-page>
         <ion-header>
@@ -12,35 +13,29 @@
                 </ion-buttons>
             </ion-toolbar>
         </ion-header>
-        <ion-content>
-            <section class="modal-content">
-                <div class="form-field">
-                    <ion-item class="ion-margin">
-                        <ion-label position="floating">Username</ion-label>
-                        <ion-input type="text" v-model="state.userName" />
-                    </ion-item>
-                    <ion-text
-                        class="ion-margin"
-                        color="danger"
-                        v-if="v$.userName.$error"
-                        >{{ v$.userName.$errors[0].$message }}</ion-text
-                    >
-                </div>
-                <span class="separator"></span>
-                <div class="form-field">
-                    <ion-item class="ion-margin">
-                        <ion-label position="floating">Password</ion-label>
-                        <ion-input type="password" v-model="state.password" />
-                    </ion-item>
-                    <ion-text
-                        class="ion-margin"
-                        color="danger"
-                        v-if="v$.password.$error"
-                        >{{ v$.password.$errors[0].$message }}</ion-text
-                    >
-                </div>
-            </section>
-        </ion-content>
+        <section>
+            <ion-item class="ion-margin">
+                <ion-label position="floating">Username</ion-label>
+                <ion-input type="text" v-model="state.userName" />
+            </ion-item>
+            <ion-text
+                class="ion-margin"
+                color="danger"
+                v-if="v$.userName.$error"
+                >{{ v$.userName.$errors[0].$message }}</ion-text
+            >
+            <span class="separator"></span>
+            <ion-item class="ion-margin">
+                <ion-label position="floating">Password</ion-label>
+                <ion-input type="password" v-model="state.password" />
+            </ion-item>
+            <ion-text
+                class="ion-margin"
+                color="danger"
+                v-if="v$.password.$error"
+                >{{ v$.password.$errors[0].$message }}</ion-text
+            >
+        </section>
         <ion-footer>
             <ion-toolbar>
                 <ion-button slot="end" @click="submitForm()" color="primary"
@@ -74,7 +69,7 @@ import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { ref } from "vue";
 
-import { useUserStore } from "../../stores/useUserStore";
+import { useUserStore } from "stores/useUserStore";
 
 const state = ref({
     userName: "",
@@ -137,22 +132,4 @@ function dismissLoginModal() {
 }
 </script>
 
-<style>
-ion-footer {
-    position: absolute;
-    bottom: 0px;
-}
-.modal-content {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: auto;
-    margin-bottom: auto;
-    height: 300px;
-    width: 300px;
-}
-</style>
+<style></style>

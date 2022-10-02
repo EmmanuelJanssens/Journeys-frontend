@@ -27,6 +27,7 @@
 </template>
 
 <script lang="ts" setup>
+import { Poi, Experience } from "journeys/journeys";
 import {
     IonCard,
     IonCardHeader,
@@ -43,7 +44,7 @@ import {
 import axios from "axios";
 import { onMounted } from "vue";
 
-import { useJourneyStore } from "../stores/useJourneyStore";
+import { useJourneyStore } from "stores/useJourneyStore";
 
 const data = defineProps(["poi"]);
 
@@ -51,10 +52,7 @@ const useJourney = useJourneyStore();
 
 function addToJourney(poi: Poi) {
     const experience: Experience = {
-        poi: {
-            name: poi.name,
-            poi_id: poi.id
-        },
+        poi: poi,
         experience: {
             date: new Date(),
             description: "",

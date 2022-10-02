@@ -7,10 +7,9 @@
 
 <script lang="ts" setup>
 import { IonApp, IonRouterOutlet } from "@ionic/vue";
-import { onBeforeMount, onMounted } from "vue";
+import { useUserStore } from "stores/useUserStore";
+import { onBeforeMount } from "vue";
 
-import UserDetailMenu from "./components/UserDetailMenu.vue";
-import { useUserStore } from "./stores/useUserStore";
 const userStore = useUserStore();
 function readFromStorage() {
     if (localStorage.getItem("user")) {

@@ -41,12 +41,12 @@
                         </ion-label>
                     </ion-col>
                     <ion-col size="5">
-                        <img src="../assets/map_carte.png" />
+                        <img src="src/assets/map_carte.png" />
                     </ion-col>
                 </ion-row>
                 <ion-row class="ion-align-items-center" id="row">
                     <ion-col size="5">
-                        <img src="../assets/featureImg2.png" />
+                        <img src="src/assets/featureImg2.png" />
                     </ion-col>
                     <ion-col size="7">
                         <ion-label class="ion-text-wrap ion-text-justify">
@@ -76,7 +76,7 @@
                         </ion-label>
                     </ion-col>
                     <ion-col size="5">
-                        <img src="../assets/featureImg3.png" />
+                        <img src="src/assets/featureImg3.png" />
                     </ion-col>
                 </ion-row>
             </ion-grid>
@@ -103,10 +103,10 @@ import {
 import { LngLat } from "maplibre-gl";
 import { ref } from "vue";
 
-import JourneysHeader from "../components/JourneysHeader.vue";
-import router from "../router";
-import GautoCompletePredictionList from "../components/GautoCompletePredictionList.vue";
-import { getGeocodedData } from "../googleGeocoder";
+import JourneysHeader from "components/JourneysHeader.vue";
+import router from "router";
+import GautoCompletePredictionList from "components/GautoCompletePredictionList.vue";
+import { getGeocodedData } from "google/googleGeocoder";
 
 const startData = ref({
     locationText: "",
@@ -160,6 +160,7 @@ async function gotoJourneyMap() {
                     end: JSON.stringify(geocodedEnd)
                 }
             };
+            console.log(route);
             router.push(route);
         }
     }
@@ -169,7 +170,7 @@ async function gotoJourneyMap() {
 <style>
 .journey {
     height: 300px;
-    background-image: url(../assets/hero-bg.jpg);
+    background-image: url(assets/hero-bg.jpg);
     background-repeat: no-repeat;
     background-size: cover;
 }

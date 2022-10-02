@@ -8,7 +8,8 @@
         "preview": "vite preview",
         "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
         "fmt": "eslint --ext .js,.ts,.vue --fix ",
-        "format": "prettier .  --write"
+        "format": "prettier .  --write",
+        "tsc": "vue-tsc --noEmit "
     },
     "dependencies": {
         "@capacitor/app": "^4.0.1",

@@ -1,49 +1,27 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-type User = {
+export type User = {
     userName: string;
     firstName: string;
     lastName: string;
     email: string;
+    password?: string;
 };
 
-type UserRegister = {
-    userName: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-};
-
-type Poi = {
+export type Poi = {
     id: string;
     name: string;
     description?: string;
     location: {
-        longitude: number;
         latitude: number;
+        longitude: number;
     };
 };
-
-type PositionStackData = {
-    latitude?: number;
-    longitude?: number;
-    label?: string;
-    name?: string;
-    type?: string;
-    number?: string;
-    street?: string;
-    postal_code?: string;
-    confidence?: number;
-    region?: string;
-    region_code?: string;
-    administrative_area?: undefined;
-    neighbourhood?: string;
-    country?: string;
-    country_code?: string;
-    mapurl?: string;
+export type GeocodedData = {
+    address: string;
+    coordinates: import("maplibre-gl").LngLat;
+    error?: any;
 };
 
-type GeoJsonData = {
+export type PoiGeoJsonData = {
     type: string;
     crs: {
         type: string;
@@ -51,10 +29,10 @@ type GeoJsonData = {
             name: string;
         };
     };
-    features: GeoJsonPoi[];
+    features: PoiGeoJsonFormat[];
 };
 
-type GeoJsonPoi = {
+export type PoiGeoJsonFormat = {
     type: string;
     geometry: {
         type: string;
@@ -63,11 +41,8 @@ type GeoJsonPoi = {
     properties: Poi;
     id?: string;
 };
-type Experience = {
-    poi: {
-        poi_id: string;
-        name: string;
-    };
+export type Experience = {
+    poi: Poi;
     experience: {
         description: string;
         date: Date;
@@ -76,7 +51,7 @@ type Experience = {
     };
 };
 
-type Journey = {
+export type Journey = {
     id?: string;
     title?: string;
     start?: {
@@ -93,7 +68,7 @@ type Journey = {
     experiences: Experience[];
 };
 
-type ApiAuthenticationResponse = {
+export type ApiAuthenticationResponse = {
     userName: string;
     firstName: string;
     lastName: string;
@@ -101,6 +76,6 @@ type ApiAuthenticationResponse = {
     token: string;
 };
 
-type ApiError = {
+export type ApiError = {
     message: string;
 };

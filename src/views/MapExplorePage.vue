@@ -82,7 +82,6 @@
 </template>
 
 <script lang="ts" setup>
-import router from "../router";
 import {
     IonPage,
     IonContent,
@@ -108,20 +107,28 @@ import { Map, MapMouseEvent, Marker, NavigationControl } from "maplibre-gl";
 import { LngLat } from "maplibre-gl";
 import { ref } from "vue";
 
-import SaveJourneyModal from "../components/Modals/SaveJourneyModal.vue";
-import JourneysHeader from "../components/JourneysHeader.vue";
-import MapJourneySidebar from "../components/MapJourneySidebar.vue";
-import PoiCard from "../components/PoiCard.vue";
-import { useJourneyStore } from "../stores/useJourneyStore";
-import { usePoiStore } from "../stores/usePoiStore";
+import SaveJourneyModal from "components/Modals/SaveJourneyModal.vue";
+import JourneysHeader from "components/JourneysHeader.vue";
+import MapJourneySidebar from "components/MapJourneySidebar.vue";
+import PoiCard from "components/PoiCard.vue";
+import { useJourneyStore } from "stores/useJourneyStore";
+import { usePoiStore } from "stores/usePoiStore";
+import { GeocodedData, Poi } from "journeys/journeys";
+import router from "router";
 
 const usePoi = usePoiStore();
 const useJourney = useJourneyStore();
 
 var mapContainer = ref();
 var map = ref<Map>();
-var startPoint = ref({ text: "", coordinates: new LngLat(-1, -1) });
-var endPoint = ref({ text: "", coordinates: new LngLat(-1, -1) });
+var startPoint = ref<GeocodedData>({
+    address: "",
+    coordinates: new LngLat(-1, -1)
+});
+var endPoint = ref<GeocodedData>({
+    address: "",
+    coordinates: new LngLat(-1, -1)
+});
 var hideSidebar = ref(true);
 var isLoading = ref(true);
 
@@ -130,14 +137,8 @@ onIonViewWillEnter(() => {
 
     useJourney.journeyRef.experiences = [];
     if (params.start != undefined && params.end != undefined) {
-        startPoint.value = JSON.parse(params.start as string) as {
-            text: string;
-            coordinates: LngLat;
-        };
-        endPoint.value = JSON.parse(params.end as string) as {
-            text: string;
-            coordinates: LngLat;
-        };
+        startPoint.value = JSON.parse(params.start as string) as GeocodedData;
+        endPoint.value = JSON.parse(params.end as string) as GeocodedData;
         useJourney.setJourneyStartEnd(
             startPoint.value.coordinates,
             endPoint.value.coordinates

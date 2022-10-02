@@ -27,10 +27,13 @@
                                         </ion-buttons>
                                     </ion-toolbar>
                                 </ion-row>
-                                <ion-row class="mid-page">
+                                <ion-row class="mid-page" ref="slides">
                                     <swiper
                                         :slides-per-view="slidesPerView"
-                                        :space-between="30"
+                                        :space-between="10"
+                                        :initial-slide="
+                                            useUser.myJourneys?.length
+                                        "
                                         :pagination="{ clickable: true }"
                                         navigation
                                         lazy
@@ -47,7 +50,7 @@
                             </ion-content>
                         </ion-grid>
                     </ion-col>
-                    <ion-col class="side ion-hide-sm-down"> second </ion-col>
+                    <ion-col class="side ion-hide-sm-down"> </ion-col>
                 </ion-row>
             </ion-grid>
         </ion-content>
@@ -64,12 +67,13 @@ import {
     IonToolbar,
     IonButtons,
     onIonViewWillEnter,
-    modalController
+    modalController,
+    onIonViewDidLeave
 } from "@ionic/vue";
-import JourneysHeader from "../components/JourneysHeader.vue";
-import JourneyCard from "../components/JourneyCard.vue";
+import JourneysHeader from "components/JourneysHeader.vue";
+import JourneyCard from "components/JourneyCard.vue";
 import { ref } from "vue";
-import { useUserStore } from "../stores/useUserStore";
+import { useUserStore } from "stores/useUserStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy } from "swiper";
 
@@ -79,24 +83,43 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
-import CreateJourneyModalVue from "../components/Modals/CreateJourneyModal.vue";
+import CreateJourneyModalVue from "components/Modals/CreateJourneyModal.vue";
 
 const slidesPerView = ref(0);
 const useUser = useUserStore();
 const modules = ref([Pagination, Navigation, Lazy]);
 
+const slides = ref();
+onIonViewDidLeave(() => {
+    window.removeEventListener("resize", updateView);
+});
 onIonViewWillEnter(() => {
+    window.addEventListener("resize", updateView);
     useUser.fetchMyJourneys().then((response) => {
         if (response) {
-            if (useUser.myJourneys?.length! < 4) {
-                slidesPerView.value = useUser.myJourneys?.length!;
-            } else {
-                slidesPerView.value = 4;
-            }
+            updateView();
         }
     });
 });
 
+function updateView() {
+    if (slides.value != null) {
+        const width = slides.value.$el.clientWidth;
+        if (width < 800) {
+            slidesPerView.value = 1;
+        } else if (width < 1100) {
+            slidesPerView.value = 2;
+        } else if (width < 1500) {
+            slidesPerView.value = 3;
+        } else {
+            if (useUser.myJourneys?.length! < 4) {
+                slidesPerView.value = useUser.myJourneys?.length!;
+            } else {
+                slidesPerView.value = Math.floor(width / 400);
+            }
+        }
+    }
+}
 async function openJourneyCreationModal() {
     const modal = await modalController.create({
         component: CreateJourneyModalVue
@@ -118,18 +141,26 @@ async function openJourneyCreationModal() {
     flex-wrap: nowrap;
 }
 .swiper {
-    padding: 10px;
+    width: 100%;
+    height: 100%;
 }
-.red {
-    background-color: red;
-}
-.blue {
-    background-color: blue;
-}
-.green {
-    background-color: green;
-}
-.yellow {
-    background-color: yellow;
+
+.swiper-slide {
+    text-align: center;
+    font-size: 18px;
+
+    /* Center slide text vertically */
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
 }
 </style>

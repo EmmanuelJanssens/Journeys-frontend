@@ -1,5 +1,6 @@
 import { LngLat } from "maplibre-gl";
-import googleLoader from "./googleLoader";
+import googleLoader from "google/googleLoader";
+import { GeocodedData } from "types/journeys";
 
 let googleGeocoder: google.maps.Geocoder;
 
@@ -7,11 +8,7 @@ googleLoader.load().then((google) => {
     googleGeocoder = new google.maps.Geocoder();
 });
 
-async function getGeocodedData(value: string): Promise<{
-    address: string;
-    coordinates: LngLat;
-    error?: any;
-}> {
+async function getGeocodedData(value: string): Promise<GeocodedData> {
     const request: google.maps.GeocoderRequest = {
         address: value,
         componentRestrictions: { country: "ch" }

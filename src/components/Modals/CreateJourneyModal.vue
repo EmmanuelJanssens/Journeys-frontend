@@ -1,5 +1,5 @@
 <template>
-    <ion-page>
+    <section class="fullpage">
         <ion-header>
             <ion-toolbar>
                 <ion-title>Create new journey</ion-title>
@@ -12,36 +12,24 @@
                 </ion-buttons>
             </ion-toolbar>
         </ion-header>
-        <ion-content>
-            <ion-grid class="fullpage ion-align-items-center">
-                <ion-row>
-                    <ion-col>
-                        <GautoCompletePredictionList
-                            placeholder="Start"
-                            :input="startData.locationText"
-                            @prediction-chosen="
-                                setStartPredictionText($event)
-                            " />
-                    </ion-col>
-                </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <GautoCompletePredictionList
-                            placeholder="End"
-                            :input="endData.locationText"
-                            @prediction-chosen="setEndPredictionText($event)" />
-                    </ion-col>
-                </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <ion-button @click="gotoJourneyMap">
-                            Create
-                        </ion-button>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
+        <ion-content class="ion-text-center ion-padding">
+            <GautoCompletePredictionList
+                class="ion-padding"
+                placeholder="Start"
+                :input="startData.locationText"
+                @prediction-chosen="setStartPredictionText($event)" />
+
+            <GautoCompletePredictionList
+                class="ion-padding"
+                placeholder="End"
+                :input="endData.locationText"
+                @prediction-chosen="setEndPredictionText($event)" />
+
+            <ion-button class="ion-padding" @click="gotoJourneyMap">
+                Create
+            </ion-button>
         </ion-content>
-    </ion-page>
+    </section>
 </template>
 
 <script lang="ts" setup>
@@ -53,19 +41,15 @@ import {
     IonButtons,
     IonButton,
     IonIcon,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonPage,
     onIonViewDidLeave
 } from "@ionic/vue";
 
 import { ref } from "vue";
 import { LngLat } from "maplibre-gl";
 
-import GautoCompletePredictionList from "../GautoCompletePredictionList.vue";
-import { getGeocodedData } from "../..//googleGeocoder";
-import router from "../..//router";
+import GautoCompletePredictionList from "components/GautoCompletePredictionList.vue";
+import { getGeocodedData } from "ts/googleGeocoder";
+import router from "router";
 import { modalController } from "@ionic/core";
 
 onIonViewDidLeave(() => {

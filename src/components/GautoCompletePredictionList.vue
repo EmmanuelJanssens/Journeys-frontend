@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import googleLoader from "../googleLoader";
+import googleLoader from "google/googleLoader";
 
 import {
     IonText,

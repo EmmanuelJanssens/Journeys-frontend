@@ -33,7 +33,7 @@
     </ion-page>
 </template>
 <script lang="ts" setup>
-import { useJourneyStore } from "../../stores/useJourneyStore";
+import { useJourneyStore } from "stores/useJourneyStore";
 import {
     IonItem,
     IonInput,

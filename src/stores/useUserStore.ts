@@ -1,6 +1,13 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
 import { defineStore } from "pinia";
+import {
+    User,
+    Journey,
+    ApiAuthenticationResponse,
+    ApiError
+} from "types/journeys";
+
 import { ref } from "vue";
 
 export const useUserStore = defineStore("user", () => {
@@ -46,7 +53,7 @@ export const useUserStore = defineStore("user", () => {
             });
     }
 
-    async function register(user: UserRegister): Promise<boolean> {
+    async function register(user: User): Promise<boolean> {
         console.log("Register " + user.userName);
         return await axios
             .post("/api/auth/register", user)
@@ -80,7 +87,7 @@ export const useUserStore = defineStore("user", () => {
                 myJourneys.value = response.data.journeys as Journey[];
                 return true;
             })
-            .catch((e) => {
+            .catch(() => {
                 return false;
             });
     }

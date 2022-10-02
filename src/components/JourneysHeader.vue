@@ -44,13 +44,13 @@ import {
     menuController
 } from "@ionic/vue";
 
-import { useUserStore } from "../stores/useUserStore";
+import { useUserStore } from "stores/useUserStore";
 import LoginModal from "./Modals/LoginModal.vue";
 import RegisterModal from "./Modals/RegisterModal.vue";
 const userStore = useUserStore();
 
 function toggleProfile() {
-    menuController.toggle("profileMenu").then(() => {
+    menuController.open("profileMenu").then(() => {
         menuController.isOpen("profileMenu").then((b) => console.log(b));
     });
 }

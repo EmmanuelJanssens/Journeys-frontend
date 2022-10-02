@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
 import { LngLat } from "maplibre-gl";
+import { Journey, Experience } from "types/journeys";
 export const useJourneyStore = defineStore("journey", () => {
     const editJourney = ref<Journey>({
         title: "wolol",
@@ -25,14 +26,14 @@ export const useJourneyStore = defineStore("journey", () => {
 
     function removeFromJourney(id: string): void {
         editJourney.value!.experiences = editJourney.value?.experiences?.filter(
-            (item) => item.poi.poi_id !== id
+            (item) => item.poi.id !== id
         );
     }
 
     function alreadyInJourney(experience: Experience): boolean {
         return (
             editJourney.value?.experiences!.find(
-                (item) => item.poi.poi_id === experience.poi.poi_id
+                (item) => item.poi.id === experience.poi.id
             ) !== undefined
         );
     }

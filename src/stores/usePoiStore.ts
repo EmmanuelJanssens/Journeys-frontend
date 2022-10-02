@@ -1,10 +1,11 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
 import { defineStore } from "pinia";
+import { PoiGeoJsonData, Poi, ApiError } from "types/journeys";
 import { ref } from "vue";
 
 export const usePoiStore = defineStore("poi", () => {
-    const poiRef = ref<GeoJsonData>({
+    const poiRef = ref<PoiGeoJsonData>({
         crs: {
             properties: {
                 name: ""

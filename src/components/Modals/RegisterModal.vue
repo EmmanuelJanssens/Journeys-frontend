@@ -140,7 +140,7 @@ import { useVuelidate } from "@vuelidate/core";
 import { required, minLength, email, sameAs } from "@vuelidate/validators";
 import { computed, ref } from "vue";
 
-import { useUserStore } from "../../stores/useUserStore";
+import { useUserStore } from "stores/useUserStore";
 
 const state = ref({
     userName: "",
