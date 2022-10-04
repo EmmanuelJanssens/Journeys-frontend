@@ -1,12 +1,17 @@
 <template>
     <ion-app>
         <user-detail-menu />
-        <ion-router-outlet content-id="main-content" />
+        <journeys-header />
+        <ion-content>
+            <ion-router-outlet content-id="main-content" />
+        </ion-content>
     </ion-app>
 </template>
 
 <script lang="ts" setup>
-import { IonApp, IonRouterOutlet } from "@ionic/vue";
+import { IonApp, IonRouterOutlet, IonContent } from "@ionic/vue";
+import UserDetailMenu from "components/UserDetailMenu.vue";
+import JourneysHeader from "components/JourneysHeader.vue";
 import { useUserStore } from "stores/useUserStore";
 import { onBeforeMount } from "vue";
 
@@ -18,7 +23,7 @@ function readFromStorage() {
         userStore.$patch({
             token: token,
             userRef: {
-                userName: userRef.userName,
+                username: userRef.username,
                 email: userRef.email,
                 firstName: userRef.firstName,
                 lastName: userRef.lastName

@@ -1,6 +1,5 @@
 <template>
-    <ion-page>
-        <JourneysHeader />
+    <ion-page id="main-content">
         <ion-loading v-if="isLoading" />
         <ion-content>
             <ion-grid style="height: 100%">
@@ -108,13 +107,12 @@ import { LngLat } from "maplibre-gl";
 import { ref } from "vue";
 
 import SaveJourneyModal from "components/Modals/SaveJourneyModal.vue";
-import JourneysHeader from "components/JourneysHeader.vue";
 import MapJourneySidebar from "components/MapJourneySidebar.vue";
 import PoiCard from "components/PoiCard.vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { usePoiStore } from "stores/usePoiStore";
-import { GeocodedData, Poi } from "journeys/journeys";
-import router from "router";
+import { GeocodedData, Poi } from "types/journeys";
+import router from "router/router";
 
 const usePoi = usePoiStore();
 const useJourney = useJourneyStore();
@@ -139,10 +137,7 @@ onIonViewWillEnter(() => {
     if (params.start != undefined && params.end != undefined) {
         startPoint.value = JSON.parse(params.start as string) as GeocodedData;
         endPoint.value = JSON.parse(params.end as string) as GeocodedData;
-        useJourney.setJourneyStartEnd(
-            startPoint.value.coordinates,
-            endPoint.value.coordinates
-        );
+        useJourney.setJourneyStartEnd(startPoint.value, endPoint.value);
         load();
     }
 
@@ -191,7 +186,6 @@ function panTo(coordinates: number[]) {
 
 function load() {
     isLoading.value = true;
-    getMidPoint(startPoint.value.coordinates, endPoint.value.coordinates);
     const midPoint = {
         lng: getMidPoint(
             startPoint.value.coordinates,

@@ -93,7 +93,7 @@ function submitForm() {
                 if (response == true) {
                     dismissLoginModal();
                     showToast(
-                        "Welcome " + userStore.userRef.userName,
+                        "Welcome " + userStore.userRef.username,
                         "success"
                     );
                 } else {

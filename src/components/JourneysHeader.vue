@@ -27,7 +27,7 @@
                     color="secondary"
                     v-if="userStore.IsLoggedIn() == true"
                     @click="toggleProfile()"
-                    >{{ userStore.userRef.userName }}</ion-button
+                    >{{ userStore.userRef.username }}</ion-button
                 >
             </ion-buttons>
         </ion-toolbar>
@@ -36,6 +36,7 @@
 
 <script lang="ts" setup>
 import {
+    IonContent,
     IonHeader,
     IonToolbar,
     IonButtons,
@@ -45,12 +46,13 @@ import {
 } from "@ionic/vue";
 
 import { useUserStore } from "stores/useUserStore";
-import LoginModal from "./Modals/LoginModal.vue";
-import RegisterModal from "./Modals/RegisterModal.vue";
+import LoginModal from "./modals/LoginModal.vue";
+import RegisterModal from "./modals/RegisterModal.vue";
 const userStore = useUserStore();
 
 function toggleProfile() {
-    menuController.open("profileMenu").then(() => {
+    menuController.toggle("profileMenu").then((e) => {
+        console.log(e);
         menuController.isOpen("profileMenu").then((b) => console.log(b));
     });
 }

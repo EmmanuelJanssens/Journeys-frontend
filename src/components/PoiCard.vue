@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Poi, Experience } from "journeys/journeys";
+import { Poi, Experience } from "types/journeys";
 import {
     IonCard,
     IonCardHeader,
@@ -45,28 +45,30 @@ import axios from "axios";
 import { onMounted } from "vue";
 
 import { useJourneyStore } from "stores/useJourneyStore";
+import { ExperienceDto } from "types/dtos";
 
 const data = defineProps(["poi"]);
 
 const useJourney = useJourneyStore();
 
 function addToJourney(poi: Poi) {
-    const experience: Experience = {
+    const experience: ExperienceDto = {
         poi: poi,
         experience: {
             date: new Date(),
             description: "",
-            images: [],
-            order: useJourney.journeyRef.experiences.length
+            images: [""],
+            order: useJourney.journeyRef.experiences!.length
         }
     };
     useJourney.addToJourney(experience);
+    console.log(useJourney.journeyRef.experiences);
     popoverController.dismiss();
 }
 onMounted(() => {
     console.log(data);
     const poi = data.poi as Poi;
-    axios.get(`/api/pois/${poi.id}/experiences`).then((response: any) => {
+    axios.get(`/api/poi/${poi.id}/experiences`).then((response: any) => {
         console.log(response);
     });
 });

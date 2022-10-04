@@ -48,8 +48,8 @@ import { ref } from "vue";
 import { LngLat } from "maplibre-gl";
 
 import GautoCompletePredictionList from "components/GautoCompletePredictionList.vue";
-import { getGeocodedData } from "ts/googleGeocoder";
-import router from "router";
+import { getGeocodedData } from "google/googleGeocoder";
+import router from "router/router";
 import { modalController } from "@ionic/core";
 
 onIonViewDidLeave(() => {

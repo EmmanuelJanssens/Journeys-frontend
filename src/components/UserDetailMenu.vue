@@ -6,7 +6,7 @@
         side="end">
         <ion-header>
             <ion-toolbar>
-                <ion-title>{{ userStore.userRef.userName }}</ion-title>
+                <ion-title>{{ userStore.userRef.username }}</ion-title>
                 <ion-button slot="end" color="secondary" @click="logout"
                     >logout</ion-button
                 >

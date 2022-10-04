@@ -1,6 +1,5 @@
 <template>
     <ion-page id="main-content">
-        <journeys-header />
         <ion-content :fullscreen="true">
             <ion-grid :fixed="true" class="ion-no-padding">
                 <ion-row
@@ -8,7 +7,7 @@
                     <ion-col size="3" class="ion-margin">
                         <GautoCompletePredictionList
                             placeholder="Start"
-                            :input="startData.locationText"
+                            :input="startData.address"
                             @prediction-chosen="
                                 setStartPredictionText($event)
                             " />
@@ -16,7 +15,7 @@
                     <ion-col size="3" class="ion-margin">
                         <GautoCompletePredictionList
                             placeholder="Destination"
-                            :input="endData.locationText"
+                            :input="endData.address"
                             @prediction-chosen="setEndPredictionText($event)" />
                     </ion-col>
                     <ion-col size="3" class="ion-margin">
@@ -103,40 +102,40 @@ import {
 import { LngLat } from "maplibre-gl";
 import { ref } from "vue";
 
-import JourneysHeader from "components/JourneysHeader.vue";
-import router from "router";
+import router from "router/router";
 import GautoCompletePredictionList from "components/GautoCompletePredictionList.vue";
 import { getGeocodedData } from "google/googleGeocoder";
+import { JourneyLocation } from "types/journeys";
 
-const startData = ref({
-    locationText: "",
+const startData = ref<JourneyLocation>({
+    address: "",
     coordinates: new LngLat(-1, -1),
     isOk: false
 });
 
-const endData = ref({
-    locationText: "",
+const endData = ref<JourneyLocation>({
+    address: "",
     coordinates: new LngLat(-1, -1),
     isOk: false
 });
 
 function setStartPredictionText(prediction: string) {
-    startData.value.locationText = prediction;
+    startData.value.address = prediction;
     startData.value.isOk = true;
 }
 function setEndPredictionText(prediction: string) {
-    endData.value.locationText = prediction;
+    endData.value.address = prediction;
     endData.value.isOk = true;
 }
 
 onIonViewWillEnter(() => {
     startData.value = {
-        locationText: "",
+        address: "",
         coordinates: new LngLat(-1, -1),
         isOk: false
     };
     endData.value = {
-        locationText: "",
+        address: "",
         coordinates: new LngLat(-1, -1),
         isOk: false
     };
@@ -144,10 +143,8 @@ onIonViewWillEnter(() => {
 
 async function gotoJourneyMap() {
     if (startData.value.isOk && endData.value.isOk) {
-        const geocodedStart = await getGeocodedData(
-            startData.value.locationText
-        );
-        const geocodedEnd = await getGeocodedData(endData.value.locationText);
+        const geocodedStart = await getGeocodedData(startData.value.address);
+        const geocodedEnd = await getGeocodedData(endData.value.address);
 
         if (
             geocodedStart.error === undefined &&
@@ -160,7 +157,6 @@ async function gotoJourneyMap() {
                     end: JSON.stringify(geocodedEnd)
                 }
             };
-            console.log(route);
             router.push(route);
         }
     }

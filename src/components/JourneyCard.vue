@@ -2,7 +2,9 @@
     <ion-card class="journey-card">
         <ion-card-header>
             <ion-toolbar color="none">
-                <ion-card-title>{{ props.journey.title }}</ion-card-title>
+                <ion-card-title @click="goToJourney(props.journey.id)">{{
+                    props.journey.title
+                }}</ion-card-title>
                 <ion-buttons slot="end">
                     <ion-button>
                         <ion-icon
@@ -61,8 +63,19 @@ import {
     IonImg,
     IonIcon
 } from "@ionic/vue";
+import router from "router/router";
 
 const props = defineProps(["journey"]);
+
+function goToJourney(id: string) {
+    const route = {
+        name: "journey",
+        params: {
+            id: id
+        }
+    };
+    router.push(route);
+}
 </script>
 <style>
 .journey-card {

@@ -1,7 +1,6 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template>
-    <ion-page>
-        <JourneysHeader />
+    <ion-page id="main-content">
         <ion-content>
             <ion-grid class="full-page">
                 <ion-row class="full-page">
@@ -70,7 +69,6 @@ import {
     modalController,
     onIonViewDidLeave
 } from "@ionic/vue";
-import JourneysHeader from "components/JourneysHeader.vue";
 import JourneyCard from "components/JourneyCard.vue";
 import { ref } from "vue";
 import { useUserStore } from "stores/useUserStore";

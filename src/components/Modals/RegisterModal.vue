@@ -170,7 +170,7 @@ function submitForm() {
         userStore.register(state.value).then((response) => {
             if (response == true) {
                 dismissRegisterModal();
-                showToast("Welcome " + userStore.userRef.userName, "success");
+                showToast("Welcome " + userStore.userRef.username, "success");
             } else {
                 showToast("Authentication error", "danger");
             }

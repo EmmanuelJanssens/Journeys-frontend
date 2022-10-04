@@ -1,6 +1,7 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
 import { defineStore } from "pinia";
+import { UserDto } from "types/dtos";
 import {
     User,
     Journey,
@@ -11,8 +12,8 @@ import {
 import { ref } from "vue";
 
 export const useUserStore = defineStore("user", () => {
-    const userObj: User = {
-        userName: "",
+    const userObj: UserDto = {
+        username: "",
         firstName: "",
         lastName: "",
         email: ""
@@ -25,14 +26,15 @@ export const useUserStore = defineStore("user", () => {
 
     async function login(user: string, password: string): Promise<boolean> {
         console.log("Log " + user + " in");
+        const dto: UserDto = {
+            username: user,
+            password: password
+        };
         return await axios
-            .post("/api/auth/login", {
-                userName: user,
-                password
-            })
+            .post("/api/authentication/login", dto)
             .then((response) => {
                 const result = response.data as ApiAuthenticationResponse;
-                userRef.value.userName = result.userName;
+                userRef.value.username = result.username;
                 userRef.value.firstName = result.firstName;
                 userRef.value.lastName = result.lastName;
                 userRef.value.email = result.email;
@@ -53,13 +55,13 @@ export const useUserStore = defineStore("user", () => {
             });
     }
 
-    async function register(user: User): Promise<boolean> {
-        console.log("Register " + user.userName);
+    async function register(user: UserDto): Promise<boolean> {
+        console.log("Register " + user.username);
         return await axios
-            .post("/api/auth/register", user)
+            .post("/api/authentication/register", user)
             .then((response) => {
                 const result = response.data as ApiAuthenticationResponse;
-                userRef.value.userName = result.userName;
+                userRef.value.username = result.username;
                 userRef.value.firstName = result.firstName;
                 userRef.value.lastName = result.lastName;
                 userRef.value.email = result.email;
@@ -82,7 +84,7 @@ export const useUserStore = defineStore("user", () => {
 
     function fetchMyJourneys(): Promise<boolean> {
         return axios
-            .get("/api/users/" + userRef.value.userName + "/journeys")
+            .get("/api/user/" + userRef.value.username + "/journeys")
             .then((response) => {
                 myJourneys.value = response.data.journeys as Journey[];
                 return true;
@@ -98,7 +100,7 @@ export const useUserStore = defineStore("user", () => {
 
     function logout(): void {
         userRef.value = {
-            userName: "",
+            username: "",
             firstName: "",
             lastName: "",
             email: ""

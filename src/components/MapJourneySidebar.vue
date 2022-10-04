@@ -6,7 +6,7 @@
                     slot="start"
                     size="large"
                     src="/src/assets/icon/pin-svgrepo-com.svg"></ion-icon>
-                <ion-label>{{ props.start.address }}</ion-label>
+                <ion-label>{{ props.start?.address }}</ion-label>
             </ion-item>
             <ion-item-options>
                 <ion-item-option color="tertiary">
@@ -32,7 +32,7 @@
                 <ion-item-options>
                     <ion-item-option
                         color="danger"
-                        @click="remove(experience.poi.id)">
+                        @click="remove(experience.poi.id!)">
                         <ion-icon
                             size="large"
                             src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
@@ -46,7 +46,7 @@
                     slot="start"
                     size="large"
                     src="/src/assets/icon/pin-svgrepo-com.svg"></ion-icon>
-                <ion-label>{{ props.end.address }}</ion-label>
+                <ion-label>{{ props.end?.address }}</ion-label>
             </ion-item>
             <ion-item-options>
                 <ion-item-option color="tertiary">
@@ -59,7 +59,7 @@
     </ion-content>
 </template>
 <script lang="ts" setup>
-import { ItemReorderCustomEvent } from "@ionic/vue";
+import { ItemReorderCustomEvent, onIonViewWillEnter } from "@ionic/vue";
 import {
     IonContent,
     IonItemOptions,
@@ -76,13 +76,17 @@ import { useJourneyStore } from "stores/useJourneyStore";
 
 const props = defineProps(["start", "end"]);
 
+onIonViewWillEnter(() => {
+    console.log(props.start);
+});
+
 const useJourney = useJourneyStore();
 function remove(id: string) {
     useJourney.removeFromJourney(id);
 }
 function reordered(evt: ItemReorderCustomEvent) {
     if (evt.detail.from < evt.detail.to) {
-        useJourney.journeyRef.experiences.forEach(
+        useJourney.journeyRef.experiences!.forEach(
             (item: { experience: { order: number } }) => {
                 if (item.experience.order == evt.detail.from) {
                     item.experience.order = evt.detail.to;
@@ -95,7 +99,7 @@ function reordered(evt: ItemReorderCustomEvent) {
             }
         );
     } else {
-        useJourney.journeyRef.experiences.forEach(
+        useJourney.journeyRef.experiences!.forEach(
             (item: { experience: { order: number } }) => {
                 if (item.experience.order == evt.detail.from) {
                     item.experience.order = evt.detail.to;

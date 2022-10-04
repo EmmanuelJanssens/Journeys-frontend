@@ -22,8 +22,9 @@ export const usePoiStore = defineStore("poi", () => {
         radius: number
     ): Promise<boolean> {
         return await axios
-            .get(`api/pois?lat=${lat}&lng=${lng}&radius=${radius}`)
+            .get(`api/poi?lat=${lat}&lng=${lng}&radius=${radius}`)
             .then((response) => {
+                console.log(response);
                 if (poiRef.value?.features?.length > 0) {
                     poiRef.value.features = [];
                 }

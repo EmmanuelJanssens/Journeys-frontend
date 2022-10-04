@@ -1,5 +1,9 @@
+import { LngLat } from "maplibre-gl";
+import { string } from "yargs";
+import { PoiDto } from "./dtos";
+
 export type User = {
-    userName: string;
+    username: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -17,7 +21,7 @@ export type Poi = {
 };
 export type GeocodedData = {
     address: string;
-    coordinates: import("maplibre-gl").LngLat;
+    coordinates: LngLat;
     error?: any;
 };
 
@@ -38,7 +42,7 @@ export type PoiGeoJsonFormat = {
         type: string;
         coordinates: number[];
     };
-    properties: Poi;
+    properties: PoiDto;
     id?: string;
 };
 export type Experience = {
@@ -51,25 +55,25 @@ export type Experience = {
     };
 };
 
+export type JourneyLocation = {
+    address: string;
+    coordinates: LngLat;
+    isOk: boolean;
+    error?: any;
+};
 export type Journey = {
     id?: string;
     title?: string;
-    start?: {
-        latitude: number;
-        longitude: number;
-    };
-    end?: {
-        latitude: number;
-        longitude: number;
-    };
+    start?: GeocodedData;
+    end?: GeocodedData;
     creator?: {
-        userName: string;
+        username: string;
     };
     experiences: Experience[];
 };
 
 export type ApiAuthenticationResponse = {
-    userName: string;
+    username: string;
     firstName: string;
     lastName: string;
     email: string;

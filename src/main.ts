@@ -6,7 +6,7 @@ import VueAxios from "vue-axios";
 import { RecycleScroller } from "vue-virtual-scroller";
 
 import App from "./App.vue";
-import router from "./router";
+import router from "./router/router";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/vue/css/core.css";

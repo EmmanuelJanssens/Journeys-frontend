@@ -15,8 +15,7 @@
         "typeRoots": ["node_modules/@types", "src/types/*"],
         "types": ["jest", "node", "vite/client"],
         "paths": {
-            "@/*": ["./src/*"],
-            "@/stores/*": ["./src/stores/*"]
+            "@/*": ["./src/*"]
         },
         "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
     },
