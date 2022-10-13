@@ -1,5 +1,3 @@
-import { Experience } from "./journeys";
-
 export type SearchPoiDto = {
     lat: number;
     lng: number;
@@ -9,9 +7,9 @@ export type SearchPoiDto = {
 };
 
 export type PoiDto = {
-    id?: string;
-    name?: string;
-    location?: LocationDto;
+    id: string;
+    name: string;
+    location: LocationDto;
     experiences?: ExperienceDto[];
 };
 

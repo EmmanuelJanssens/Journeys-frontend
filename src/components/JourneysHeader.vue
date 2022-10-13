@@ -52,8 +52,7 @@ const userStore = useUserStore();
 
 function toggleProfile() {
     menuController.toggle("profileMenu").then((e) => {
-        console.log(e);
-        menuController.isOpen("profileMenu").then((b) => console.log(b));
+        menuController.isOpen("profileMenu").then((b) => {});
     });
 }
 

@@ -7,11 +7,32 @@
                         <ion-content class="map-wrap">
                             <section class="map" ref="mapContainer"></section>
                         </ion-content>
+                        <section class="experiences">
+                            <swiper
+                                :slides-per-view="3"
+                                :space-between="50"
+                                :initial-slide="0"
+                                navigation
+                                lazy
+                                :modules="modules">
+                                <swiper-slide
+                                    v-for="exp in journey?.experiences"
+                                    v-bind:key="exp.poi.id">
+                                    <experience-card
+                                        :title="exp.poi.name"
+                                        :description="
+                                            exp.experience.description
+                                        "
+                                        :date="exp.experience.date" />
+                                </swiper-slide>
+                            </swiper>
+                        </section>
                     </ion-col>
                     <ion-col class="sidebar">
                         <map-journey-sidebar
                             :start="journey?.start!"
-                            :end="journey?.end!" />
+                            :end="journey?.end!"
+                            mode="view" />
                     </ion-col>
                 </ion-row>
             </ion-grid>
@@ -34,9 +55,19 @@ import { PoiGeoJsonData } from "types/journeys";
 import { ref } from "vue";
 import MapJourneySidebar from "components/MapJourneySidebar.vue";
 import { JourneyDto } from "types/dtos";
+
+import { Swiper, SwiperSlide } from "swiper/vue";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/scrollbar";
+import { Navigation, Lazy } from "swiper";
+import ExperienceCard from "components/Cards/ExperienceCard.vue";
 const journey = ref<JourneyDto>();
 const useJourney = useJourneyStore();
 
+//swiper modules
+const modules = ref([Navigation, Lazy]);
 const start = ref("");
 const end = ref("");
 onIonViewWillEnter(() => {
@@ -52,7 +83,6 @@ async function load(id: string) {
     await useJourney.getJourney(id).then((response) => {
         journey.value = response;
         useJourney.journeyRef.experiences = journey.value.experiences;
-        console.log(journey.value);
     });
     const start = new LngLat(
         journey.value?.start?.longitude!,
@@ -113,7 +143,6 @@ async function load(id: string) {
             type: "geojson",
             data: poisCollection
         });
-        console.log(poisCollection);
         map.value?.addLayer({
             id: "journey-pois",
             type: "circle",
@@ -133,7 +162,6 @@ async function load(id: string) {
         });
         coords.push(end.toArray());
 
-        console.log(coords);
         map.value?.addSource("route", {
             type: "geojson",
             data: {
@@ -207,5 +235,40 @@ function getMidPoint(start: maplibregl.LngLat, end: maplibregl.LngLat) {
 .sidebar {
     max-width: 300px;
     min-width: 200px;
+}
+
+.experiences {
+    position: absolute;
+    bottom: 100px;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 70%;
+    height: 40%;
+}
+
+.swiper {
+    width: 100%;
+    height: 100%;
+}
+
+.swiper-slide {
+    text-align: center;
+    font-size: 18px;
+
+    /* Center slide text vertically */
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
 }
 </style>

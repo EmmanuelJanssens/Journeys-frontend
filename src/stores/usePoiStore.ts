@@ -1,7 +1,8 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
 import { defineStore } from "pinia";
-import { PoiGeoJsonData, Poi, ApiError } from "types/journeys";
+import { PoiDto } from "types/dtos";
+import { PoiGeoJsonData, ApiError } from "types/journeys";
 import { ref } from "vue";
 
 export const usePoiStore = defineStore("poi", () => {
@@ -24,7 +25,6 @@ export const usePoiStore = defineStore("poi", () => {
         return await axios
             .get(`api/poi?lat=${lat}&lng=${lng}&radius=${radius}`)
             .then((response) => {
-                console.log(response);
                 if (poiRef.value?.features?.length > 0) {
                     poiRef.value.features = [];
                 }
@@ -38,14 +38,14 @@ export const usePoiStore = defineStore("poi", () => {
                     features: []
                 };
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                (response.data.data as Poi[]).forEach((poi) => {
+                (response.data.data as PoiDto[]).forEach((poi) => {
                     poiRef.value.features.push({
                         type: "Feature",
                         geometry: {
                             type: "Point",
                             coordinates: [
-                                poi.location.longitude,
-                                poi.location.latitude
+                                poi.location!.longitude,
+                                poi.location!.latitude
                             ]
                         },
                         properties: poi,
@@ -55,7 +55,6 @@ export const usePoiStore = defineStore("poi", () => {
                 return true;
             })
             .catch((error: AxiosError) => {
-                console.log((error.response?.data as ApiError).message);
                 return false;
             });
     }

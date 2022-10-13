@@ -1,6 +1,6 @@
 <template>
     <ion-content>
-        <ion-item-sliding>
+        <ion-item-sliding :disabled="props.mode == 'view'">
             <ion-item lines="full">
                 <ion-icon
                     slot="start"
@@ -20,14 +20,17 @@
         <IonReorderGroup @ionItemReorder="reordered($event)" disabled="false">
             <ion-item-sliding
                 v-for="experience in useJourney.journeyRef?.experiences"
-                v-bind:key="experience">
+                v-bind:key="experience"
+                :disabled="props.mode == 'view'">
                 <ion-item>
                     <ion-icon
                         slot="start"
                         size="large"
                         src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
                     <ion-label>{{ experience.poi.name }}</ion-label>
-                    <ion-reorder slot="end"></ion-reorder>
+                    <ion-reorder
+                        v-if="props.mode == 'edit'"
+                        slot="end"></ion-reorder>
                 </ion-item>
                 <ion-item-options>
                     <ion-item-option
@@ -40,7 +43,7 @@
                 </ion-item-options>
             </ion-item-sliding>
         </IonReorderGroup>
-        <ion-item-sliding>
+        <ion-item-sliding :disabled="props.mode == 'view'">
             <ion-item lines="full">
                 <ion-icon
                     slot="start"
@@ -74,15 +77,20 @@ import {
 
 import { useJourneyStore } from "stores/useJourneyStore";
 
-const props = defineProps(["start", "end"]);
+const props = defineProps(["start", "end", "mode"]);
 
-onIonViewWillEnter(() => {
-    console.log(props.start);
-});
-
+const emit = defineEmits(["reordered"]);
 const useJourney = useJourneyStore();
 function remove(id: string) {
-    useJourney.removeFromJourney(id);
+    const removed = useJourney.removeFromJourney(id);
+
+    useJourney.journeyRef.experiences!.forEach(
+        (item: { experience: { order: number } }) => {
+            if (item.experience.order > removed!.experience.order)
+                item.experience.order--;
+        }
+    );
+    emit("reordered");
 }
 function reordered(evt: ItemReorderCustomEvent) {
     if (evt.detail.from < evt.detail.to) {
@@ -112,6 +120,10 @@ function reordered(evt: ItemReorderCustomEvent) {
             }
         );
     }
+    useJourney.journeyRef.experiences!.sort(
+        (a, b) => a.experience.order - b.experience.order
+    );
     evt.detail.complete();
+    emit("reordered");
 }
 </script>

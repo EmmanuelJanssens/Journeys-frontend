@@ -1,13 +1,8 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
 import { defineStore } from "pinia";
-import { UserDto } from "types/dtos";
-import {
-    User,
-    Journey,
-    ApiAuthenticationResponse,
-    ApiError
-} from "types/journeys";
+import { JourneyDto, UserDto } from "types/dtos";
+import { User, ApiAuthenticationResponse, ApiError } from "types/journeys";
 
 import { ref } from "vue";
 
@@ -22,10 +17,9 @@ export const useUserStore = defineStore("user", () => {
     const token = ref("");
     const loggedIn = ref(false);
 
-    const myJourneys = ref<Journey[]>();
+    const myJourneys = ref<JourneyDto[]>();
 
     async function login(user: string, password: string): Promise<boolean> {
-        console.log("Log " + user + " in");
         const dto: UserDto = {
             username: user,
             password: password
@@ -50,13 +44,11 @@ export const useUserStore = defineStore("user", () => {
                 return true;
             })
             .catch((error: AxiosError) => {
-                console.log((error.response?.data as ApiError).message);
                 return false;
             });
     }
 
     async function register(user: UserDto): Promise<boolean> {
-        console.log("Register " + user.username);
         return await axios
             .post("/api/authentication/register", user)
             .then((response) => {
@@ -77,7 +69,6 @@ export const useUserStore = defineStore("user", () => {
                 return true;
             })
             .catch((error: AxiosError) => {
-                console.log((error.response?.data as ApiError).message);
                 return false;
             });
     }
@@ -86,7 +77,7 @@ export const useUserStore = defineStore("user", () => {
         return axios
             .get("/api/user/" + userRef.value.username + "/journeys")
             .then((response) => {
-                myJourneys.value = response.data.journeys as Journey[];
+                myJourneys.value = response.data.journeys as JourneyDto[];
                 return true;
             })
             .catch(() => {

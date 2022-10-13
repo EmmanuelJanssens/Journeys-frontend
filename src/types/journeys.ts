@@ -10,15 +10,6 @@ export type User = {
     password?: string;
 };
 
-export type Poi = {
-    id: string;
-    name: string;
-    description?: string;
-    location: {
-        latitude: number;
-        longitude: number;
-    };
-};
 export type GeocodedData = {
     address: string;
     coordinates: LngLat;
@@ -43,16 +34,7 @@ export type PoiGeoJsonFormat = {
         coordinates: number[];
     };
     properties: PoiDto;
-    id?: string;
-};
-export type Experience = {
-    poi: Poi;
-    experience: {
-        description: string;
-        date: Date;
-        images: never[];
-        order: number;
-    };
+    id: string;
 };
 
 export type JourneyLocation = {
@@ -60,16 +42,6 @@ export type JourneyLocation = {
     coordinates: LngLat;
     isOk: boolean;
     error?: any;
-};
-export type Journey = {
-    id?: string;
-    title?: string;
-    start?: GeocodedData;
-    end?: GeocodedData;
-    creator?: {
-        username: string;
-    };
-    experiences: Experience[];
 };
 
 export type ApiAuthenticationResponse = {

@@ -31,7 +31,7 @@ import { useUserStore } from "stores/useUserStore";
 
 const userStore = useUserStore();
 
-function logout() {
+async function logout() {
     userStore.logout();
     menuController.toggle("profileMenu");
 }

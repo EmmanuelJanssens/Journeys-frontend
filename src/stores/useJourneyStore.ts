@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
 import { LngLat } from "maplibre-gl";
-import { Journey, Experience, GeocodedData } from "types/journeys";
+import { GeocodedData } from "types/journeys";
 import { ExperienceDto, JourneyDto } from "types/dtos";
 export const useJourneyStore = defineStore("journey", () => {
     const editJourney = ref<JourneyDto>({
@@ -28,16 +28,19 @@ export const useJourneyStore = defineStore("journey", () => {
     }
 
     function addToJourney(experience: ExperienceDto): void {
-        console.log(editJourney);
         if (!alreadyInJourney(experience)) {
             editJourney.value?.experiences?.push(experience);
         }
     }
 
-    function removeFromJourney(id: string): void {
+    function removeFromJourney(id: string) {
+        const removed = editJourney.value.experiences?.find(
+            (p) => p.poi.id == id
+        );
         editJourney.value!.experiences = editJourney.value?.experiences?.filter(
             (item) => item.poi.id !== id
         );
+        return removed;
     }
 
     function alreadyInJourney(experience: ExperienceDto): boolean {
@@ -51,7 +54,6 @@ export const useJourneyStore = defineStore("journey", () => {
     function saveJourney(name: string): void {
         const token = JSON.parse(localStorage.getItem("user")!).token;
         editJourney.value!.title = name;
-        console.log(editJourney.value);
 
         const dto: JourneyDto = {
             title: editJourney.value.title,
@@ -73,9 +75,7 @@ export const useJourneyStore = defineStore("journey", () => {
                     Authorization: `Bearer ${token}`
                 }
             })
-            .then((response) => {
-                console.log(response);
-            });
+            .then((response) => {});
     }
 
     function setJourneyStartEnd(start: GeocodedData, end: GeocodedData) {

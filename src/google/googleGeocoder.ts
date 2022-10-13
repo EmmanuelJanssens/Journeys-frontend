@@ -34,4 +34,35 @@ async function getGeocodedData(value: string): Promise<GeocodedData> {
     return response;
 }
 
-export { getGeocodedData };
+async function reverseGeocode(
+    lat: number,
+    lng: number
+): Promise<google.maps.GeocoderResult | undefined> {
+    const request: google.maps.GeocoderRequest = {
+        location: {
+            lat,
+            lng
+        }
+    };
+    const result = await googleGeocoder.geocode(request);
+
+    if (result.results[0]) {
+        return result.results[0];
+    } else {
+        return undefined;
+    }
+}
+
+function getLocalityAndCountry(results: google.maps.GeocoderResult): {
+    locality: string;
+    country: string;
+} {
+    const result = results.address_components.filter(
+        (f) => f.types.includes("locality") || f.types.includes("country")
+    );
+    return {
+        locality: result[0].long_name,
+        country: result[1].long_name
+    };
+}
+export { getGeocodedData, reverseGeocode, getLocalityAndCountry };

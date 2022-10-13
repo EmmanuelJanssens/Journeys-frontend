@@ -5,10 +5,10 @@
             <ion-grid style="height: 100%">
                 <ion-row style="height: 100%">
                     <ion-col
-                        v-if="!isLoading"
                         :hidden="false"
                         class="sidebar-items-list ion-hide-xl-down">
                         <RecycleScroller
+                            v-if="!isLoading"
                             style="height: 100%"
                             :items="usePoi.poiRef.features"
                             :item-size="50">
@@ -71,8 +71,11 @@
                         v-if="!isLoading"
                         class="journeys-items ion-hide-md-down">
                         <map-journey-sidebar
+                            v-if="!isLoading"
                             :start="startPoint"
-                            :end="endPoint" />
+                            :end="endPoint"
+                            mode="edit"
+                            @reordered="addStopPointToMapp" />
                     </ion-col>
                 </ion-row>
             </ion-grid>
@@ -102,23 +105,35 @@ import {
     modalController
 } from "@ionic/vue";
 import haversine from "haversine";
-import { Map, MapMouseEvent, Marker, NavigationControl } from "maplibre-gl";
+import {
+    GeoJSONSource,
+    Map,
+    MapMouseEvent,
+    Marker,
+    NavigationControl
+} from "maplibre-gl";
 import { LngLat } from "maplibre-gl";
 import { ref } from "vue";
 
 import SaveJourneyModal from "components/Modals/SaveJourneyModal.vue";
 import MapJourneySidebar from "components/MapJourneySidebar.vue";
-import PoiCard from "components/PoiCard.vue";
+import PoiCard from "components/Cards/PoiCard.vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { usePoiStore } from "stores/usePoiStore";
-import { GeocodedData, Poi } from "types/journeys";
+import { GeocodedData } from "types/journeys";
 import router from "router/router";
-
+import { PoiDto } from "types/dtos";
+import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
+import { FeatureCollection } from "geojson";
 const usePoi = usePoiStore();
 const useJourney = useJourneyStore();
 
 var mapContainer = ref();
 var map = ref<Map>();
+
+var startMarker = ref<Marker>();
+var endMarker = ref<Marker>();
+
 var startPoint = ref<GeocodedData>({
     address: "",
     coordinates: new LngLat(-1, -1)
@@ -127,8 +142,72 @@ var endPoint = ref<GeocodedData>({
     address: "",
     coordinates: new LngLat(-1, -1)
 });
+
+var radius = ref(-1);
 var hideSidebar = ref(true);
 var isLoading = ref(true);
+
+function getRadius(start: LngLat, end: LngLat): number {
+    const r = haversine(
+        {
+            latitude: start.lat,
+            longitude: start.lng
+        },
+        {
+            latitude: end.lat,
+            longitude: end.lng
+        },
+        { unit: "meter" }
+    );
+    return r / 2;
+}
+function onMarkerDrag(marker: Marker, pos: string) {
+    marker.on("dragend", () => {
+        isLoading.value = true;
+        reverseGeocode(marker.getLngLat().lat, marker.getLngLat().lng).then(
+            (resp) => {
+                const result = getLocalityAndCountry(resp!);
+                if (
+                    result.country != undefined &&
+                    result.locality != undefined
+                ) {
+                    useJourney.journeyRef.experiences = [];
+                    if (pos === "start") {
+                        startPoint.value.address =
+                            result.locality + ", " + result.country;
+                        startPoint.value.coordinates = marker.getLngLat();
+                    } else if (pos === "end") {
+                        endPoint.value.address =
+                            result.locality + ", " + result.country;
+                        endPoint.value.coordinates = marker.getLngLat();
+                    }
+                    radius.value = getRadius(
+                        startPoint.value.coordinates,
+                        endPoint.value.coordinates
+                    );
+                    const mid = getMidPoint(
+                        startPoint.value.coordinates,
+                        endPoint.value.coordinates
+                    );
+                    usePoi
+                        .searchBetween(mid.lat, mid.lng, radius.value)
+                        .then((resp) => {
+                            if (resp == true) {
+                                addStopPointToMapp();
+                                (
+                                    map.value?.getSource("poi") as GeoJSONSource
+                                ).setData({
+                                    type: "FeatureCollection",
+                                    features: usePoi.poiRef.features
+                                } as FeatureCollection);
+                            }
+                            isLoading.value = false;
+                        });
+                }
+            }
+        );
+    });
+}
 
 onIonViewWillEnter(() => {
     const params = router.currentRoute.value.params;
@@ -138,29 +217,33 @@ onIonViewWillEnter(() => {
         startPoint.value = JSON.parse(params.start as string) as GeocodedData;
         endPoint.value = JSON.parse(params.end as string) as GeocodedData;
         useJourney.setJourneyStartEnd(startPoint.value, endPoint.value);
-        load();
-    }
 
-    /*     const dev = {
-        start: '{"text":"Lausanne, Switzerland","coordinates":{"lng":6.6322734,"lat":46.5196535}}',
-        end: '{"text":"Vevey, Switzerland","coordinates":{"lng":6.8419192,"lat":46.4628333}}'
-    };
-    useJourney.journeyRef = [];
-    if (dev.start != undefined && dev.end != undefined) {
-        startPoint.value = JSON.parse(dev.start as string) as {
-            text: string;
-            coordinates: LngLat;
-        };
-        endPoint.value = JSON.parse(dev.end as string) as {
-            text: string;
-            coordinates: LngLat;
-        };
-        useJourney.setJourneyStartEnd(
-            startPoint.value.coordinates,
-            endPoint.value.coordinates
+        startMarker.value = new Marker();
+        endMarker.value = new Marker();
+        startMarker.value
+            .setDraggable(true)
+            .setLngLat(startPoint.value.coordinates);
+
+        endMarker.value
+            .setDraggable(true)
+            .setLngLat(endPoint.value.coordinates);
+
+        onMarkerDrag(startMarker.value, "start");
+        onMarkerDrag(endMarker.value, "end");
+
+        radius.value = haversine(
+            {
+                latitude: startPoint.value.coordinates.lat,
+                longitude: startPoint.value.coordinates.lng
+            },
+            {
+                latitude: endPoint.value.coordinates.lat,
+                longitude: endPoint.value.coordinates.lng
+            },
+            { unit: "meter" }
         );
         load();
-    } */
+    }
 });
 
 onIonViewDidLeave(() => {
@@ -170,7 +253,6 @@ onIonViewDidLeave(() => {
 });
 
 async function openModal(component: any) {
-    console.log("opn");
     let modal = await modalController.create({
         component: component,
         keyboardClose: false
@@ -182,6 +264,35 @@ function panTo(coordinates: number[]) {
         center: [coordinates[0], coordinates[1]],
         zoom: 16
     });
+}
+function addStopPointToMapp() {
+    var stopPoints: number[][] = [];
+
+    stopPoints.push([
+        startPoint.value.coordinates.lng,
+        startPoint.value.coordinates.lat
+    ]);
+    useJourney.journeyRef.experiences?.forEach((exp) => {
+        stopPoints.push([
+            exp.poi.location?.longitude!,
+            exp.poi.location?.latitude!
+        ]);
+    });
+    stopPoints.push([
+        endPoint.value.coordinates.lng,
+        endPoint.value.coordinates.lat
+    ]);
+
+    if (map.value?.getSource("route")) {
+        (map.value?.getSource("route") as GeoJSONSource).setData({
+            type: "Feature",
+            properties: {},
+            geometry: {
+                type: "LineString",
+                coordinates: stopPoints
+            }
+        });
+    }
 }
 
 function load() {
@@ -212,33 +323,11 @@ function load() {
     });
 
     map.value?.once("load", () => {
-        new Marker()
-            .setLngLat([
-                startPoint.value.coordinates.lng,
-                startPoint.value.coordinates.lat
-            ])
-            .addTo(map.value!);
-        new Marker()
-            .setLngLat([
-                endPoint.value.coordinates.lng,
-                endPoint.value.coordinates.lat
-            ])
-            .addTo(map.value!);
-
-        const dist = haversine(
-            {
-                latitude: startPoint.value.coordinates.lat,
-                longitude: startPoint.value.coordinates.lng
-            },
-            {
-                latitude: endPoint.value.coordinates.lat,
-                longitude: endPoint.value.coordinates.lng
-            },
-            { unit: "meter" }
-        );
+        startMarker.value?.addTo(map.value!);
+        endMarker.value?.addTo(map.value!);
 
         usePoi
-            .searchBetween(midPoint.lat, midPoint.lng, dist / 2)
+            .searchBetween(midPoint.lat, midPoint.lng, radius.value / 2)
             .then((response) => {
                 hideSidebar.value = usePoi.poiRef.features.length == 0;
 
@@ -305,7 +394,16 @@ function load() {
                             "circle-stroke-color": "#fff"
                         }
                     });
+                    var stopPoints: number[][] = [];
 
+                    stopPoints.push([
+                        startPoint.value.coordinates.lng,
+                        startPoint.value.coordinates.lat
+                    ]);
+                    stopPoints.push([
+                        endPoint.value.coordinates.lng,
+                        endPoint.value.coordinates.lat
+                    ]);
                     map.value?.addSource("route", {
                         type: "geojson",
                         data: {
@@ -313,16 +411,7 @@ function load() {
                             properties: {},
                             geometry: {
                                 type: "LineString",
-                                coordinates: [
-                                    [
-                                        startPoint.value.coordinates.lng,
-                                        startPoint.value.coordinates.lat
-                                    ],
-                                    [
-                                        endPoint.value.coordinates.lng,
-                                        endPoint.value.coordinates.lat
-                                    ]
-                                ]
+                                coordinates: stopPoints
                             }
                         }
                     });
@@ -351,13 +440,16 @@ function load() {
     });
 
     map.value?.on("click", "unclustered-point", (e) => {
-        onPopOver(e.features![0].properties as Poi, e);
+        e.features![0].properties!.location = JSON.parse(
+            e.features![0].properties!.location
+        );
+        onPopOver(e.features![0].properties as PoiDto, e);
     });
 
     map.value?.addControl(new NavigationControl({}), "bottom-right");
 }
 
-async function onPopOver(data: Poi, e: MapMouseEvent) {
+async function onPopOver(data: PoiDto, e: MapMouseEvent) {
     const popover = await popoverController.create({
         component: PoiCard,
         componentProps: { poi: data },
@@ -368,6 +460,11 @@ async function onPopOver(data: Poi, e: MapMouseEvent) {
         alignment: "center"
     });
     await popover.present();
+
+    const didDissmiss = await popover.onDidDismiss();
+    if (didDissmiss.data != undefined) {
+        addStopPointToMapp();
+    }
 }
 
 function onClusterClick(e: MapMouseEvent) {

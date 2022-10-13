@@ -14,12 +14,13 @@ import UserDetailMenu from "components/UserDetailMenu.vue";
 import JourneysHeader from "components/JourneysHeader.vue";
 import { useUserStore } from "stores/useUserStore";
 import { onBeforeMount } from "vue";
-
+import axios from "axios";
 const userStore = useUserStore();
 function readFromStorage() {
     if (localStorage.getItem("user")) {
         const userRef = JSON.parse(localStorage.getItem("user")!).user;
         const token = JSON.parse(localStorage.getItem("user")!).token;
+
         userStore.$patch({
             token: token,
             userRef: {
@@ -34,7 +35,6 @@ function readFromStorage() {
 }
 
 onBeforeMount(() => {
-    console.log("read");
     readFromStorage();
 });
 </script>

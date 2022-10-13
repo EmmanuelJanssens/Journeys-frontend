@@ -69,7 +69,7 @@ import {
     modalController,
     onIonViewDidLeave
 } from "@ionic/vue";
-import JourneyCard from "components/JourneyCard.vue";
+import JourneyCard from "components/Cards/JourneyCard.vue";
 import { ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
