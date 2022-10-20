@@ -56,7 +56,7 @@ function addToJourney(poi: PoiDto) {
         experience: {
             date: new Date(),
             description: "",
-            images: [""],
+            images: [],
             order: useJourney.journeyRef.experiences!.length
         }
     };

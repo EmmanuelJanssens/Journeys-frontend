@@ -16,13 +16,13 @@
         <section>
             <ion-item class="ion-margin">
                 <ion-label position="floating">Username</ion-label>
-                <ion-input type="text" v-model="state.userName" />
+                <ion-input type="text" v-model="state.username" />
             </ion-item>
             <ion-text
                 class="ion-margin"
                 color="danger"
-                v-if="v$.userName.$error"
-                >{{ v$.userName.$errors[0].$message }}</ion-text
+                v-if="v$.username.$error"
+                >{{ v$.username.$errors[0].$message }}</ion-text
             >
             <span class="separator"></span>
             <ion-item class="ion-margin">
@@ -51,14 +51,12 @@ import { modalController } from "@ionic/core";
 import {
     IonIcon,
     IonPage,
-    IonModal,
     IonInput,
     IonButton,
     IonItem,
     IonLabel,
     IonHeader,
     IonToolbar,
-    IonContent,
     IonTitle,
     toastController,
     IonText,
@@ -68,15 +66,15 @@ import {
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { ref } from "vue";
-
 import { useUserStore } from "stores/useUserStore";
+import { showToast } from "utils/utils";
 
 const state = ref({
-    userName: "",
+    username: "",
     password: ""
 });
 const rules = {
-    userName: { required },
+    username: { required },
     password: { required }
 };
 
@@ -88,7 +86,7 @@ function submitForm() {
     v$.value.$validate();
     if (!v$.value.$error) {
         userStore
-            .login(state.value.userName, state.value.password)
+            .login(state.value.username, state.value.password)
             .then((response) => {
                 if (response == true) {
                     dismissLoginModal();
@@ -103,25 +101,8 @@ function submitForm() {
     }
 }
 
-async function showToast(message: string, color: string) {
-    const toast = await toastController.create({
-        message: message,
-        duration: 5000,
-        position: "bottom",
-        color: color,
-        buttons: [
-            {
-                text: "Dismiss",
-                role: "cancel",
-                handler: () => {}
-            }
-        ]
-    });
-    await toast.present();
-}
-
 function clearModal() {
-    state.value.userName = "";
+    state.value.username = "";
     state.value.password = "";
     v$.value.$reset();
 }

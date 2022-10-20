@@ -62,7 +62,7 @@
     </ion-content>
 </template>
 <script lang="ts" setup>
-import { ItemReorderCustomEvent, onIonViewWillEnter } from "@ionic/vue";
+import { ItemReorderCustomEvent } from "@ionic/vue";
 import {
     IonContent,
     IonItemOptions,

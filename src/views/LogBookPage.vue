@@ -4,9 +4,51 @@
         <ion-content>
             <ion-grid class="full-page">
                 <ion-row class="full-page">
-                    <ion-col class="side ion-hide-md-down"> side </ion-col>
+                    <ion-col class="side ion-hide-md-down experience-list">
+                        <DynamicScroller
+                            :items="useUser.myExperiences"
+                            :min-item-size="54"
+                            style="height: 100%">
+                            <template v-slot="{ item, index, active }">
+                                <DynamicScrollerItem
+                                    :item="item"
+                                    :active="active"
+                                    :data-index="index">
+                                    <ion-item button @click="editJourney(item)">
+                                        <ion-thumbnail slot="start">
+                                            <ion-img
+                                                v-if="
+                                                    item.experience.images
+                                                        .length > 0
+                                                "
+                                                :src="
+                                                    item.experience.images[0]
+                                                ">
+                                            </ion-img>
+                                            <ion-img
+                                                v-else
+                                                src="src/assets/placeholder.png">
+                                            </ion-img>
+                                        </ion-thumbnail>
+                                        <ion-label>
+                                            <h3>
+                                                {{ item.poi.name }}
+                                            </h3>
+                                            <p>{{ item.journey.title }}</p>
+                                            <p>
+                                                {{
+                                                    item.experience.description
+                                                }}
+                                            </p>
+                                        </ion-label>
+                                    </ion-item>
+                                </DynamicScrollerItem>
+                            </template>
+                        </DynamicScroller>
+                    </ion-col>
                     <ion-col>
-                        <ion-grid class="full-page content">
+                        <ion-grid
+                            class="full-page slides ion-no-margin ion-no-padding">
                             <ion-content>
                                 <ion-row class="">
                                     <ion-toolbar color="secondary">
@@ -41,11 +83,10 @@
                                             v-for="item in useUser.myJourneys">
                                             <JourneyCard
                                                 :journey="item"
-                                                class="card" />
+                                                class="journey-card ion-margin" />
                                         </swiper-slide>
                                     </swiper>
                                 </ion-row>
-                                <ion-row class="mid-page"> Pois </ion-row>
                             </ion-content>
                         </ion-grid>
                     </ion-col>
@@ -67,7 +108,12 @@ import {
     IonButtons,
     onIonViewWillEnter,
     modalController,
-    onIonViewDidLeave
+    onIonViewDidLeave,
+    IonItem,
+    IonList,
+    IonLabel,
+    IonThumbnail,
+    IonImg
 } from "@ionic/vue";
 import JourneyCard from "components/Cards/JourneyCard.vue";
 import { ref } from "vue";
@@ -82,24 +128,31 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 import CreateJourneyModalVue from "components/Modals/CreateJourneyModal.vue";
+import { useJourneyStore } from "stores/useJourneyStore";
+import editExperienceModal from "components/Modals/editExperienceModal.vue";
+import { openModal } from "utils/utils";
+import { ExperienceDto } from "types/dtos";
 
-const slidesPerView = ref(0);
+const slidesPerView = ref(3);
 const useUser = useUserStore();
+const useJourney = useJourneyStore();
+
 const modules = ref([Pagination, Navigation, Lazy]);
 
 const slides = ref();
 onIonViewDidLeave(() => {
     window.removeEventListener("resize", updateView);
 });
-onIonViewWillEnter(() => {
+onIonViewWillEnter(async () => {
     window.addEventListener("resize", updateView);
-    useUser.fetchMyJourneys().then((response) => {
-        if (response) {
-            updateView();
-        }
-    });
+    await useUser.fetchMyJourneys();
+    updateView();
+    await useUser.fetchMyExperiences();
 });
 
+function editJourney(exp: ExperienceDto) {
+    openModal(editExperienceModal, { experience: exp });
+}
 function updateView() {
     if (slides.value != null) {
         const width = slides.value.$el.clientWidth;
@@ -117,6 +170,7 @@ function updateView() {
             }
         }
     }
+    console.log(slidesPerView.value + " 2");
 }
 async function openJourneyCreationModal() {
     const modal = await modalController.create({
@@ -128,25 +182,20 @@ async function openJourneyCreationModal() {
 <style>
 .side {
     min-width: 200px;
-    max-width: 600px;
+    max-width: 400px;
 }
 .full-page {
     height: 100%;
 }
 .mid-page {
-    height: 45%;
+    height: 50%;
     overflow-y: auto;
     flex-wrap: nowrap;
 }
-.swiper {
-    width: 100%;
-    height: 100%;
-}
 
 .swiper-slide {
-    text-align: center;
+    text-align: left;
     font-size: 18px;
-
     /* Center slide text vertically */
     display: -webkit-box;
     display: -ms-flexbox;
@@ -160,5 +209,18 @@ async function openJourneyCreationModal() {
     -ms-flex-align: center;
     -webkit-align-items: center;
     align-items: center;
+}
+
+.experience-list {
+    height: 100%;
+    overflow-y: auto;
+    flex-wrap: nowrap;
+}
+
+.journey-card {
+    min-width: 300px;
+    min-height: 400px;
+    height: 90%;
+    width: 30%;
 }
 </style>

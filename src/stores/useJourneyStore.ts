@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
-import { LngLat } from "maplibre-gl";
 import { GeocodedData } from "types/journeys";
 import { ExperienceDto, JourneyDto } from "types/dtos";
 export const useJourneyStore = defineStore("journey", () => {
@@ -28,6 +27,7 @@ export const useJourneyStore = defineStore("journey", () => {
     }
 
     function addToJourney(experience: ExperienceDto): void {
+        console.log(experience);
         if (!alreadyInJourney(experience)) {
             editJourney.value?.experiences?.push(experience);
         }
@@ -43,15 +43,42 @@ export const useJourneyStore = defineStore("journey", () => {
         return removed;
     }
 
-    function alreadyInJourney(experience: ExperienceDto): boolean {
+    function removeExperience(expDto: ExperienceDto) {
+        const token = JSON.parse(localStorage.getItem("user")!).token;
+        return axios
+            .patch("api/journey/experience", expDto, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            .then((response) => {
+                const journey = response.data as JourneyDto;
+                return journey;
+            });
+    }
+    function updateExperience(experience: ExperienceDto) {
+        const token = JSON.parse(localStorage.getItem("user")!).token;
+        const data = experience;
+        return axios
+            .put("api/journey/experience", data, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            .then((response) => {
+                const journey = response.data as JourneyDto;
+                return journey;
+            });
+    }
+    function alreadyInJourney(expDto: ExperienceDto): boolean {
         return (
             editJourney.value?.experiences!.find(
-                (item) => item.poi.id === experience.poi.id
+                (item) => item.poi.id === expDto.poi.id
             ) !== undefined
         );
     }
 
-    function saveJourney(name: string): void {
+    function saveJourney(name: string): Promise<string> {
         const token = JSON.parse(localStorage.getItem("user")!).token;
         editJourney.value!.title = name;
 
@@ -69,13 +96,11 @@ export const useJourneyStore = defineStore("journey", () => {
             },
             experiences: editJourney.value.experiences!
         };
-        axios
-            .post("/api/journey/", dto, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-            .then((response) => {});
+        return axios.post("/api/journey/", dto, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
     }
 
     function setJourneyStartEnd(start: GeocodedData, end: GeocodedData) {
@@ -106,10 +131,30 @@ export const useJourneyStore = defineStore("journey", () => {
             experiences: []
         };
     }
+    function removeJourney(id: string): Promise<Boolean> {
+        const token = JSON.parse(localStorage.getItem("user")!).token;
+
+        return axios
+            .delete("api/journey/" + id, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            .then((resp) => {
+                if (resp.data.nodesDeleted > 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+    }
     return {
         journeyRef: editJourney,
         addToJourney,
+        updateExperience,
+        removeExperience,
         removeFromJourney,
+        removeJourney,
         saveJourney,
         alreadyExists: alreadyInJourney,
         setJourneyStartEnd,

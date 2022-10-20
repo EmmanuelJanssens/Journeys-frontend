@@ -46,8 +46,8 @@ import {
 } from "@ionic/vue";
 
 import { useUserStore } from "stores/useUserStore";
-import LoginModal from "./modals/LoginModal.vue";
-import RegisterModal from "./modals/RegisterModal.vue";
+import LoginModal from "components/Modals/LoginModal.vue";
+import RegisterModal from "components/Modals/RegisterModal.vue";
 const userStore = useUserStore();
 
 function toggleProfile() {

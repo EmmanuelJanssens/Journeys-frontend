@@ -7,6 +7,7 @@ export default defineConfig({
     plugins: [vue()],
     resolve: {
         alias: {
+            utils: path.resolve(__dirname, "./src/utils"),
             stores: path.resolve(__dirname, "./src/stores"),
             views: path.resolve(__dirname, "./src/views"),
             types: path.resolve(__dirname, "./src/types"),

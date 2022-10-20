@@ -19,11 +19,9 @@
                                     v-for="exp in journey?.experiences"
                                     v-bind:key="exp.poi.id">
                                     <experience-card
-                                        :title="exp.poi.name"
-                                        :description="
-                                            exp.experience.description
-                                        "
-                                        :date="exp.experience.date" />
+                                        :journey="journey!.id"
+                                        :experience="exp"
+                                        class="experience-card" />
                                 </swiper-slide>
                             </swiper>
                         </section>
@@ -131,8 +129,8 @@ async function load(id: string) {
                 geometry: {
                     type: "Point",
                     coordinates: [
-                        element.poi.location!.longitude,
-                        element.poi.location!.latitude
+                        element.poi.location.longitude,
+                        element.poi.location.latitude
                     ]
                 },
                 properties: element.poi,
@@ -254,7 +252,7 @@ function getMidPoint(start: maplibregl.LngLat, end: maplibregl.LngLat) {
 }
 
 .swiper-slide {
-    text-align: center;
+    text-align: left;
     font-size: 18px;
 
     /* Center slide text vertically */
@@ -270,5 +268,10 @@ function getMidPoint(start: maplibregl.LngLat, end: maplibregl.LngLat) {
     -ms-flex-align: center;
     -webkit-align-items: center;
     align-items: center;
+}
+.experience-card {
+    min-width: 300px;
+    width: 30%;
+    height: 90%;
 }
 </style>

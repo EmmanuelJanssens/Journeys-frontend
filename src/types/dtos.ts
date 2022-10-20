@@ -26,6 +26,8 @@ export type ExperienceDto = {
         images: string[];
         date: Date;
     };
+    journey?: JourneyDto;
+    id?: number;
 };
 
 export type AddressDto = {

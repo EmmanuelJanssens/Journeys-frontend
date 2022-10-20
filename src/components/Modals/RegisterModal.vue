@@ -46,13 +46,13 @@
                     <ion-col>
                         <ion-item class="ion-margin">
                             <ion-label position="floating">Username</ion-label>
-                            <ion-input type="text" v-model="state.userName" />
+                            <ion-input type="text" v-model="state.username" />
                         </ion-item>
                         <ion-text
                             class="ion-margin"
                             color="danger"
-                            v-if="v$.userName.$error"
-                            >{{ v$.userName.$errors[0].$message }}</ion-text
+                            v-if="v$.username.$error"
+                            >{{ v$.username.$errors[0].$message }}</ion-text
                         >
                     </ion-col>
                 </ion-row>
@@ -109,7 +109,7 @@
         <ion-footer>
             <ion-toolbar>
                 <ion-button slot="end" @click="submitForm()" color="primary"
-                    >login</ion-button
+                    >Register</ion-button
                 >
             </ion-toolbar>
         </ion-footer>
@@ -143,7 +143,7 @@ import { computed, ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
 
 const state = ref({
-    userName: "",
+    username: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -152,7 +152,7 @@ const state = ref({
 });
 const passwordRef = computed(() => state.value.password);
 const rules = {
-    userName: { required, minLength: minLength(4) },
+    username: { required, minLength: minLength(4) },
     firstName: { required },
     lastName: { required },
     email: { required, email },
@@ -164,17 +164,16 @@ const userStore = useUserStore();
 
 const v$ = useVuelidate(rules, state);
 
-function submitForm() {
+async function submitForm() {
     v$.value.$validate();
     if (!v$.value.$error) {
-        userStore.register(state.value).then((response) => {
-            if (response == true) {
-                dismissRegisterModal();
-                showToast("Welcome " + userStore.userRef.username, "success");
-            } else {
-                showToast("Authentication error", "danger");
-            }
-        });
+        const response = await userStore.register(state.value);
+        if (response == true) {
+            dismissRegisterModal();
+            showToast("Welcome " + userStore.userRef.username, "success");
+        } else {
+            showToast("Authentication error", "danger");
+        }
     }
 }
 
@@ -196,7 +195,7 @@ async function showToast(message: string, color: string) {
 }
 
 function clearModal() {
-    state.value.userName = "";
+    state.value.username = "";
     state.value.password = "";
     v$.value.$reset();
 }

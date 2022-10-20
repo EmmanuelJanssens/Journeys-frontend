@@ -7,7 +7,34 @@
                     <ion-col
                         :hidden="false"
                         class="sidebar-items-list ion-hide-xl-down">
-                        <RecycleScroller
+                        <DynamicScroller
+                            :items="usePoi.poiRef.features"
+                            :min-item-size="54"
+                            style="height: 100%">
+                            <template v-slot="{ item, index, active }">
+                                <DynamicScrollerItem
+                                    :item="item"
+                                    :active="active"
+                                    :data-index="index">
+                                    <ion-item
+                                        button
+                                        @click="
+                                            panTo(item.geometry.coordinates)
+                                        ">
+                                        <ion-thumbnail slot="start">
+                                            <ion-img
+                                                src="src/assets/placeholder.png">
+                                            </ion-img>
+                                        </ion-thumbnail>
+                                        <ion-label>{{
+                                            item.properties.name
+                                        }}</ion-label>
+                                    </ion-item>
+                                </DynamicScrollerItem>
+                            </template>
+                        </DynamicScroller>
+
+                        <!--<RecycleScroller
                             v-if="!isLoading"
                             style="height: 100%"
                             :items="usePoi.poiRef.features"
@@ -16,16 +43,17 @@
                                 <ion-item
                                     button
                                     @click="panTo(item.geometry.coordinates)">
-                                    <ion-icon
-                                        slot="start"
-                                        size="large"
-                                        src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
+                                    <ion-thumbnail slot="start">
+                                        <ion-img
+                                            src="src/assets/placeholder.png">
+                                        </ion-img>
+                                    </ion-thumbnail>
                                     <ion-label>{{
                                         item.properties.name
                                     }}</ion-label>
                                 </ion-item>
                             </template>
-                        </RecycleScroller>
+                        </RecycleScroller>-->
                     </ion-col>
                     <ion-col class="map-col">
                         <ion-searchbar class="floating search"></ion-searchbar>
@@ -85,6 +113,8 @@
 
 <script lang="ts" setup>
 import {
+    IonThumbnail,
+    IonImg,
     IonPage,
     IonContent,
     IonButton,
@@ -102,7 +132,8 @@ import {
     IonFabButton,
     IonFabList,
     IonSearchbar,
-    modalController
+    modalController,
+    alertController
 } from "@ionic/vue";
 import haversine from "haversine";
 import {
@@ -125,6 +156,8 @@ import router from "router/router";
 import { PoiDto } from "types/dtos";
 import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
 import { FeatureCollection } from "geojson";
+import { onBeforeRouteLeave } from "vue-router";
+import CreateJourneyModal from "components/Modals/CreateJourneyModal.vue";
 const usePoi = usePoiStore();
 const useJourney = useJourneyStore();
 
@@ -145,7 +178,9 @@ var endPoint = ref<GeocodedData>({
 
 var radius = ref(-1);
 var hideSidebar = ref(true);
-var isLoading = ref(true);
+var isLoading = ref(false);
+var isSaved = ref(false);
+var isValid = ref(false);
 
 function getRadius(start: LngLat, end: LngLat): number {
     const r = haversine(
@@ -209,6 +244,44 @@ function onMarkerDrag(marker: Marker, pos: string) {
     });
 }
 
+onBeforeRouteLeave(async () => {
+    if (
+        isSaved.value === false &&
+        useJourney.journeyRef.experiences != undefined &&
+        useJourney.journeyRef.experiences.length > 0
+    ) {
+        let leave = false;
+        const alert = await alertController.create({
+            header: "Alert",
+            subHeader: "Save Journey",
+            message: "You did not save your journey Proceed?",
+            buttons: [
+                {
+                    text: "Proceed",
+                    role: "proceed",
+                    handler: () => {
+                        leave = true;
+                    }
+                },
+                {
+                    text: "Save",
+                    role: "Save",
+                    handler: () => {
+                        leave = false;
+                        openModal(SaveJourneyModal);
+                    }
+                }
+            ]
+        });
+
+        await alert.present();
+
+        const { role } = await alert.onDidDismiss();
+        leave = role == "proceed";
+        return leave;
+    }
+});
+
 onIonViewWillEnter(() => {
     const params = router.currentRoute.value.params;
 
@@ -243,11 +316,18 @@ onIonViewWillEnter(() => {
             { unit: "meter" }
         );
         load();
+    } else {
+        isValid.value = false;
+        isLoading.value = false;
+        openModal(CreateJourneyModal);
     }
 });
 
 onIonViewDidLeave(() => {
     usePoi.poiRef.features = [];
+    isValid.value = false;
+    isLoading.value = false;
+    isSaved.value = false;
     useJourney.clearMapView();
     map.value?.remove();
 });
@@ -257,14 +337,28 @@ async function openModal(component: any) {
         component: component,
         keyboardClose: false
     });
-    modal.present();
+    await modal.present();
+
+    const { data, role } = await modal.onDidDismiss();
+    isSaved.value = role == "view" || role == "stay";
+    if (role == "view") {
+        const route = {
+            name: "journey",
+            params: {
+                id: data.data
+            }
+        };
+        router.push(route);
+    }
 }
+
 function panTo(coordinates: number[]) {
     map.value?.easeTo({
         center: [coordinates[0], coordinates[1]],
         zoom: 16
     });
 }
+
 function addStopPointToMapp() {
     var stopPoints: number[][] = [];
 
@@ -274,8 +368,8 @@ function addStopPointToMapp() {
     ]);
     useJourney.journeyRef.experiences?.forEach((exp) => {
         stopPoints.push([
-            exp.poi.location?.longitude!,
-            exp.poi.location?.latitude!
+            exp.poi.location.longitude!,
+            exp.poi.location.latitude!
         ]);
     });
     stopPoints.push([
@@ -293,10 +387,12 @@ function addStopPointToMapp() {
             }
         });
     }
+    isSaved.value = false;
 }
 
 function load() {
     isLoading.value = true;
+    isValid.value = true;
     const midPoint = {
         lng: getMidPoint(
             startPoint.value.coordinates,

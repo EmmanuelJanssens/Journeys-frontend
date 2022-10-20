@@ -10,3 +10,4 @@ declare module "haversine";
 declare module "@maptiler/geocoder";
 declare module "vue-virtual-scroller";
 declare module "jsonwebtoken";
+declare module "uuid";

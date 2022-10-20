@@ -1,12 +1,12 @@
 <template>
-    <ion-card class="journey-card">
+    <ion-card>
         <ion-card-header>
             <ion-toolbar color="none">
                 <ion-card-title @click="goToJourney(props.journey.id)">{{
                     props.journey.title
                 }}</ion-card-title>
                 <ion-buttons slot="end">
-                    <ion-button>
+                    <ion-button @click="onPopover">
                         <ion-icon
                             size="large"
                             src="/src/assets/icon/ellipsis-vertical-outline.svg"></ion-icon>
@@ -15,9 +15,10 @@
             </ion-toolbar>
             <ion-card-subtitle>Subtitle</ion-card-subtitle>
         </ion-card-header>
-        <ion-card-content>
-            <ion-img src="/src/assets/featureImg3.png"></ion-img>
-            <p class="desc">
+        <ion-img src="/src/assets/featureImg3.png"></ion-img>
+
+        <section class="content ion-margin">
+            <ion-text>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                 Pellentesque tempus euismod felis, nec hendrerit metus fermentum
                 in. Vivamus ante mi, auctor nec augue non, fermentum mollis mi.
@@ -45,8 +46,8 @@
                 id, luctus ullamcorper dolor. Nullam facilisis molestie lacus
                 vel hendrerit. Donec rutrum dui sit amet consectetur finibus.
                 Mauris vitae volutpat nisi, sit amet sagittis est.
-            </p>
-        </ion-card-content>
+            </ion-text>
+        </section>
     </ion-card>
 </template>
 
@@ -61,12 +62,27 @@ import {
     IonButtons,
     IonButton,
     IonImg,
-    IonIcon
+    IonIcon,
+    IonText,
+    IonContent,
+    popoverController
 } from "@ionic/vue";
 import router from "router/router";
-
+import JourneyCardPopover from "components/JourneyCardPopover.vue";
 const props = defineProps(["journey"]);
 
+async function onPopover(e: Event) {
+    const popover = await popoverController.create({
+        component: JourneyCardPopover,
+        componentProps: props,
+        event: e,
+        size: "auto",
+        reference: "event",
+        side: "left",
+        alignment: "bottom"
+    });
+    await popover.present();
+}
 function goToJourney(id: string) {
     const route = {
         name: "journey",
@@ -77,31 +93,13 @@ function goToJourney(id: string) {
     router.push(route);
 }
 </script>
-<style>
-.journey-card {
-    min-width: 300px;
-    width: 30%;
-    height: 90%;
-    overflow-y: auto;
+<style scoped>
+ion-card {
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
 }
-
-/* width */
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-    background: #888;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-    background: #555;
+.content {
+    overflow: auto;
 }
 </style>

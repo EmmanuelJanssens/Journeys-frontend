@@ -47,17 +47,53 @@ import {
     IonContent,
     IonFooter,
     IonIcon,
-    modalController
+    modalController,
+    alertController
 } from "@ionic/vue";
 import { ref } from "vue";
 const title = ref();
 const useJourney = useJourneyStore();
+
 function dismissModal() {
-    modalController.dismiss();
+    modalController.dismiss("dismiss", "discarded");
 }
 
-function saveJourney() {
-    useJourney.saveJourney(title.value);
-    modalController.dismiss();
+async function saveJourney() {
+    if (
+        useJourney.journeyRef.start?.address!.length! <= 0 ||
+        useJourney.journeyRef.end?.address!.length! <= 0
+    ) {
+        let alert = await alertController.create({
+            header: "Error",
+            message: "Your journey is not valid, Some values may be missing",
+            buttons: ["Dismiss"]
+        });
+        alert.present();
+    } else {
+        const journeyId = await useJourney.saveJourney(title.value);
+
+        const alert = await alertController.create({
+            header: "Notification",
+            message: "Your journey was saved successfuly",
+            backdropDismiss: false,
+            buttons: [
+                {
+                    text: "View",
+                    role: "view",
+                    handler: () => {
+                        modalController.dismiss(journeyId, "view");
+                    }
+                },
+                {
+                    text: "Stay",
+                    role: "stay",
+                    handler: () => {
+                        modalController.dismiss(null, "stay");
+                    }
+                }
+            ]
+        });
+        await alert.present();
+    }
 }
 </script>

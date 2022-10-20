@@ -1,7 +1,7 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
 import { defineStore } from "pinia";
-import { JourneyDto, UserDto } from "types/dtos";
+import { ExperienceDto, JourneyDto, UserDto } from "types/dtos";
 import { User, ApiAuthenticationResponse, ApiError } from "types/journeys";
 
 import { ref } from "vue";
@@ -18,7 +18,7 @@ export const useUserStore = defineStore("user", () => {
     const loggedIn = ref(false);
 
     const myJourneys = ref<JourneyDto[]>();
-
+    const myExperiences = ref<ExperienceDto[]>([]);
     async function login(user: string, password: string): Promise<boolean> {
         const dto: UserDto = {
             username: user,
@@ -57,16 +57,13 @@ export const useUserStore = defineStore("user", () => {
                 userRef.value.firstName = result.firstName;
                 userRef.value.lastName = result.lastName;
                 userRef.value.email = result.email;
-                token.value = result.token;
-                loggedIn.value = true;
-                localStorage.setItem(
-                    "user",
-                    JSON.stringify({
-                        user: userRef.value,
-                        token: token.value
+                return login(user.username!, user.password!)
+                    .then(() => {
+                        return true;
                     })
-                );
-                return true;
+                    .catch(() => {
+                        return false;
+                    });
             })
             .catch((error: AxiosError) => {
                 return false;
@@ -74,8 +71,14 @@ export const useUserStore = defineStore("user", () => {
     }
 
     function fetchMyJourneys(): Promise<boolean> {
+        const token = JSON.parse(localStorage.getItem("user")!).token;
+
         return axios
-            .get("/api/user/" + userRef.value.username + "/journeys")
+            .get("/api/user/journeys", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
             .then((response) => {
                 myJourneys.value = response.data.journeys as JourneyDto[];
                 return true;
@@ -85,6 +88,23 @@ export const useUserStore = defineStore("user", () => {
             });
     }
 
+    function fetchMyExperiences(): Promise<boolean> {
+        const token = JSON.parse(localStorage.getItem("user")!).token;
+
+        return axios
+            .get("/api/user/experiences", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            .then((response) => {
+                myExperiences.value = response.data as ExperienceDto[];
+                return true;
+            })
+            .catch(() => {
+                return false;
+            });
+    }
     function IsLoggedIn(): boolean {
         return loggedIn.value;
     }
@@ -102,6 +122,12 @@ export const useUserStore = defineStore("user", () => {
         localStorage.removeItem("user");
     }
 
+    function removeJourney(id: string) {
+        myJourneys.value = myJourneys.value?.filter((j) => j.id != id);
+        myExperiences.value = myExperiences.value.filter(
+            (e) => e.journey != id
+        );
+    }
     return {
         userRef,
         token,
@@ -110,7 +136,10 @@ export const useUserStore = defineStore("user", () => {
         logout,
         register,
         IsLoggedIn,
+        removeJourney,
         myJourneys,
-        fetchMyJourneys
+        myExperiences,
+        fetchMyJourneys,
+        fetchMyExperiences
     };
 });
