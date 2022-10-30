@@ -61,11 +61,8 @@ import {
     IonLabel,
     IonImg,
     IonThumbnail,
-    IonInput,
     IonTextarea,
-    modalController,
-    onIonViewWillEnter,
-    onIonViewDidEnter
+    modalController
 } from "@ionic/vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";

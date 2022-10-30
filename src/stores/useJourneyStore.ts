@@ -130,7 +130,14 @@ export const useJourneyStore = defineStore("journey", () => {
             }
         });
     }
-
+    function updateJourney(journey: JourneyDto) {
+        const token = JSON.parse(localStorage.getItem("user")!).token;
+        return axios.put("/api/journey/", journey, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+    }
     function setJourneyStartEnd(start: GeocodedData, end: GeocodedData) {
         editJourney.value!.start = {
             address: start.address,
@@ -186,6 +193,7 @@ export const useJourneyStore = defineStore("journey", () => {
         removeFromJourney,
         removeJourney,
         saveJourney,
+        updateJourney,
         alreadyExists: alreadyInJourney,
         setJourneyStartEnd,
         clearMapView,

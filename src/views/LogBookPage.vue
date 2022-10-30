@@ -14,6 +14,18 @@
                             <ion-content>
                                 <ion-row class="">
                                     <ion-toolbar color="secondary">
+                                        <ion-buttons slot="start">
+                                            <ion-button
+                                                @click="
+                                                    () => {
+                                                        setData();
+                                                    }
+                                                ">
+                                                <ion-icon
+                                                    src="src/assets/icon/return-up-back-outline.svg"
+                                                    slot="icon-only"></ion-icon>
+                                            </ion-button>
+                                        </ion-buttons>
                                         <ion-buttons slot="end">
                                             <ion-button @click="openJourneyCreationModal">
                                                 <ion-icon
@@ -46,7 +58,8 @@
                                                 <JourneyCard
                                                     :journey="item"
                                                     class="journey-card ion-margin"
-                                                    @header-clicked="showExperiences(item.id!)" />
+                                                    @header-clicked="showExperiences(item.id!)"
+                                                    @upated="setData" />
                                             </swiper-slide>
                                         </swiper>
                                     </section>
@@ -147,18 +160,18 @@ import CreateJourneyModalVue from "components/Modals/CreateJourneyModal.vue";
 
 import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto } from "types/dtos";
+import { Journeys } from "../map/JourneysMap";
+
 import mapboxgl from "mapbox-gl";
-import GeoJSON from "geojson";
+import GeoJSON, { Geometry } from "geojson";
+
 const slidesPerView = ref(3);
 const useUser = useUserStore();
 const useJourney = useJourneyStore();
 const isLoading = ref(true);
 const modules = ref([Pagination, Navigation, Lazy]);
-const markers: mapboxgl.Marker[] = [];
-var coords = Array<number[]>();
 
 const slides = ref();
-let map = ref<mapboxgl.Map>();
 
 let statisticsCol = ref<typeof IonCol>();
 let experiencesCol = ref();
@@ -166,115 +179,67 @@ let mapCol = ref();
 let isLoaded = ref(false);
 
 onIonViewWillEnter(async () => {
-    isLoaded.value = false;
-    window.addEventListener("resize", updateView);
-
     await useUser.fetchMyJourneys();
     updateView();
 
-    const apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
-
-    mapboxgl.accessToken =
-        "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg";
-    if (!map.value) {
-        map.value = new mapboxgl.Map({
-            container: "Map",
-            style: `https://api.maptiler.com/maps/voyager/style.json?key=${apiKey}`,
-            zoom: 3,
-            center: [30, 50],
-            projection: {
-                name: "globe"
-            }
-        });
-        load_once(map.value);
-    } else {
-        map.value?.resize();
+    Journeys.loadMap("Map");
+    if (Journeys.JourneysMap.isStyleLoaded()) {
+        setData();
     }
-    map.value?.once("render", () => {
-        map.value?.resize();
+    Journeys.JourneysMap.on("sourcedata", (e) => {
+        if (e.isSourceLoaded && e.sourceId === Journeys.MapLayer.journey_list && e.sourceDataType == "metadata")
+            isLoading.value = false;
+        else if (e.isSourceLoaded && e.sourceId === Journeys.MapLayer.journey_route) isLoading.value = false;
+    });
+    Journeys.JourneysMap.once("load", () => {
+        setData();
+        Journeys.JourneysMap.resize();
     });
 
-    map.value.on("sourcedata", (e) => {
-        if (e.isSourceLoaded && e.sourceId === "journeys" && e.sourceDataType == "metadata") isLoading.value = false;
-        else if (e.isSourceLoaded && e.sourceId === "route") isLoading.value = false;
+    Journeys.JourneysMap.once("style.load", () => {
+        Journeys.JourneysMap.setFog({});
     });
 });
 
 onIonViewWillLeave(() => {
-    useJourney.viewJourney = {};
     window.removeEventListener("resize", updateView);
 });
 onIonViewDidLeave(() => {
-    if (map.value) {
-        if (markers.length > 0) markers.forEach((marker) => marker.remove());
-
-        var src = map.value.getSource("route") as mapboxgl.GeoJSONSource;
-        if (src) {
-            map.value.removeLayer("route");
-            map.value.removeSource("route");
-        }
-        map.value.setZoom(3);
-        coords = [];
-    }
+    Journeys.clear_map(true);
 });
-async function load_once(map: mapboxgl.Map) {
-    map.once("load", () => {
-        const geoJSONJourney: GeoJSON.FeatureCollection = {
-            type: "FeatureCollection",
-            features: []
-        };
-        useUser.myJourneys?.forEach((journey) => {
-            geoJSONJourney.features.push(useJourney.journeyToGeojson(journey)[0]);
-            geoJSONJourney.features.push(useJourney.journeyToGeojson(journey)[1]);
-        });
 
-        map?.addSource("journeys", {
-            type: "geojson",
-            data: geoJSONJourney,
-            cluster: true,
-            clusterMaxZoom: 14,
-            clusterRadius: 50
-        });
-
-        map?.addLayer({
-            id: "clusters",
-            type: "circle",
-            source: "journeys",
-            filter: ["has", "point_count"],
-            paint: {
-                "circle-color": ["step", ["get", "point_count"], "#FFBA93", 100, "#FFECE0", 750, "#CC9676"],
-                "circle-radius": ["step", ["get", "point_count"], 20, 100, 30, 750, 40]
+function setData() {
+    useJourney.viewJourney = {};
+    Journeys.clear_map(false);
+    const geoJSONJourney: GeoJSON.FeatureCollection = {
+        type: "FeatureCollection",
+        features: []
+    };
+    const connections: GeoJSON.FeatureCollection = {
+        type: "FeatureCollection",
+        features: []
+    };
+    useUser.myJourneys?.forEach((journey) => {
+        geoJSONJourney.features.push(useJourney.journeyToGeojson(journey)[0]);
+        geoJSONJourney.features.push(useJourney.journeyToGeojson(journey)[1]);
+        connections.features.push({
+            type: "Feature",
+            geometry: {
+                type: "LineString",
+                coordinates: [
+                    [journey.start?.longitude!, journey.start?.latitude!],
+                    [journey.end?.longitude!, journey.end?.latitude!]
+                ]
+            },
+            properties: {
+                title: journey.title
             }
         });
-        map?.addLayer({
-            id: "cluster-count",
-            type: "symbol",
-            source: "journeys",
-            filter: ["has", "point_count"],
-            layout: {
-                "text-field": "{point_count_abbreviated}",
-                "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-                "text-size": 12
-            }
-        });
-
-        map?.addLayer({
-            id: "unclustered-point",
-            type: "circle",
-            source: "journeys",
-            filter: ["!", ["has", "point_count"]],
-            paint: {
-                "circle-color": "#FFBA93",
-                "circle-radius": 6,
-                "circle-stroke-width": 1,
-                "circle-stroke-color": "#fff"
-            }
-        });
-        map.resize();
-        map?.setFog({});
     });
-}
 
+    Journeys.addSource(Journeys.MapLayer.journey_list, geoJSONJourney);
+    Journeys.addSource(Journeys.MapLayer.journey_route, connections);
+}
 function updateView() {
     if (slides.value != null) {
         const width = slides.value.$el.clientWidth;
@@ -302,22 +267,18 @@ async function openJourneyCreationModal() {
 }
 
 async function showExperiences(id: string) {
-    isLoading.value = true;
-    var src = map.value?.getSource("route") as mapboxgl.GeoJSONSource;
-    if (src) {
-        map.value?.removeLayer("route");
-        map.value?.removeSource("route");
-    }
-    if (markers.length > 0) markers.forEach((marker) => marker.remove());
-    console.log(id);
     if (useJourney.viewJourney.id !== id) useJourney.viewJourney = await useJourney.getJourney(id);
-    coords = [];
-    const exps: GeoJSON.FeatureCollection = {
+
+    Journeys.clear_source(Journeys.MapLayer.journey_experiences);
+    Journeys.clear_source(Journeys.MapLayer.journey_route);
+    Journeys.clear_source(Journeys.MapLayer.journey_list);
+
+    const experiences: GeoJSON.FeatureCollection = {
         type: "FeatureCollection",
         features: []
     };
     useJourney.viewJourney.experiences?.forEach((exp) => {
-        exps.features.push({
+        experiences.features.push({
             type: "Feature",
             geometry: {
                 type: "Point",
@@ -327,101 +288,36 @@ async function showExperiences(id: string) {
             id: exp.poi.id
         });
     });
-    console.log(useJourney.viewJourney);
+    Journeys.addSource(Journeys.MapLayer.journey_experiences, experiences, useJourney.viewJourney);
 
-    exps.features.forEach((exp) => {
-        const el = document.createElement("div");
-        el.className = "marker";
-        if (exp.properties!.images.length > 0) el.style.backgroundImage = `url(${exp.properties!.images[0]})`;
-        else
-            el.style.backgroundImage =
-                "url(https://firebasestorage.googleapis.com/v0/b/journeys-v2/o/images%2Fplaceholder.png?alt=media&token=c921b603-8028-42d4-a7a3-7b186f427c98)";
-        el.style.backgroundSize = "100%";
-        el.style.backgroundColor = "black";
-        el.style.width = "30px";
-        el.style.height = "30px";
-        markers.push(
-            new mapboxgl.Marker(el)
-                .setLngLat(
-                    new mapboxgl.LngLat(
-                        (exp.geometry as GeoJSON.Point).coordinates[0],
-                        (exp.geometry as GeoJSON.Point).coordinates[1]
-                    )
-                )
-                .addTo(map.value!)
-        );
-    });
+    const coords = Array<number[]>();
 
     coords.push([useJourney.viewJourney.start?.longitude!, useJourney.viewJourney.start?.latitude!]);
-    exps.features.forEach((element) => {
+    experiences.features.forEach((element) => {
         coords.push((element.geometry as GeoJSON.Point).coordinates);
     });
     coords.push([useJourney.viewJourney.end?.longitude!, useJourney.viewJourney.end?.latitude!]);
 
-    map.value?.addSource("route", {
-        type: "geojson",
-        data: {
-            type: "Feature",
-            properties: {},
-            geometry: {
-                type: "LineString",
-                coordinates: coords
-            }
+    const route: GeoJSON.Feature = {
+        type: "Feature",
+        properties: {},
+        geometry: {
+            type: "LineString",
+            coordinates: coords
         }
-    });
-    map.value?.addLayer({
-        id: "route",
-        type: "line",
-        source: "route",
-        layout: {
-            "line-join": "round",
-            "line-cap": "round"
-        },
-        paint: {
-            "line-color": "#555",
-            "line-width": 2
-        }
-    });
+    };
+    Journeys.addSource(Journeys.MapLayer.journey_route, route);
 
-    const center = getMidPoint(
+    const center = Journeys.getMidPoint(
         new mapboxgl.LngLat(useJourney.viewJourney.start?.longitude!, useJourney.viewJourney.start?.latitude!),
         new mapboxgl.LngLat(useJourney.viewJourney.end?.longitude!, useJourney.viewJourney.end?.latitude!)
     );
-    map.value?.easeTo({
+    Journeys.JourneysMap.easeTo({
         animate: true,
         duration: 3000,
         center: [center.lng, center.lat],
         zoom: 10
     });
-}
-
-function getMidPoint(start: mapboxgl.LngLat, end: mapboxgl.LngLat) {
-    const lat1 = (start.lat * Math.PI) / 180;
-    const lon1 = (start.lng * Math.PI) / 180;
-    const X1 = Math.cos(lat1) * Math.cos(lon1);
-    const Y1 = Math.cos(lat1) * Math.sin(lon1);
-    const Z1 = Math.sin(lat1);
-
-    const lat2 = (end.lat * Math.PI) / 180;
-    const lon2 = (end.lng * Math.PI) / 180;
-    const X2 = Math.cos(lat2) * Math.cos(lon2);
-    const Y2 = Math.cos(lat2) * Math.sin(lon2);
-    const Z2 = Math.sin(lat2);
-
-    const x = (X1 + X2) / 2;
-    const y = (Y1 + Y2) / 2;
-    const z = (Z1 + Z2) / 2;
-
-    var lon = Math.atan2(y, x);
-    var hyp = Math.sqrt(x * x + y * y);
-    var lat = Math.atan2(z, hyp);
-    lat = (lat * 180) / Math.PI;
-    lon = (lon * 180) / Math.PI;
-
-    return {
-        lat: lat,
-        lng: lon
-    };
 }
 </script>
 <style>

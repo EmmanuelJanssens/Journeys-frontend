@@ -2,13 +2,16 @@
     <ion-card>
         <ion-card-header>
             <ion-toolbar color="none">
-                <ion-card-title @click="goToJourney(props.journey.id)">{{ props.journey.title }}</ion-card-title>
+                <ion-card-title>{{ props.journey.title }}</ion-card-title>
                 <ion-buttons slot="end">
-                    <ion-button>
+                    <ion-button @click="goToJourney(props.journey.id)">
                         <ion-icon src="/src/assets/icon/eye-outline.svg" slot="icon-only"></ion-icon>
                     </ion-button>
-                    <ion-button @click="onPopover">
-                        <ion-icon src="/src/assets/icon/ellipsis-vertical-outline.svg" slot="icon-only"></ion-icon>
+                    <ion-button @click="onEdit">
+                        <ion-icon src="/src/assets/icon/pencil-outline.svg" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button @click="onDelete">
+                        <ion-icon src="/src/assets/icon/trash-bin-outline.svg" slot="icon-only"></ion-icon>
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
@@ -52,26 +55,54 @@ import {
     IonImg,
     IonIcon,
     IonText,
-    popoverController
+    popoverController,
+    modalController,
+    alertController
 } from "@ionic/vue";
-import JourneyCardPopover from "components/JourneyCardPopover.vue";
+import EditJourneyModal from "components/Modals/EditJourneyModal.vue";
 import { useJourneyStore } from "stores/useJourneyStore";
-
+import { useUserStore } from "stores/useUserStore";
+import { showToast } from "utils/utils";
 const props = defineProps(["journey"]);
-
-const emit = defineEmits(["headerClicked"]);
-async function onPopover(e: Event) {
+const emit = defineEmits(["headerClicked", "upated"]);
+const useJourney = useJourneyStore();
+const useUser = useUserStore();
+async function onEdit() {
     console.log(props);
-    const popover = await popoverController.create({
-        component: JourneyCardPopover,
+    const modal = await modalController.create({
+        component: EditJourneyModal,
         componentProps: props,
-        event: e,
-        size: "auto",
-        reference: "event",
-        side: "left",
-        alignment: "bottom"
+        keyboardClose: false
     });
-    await popover.present();
+
+    await modal.present();
+    const { data } = await modal.onDidDismiss();
+    console.log(data);
+    if (data && data.status === "success") emit("upated");
+}
+
+async function onDelete() {
+    popoverController.dismiss();
+
+    const alert = await alertController.create({
+        header: "Warning",
+        subHeader: "You are about to delete this journey, this action is action is irreversible",
+        message: "Do you wish to proceed?",
+        buttons: [
+            {
+                text: "Yes",
+                role: "proceed",
+                handler: async () => {
+                    await useJourney.removeJourney(props.journey.id);
+                    useUser.removeJourney(props.journey.id);
+                    showToast("Journey deleted", "success");
+                    emit("upated");
+                }
+            },
+            "No"
+        ]
+    });
+    await alert.present();
 }
 async function goToJourney(id: string) {
     console.log(id);
