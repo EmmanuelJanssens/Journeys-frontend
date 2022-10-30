@@ -15,22 +15,14 @@
                                 navigation
                                 lazy
                                 :modules="modules">
-                                <swiper-slide
-                                    v-for="exp in journey?.experiences"
-                                    v-bind:key="exp.poi.id">
-                                    <experience-card
-                                        :journey="journey!.id"
-                                        :experience="exp"
-                                        class="experience-card" />
+                                <swiper-slide v-for="exp in journey?.experiences" v-bind:key="exp.poi.id">
+                                    <experience-card :journey="journey!.id" :experience="exp" class="experience-card" />
                                 </swiper-slide>
                             </swiper>
                         </section>
                     </ion-col>
                     <ion-col class="sidebar">
-                        <map-journey-sidebar
-                            :start="journey?.start!"
-                            :end="journey?.end!"
-                            mode="view" />
+                        <map-journey-sidebar :start="journey?.start!" :end="journey?.end!" mode="view" />
                     </ion-col>
                 </ion-row>
             </ion-grid>
@@ -38,18 +30,10 @@
     </ion-page>
 </template>
 <script lang="ts" setup>
-import {
-    IonPage,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonContent,
-    onIonViewWillEnter
-} from "@ionic/vue";
+import { IonPage, IonGrid, IonRow, IonCol, IonContent, onIonViewWillEnter } from "@ionic/vue";
 import { LngLat, Map, Marker, NavigationControl } from "maplibre-gl";
 import router from "router/router";
 import { useJourneyStore } from "stores/useJourneyStore";
-import { PoiGeoJsonData } from "types/journeys";
 import { ref } from "vue";
 import MapJourneySidebar from "components/MapJourneySidebar.vue";
 import { JourneyDto } from "types/dtos";
@@ -61,6 +45,7 @@ import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 import { Navigation, Lazy } from "swiper";
 import ExperienceCard from "components/Cards/ExperienceCard.vue";
+import { GeoJSON } from "geojson";
 const journey = ref<JourneyDto>();
 const useJourney = useJourneyStore();
 
@@ -80,16 +65,10 @@ var mapContainer = ref();
 async function load(id: string) {
     await useJourney.getJourney(id).then((response) => {
         journey.value = response;
-        useJourney.journeyRef.experiences = journey.value.experiences;
+        useJourney.editJourney.experiences = journey.value.experiences;
     });
-    const start = new LngLat(
-        journey.value?.start?.longitude!,
-        journey.value?.start?.latitude!
-    );
-    const end = new LngLat(
-        journey.value?.end?.longitude!,
-        journey.value?.end?.latitude!
-    );
+    const start = new LngLat(journey.value?.start?.longitude!, journey.value?.start?.latitude!);
+    const end = new LngLat(journey.value?.end?.longitude!, journey.value?.end?.latitude!);
 
     const mid = getMidPoint(start, end);
     const midPoint = {
@@ -114,11 +93,7 @@ async function load(id: string) {
         new Marker().setLngLat(start).addTo(map.value!);
         new Marker().setLngLat([end.lng, end.lat]).addTo(map.value!);
 
-        const poisCollection: PoiGeoJsonData = {
-            crs: {
-                properties: { name: "urn:ogc:def:crs:OGC:1.3:CRS84" },
-                type: "name"
-            },
+        const poisCollection: GeoJSON.FeatureCollection = {
             features: [],
             type: "FeatureCollection"
         };
@@ -128,10 +103,7 @@ async function load(id: string) {
                 type: "Feature",
                 geometry: {
                     type: "Point",
-                    coordinates: [
-                        element.poi.location.longitude,
-                        element.poi.location.latitude
-                    ]
+                    coordinates: [element.poi.location.longitude, element.poi.location.latitude]
                 },
                 properties: element.poi,
                 id: element.poi.id
@@ -156,7 +128,7 @@ async function load(id: string) {
         const coords = Array<number[]>();
         coords.push(start.toArray() as Array<number>);
         poisCollection.features.forEach((element) => {
-            coords.push(element.geometry.coordinates);
+            coords.push((element.geometry as GeoJSON.Point).coordinates);
         });
         coords.push(end.toArray());
 
@@ -164,7 +136,7 @@ async function load(id: string) {
             type: "geojson",
             data: {
                 type: "Feature",
-                propreties: {},
+                properties: {},
                 geometry: {
                     type: "LineString",
                     coordinates: coords

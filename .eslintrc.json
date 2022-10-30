@@ -7,6 +7,24 @@
         "eslint:recommended",
         "@vue/eslint-config-typescript"
     ],
+    "rules": {
+        "prettier/prettier": [
+            "error",
+            {
+                "semi": true,
+                "semicolons": true,
+                "tabWidth": 4,
+                "useTabs": false,
+                "printWidth": 120,
+                "endOfLine": "auto",
+                "singleQuote": false,
+                "trailingComma": "none",
+                "bracketSpacing": true,
+                "arrowParens": "always",
+                "bracketSameLine": true
+            }
+        ]
+    },
     "globals": {
         "google": "readonly",
         "maplibregl": "readonly"

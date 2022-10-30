@@ -2,26 +2,20 @@ import type { AxiosError } from "axios";
 import axios from "axios";
 import { defineStore } from "pinia";
 import { PoiDto } from "types/dtos";
-import { PoiGeoJsonData, ApiError } from "types/journeys";
 import { ref } from "vue";
 
 export const usePoiStore = defineStore("poi", () => {
-    const poiRef = ref<PoiGeoJsonData>({
-        crs: {
-            properties: {
-                name: ""
-            },
-            type: ""
-        },
+    const poiRef = ref<GeoJSON.FeatureCollection>({
         features: [],
-        type: ""
+        type: "FeatureCollection"
     });
 
-    async function searchBetween(
-        lat: number,
-        lng: number,
-        radius: number
-    ): Promise<boolean> {
+    async function getThumbnail(poi: PoiDto) {
+        return await axios.post("api/poi/thumbnail", poi).then((r) => {
+            return r;
+        });
+    }
+    async function searchBetween(lat: number, lng: number, radius: number): Promise<boolean> {
         return await axios
             .get(`api/poi?lat=${lat}&lng=${lng}&radius=${radius}`)
             .then((response) => {
@@ -30,11 +24,7 @@ export const usePoiStore = defineStore("poi", () => {
                 }
 
                 poiRef.value = {
-                    type: "FeatrureCollection",
-                    crs: {
-                        type: "name",
-                        properties: { name: "urn:ogc:def:crs:OGC:1.3:CRS84" }
-                    },
+                    type: "FeatureCollection",
                     features: []
                 };
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -43,10 +33,7 @@ export const usePoiStore = defineStore("poi", () => {
                         type: "Feature",
                         geometry: {
                             type: "Point",
-                            coordinates: [
-                                poi.location!.longitude,
-                                poi.location!.latitude
-                            ]
+                            coordinates: [poi.location!.longitude, poi.location!.latitude]
                         },
                         properties: poi,
                         id: poi.id
@@ -59,5 +46,5 @@ export const usePoiStore = defineStore("poi", () => {
             });
     }
 
-    return { poiRef, searchBetween };
+    return { poiRef, searchBetween, getThumbnail };
 });

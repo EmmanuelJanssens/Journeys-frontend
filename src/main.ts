@@ -4,11 +4,7 @@ import { createPinia } from "pinia";
 import { createApp } from "vue";
 import Vue from "vue";
 import VueAxios from "vue-axios";
-import {
-    RecycleScroller,
-    DynamicScroller,
-    DynamicScrollerItem
-} from "vue-virtual-scroller";
+import { RecycleScroller, DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 
 import App from "./App.vue";
 import router from "./router/router";

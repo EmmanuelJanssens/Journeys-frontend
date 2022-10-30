@@ -10,20 +10,14 @@
                 <ion-row>
                     <ion-col>
                         <ion-item>
-                            <ion-label position="stacked">
-                                JourneyTitle
-                            </ion-label>
-                            <ion-input
-                                type="text"
-                                value="Journey name" /> </ion-item
+                            <ion-label position="stacked"> JourneyTitle </ion-label>
+                            <ion-input type="text" value="Journey name" /> </ion-item
                     ></ion-col>
                 </ion-row>
                 <ion-row>
                     <ion-col>
                         <ion-item>
-                            <ion-label position="stacked"
-                                >Description</ion-label
-                            >
+                            <ion-label position="stacked">Description</ion-label>
                             <ion-textarea value="Description"> </ion-textarea>
                         </ion-item>
                     </ion-col>

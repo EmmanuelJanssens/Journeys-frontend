@@ -23,9 +23,7 @@
             <ion-item>
                 <ion-label>
                     <ion-icon src="/src/assets/icon/logo-google.svg"></ion-icon>
-                    <ion-text class="google" color="medium">
-                        Powered by google</ion-text
-                    >
+                    <ion-text class="google" color="medium"> Powered by google</ion-text>
                 </ion-label>
             </ion-item>
         </ion-content>

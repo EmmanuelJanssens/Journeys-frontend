@@ -5,9 +5,7 @@
                 <ion-title>Register</ion-title>
                 <ion-buttons slot="end">
                     <ion-button @click="dismissRegisterModal()">
-                        <ion-icon
-                            size="large"
-                            src="/src/assets/icon/close-outline.svg" />
+                        <ion-icon size="large" src="/src/assets/icon/close-outline.svg" />
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
@@ -17,29 +15,21 @@
                 <ion-row>
                     <ion-col>
                         <ion-item class="ion-margin">
-                            <ion-label position="floating"
-                                >First Name</ion-label
-                            >
+                            <ion-label position="floating">First Name</ion-label>
                             <ion-input type="text" v-model="state.firstName" />
                         </ion-item>
-                        <ion-text
-                            class="ion-margin"
-                            color="danger"
-                            v-if="v$.firstName.$error"
-                            >{{ v$.firstName.$errors[0].$message }}</ion-text
-                        >
+                        <ion-text class="ion-margin" color="danger" v-if="v$.firstName.$error">{{
+                            v$.firstName.$errors[0].$message
+                        }}</ion-text>
                     </ion-col>
                     <ion-col>
                         <ion-item class="ion-margin">
                             <ion-label position="floating">lastName</ion-label>
                             <ion-input type="text" v-model="state.lastName" />
                         </ion-item>
-                        <ion-text
-                            class="ion-margin"
-                            color="danger"
-                            v-if="v$.lastName.$error"
-                            >{{ v$.lastName.$errors[0].$message }}</ion-text
-                        >
+                        <ion-text class="ion-margin" color="danger" v-if="v$.lastName.$error">{{
+                            v$.lastName.$errors[0].$message
+                        }}</ion-text>
                     </ion-col>
                 </ion-row>
                 <ion-row>
@@ -48,12 +38,9 @@
                             <ion-label position="floating">Username</ion-label>
                             <ion-input type="text" v-model="state.username" />
                         </ion-item>
-                        <ion-text
-                            class="ion-margin"
-                            color="danger"
-                            v-if="v$.username.$error"
-                            >{{ v$.username.$errors[0].$message }}</ion-text
-                        >
+                        <ion-text class="ion-margin" color="danger" v-if="v$.username.$error">{{
+                            v$.username.$errors[0].$message
+                        }}</ion-text>
                     </ion-col>
                 </ion-row>
                 <ion-row>
@@ -62,55 +49,36 @@
                             <ion-label position="floating">E-mail</ion-label>
                             <ion-input type="text" v-model="state.email" />
                         </ion-item>
-                        <ion-text
-                            class="ion-margin"
-                            color="danger"
-                            v-if="v$.email.$error"
-                            >{{ v$.email.$errors[0].$message }}</ion-text
-                        >
+                        <ion-text class="ion-margin" color="danger" v-if="v$.email.$error">{{
+                            v$.email.$errors[0].$message
+                        }}</ion-text>
                     </ion-col>
                 </ion-row>
                 <ion-row>
                     <ion-col>
                         <ion-item class="ion-margin">
                             <ion-label position="floating">Password</ion-label>
-                            <ion-input
-                                type="password"
-                                v-model="state.password" />
+                            <ion-input type="password" v-model="state.password" />
                         </ion-item>
-                        <ion-text
-                            class="ion-margin"
-                            color="danger"
-                            v-if="v$.password.$error"
-                            >{{ v$.password.$errors[0].$message }}</ion-text
-                        >
+                        <ion-text class="ion-margin" color="danger" v-if="v$.password.$error">{{
+                            v$.password.$errors[0].$message
+                        }}</ion-text>
                     </ion-col>
                     <ion-col>
                         <ion-item class="ion-margin">
-                            <ion-label position="floating"
-                                >Confirm Password</ion-label
-                            >
-                            <ion-input
-                                type="password"
-                                v-model="state.confirmPassword" />
+                            <ion-label position="floating">Confirm Password</ion-label>
+                            <ion-input type="password" v-model="state.confirmPassword" />
                         </ion-item>
-                        <ion-text
-                            class="ion-margin"
-                            color="danger"
-                            v-if="v$.confirmPassword.$error"
-                            >{{
-                                v$.confirmPassword.$errors[0].$message
-                            }}</ion-text
-                        >
+                        <ion-text class="ion-margin" color="danger" v-if="v$.confirmPassword.$error">{{
+                            v$.confirmPassword.$errors[0].$message
+                        }}</ion-text>
                     </ion-col>
                 </ion-row>
             </ion-grid>
         </ion-content>
         <ion-footer>
             <ion-toolbar>
-                <ion-button slot="end" @click="submitForm()" color="primary"
-                    >Register</ion-button
-                >
+                <ion-button slot="end" @click="submitForm()" color="primary">Register</ion-button>
             </ion-toolbar>
         </ion-footer>
     </ion-page>

@@ -5,9 +5,7 @@
                 <ion-title>Create new journey</ion-title>
                 <ion-buttons slot="end">
                     <ion-button @click="modalController.dismiss()">
-                        <ion-icon
-                            size="large"
-                            src="/src/assets/icon/close-outline.svg"></ion-icon>
+                        <ion-icon size="large" src="/src/assets/icon/close-outline.svg"></ion-icon>
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
@@ -25,9 +23,7 @@
                 :input="endData.locationText"
                 @prediction-chosen="setEndPredictionText($event)" />
 
-            <ion-button class="ion-padding" @click="gotoJourneyMap">
-                Create
-            </ion-button>
+            <ion-button class="ion-padding" @click="gotoJourneyMap"> Create </ion-button>
         </ion-content>
     </section>
 </template>
@@ -88,15 +84,10 @@ function setEndPredictionText(prediction: string) {
 
 async function gotoJourneyMap() {
     if (startData.value.isOk && endData.value.isOk) {
-        const geocodedStart = await getGeocodedData(
-            startData.value.locationText
-        );
+        const geocodedStart = await getGeocodedData(startData.value.locationText);
         const geocodedEnd = await getGeocodedData(endData.value.locationText);
 
-        if (
-            geocodedStart.error === undefined &&
-            geocodedEnd.error === undefined
-        ) {
+        if (geocodedStart.error === undefined && geocodedEnd.error === undefined) {
             const route = {
                 name: "map",
                 params: {

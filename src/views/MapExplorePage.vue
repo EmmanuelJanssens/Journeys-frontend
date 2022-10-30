@@ -4,31 +4,15 @@
         <ion-content>
             <ion-grid style="height: 100%">
                 <ion-row style="height: 100%">
-                    <ion-col
-                        :hidden="false"
-                        class="sidebar-items-list ion-hide-xl-down">
-                        <DynamicScroller
-                            :items="usePoi.poiRef.features"
-                            :min-item-size="54"
-                            style="height: 100%">
+                    <ion-col :hidden="false" class="sidebar-items-list ion-hide-xl-down">
+                        <DynamicScroller :items="usePoi.poiRef.features" :min-item-size="54" style="height: 100%">
                             <template v-slot="{ item, index, active }">
-                                <DynamicScrollerItem
-                                    :item="item"
-                                    :active="active"
-                                    :data-index="index">
-                                    <ion-item
-                                        button
-                                        @click="
-                                            panTo(item.geometry.coordinates)
-                                        ">
+                                <DynamicScrollerItem :item="item" :active="active" :data-index="index">
+                                    <ion-item button @click="panTo(item.geometry.coordinates)">
                                         <ion-thumbnail slot="start">
-                                            <ion-img
-                                                src="src/assets/placeholder.png">
-                                            </ion-img>
+                                            <ion-img :src="item.properties.thumbnail"> </ion-img>
                                         </ion-thumbnail>
-                                        <ion-label>{{
-                                            item.properties.name
-                                        }}</ion-label>
+                                        <ion-label>{{ item.properties.name }}</ion-label>
                                     </ion-item>
                                 </DynamicScrollerItem>
                             </template>
@@ -57,9 +41,7 @@
                     </ion-col>
                     <ion-col class="map-col">
                         <ion-searchbar class="floating search"></ion-searchbar>
-                        <ion-button
-                            size="small"
-                            class="ion-margin-start ion-margin-top floating icon-button">
+                        <ion-button size="small" class="ion-margin-start ion-margin-top floating icon-button">
                             <ion-icon
                                 class="icon-button"
                                 slot="icon-only"
@@ -67,27 +49,16 @@
                         </ion-button>
 
                         <ion-content class="map-wrap">
-                            <ion-fab
-                                v-if="!isLoading"
-                                vertical="top"
-                                horizontal="end"
-                                slot="fixed">
+                            <ion-fab v-if="!isLoading" vertical="top" horizontal="end" slot="fixed">
                                 <ion-fab-button>
-                                    <ion-icon
-                                        size="large"
-                                        src="/src/assets/icon/chevron-down-outline.svg"></ion-icon>
+                                    <ion-icon size="large" src="/src/assets/icon/chevron-down-outline.svg"></ion-icon>
                                 </ion-fab-button>
                                 <ion-fab-list>
-                                    <ion-fab-button
-                                        @click="openModal(SaveJourneyModal)">
-                                        <ion-icon
-                                            size="large"
-                                            src="/src/assets/icon/save-outline.svg"></ion-icon>
+                                    <ion-fab-button @click="openModal(SaveJourneyModal)">
+                                        <ion-icon size="large" src="/src/assets/icon/save-outline.svg"></ion-icon>
                                     </ion-fab-button>
                                     <ion-fab-button>
-                                        <ion-icon
-                                            size="large"
-                                            src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
+                                        <ion-icon size="large" src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
                                     </ion-fab-button>
                                 </ion-fab-list>
                             </ion-fab>
@@ -95,9 +66,7 @@
                             <section class="map" ref="mapContainer"></section>
                         </ion-content>
                     </ion-col>
-                    <ion-col
-                        v-if="!isLoading"
-                        class="journeys-items ion-hide-md-down">
+                    <ion-col v-if="!isLoading" class="journeys-items ion-hide-md-down">
                         <map-journey-sidebar
                             v-if="!isLoading"
                             :start="startPoint"
@@ -136,14 +105,9 @@ import {
     alertController
 } from "@ionic/vue";
 import haversine from "haversine";
-import {
-    GeoJSONSource,
-    Map,
-    MapMouseEvent,
-    Marker,
-    NavigationControl
-} from "maplibre-gl";
-import { LngLat } from "maplibre-gl";
+
+import mapboxgl from "mapbox-gl";
+import { Map, Marker, NavigationControl, MapMouseEvent, GeoJSONSource, LngLat } from "mapbox-gl";
 import { ref } from "vue";
 
 import SaveJourneyModal from "components/Modals/SaveJourneyModal.vue";
@@ -199,56 +163,49 @@ function getRadius(start: LngLat, end: LngLat): number {
 function onMarkerDrag(marker: Marker, pos: string) {
     marker.on("dragend", () => {
         isLoading.value = true;
-        reverseGeocode(marker.getLngLat().lat, marker.getLngLat().lng).then(
-            (resp) => {
-                const result = getLocalityAndCountry(resp!);
-                if (
-                    result.country != undefined &&
-                    result.locality != undefined
-                ) {
-                    useJourney.journeyRef.experiences = [];
-                    if (pos === "start") {
-                        startPoint.value.address =
-                            result.locality + ", " + result.country;
-                        startPoint.value.coordinates = marker.getLngLat();
-                    } else if (pos === "end") {
-                        endPoint.value.address =
-                            result.locality + ", " + result.country;
-                        endPoint.value.coordinates = marker.getLngLat();
-                    }
-                    radius.value = getRadius(
-                        startPoint.value.coordinates,
-                        endPoint.value.coordinates
-                    );
-                    const mid = getMidPoint(
-                        startPoint.value.coordinates,
-                        endPoint.value.coordinates
-                    );
-                    usePoi
-                        .searchBetween(mid.lat, mid.lng, radius.value)
-                        .then((resp) => {
-                            if (resp == true) {
-                                addStopPointToMapp();
-                                (
-                                    map.value?.getSource("poi") as GeoJSONSource
-                                ).setData({
-                                    type: "FeatureCollection",
-                                    features: usePoi.poiRef.features
-                                } as FeatureCollection);
-                            }
-                            isLoading.value = false;
-                        });
+        reverseGeocode(marker.getLngLat().lat, marker.getLngLat().lng).then((resp) => {
+            const result = getLocalityAndCountry(resp!);
+            if (result.country != undefined && result.locality != undefined) {
+                useJourney.editJourney.experiences = [];
+                if (pos === "start") {
+                    startPoint.value.address = result.locality + ", " + result.country;
+                    startPoint.value.coordinates = marker.getLngLat();
+                    useJourney.editJourney.start = {
+                        address: startPoint.value.address,
+                        latitude: startPoint.value.coordinates.lat,
+                        longitude: startPoint.value.coordinates.lng
+                    };
+                } else if (pos === "end") {
+                    endPoint.value.address = result.locality + ", " + result.country;
+                    endPoint.value.coordinates = marker.getLngLat();
+                    useJourney.editJourney.end = {
+                        address: endPoint.value.address,
+                        latitude: endPoint.value.coordinates.lat,
+                        longitude: endPoint.value.coordinates.lng
+                    };
                 }
+                radius.value = getRadius(startPoint.value.coordinates, endPoint.value.coordinates);
+                const mid = getMidPoint(startPoint.value.coordinates, endPoint.value.coordinates);
+                usePoi.searchBetween(mid.lat, mid.lng, radius.value).then((resp) => {
+                    if (resp == true) {
+                        addStopPointToMapp();
+                        (map.value?.getSource("poi") as GeoJSONSource).setData({
+                            type: "FeatureCollection",
+                            features: usePoi.poiRef.features
+                        } as FeatureCollection);
+                    }
+                    isLoading.value = false;
+                });
             }
-        );
+        });
     });
 }
 
 onBeforeRouteLeave(async () => {
     if (
         isSaved.value === false &&
-        useJourney.journeyRef.experiences != undefined &&
-        useJourney.journeyRef.experiences.length > 0
+        useJourney.editJourney.experiences != undefined &&
+        useJourney.editJourney.experiences.length > 0
     ) {
         let leave = false;
         const alert = await alertController.create({
@@ -285,7 +242,7 @@ onBeforeRouteLeave(async () => {
 onIonViewWillEnter(() => {
     const params = router.currentRoute.value.params;
 
-    useJourney.journeyRef.experiences = [];
+    useJourney.editJourney.experiences = [];
     if (params.start != undefined && params.end != undefined) {
         startPoint.value = JSON.parse(params.start as string) as GeocodedData;
         endPoint.value = JSON.parse(params.end as string) as GeocodedData;
@@ -293,13 +250,9 @@ onIonViewWillEnter(() => {
 
         startMarker.value = new Marker();
         endMarker.value = new Marker();
-        startMarker.value
-            .setDraggable(true)
-            .setLngLat(startPoint.value.coordinates);
+        startMarker.value.setDraggable(true).setLngLat(startPoint.value.coordinates);
 
-        endMarker.value
-            .setDraggable(true)
-            .setLngLat(endPoint.value.coordinates);
+        endMarker.value.setDraggable(true).setLngLat(endPoint.value.coordinates);
 
         onMarkerDrag(startMarker.value, "start");
         onMarkerDrag(endMarker.value, "end");
@@ -343,7 +296,7 @@ async function openModal(component: any) {
     isSaved.value = role == "view" || role == "stay";
     if (role == "view") {
         const route = {
-            name: "journey",
+            name: "logbook",
             params: {
                 id: data.data
             }
@@ -362,20 +315,11 @@ function panTo(coordinates: number[]) {
 function addStopPointToMapp() {
     var stopPoints: number[][] = [];
 
-    stopPoints.push([
-        startPoint.value.coordinates.lng,
-        startPoint.value.coordinates.lat
-    ]);
-    useJourney.journeyRef.experiences?.forEach((exp) => {
-        stopPoints.push([
-            exp.poi.location.longitude!,
-            exp.poi.location.latitude!
-        ]);
+    stopPoints.push([startPoint.value.coordinates.lng, startPoint.value.coordinates.lat]);
+    useJourney.editJourney.experiences?.forEach((exp) => {
+        stopPoints.push([exp.poi.location.longitude!, exp.poi.location.latitude!]);
     });
-    stopPoints.push([
-        endPoint.value.coordinates.lng,
-        endPoint.value.coordinates.lat
-    ]);
+    stopPoints.push([endPoint.value.coordinates.lng, endPoint.value.coordinates.lat]);
 
     if (map.value?.getSource("route")) {
         (map.value?.getSource("route") as GeoJSONSource).setData({
@@ -394,16 +338,13 @@ function load() {
     isLoading.value = true;
     isValid.value = true;
     const midPoint = {
-        lng: getMidPoint(
-            startPoint.value.coordinates,
-            endPoint.value.coordinates
-        ).lng,
-        lat: getMidPoint(
-            startPoint.value.coordinates,
-            endPoint.value.coordinates
-        ).lat,
+        lng: getMidPoint(startPoint.value.coordinates, endPoint.value.coordinates).lng,
+        lat: getMidPoint(startPoint.value.coordinates, endPoint.value.coordinates).lat,
         zoom: 10
     };
+
+    mapboxgl.accessToken =
+        "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg";
 
     const apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
 
@@ -411,7 +352,10 @@ function load() {
         container: mapContainer.value,
         style: `https://api.maptiler.com/maps/voyager/style.json?key=${apiKey}`,
         center: [midPoint.lng, midPoint.lat],
-        zoom: midPoint.zoom
+        zoom: midPoint.zoom,
+        projection: {
+            name: "globe"
+        }
     });
 
     map.value?.once("render", () => {
@@ -422,113 +366,88 @@ function load() {
         startMarker.value?.addTo(map.value!);
         endMarker.value?.addTo(map.value!);
 
-        usePoi
-            .searchBetween(midPoint.lat, midPoint.lng, radius.value / 2)
-            .then((response) => {
-                hideSidebar.value = usePoi.poiRef.features.length == 0;
+        usePoi.searchBetween(midPoint.lat, midPoint.lng, radius.value / 2).then((response) => {
+            hideSidebar.value = usePoi.poiRef.features.length == 0;
 
-                if (hideSidebar.value != true && response) {
-                    map.value?.addSource("poi", {
-                        type: "geojson",
-                        data: usePoi.poiRef,
-                        cluster: true,
-                        clusterMaxZoom: 14,
-                        clusterRadius: 50
-                    });
+            if (hideSidebar.value != true && response) {
+                map.value?.addSource("poi", {
+                    type: "geojson",
+                    data: usePoi.poiRef,
+                    cluster: true,
+                    clusterMaxZoom: 14,
+                    clusterRadius: 50
+                });
 
-                    map.value?.addLayer({
-                        id: "clusters",
-                        type: "circle",
-                        source: "poi",
-                        filter: ["has", "point_count"],
-                        paint: {
-                            "circle-color": [
-                                "step",
-                                ["get", "point_count"],
-                                "#51bbd6",
-                                100,
-                                "#f1f075",
-                                750,
-                                "#f28cb1"
-                            ],
-                            "circle-radius": [
-                                "step",
-                                ["get", "point_count"],
-                                20,
-                                100,
-                                30,
-                                750,
-                                40
-                            ]
+                map.value?.addLayer({
+                    id: "clusters",
+                    type: "circle",
+                    source: "poi",
+                    filter: ["has", "point_count"],
+                    paint: {
+                        "circle-color": ["step", ["get", "point_count"], "#51bbd6", 100, "#f1f075", 750, "#f28cb1"],
+                        "circle-radius": ["step", ["get", "point_count"], 20, 100, 30, 750, 40]
+                    }
+                });
+
+                map.value?.addLayer({
+                    id: "cluster-count",
+                    type: "symbol",
+                    source: "poi",
+                    filter: ["has", "point_count"],
+                    layout: {
+                        "text-field": "{point_count_abbreviated}",
+                        "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+                        "text-size": 12
+                    }
+                });
+
+                map.value?.addLayer({
+                    id: "unclustered-point",
+                    type: "circle",
+                    source: "poi",
+                    filter: ["!", ["has", "point_count"]],
+                    paint: {
+                        "circle-color": "#11b4da",
+                        "circle-radius": 6,
+                        "circle-stroke-width": 1,
+                        "circle-stroke-color": "#fff"
+                    }
+                });
+                var stopPoints: number[][] = [];
+
+                stopPoints.push([startPoint.value.coordinates.lng, startPoint.value.coordinates.lat]);
+                stopPoints.push([endPoint.value.coordinates.lng, endPoint.value.coordinates.lat]);
+                map.value?.addSource("route", {
+                    type: "geojson",
+                    data: {
+                        type: "Feature",
+                        properties: {},
+                        geometry: {
+                            type: "LineString",
+                            coordinates: stopPoints
                         }
-                    });
+                    }
+                });
 
-                    map.value?.addLayer({
-                        id: "cluster-count",
-                        type: "symbol",
-                        source: "poi",
-                        filter: ["has", "point_count"],
-                        layout: {
-                            "text-field": "{point_count_abbreviated}",
-                            "text-font": [
-                                "DIN Offc Pro Medium",
-                                "Arial Unicode MS Bold"
-                            ],
-                            "text-size": 12
-                        }
-                    });
+                map.value?.addLayer({
+                    id: "route",
+                    type: "line",
+                    source: "route",
+                    layout: {
+                        "line-join": "round",
+                        "line-cap": "round"
+                    },
+                    paint: {
+                        "line-color": "#555",
+                        "line-width": 2
+                    }
+                });
+            }
+            //finish loading
+            isLoading.value = false;
+        });
 
-                    map.value?.addLayer({
-                        id: "unclustered-point",
-                        type: "circle",
-                        source: "poi",
-                        filter: ["!", ["has", "point_count"]],
-                        paint: {
-                            "circle-color": "#11b4da",
-                            "circle-radius": 6,
-                            "circle-stroke-width": 1,
-                            "circle-stroke-color": "#fff"
-                        }
-                    });
-                    var stopPoints: number[][] = [];
-
-                    stopPoints.push([
-                        startPoint.value.coordinates.lng,
-                        startPoint.value.coordinates.lat
-                    ]);
-                    stopPoints.push([
-                        endPoint.value.coordinates.lng,
-                        endPoint.value.coordinates.lat
-                    ]);
-                    map.value?.addSource("route", {
-                        type: "geojson",
-                        data: {
-                            type: "Feature",
-                            properties: {},
-                            geometry: {
-                                type: "LineString",
-                                coordinates: stopPoints
-                            }
-                        }
-                    });
-
-                    map.value?.addLayer({
-                        id: "route",
-                        type: "line",
-                        source: "route",
-                        layout: {
-                            "line-join": "round",
-                            "line-cap": "round"
-                        },
-                        paint: {
-                            "line-color": "#555",
-                            "line-width": 2
-                        }
-                    });
-                }
-                //finish loading
-                isLoading.value = false;
-            });
+        map.value?.setFog({});
     });
 
     map.value?.on("click", "clusters", (e) => {
@@ -536,9 +455,7 @@ function load() {
     });
 
     map.value?.on("click", "unclustered-point", (e) => {
-        e.features![0].properties!.location = JSON.parse(
-            e.features![0].properties!.location
-        );
+        e.features![0].properties!.location = JSON.parse(e.features![0].properties!.location);
         onPopOver(e.features![0].properties as PoiDto, e);
     });
 
@@ -567,25 +484,20 @@ function onClusterClick(e: MapMouseEvent) {
     const features = map.value?.queryRenderedFeatures(e.point, {
         layers: ["clusters"]
     });
-    const clusterId = features![0].properties.cluster_id;
-    const source: maplibregl.GeoJSONSource = map.value?.getSource(
-        "poi"
-    ) as maplibregl.GeoJSONSource;
+    const clusterId = features![0].properties!.cluster_id;
+    const source: maplibregl.GeoJSONSource = map.value?.getSource("poi") as maplibregl.GeoJSONSource;
     source.getClusterExpansionZoom(clusterId, (err: any, zoom: any) => {
         if (err) return;
         if (features![0].geometry.type === "Point") {
             map.value?.easeTo({
-                center: [
-                    features![0].geometry.coordinates[0],
-                    features![0].geometry.coordinates[1]
-                ],
+                center: [features![0].geometry.coordinates[0], features![0].geometry.coordinates[1]],
                 zoom: zoom
             });
         }
     });
 }
 
-function getMidPoint(start: maplibregl.LngLat, end: maplibregl.LngLat) {
+function getMidPoint(start: LngLat, end: LngLat) {
     const lat1 = (start.lat * Math.PI) / 180;
     const lon1 = (start.lng * Math.PI) / 180;
     const X1 = Math.cos(lat1) * Math.cos(lon1);

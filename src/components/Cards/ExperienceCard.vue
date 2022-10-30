@@ -4,16 +4,15 @@
             <ion-toolbar color="none">
                 <ion-card-title>{{ props.experience.poi.name }}</ion-card-title>
                 <ion-buttons slot="end">
-                    <ion-button @click="onPopover">
-                        <ion-icon
-                            size="large"
-                            src="/src/assets/icon/ellipsis-vertical-outline.svg"></ion-icon>
+                    <ion-button @click="onEdit">
+                        <ion-icon src="/src/assets/icon/pencil-outline.svg" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button @click="onDelete">
+                        <ion-icon src="/src/assets/icon/trash-bin-outline.svg" slot="icon-only"></ion-icon>
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
-            <ion-card-subtitle>{{
-                props.experience.experience.date
-            }}</ion-card-subtitle>
+            <ion-card-subtitle>{{ props.experience.experience.date }}</ion-card-subtitle>
         </ion-card-header>
         <swiper
             :slides-per-view="1"
@@ -28,9 +27,7 @@
             }"
             :loop="true"
             :modules="modules">
-            <swiper-slide
-                v-for="image in props.experience.experience.images"
-                v-bind:key="image">
+            <swiper-slide v-for="image in props.experience.experience.images" v-bind:key="image">
                 <ion-img :src="image"></ion-img>
             </swiper-slide>
         </swiper>
@@ -52,42 +49,97 @@ import {
     IonImg,
     IonCardSubtitle,
     IonIcon,
-    popoverController
+    popoverController,
+    alertController,
+    modalController
 } from "@ionic/vue";
+
 import { Swiper, SwiperSlide } from "swiper/vue";
+import { Navigation, Lazy, Pagination, Autoplay } from "swiper";
+
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
+
 import { ref } from "vue";
+import EditExperienceModal from "components/Modals/EditExperienceModal.vue";
+import { useJourneyStore } from "stores/useJourneyStore";
+import { ExperienceDto } from "types/dtos";
+import { showToast } from "utils/utils";
 
-import { Navigation, Lazy, Pagination, Autoplay } from "swiper";
-import ExperienceCardPopover from "components/ExperienceCardPopover.vue";
 const props = defineProps(["experience", "journey"]);
+const emit = defineEmits(["updated"]);
 const modules = ref([Navigation, Lazy, Pagination, Autoplay]);
+const useJourney = useJourneyStore();
 
-async function onPopover(e: Event) {
-    console.log(props);
-    const popover = await popoverController.create({
-        component: ExperienceCardPopover,
-        componentProps: props,
-        event: e,
-        size: "auto",
-        reference: "event",
-        side: "left",
-        alignment: "bottom"
+async function onEdit() {
+    const experience = props.experience as ExperienceDto;
+    experience.journey = {
+        id: props.journey
+    };
+
+    popoverController.dismiss();
+    console.log(experience);
+    const modal = await modalController.create({
+        component: EditExperienceModal,
+        componentProps: {
+            experience: {
+                experience: experience.experience,
+                journey: experience.journey,
+                poi: experience.poi
+            }
+        },
+        keyboardClose: false
     });
-    await popover.present();
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    if (data && data.status === "success") {
+        emit("updated");
+    }
+}
+
+async function onDelete() {
+    const exp = props.experience as ExperienceDto;
+    exp.journey = {
+        id: props.journey
+    };
+    popoverController.dismiss();
+
+    const alert = await alertController.create({
+        header: "Warning",
+        subHeader: "You are about to delete this experience, this action is action is irreversible",
+        message: "Do you wish to proceed?",
+        buttons: [
+            {
+                text: "Yes",
+                role: "proceed",
+                handler: async () => {
+                    await useJourney.removeExperience(exp);
+                    useJourney.viewJourney.experiences = useJourney.viewJourney.experiences!.filter(
+                        (el) => el.poi.id != exp.poi.id
+                    );
+                    showToast("Experience deleted", "success");
+                    emit("updated");
+                }
+            },
+            "No"
+        ]
+    });
+    await alert.present();
 }
 </script>
 
 <style scoped>
-ion-card {
-    max-height: 100%;
-    display: flex;
-    flex-direction: column;
+ion-img {
+    width: 90%;
+    height: 100%;
 }
 .content {
-    overflow: auto;
+    height: 100%;
+    max-height: 200px;
+    overflow-y: auto;
 }
 </style>

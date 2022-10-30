@@ -18,7 +18,43 @@ export const useJourneyStore = defineStore("journey", () => {
             longitude: -1
         }
     });
-
+    const viewJourney = ref<JourneyDto>({
+        title: "wolol",
+        experiences: [],
+        start: {
+            address: "",
+            latitude: -1,
+            longitude: -1
+        },
+        end: {
+            address: "",
+            latitude: -1,
+            longitude: -1
+        }
+    });
+    function journeyToGeojson(journey: JourneyDto): GeoJSON.Feature[] {
+        const obj: GeoJSON.Feature[] = [
+            {
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [journey.start?.longitude!, journey.start?.latitude!]
+                },
+                properties: journey,
+                id: journey.id
+            },
+            {
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [journey.end?.longitude!, journey.end?.latitude!]
+                },
+                properties: journey,
+                id: journey.id
+            }
+        ];
+        return obj;
+    }
     function getJourney(id: string): Promise<JourneyDto> {
         return axios.get("api/journey/" + id).then((response) => {
             const journey = response.data as JourneyDto;
@@ -34,12 +70,8 @@ export const useJourneyStore = defineStore("journey", () => {
     }
 
     function removeFromJourney(id: string) {
-        const removed = editJourney.value.experiences?.find(
-            (p) => p.poi.id == id
-        );
-        editJourney.value!.experiences = editJourney.value?.experiences?.filter(
-            (item) => item.poi.id !== id
-        );
+        const removed = editJourney.value.experiences?.find((p) => p.poi.id == id);
+        editJourney.value!.experiences = editJourney.value?.experiences?.filter((item) => item.poi.id !== id);
         return removed;
     }
 
@@ -71,11 +103,7 @@ export const useJourneyStore = defineStore("journey", () => {
             });
     }
     function alreadyInJourney(expDto: ExperienceDto): boolean {
-        return (
-            editJourney.value?.experiences!.find(
-                (item) => item.poi.id === expDto.poi.id
-            ) !== undefined
-        );
+        return editJourney.value?.experiences!.find((item) => item.poi.id === expDto.poi.id) !== undefined;
     }
 
     function saveJourney(name: string): Promise<string> {
@@ -149,8 +177,10 @@ export const useJourneyStore = defineStore("journey", () => {
             });
     }
     return {
-        journeyRef: editJourney,
+        editJourney,
+        viewJourney,
         addToJourney,
+        journeyToGeojson,
         updateExperience,
         removeExperience,
         removeFromJourney,

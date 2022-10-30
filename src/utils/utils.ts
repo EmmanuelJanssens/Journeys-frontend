@@ -21,7 +21,9 @@ export async function openModal(component: any, props?: any) {
     const modal = await modalController.create({
         component: component,
         componentProps: props,
-        keyboardClose: false
+        keyboardClose: false,
+        backdropDismiss: false
     });
-    modal.present();
+    await modal.present();
+    return modal;
 }

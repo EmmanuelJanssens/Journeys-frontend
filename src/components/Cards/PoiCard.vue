@@ -8,7 +8,7 @@
             <ion-grid>
                 <ion-row>
                     <ion-col>
-                        <ion-img src="/src/assets/featureImg3.png"></ion-img>
+                        <ion-img :src="data.poi.thumbnail"></ion-img>
                     </ion-col>
                 </ion-row>
                 <ion-row>
@@ -16,9 +16,7 @@
                 </ion-row>
                 <ion-row>
                     <ion-col>
-                        <ion-button @click="addToJourney(data.poi)">
-                            Add
-                        </ion-button>
+                        <ion-button @click="addToJourney(data.poi)"> Add </ion-button>
                     </ion-col>
                 </ion-row>
             </ion-grid>
@@ -51,13 +49,14 @@ const data = defineProps(["poi"]);
 const useJourney = useJourneyStore();
 
 function addToJourney(poi: PoiDto) {
+    if (poi.thumbnail != undefined) delete poi.thumbnail;
     const experience: ExperienceDto = {
         poi: poi,
         experience: {
             date: new Date(),
             description: "",
             images: [],
-            order: useJourney.journeyRef.experiences!.length
+            order: useJourney.editJourney.experiences!.length
         }
     };
     useJourney.addToJourney(experience);

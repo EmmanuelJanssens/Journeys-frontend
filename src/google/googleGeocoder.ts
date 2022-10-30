@@ -34,10 +34,7 @@ async function getGeocodedData(value: string): Promise<GeocodedData> {
     return response;
 }
 
-async function reverseGeocode(
-    lat: number,
-    lng: number
-): Promise<google.maps.GeocoderResult | undefined> {
+async function reverseGeocode(lat: number, lng: number): Promise<google.maps.GeocoderResult | undefined> {
     const request: google.maps.GeocoderRequest = {
         location: {
             lat,

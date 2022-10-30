@@ -4,10 +4,9 @@ import type { RouteRecordRaw } from "vue-router";
 import MapExplorePage from "views/MapExplorePage.vue";
 import LogBookPage from "views/LogBookPage.vue";
 import JourneyPage from "views/JourneyPage.vue"; */
-import LogBookPage from "views/LogBookPage.vue";
 
 const HomePage = async () => import("views/HomePage.vue");
-const JourneyPage = async () => import("views/JourneyPage.vue");
+const LogBookPage = async () => import("views/LogBookPage.vue");
 const MapExplorePage = async () => import("views/MapExplorePage.vue");
 const routes: RouteRecordRaw[] = [
     {
@@ -28,11 +27,6 @@ const routes: RouteRecordRaw[] = [
         path: "/logbook",
         name: "logbook",
         component: LogBookPage
-    },
-    {
-        path: "/journey",
-        name: "journey",
-        component: JourneyPage
     }
 ];
 

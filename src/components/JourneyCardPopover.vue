@@ -5,14 +5,7 @@
     </ion-list>
 </template>
 <script lang="ts" setup>
-import {
-    IonItem,
-    IonList,
-    IonAlert,
-    popoverController,
-    alertController,
-    modalController
-} from "@ionic/vue";
+import { IonItem, IonList, IonAlert, popoverController, alertController, modalController } from "@ionic/vue";
 import EditJourneyModal from "components/Modals/EditJourneyModal.vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
@@ -38,8 +31,7 @@ async function onDelete() {
 
     const alert = await alertController.create({
         header: "Warning",
-        subHeader:
-            "You are about to delete this journey, this action is action is irreversible",
+        subHeader: "You are about to delete this journey, this action is action is irreversible",
         message: "Do you wish to proceed?",
         buttons: [
             {

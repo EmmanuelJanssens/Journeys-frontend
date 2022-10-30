@@ -2,15 +2,12 @@
     <ion-page id="main-content">
         <ion-content :fullscreen="true">
             <ion-grid :fixed="true" class="ion-no-padding">
-                <ion-row
-                    class="ion-align-items-center ion-justify-content-center ion-hide-sm-down journey">
+                <ion-row class="ion-align-items-center ion-justify-content-center ion-hide-sm-down journey">
                     <ion-col size="3" class="ion-margin">
                         <GautoCompletePredictionList
                             placeholder="Start"
                             :input="startData.address"
-                            @prediction-chosen="
-                                setStartPredictionText($event)
-                            " />
+                            @prediction-chosen="setStartPredictionText($event)" />
                     </ion-col>
                     <ion-col size="3" class="ion-margin">
                         <GautoCompletePredictionList
@@ -19,9 +16,7 @@
                             @prediction-chosen="setEndPredictionText($event)" />
                     </ion-col>
                     <ion-col size="3" class="ion-margin">
-                        <ion-button color="primary" @click="gotoJourneyMap()"
-                            >Start
-                        </ion-button>
+                        <ion-button color="primary" @click="gotoJourneyMap()">Start </ion-button>
                     </ion-col>
                 </ion-row>
                 <ion-row class="ion-align-items-center" id="row">
@@ -29,13 +24,10 @@
                         <ion-label class="ion-text-wrap">
                             <h1>Find your next adventure</h1>
                             <p class="ion-text-justify">
-                                Plan places you want to visit be it local,
-                                cantonal or national, plan as you go and
-                                visualize your trip. Choose from many of our
-                                Points Of Interest, shared by other members Save
-                                your journey and come back to it anytime to edit
-                                your story Inspire Others by sharing your
-                                experiences within the community
+                                Plan places you want to visit be it local, cantonal or national, plan as you go and
+                                visualize your trip. Choose from many of our Points Of Interest, shared by other members
+                                Save your journey and come back to it anytime to edit your story Inspire Others by
+                                sharing your experiences within the community
                             </p>
                         </ion-label>
                     </ion-col>
@@ -51,12 +43,10 @@
                         <ion-label class="ion-text-wrap ion-text-justify">
                             <h1>share your story</h1>
                             <p class="ion-text-justif">
-                                Have you been to a place that no one else has
-                                seen ? Share them on our site and show the world
-                                your experiences. Create an account to add your
-                                new points of interest Look for the place you
-                                want to add on our interactive map Upload your
-                                pictures, and write your experience
+                                Have you been to a place that no one else has seen ? Share them on our site and show the
+                                world your experiences. Create an account to add your new points of interest Look for
+                                the place you want to add on our interactive map Upload your pictures, and write your
+                                experience
                             </p>
                         </ion-label>
                     </ion-col>
@@ -66,11 +56,9 @@
                         <ion-label class="ion-text-wrap">
                             <h1>Journayl your trip</h1>
                             <p class="ion-text-justify">
-                                Complete your dashboard with various adventures,
-                                save your memories to keep them forever. Thanks
-                                to our user friendly dashboard you will be able
-                                to edit your cards on the go or after you have
-                                completed your trip.
+                                Complete your dashboard with various adventures, save your memories to keep them
+                                forever. Thanks to our user friendly dashboard you will be able to edit your cards on
+                                the go or after you have completed your trip.
                             </p>
                         </ion-label>
                     </ion-col>
@@ -146,10 +134,7 @@ async function gotoJourneyMap() {
         const geocodedStart = await getGeocodedData(startData.value.address);
         const geocodedEnd = await getGeocodedData(endData.value.address);
 
-        if (
-            geocodedStart.error === undefined &&
-            geocodedEnd.error === undefined
-        ) {
+        if (geocodedStart.error === undefined && geocodedEnd.error === undefined) {
             const route = {
                 name: "map",
                 params: {

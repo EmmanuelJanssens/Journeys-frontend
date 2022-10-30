@@ -6,9 +6,7 @@
                 <ion-title>Login</ion-title>
                 <ion-buttons slot="end">
                     <ion-button @click="dismissLoginModal()">
-                        <ion-icon
-                            size="large"
-                            src="/src/assets/icon/close-outline.svg" />
+                        <ion-icon size="large" src="/src/assets/icon/close-outline.svg" />
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
@@ -18,29 +16,21 @@
                 <ion-label position="floating">Username</ion-label>
                 <ion-input type="text" v-model="state.username" />
             </ion-item>
-            <ion-text
-                class="ion-margin"
-                color="danger"
-                v-if="v$.username.$error"
-                >{{ v$.username.$errors[0].$message }}</ion-text
-            >
+            <ion-text class="ion-margin" color="danger" v-if="v$.username.$error">{{
+                v$.username.$errors[0].$message
+            }}</ion-text>
             <span class="separator"></span>
             <ion-item class="ion-margin">
                 <ion-label position="floating">Password</ion-label>
                 <ion-input type="password" v-model="state.password" />
             </ion-item>
-            <ion-text
-                class="ion-margin"
-                color="danger"
-                v-if="v$.password.$error"
-                >{{ v$.password.$errors[0].$message }}</ion-text
-            >
+            <ion-text class="ion-margin" color="danger" v-if="v$.password.$error">{{
+                v$.password.$errors[0].$message
+            }}</ion-text>
         </section>
         <ion-footer>
             <ion-toolbar>
-                <ion-button slot="end" @click="submitForm()" color="primary"
-                    >login</ion-button
-                >
+                <ion-button slot="end" @click="submitForm()" color="primary">login</ion-button>
             </ion-toolbar>
         </ion-footer>
     </ion-page>
@@ -85,19 +75,14 @@ const v$ = useVuelidate(rules, state);
 function submitForm() {
     v$.value.$validate();
     if (!v$.value.$error) {
-        userStore
-            .login(state.value.username, state.value.password)
-            .then((response) => {
-                if (response == true) {
-                    dismissLoginModal();
-                    showToast(
-                        "Welcome " + userStore.userRef.username,
-                        "success"
-                    );
-                } else {
-                    showToast("Authentication error", "danger");
-                }
-            });
+        userStore.login(state.value.username, state.value.password).then((response) => {
+            if (response == true) {
+                dismissLoginModal();
+                showToast("Welcome " + userStore.userRef.username, "success");
+            } else {
+                showToast("Authentication error", "danger");
+            }
+        });
     }
 }
 

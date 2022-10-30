@@ -5,9 +5,7 @@
                 <ion-title> Save your journey </ion-title>
                 <ion-buttons slot="end">
                     <ion-button @click="dismissModal">
-                        <ion-icon
-                            size="large"
-                            src="/src/assets/icon/close-outline.svg"></ion-icon>
+                        <ion-icon size="large" src="/src/assets/icon/close-outline.svg"></ion-icon>
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
@@ -17,9 +15,7 @@
             <section class="modal-content">
                 <div class="form-field">
                     <ion-item class="ion-margin">
-                        <ion-label position="floating">
-                            Journey Title
-                        </ion-label>
+                        <ion-label position="floating"> Journey Title </ion-label>
                         <ion-input type="text" v-model="title"> </ion-input>
                     </ion-item>
                 </div>
@@ -59,10 +55,7 @@ function dismissModal() {
 }
 
 async function saveJourney() {
-    if (
-        useJourney.journeyRef.start?.address!.length! <= 0 ||
-        useJourney.journeyRef.end?.address!.length! <= 0
-    ) {
+    if (useJourney.editJourney.start?.address!.length! <= 0 || useJourney.editJourney.end?.address!.length! <= 0) {
         let alert = await alertController.create({
             header: "Error",
             message: "Your journey is not valid, Some values may be missing",

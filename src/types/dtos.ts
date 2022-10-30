@@ -11,6 +11,7 @@ export type PoiDto = {
     name: string;
     location: LocationDto;
     experiences?: ExperienceDto[];
+    thumbnail?: string;
 };
 
 export type LocationDto = {
