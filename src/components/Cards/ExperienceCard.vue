@@ -80,7 +80,6 @@ async function onEdit() {
     };
 
     popoverController.dismiss();
-    console.log(experience);
     const modal = await modalController.create({
         component: EditExperienceModal,
         componentProps: {

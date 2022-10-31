@@ -82,7 +82,6 @@ const uploading = ref(false);
 let currentData = ref<ExperienceDto>();
 
 onMounted(() => {
-    console.log(props);
     currentData.value = props.experience as ExperienceDto;
 });
 

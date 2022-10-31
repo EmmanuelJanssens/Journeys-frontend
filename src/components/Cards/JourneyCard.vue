@@ -68,7 +68,6 @@ const emit = defineEmits(["headerClicked", "upated"]);
 const useJourney = useJourneyStore();
 const useUser = useUserStore();
 async function onEdit() {
-    console.log(props);
     const modal = await modalController.create({
         component: EditJourneyModal,
         componentProps: props,
@@ -77,7 +76,6 @@ async function onEdit() {
 
     await modal.present();
     const { data } = await modal.onDidDismiss();
-    console.log(data);
     if (data && data.status === "success") emit("upated");
 }
 
@@ -105,7 +103,6 @@ async function onDelete() {
     await alert.present();
 }
 async function goToJourney(id: string) {
-    console.log(id);
     emit("headerClicked", id);
 }
 </script>

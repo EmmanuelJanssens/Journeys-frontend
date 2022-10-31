@@ -1,0 +1,3 @@
+[submodule "journeys-capacitor-mapbox"]
+	path = journeys-capacitor-mapbox
+	url = git@github.com:EmmanuelJanssens/JourneysMapboxPlugin.git

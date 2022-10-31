@@ -57,9 +57,6 @@ import { onMounted, ref } from "vue";
 const useJourney = useJourneyStore();
 const props = defineProps(["journey"]);
 const title = ref();
-onMounted(() => {
-    console.log(props);
-});
 
 async function save() {
     const updated = props.journey;

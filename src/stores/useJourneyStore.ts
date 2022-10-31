@@ -63,7 +63,6 @@ export const useJourneyStore = defineStore("journey", () => {
     }
 
     function addToJourney(experience: ExperienceDto): void {
-        console.log(experience);
         if (!alreadyInJourney(experience)) {
             editJourney.value?.experiences?.push(experience);
         }

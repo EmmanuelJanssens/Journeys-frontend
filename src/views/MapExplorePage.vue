@@ -17,27 +17,6 @@
                                 </DynamicScrollerItem>
                             </template>
                         </DynamicScroller>
-
-                        <!--<RecycleScroller
-                            v-if="!isLoading"
-                            style="height: 100%"
-                            :items="usePoi.poiRef.features"
-                            :item-size="50">
-                            <template #default="{ item }">
-                                <ion-item
-                                    button
-                                    @click="panTo(item.geometry.coordinates)">
-                                    <ion-thumbnail slot="start">
-                                        <ion-img
-                                            src="src/assets/placeholder.png">
-                                        </ion-img>
-                                    </ion-thumbnail>
-                                    <ion-label>{{
-                                        item.properties.name
-                                    }}</ion-label>
-                                </ion-item>
-                            </template>
-                        </RecycleScroller>-->
                     </ion-col>
                     <ion-col class="map-col">
                         <ion-searchbar class="floating search"></ion-searchbar>
@@ -63,7 +42,7 @@
                                 </ion-fab-list>
                             </ion-fab>
 
-                            <section class="map" ref="mapContainer"></section>
+                            <section id="Map"></section>
                         </ion-content>
                     </ion-col>
                     <ion-col v-if="!isLoading" class="journeys-items ion-hide-md-down">
@@ -122,6 +101,7 @@ import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
 import { FeatureCollection } from "geojson";
 import { onBeforeRouteLeave } from "vue-router";
 import CreateJourneyModal from "components/Modals/CreateJourneyModal.vue";
+import { JourneysMap } from "journeys-capacitor-mapbox";
 const usePoi = usePoiStore();
 const useJourney = useJourneyStore();
 
@@ -334,7 +314,7 @@ function addStopPointToMapp() {
     isSaved.value = false;
 }
 
-function load() {
+async function load() {
     isLoading.value = true;
     isValid.value = true;
     const midPoint = {
@@ -347,16 +327,12 @@ function load() {
         "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg";
 
     const apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
-
-    map.value = new Map({
-        container: mapContainer.value,
-        style: `https://api.maptiler.com/maps/voyager/style.json?key=${apiKey}`,
-        center: [midPoint.lng, midPoint.lat],
-        zoom: midPoint.zoom,
-        projection: {
-            name: "globe"
-        }
-    });
+    await JourneysMap.loadMap(
+        "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg",
+        apiKey,
+        mapContainer.value
+    );
+    map.value = await JourneysMap.getMap()!;
 
     map.value?.once("render", () => {
         map.value?.resize();

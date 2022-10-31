@@ -11,60 +11,56 @@
                     </ion-col>
                     <ion-col ref="mapCol">
                         <ion-grid class="full-page slides ion-no-margin ion-no-padding">
-                            <ion-content>
-                                <ion-row class="">
-                                    <ion-toolbar color="secondary">
-                                        <ion-buttons slot="start">
-                                            <ion-button
-                                                @click="
-                                                    () => {
-                                                        setData();
-                                                    }
-                                                ">
-                                                <ion-icon
-                                                    src="src/assets/icon/return-up-back-outline.svg"
-                                                    slot="icon-only"></ion-icon>
-                                            </ion-button>
-                                        </ion-buttons>
-                                        <ion-buttons slot="end">
-                                            <ion-button @click="openJourneyCreationModal">
-                                                <ion-icon
-                                                    src="src/assets/icon/add-outline.svg"
-                                                    slot="icon-only"></ion-icon>
-                                            </ion-button>
-                                            <ion-button>
-                                                <ion-icon
-                                                    src="src/assets/icon/filter-outline.svg"
-                                                    slot="icon-only"></ion-icon>
-                                            </ion-button>
-                                            <ion-button>
-                                                <ion-icon
-                                                    src="src/assets/icon/search-outline.svg"
-                                                    slot="icon-only"></ion-icon>
-                                            </ion-button>
-                                        </ion-buttons>
-                                    </ion-toolbar>
-                                </ion-row>
-                                <ion-row class="map-section" ref="slides">
-                                    <section id="Map" class="full-page">
-                                        <swiper
-                                            :slides-per-view="slidesPerView"
-                                            :initial-slide="useUser.myJourneys?.length"
-                                            :pagination="{ clickable: true }"
-                                            lazy
-                                            :modules="modules"
-                                            class="journeys">
-                                            <swiper-slide v-for="item in useUser.myJourneys">
-                                                <JourneyCard
-                                                    :journey="item"
-                                                    class="journey-card ion-margin"
-                                                    @header-clicked="showExperiences(item.id!)"
-                                                    @upated="setData" />
-                                            </swiper-slide>
-                                        </swiper>
-                                    </section>
-                                </ion-row>
-                            </ion-content>
+                            <ion-row>
+                                <ion-toolbar color="secondary">
+                                    <ion-buttons slot="start">
+                                        <ion-button
+                                            @click="
+                                                () => {
+                                                    setData();
+                                                }
+                                            ">
+                                            <ion-icon
+                                                src="src/assets/icon/return-up-back-outline.svg"
+                                                slot="icon-only"></ion-icon>
+                                        </ion-button>
+                                    </ion-buttons>
+                                    <ion-buttons slot="end">
+                                        <ion-button @click="openJourneyCreationModal">
+                                            <ion-icon src="src/assets/icon/add-outline.svg" slot="icon-only"></ion-icon>
+                                        </ion-button>
+                                        <ion-button>
+                                            <ion-icon
+                                                src="src/assets/icon/filter-outline.svg"
+                                                slot="icon-only"></ion-icon>
+                                        </ion-button>
+                                        <ion-button>
+                                            <ion-icon
+                                                src="src/assets/icon/search-outline.svg"
+                                                slot="icon-only"></ion-icon>
+                                        </ion-button>
+                                    </ion-buttons>
+                                </ion-toolbar>
+                            </ion-row>
+                            <ion-row id="Map" class="mid-page"> </ion-row>
+                            <ion-row class="mid-page" ref="slides">
+                                <ion-content>
+                                    <swiper
+                                        :slides-per-view="slidesPerView"
+                                        :initial-slide="useUser.myJourneys?.length"
+                                        :pagination="{ clickable: true }"
+                                        lazy
+                                        :modules="modules"
+                                        class="journeys">
+                                        <swiper-slide v-for="item in useUser.myJourneys">
+                                            <JourneyCard
+                                                :journey="item"
+                                                class="journey-card ion-margin"
+                                                @header-clicked="showExperiences(item.id!)"
+                                                @upated="setData" />
+                                        </swiper-slide> </swiper
+                                ></ion-content>
+                            </ion-row>
                         </ion-grid>
                     </ion-col>
                     <ion-col
@@ -121,7 +117,6 @@
 </template>
 <script lang="ts" setup>
 import {
-    IonSpinner,
     IonLoading,
     IonIcon,
     IonPage,
@@ -134,13 +129,8 @@ import {
     IonButtons,
     modalController,
     onIonViewDidLeave,
-    IonItem,
     IonSearchbar,
     IonTitle,
-    IonLabel,
-    IonThumbnail,
-    IonImg,
-    onIonViewDidEnter,
     onIonViewWillEnter,
     onIonViewWillLeave
 } from "@ionic/vue";
@@ -150,6 +140,7 @@ import { useUserStore } from "stores/useUserStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy } from "swiper";
 import ExperienceCard from "components/Cards/ExperienceCard.vue";
+
 // Import Swiper and modules
 // Import Swiper styles
 import "swiper/css";
@@ -160,11 +151,19 @@ import CreateJourneyModalVue from "components/Modals/CreateJourneyModal.vue";
 
 import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto } from "types/dtos";
-import { Journeys } from "../map/JourneysMap";
-
+import { JourneysMap } from "journeys-capacitor-mapbox";
 import mapboxgl from "mapbox-gl";
-import GeoJSON, { Geometry } from "geojson";
+import GeoJSON from "geojson";
 
+const MapLayer = {
+    journey_route: "journey_route",
+    journey_list: "journey_list",
+    journey_list_route: "journey_list_route",
+    journey_experiences: "journey_experiences",
+    journey_cluster: "journey_clusters",
+    poi_list: "poi_list",
+    poi_cluster: "poi_cluster"
+};
 const slidesPerView = ref(3);
 const useUser = useUserStore();
 const useJourney = useJourneyStore();
@@ -179,25 +178,33 @@ let mapCol = ref();
 let isLoaded = ref(false);
 
 onIonViewWillEnter(async () => {
+    window.addEventListener("resize", updateView);
     await useUser.fetchMyJourneys();
     updateView();
 
-    Journeys.loadMap("Map");
-    if (Journeys.JourneysMap.isStyleLoaded()) {
+    await JourneysMap.loadMap(
+        "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg",
+        import.meta.env.VITE_MAPTILER_API_KEY,
+        "Map"
+    );
+    console.log(await JourneysMap.getMap());
+    let map: mapboxgl.Map = await JourneysMap.getMap()!;
+    if (map.isStyleLoaded()) {
         setData();
     }
-    Journeys.JourneysMap.on("sourcedata", (e) => {
-        if (e.isSourceLoaded && e.sourceId === Journeys.MapLayer.journey_list && e.sourceDataType == "metadata")
+    map.on("sourcedata", (e: any) => {
+        if (e.isSourceLoaded && e.sourceId === MapLayer.journey_list && e.sourceDataType == "metadata")
             isLoading.value = false;
-        else if (e.isSourceLoaded && e.sourceId === Journeys.MapLayer.journey_route) isLoading.value = false;
+        else if (e.isSourceLoaded && e.sourceId === MapLayer.journey_route) isLoading.value = false;
     });
-    Journeys.JourneysMap.once("load", () => {
+    map.once("load", () => {
         setData();
-        Journeys.JourneysMap.resize();
+        map.addControl(new mapboxgl.NavigationControl());
+        map.resize();
     });
 
-    Journeys.JourneysMap.once("style.load", () => {
-        Journeys.JourneysMap.setFog({});
+    map.once("style.load", () => {
+        map.setFog({});
     });
 });
 
@@ -205,12 +212,12 @@ onIonViewWillLeave(() => {
     window.removeEventListener("resize", updateView);
 });
 onIonViewDidLeave(() => {
-    Journeys.clear_map(true);
+    JourneysMap.clearMap(true);
 });
 
 function setData() {
     useJourney.viewJourney = {};
-    Journeys.clear_map(false);
+    JourneysMap.clearMap(false);
     const geoJSONJourney: GeoJSON.FeatureCollection = {
         type: "FeatureCollection",
         features: []
@@ -237,8 +244,8 @@ function setData() {
         });
     });
 
-    Journeys.addSource(Journeys.MapLayer.journey_list, geoJSONJourney);
-    Journeys.addSource(Journeys.MapLayer.journey_route, connections);
+    JourneysMap.addSource(MapLayer.journey_list, geoJSONJourney);
+    JourneysMap.addSource(MapLayer.journey_route, connections);
 }
 function updateView() {
     if (slides.value != null) {
@@ -257,7 +264,6 @@ function updateView() {
             }
         }
     }
-    console.log(slidesPerView.value + " 2");
 }
 async function openJourneyCreationModal() {
     const modal = await modalController.create({
@@ -268,11 +274,10 @@ async function openJourneyCreationModal() {
 
 async function showExperiences(id: string) {
     if (useJourney.viewJourney.id !== id) useJourney.viewJourney = await useJourney.getJourney(id);
-
-    Journeys.clear_source(Journeys.MapLayer.journey_experiences);
-    Journeys.clear_source(Journeys.MapLayer.journey_route);
-    Journeys.clear_source(Journeys.MapLayer.journey_list);
-
+    const map = await JourneysMap.getMap();
+    JourneysMap.clearSource(MapLayer.journey_experiences);
+    JourneysMap.clearSource(MapLayer.journey_route);
+    JourneysMap.clearSource(MapLayer.journey_list);
     const experiences: GeoJSON.FeatureCollection = {
         type: "FeatureCollection",
         features: []
@@ -288,7 +293,7 @@ async function showExperiences(id: string) {
             id: exp.poi.id
         });
     });
-    Journeys.addSource(Journeys.MapLayer.journey_experiences, experiences, useJourney.viewJourney);
+    JourneysMap.addSource(MapLayer.journey_experiences, experiences, useJourney.viewJourney);
 
     const coords = Array<number[]>();
 
@@ -306,21 +311,50 @@ async function showExperiences(id: string) {
             coordinates: coords
         }
     };
-    Journeys.addSource(Journeys.MapLayer.journey_route, route);
+    JourneysMap.addSource(MapLayer.journey_route, route);
 
-    const center = Journeys.getMidPoint(
+    const center = getMidPoint(
         new mapboxgl.LngLat(useJourney.viewJourney.start?.longitude!, useJourney.viewJourney.start?.latitude!),
         new mapboxgl.LngLat(useJourney.viewJourney.end?.longitude!, useJourney.viewJourney.end?.latitude!)
     );
-    Journeys.JourneysMap.easeTo({
+    map!.easeTo({
         animate: true,
         duration: 3000,
         center: [center.lng, center.lat],
         zoom: 10
     });
 }
+
+function getMidPoint(start: mapboxgl.LngLat, end: mapboxgl.LngLat) {
+    const lat1 = (start.lat * Math.PI) / 180;
+    const lon1 = (start.lng * Math.PI) / 180;
+    const X1 = Math.cos(lat1) * Math.cos(lon1);
+    const Y1 = Math.cos(lat1) * Math.sin(lon1);
+    const Z1 = Math.sin(lat1);
+
+    const lat2 = (end.lat * Math.PI) / 180;
+    const lon2 = (end.lng * Math.PI) / 180;
+    const X2 = Math.cos(lat2) * Math.cos(lon2);
+    const Y2 = Math.cos(lat2) * Math.sin(lon2);
+    const Z2 = Math.sin(lat2);
+
+    const x = (X1 + X2) / 2;
+    const y = (Y1 + Y2) / 2;
+    const z = (Z1 + Z2) / 2;
+
+    let lon = Math.atan2(y, x);
+    const hyp = Math.sqrt(x * x + y * y);
+    let lat = Math.atan2(z, hyp);
+    lat = (lat * 180) / Math.PI;
+    lon = (lon * 180) / Math.PI;
+
+    return {
+        lat: lat,
+        lng: lon
+    };
+}
 </script>
-<style>
+<style lang="scss">
 .side {
     min-width: 200px;
     max-width: 400px;
@@ -334,9 +368,8 @@ async function showExperiences(id: string) {
     height: 95%;
 }
 .mid-page {
-    height: 90%;
+    height: 45%;
     overflow-y: auto;
-    flex-wrap: nowrap;
 }
 
 .swiper-slide {
@@ -374,18 +407,8 @@ async function showExperiences(id: string) {
 }
 
 .journeys {
-    position: absolute;
-    bottom: 10px;
     min-height: 300px;
-    height: 40%;
+    height: 100%;
     width: 100%;
-}
-
-.marker {
-    display: block;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    padding: 0;
 }
 </style>

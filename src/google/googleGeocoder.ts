@@ -1,4 +1,4 @@
-import { LngLat } from "maplibre-gl";
+import { LngLat } from "mapbox-gl";
 import googleLoader from "google/googleLoader";
 import { GeocodedData } from "types/journeys";
 

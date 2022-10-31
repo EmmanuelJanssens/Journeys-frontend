@@ -1,8 +1,8 @@
 import mapboxgl, { GeoJSONSource } from "mapbox-gl";
 import GeoJSON from "geojson";
-import { ExperienceDto, JourneyDto } from "types/dtos";
-import { url } from "inspector";
-
+import { JourneyDto } from "types/dtos";
+import { JourneysMap } from "journeys-capacitor-mapbox";
+/*
 export namespace Journeys {
     export const MapLayer = {
         journey_route: "journey_route",
@@ -14,14 +14,12 @@ export namespace Journeys {
         poi_cluster: "poi_cluster"
     };
 
-    export let JourneysMap: mapboxgl.Map;
+    export let map: mapboxgl.Map;
     export let JourneysExperienceMarker: mapboxgl.Marker[] = [];
     export function loadMap(container: string) {
         const apiKey = import.meta.env.VITE_MAPTILER_API_KEY;
-        mapboxgl.accessToken =
-            "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg";
-        if (!JourneysMap) {
-            JourneysMap = new mapboxgl.Map({
+        JourneysMap.createMap(
+            {
                 container: container,
                 style: `https://api.maptiler.com/maps/voyager/style.json?key=${apiKey}`,
                 zoom: 3,
@@ -29,153 +27,134 @@ export namespace Journeys {
                 projection: {
                     name: "globe"
                 }
-            });
-        }
+            },
+            "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg"
+        );
     }
 
-    export function clear_map(resetZoom: boolean) {
-        if (JourneysMap) {
-            clear_source(MapLayer.journey_experiences);
-            clear_source(MapLayer.journey_list);
-            clear_source(MapLayer.journey_route);
-            if (resetZoom) JourneysMap.setZoom(3);
-        }
-    }
-
-    export function load_once(f: (ev: mapboxgl.EventData & mapboxgl.MapboxEvent<undefined>) => void) {
-        JourneysMap.on("load", f);
+    export function clearMap(resetZoom: boolean) {
+        JourneysMap.clearSource(MapLayer.journey_experiences);
+        JourneysMap.clearSource(MapLayer.journey_list);
+        JourneysMap.clearSource(MapLayer.journey_route);
+        if (resetZoom) JourneysMap.setZoom(3);
     }
 
     export function getSource(id: string): GeoJSONSource {
         return JourneysMap.getSource(id) as GeoJSONSource;
     }
-    export function createMarker(imageUrl: string, lng: number, lat: number) {
+    export function createMarker(imageUrl: string, lng: number, lat: number, bgSize: string, size: string) {
         const marker = document.createElement("div");
-        const style = {
-            backgroundImage: `url(${imageUrl})`,
-            backgroundSize: "cover",
-            backgroundRepeat: "no-repeat",
-            width: "20px",
-            height: "20px",
-            borderRadius: "50%",
-            backgroundPosition: "center center"
-        };
-        marker.style.backgroundImage = style.backgroundImage;
-        marker.style.width = style.width;
-        marker.style.height = style.height;
-        marker.style.backgroundRepeat = style.backgroundRepeat;
-        marker.style.borderRadius = style.borderRadius;
-        marker.style.backgroundPosition = style.backgroundPosition;
-        return new mapboxgl.Marker(marker).setLngLat(new mapboxgl.LngLat(lng, lat)).addTo(JourneysMap);
+        marker.className = "marker";
+
+        marker.style.backgroundImage = `url(${imageUrl})`;
+        marker.style.width = size;
+        marker.style.height = size;
+        marker.style.backgroundRepeat = "no-repeat";
+        marker.style.borderRadius = "50%";
+        marker.style.backgroundPosition = "center center";
+        marker.style.backgroundSize = bgSize;
+        marker.style.display = "block";
+        return JourneysMap.addMarker(new mapboxgl.Marker(marker).setLngLat(new mapboxgl.LngLat(lng, lat)));
     }
     export function addSource(id: string, data?: GeoJSON.FeatureCollection | GeoJSON.Feature, journey?: JourneyDto) {
-        if (JourneysMap) {
-            let collection: GeoJSON.FeatureCollection;
-            switch (id) {
-                case MapLayer.journey_experiences:
-                    if (journey) {
+        let collection: GeoJSON.FeatureCollection;
+        switch (id) {
+            case MapLayer.journey_experiences:
+                if (journey) {
+                    JourneysExperienceMarker.push(
+                        createMarker(
+                            "src/assets/icon/flag-start.svg",
+                            journey.start?.longitude!,
+                            journey.start?.latitude!,
+                            "cover",
+                            "20px"
+                        )
+                    );
+                    JourneysExperienceMarker.push(
+                        createMarker(
+                            "src/assets/icon/flag-end.svg",
+                            journey.end?.longitude!,
+                            journey.end?.latitude!,
+                            "cover",
+                            "20px"
+                        )
+                    );
+                }
+                collection = data as GeoJSON.FeatureCollection;
+                if (collection) {
+                    collection.features.forEach((exp) => {
                         JourneysExperienceMarker.push(
                             createMarker(
-                                "src/assets/icon/flag-start.svg",
-                                journey.start?.longitude!,
-                                journey.start?.latitude!
+                                exp.properties!.images.length > 0
+                                    ? exp.properties!.images[0]
+                                    : "https://firebasestorage.googleapis.com/v0/b/journeys-v2/o/images%2Fplaceholder.png?alt=media&token=c921b603-8028-42d4-a7a3-7b186f427c98",
+                                (exp.geometry as GeoJSON.Point).coordinates[0],
+                                (exp.geometry as GeoJSON.Point).coordinates[1],
+                                "100%",
+                                "30px"
                             )
                         );
-                        JourneysExperienceMarker.push(
-                            createMarker(
-                                "src/assets/icon/flag-end.svg",
-                                journey.end?.longitude!,
-                                journey.end?.latitude!
-                            )
-                        );
+                    });
+                }
+                break;
+            case MapLayer.journey_list:
+                JourneysMap.addSource(id, {
+                    type: "geojson",
+                    data: data
+                });
+
+                JourneysMap.addLayer({
+                    id: id,
+                    type: "circle",
+                    source: id,
+                    paint: {
+                        "circle-color": "#FFBA93",
+                        "circle-radius": 6,
+                        "circle-stroke-width": 1,
+                        "circle-stroke-color": "#fff"
                     }
-                    collection = data as GeoJSON.FeatureCollection;
-                    console.log(data);
-                    if (collection) {
-                        collection.features.forEach((exp) => {
-                            const el = document.createElement("div");
-                            el.className = "marker";
-                            if (exp.properties!.images.length > 0)
-                                el.style.backgroundImage = `url(${exp.properties!.images[0]})`;
-                            else
-                                el.style.backgroundImage =
-                                    "url(https://firebasestorage.googleapis.com/v0/b/journeys-v2/o/images%2Fplaceholder.png?alt=media&token=c921b603-8028-42d4-a7a3-7b186f427c98)";
-                            el.style.backgroundSize = "100%";
-                            el.style.backgroundColor = "black";
-                            el.style.width = "30px";
-                            el.style.height = "30px";
-                            JourneysExperienceMarker.push(
-                                new mapboxgl.Marker(el)
-                                    .setLngLat(
-                                        new mapboxgl.LngLat(
-                                            (exp.geometry as GeoJSON.Point).coordinates[0],
-                                            (exp.geometry as GeoJSON.Point).coordinates[1]
-                                        )
-                                    )
-                                    .addTo(JourneysMap)
-                            );
-                        });
+                });
+
+                break;
+            case MapLayer.journey_route:
+                JourneysMap.addSource(MapLayer.journey_route, {
+                    type: "geojson",
+                    data: data
+                });
+                JourneysMap.addLayer({
+                    id: MapLayer.journey_route,
+                    type: "line",
+                    source: MapLayer.journey_route,
+                    layout: {
+                        "line-join": "round",
+                        "line-cap": "round"
+                    },
+                    paint: {
+                        "line-color": "#555",
+                        "line-width": 2
                     }
-                    break;
-                case MapLayer.journey_list:
-                    JourneysMap.addSource(id, {
-                        type: "geojson",
-                        data: data
-                    });
+                });
+                JourneysMap.addLayer({
+                    id: MapLayer.journey_route + "_symbol",
+                    type: "symbol",
+                    source: MapLayer.journey_route,
+                    layout: {
+                        "text-justify": "center",
+                        "symbol-placement": "line-center",
+                        "text-font": ["Open Sans Regular"],
+                        "text-field": "{title}",
+                        "text-size": 16
+                    },
+                    paint: {
+                        "text-translate": [0, -10]
+                    }
+                });
 
-                    JourneysMap.addLayer({
-                        id: id,
-                        type: "circle",
-                        source: id,
-                        paint: {
-                            "circle-color": "#FFBA93",
-                            "circle-radius": 6,
-                            "circle-stroke-width": 1,
-                            "circle-stroke-color": "#fff"
-                        }
-                    });
-
-                    break;
-                case MapLayer.journey_route:
-                    JourneysMap.addSource(MapLayer.journey_route, {
-                        type: "geojson",
-                        data: data
-                    });
-                    JourneysMap.addLayer({
-                        id: MapLayer.journey_route,
-                        type: "line",
-                        source: MapLayer.journey_route,
-                        layout: {
-                            "line-join": "round",
-                            "line-cap": "round"
-                        },
-                        paint: {
-                            "line-color": "#555",
-                            "line-width": 2
-                        }
-                    });
-                    JourneysMap.addLayer({
-                        id: MapLayer.journey_route + "_symbol",
-                        type: "symbol",
-                        source: MapLayer.journey_route,
-                        layout: {
-                            "text-justify": "center",
-                            "symbol-placement": "line-center",
-                            "text-font": ["Open Sans Regular"],
-                            "text-field": "{title}",
-                            "text-size": 16
-                        },
-                        paint: {
-                            "text-translate": [0, -20]
-                        }
-                    });
-
-                    break;
-            }
+                break;
         }
     }
 
-    export function clear_source(id: string) {
+    export function clearSource(id: string) {
         switch (id) {
             case MapLayer.journey_experiences:
                 if (JourneysExperienceMarker && JourneysExperienceMarker.length > 0) {
@@ -186,22 +165,22 @@ export namespace Journeys {
                     clear_layer(MapLayer.journey_experiences + "_cluster");
                     clear_layer(MapLayer.journey_experiences + "_cluster_count");
                     clear_layer(MapLayer.journey_experiences + "_unclustered");
-                    JourneysMap.removeSource(MapLayer.journey_experiences); */
+                    JourneysMap.removeSource(MapLayer.journey_experiences);
 
                 break;
             case MapLayer.journey_list:
                 if (getSource(MapLayer.journey_list)) {
-                    clear_layer(MapLayer.journey_list);
-                    clear_layer(MapLayer.journey_list + "_cluster");
-                    clear_layer(MapLayer.journey_list + "_cluster_count");
-                    clear_layer(MapLayer.journey_list + "_unclustered");
+                    clearLayer(MapLayer.journey_list);
+                    clearLayer(MapLayer.journey_list + "_cluster");
+                    clearLayer(MapLayer.journey_list + "_cluster_count");
+                    clearLayer(MapLayer.journey_list + "_unclustered");
                     JourneysMap.removeSource(MapLayer.journey_list);
                 }
                 break;
             case MapLayer.journey_route:
                 if (getSource(MapLayer.journey_route)) {
-                    clear_layer(MapLayer.journey_route);
-                    clear_layer(MapLayer.journey_route + "_symbol");
+                    clearLayer(MapLayer.journey_route);
+                    clearLayer(MapLayer.journey_route + "_symbol");
 
                     JourneysMap.removeSource(MapLayer.journey_route);
                 }
@@ -209,7 +188,7 @@ export namespace Journeys {
         }
     }
 
-    export function clear_layer(id: string) {
+    export function clearLayer(id: string) {
         if (JourneysMap.getLayer(id)) JourneysMap.removeLayer(id);
     }
     export function getMidPoint(start: mapboxgl.LngLat, end: mapboxgl.LngLat) {
@@ -240,4 +219,4 @@ export namespace Journeys {
             lng: lon
         };
     }
-}
+}*/

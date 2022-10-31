@@ -32,12 +32,14 @@
                         </ion-label>
                     </ion-col>
                     <ion-col size="5">
-                        <img src="src/assets/map_carte.png" />
+                        <img
+                            src="https://firebasestorage.googleapis.com/v0/b/journeys-v2/o/images%2Fmap_carte.png?alt=media&token=d6e4529c-c059-4018-a495-05f6cca2100e" />
                     </ion-col>
                 </ion-row>
                 <ion-row class="ion-align-items-center" id="row">
                     <ion-col size="5">
-                        <img src="src/assets/featureImg2.png" />
+                        <img
+                            src="https://firebasestorage.googleapis.com/v0/b/journeys-v2/o/images%2FfeatureImg2.png?alt=media&token=a45d6184-2074-40e6-bbc3-e86e659b6e08" />
                     </ion-col>
                     <ion-col size="7">
                         <ion-label class="ion-text-wrap ion-text-justify">
@@ -63,7 +65,8 @@
                         </ion-label>
                     </ion-col>
                     <ion-col size="5">
-                        <img src="src/assets/featureImg3.png" />
+                        <img
+                            src="https://firebasestorage.googleapis.com/v0/b/journeys-v2/o/images%2FfeatureImg3.png?alt=media&token=6cc3f721-a061-4d2c-bac7-4ab942999b1f" />
                     </ion-col>
                 </ion-row>
             </ion-grid>
@@ -87,7 +90,7 @@ import {
     IonRow,
     onIonViewWillEnter
 } from "@ionic/vue";
-import { LngLat } from "maplibre-gl";
+import { LngLat } from "mapbox-gl";
 import { ref } from "vue";
 
 import router from "router/router";
