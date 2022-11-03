@@ -48,19 +48,6 @@ import { getGeocodedData } from "google/googleGeocoder";
 import router from "router/router";
 import { modalController } from "@ionic/core";
 
-onIonViewDidLeave(() => {
-    startData.value = {
-        locationText: "",
-        coordinates: new LngLat(-1, -1),
-        isOk: false
-    };
-    endData.value = {
-        locationText: "",
-        coordinates: new LngLat(-1, -1),
-        isOk: false
-    };
-});
-
 const startData = ref({
     locationText: "",
     coordinates: new LngLat(-1, -1),
@@ -73,6 +60,7 @@ const endData = ref({
     isOk: false
 });
 
+const emit = defineEmits(["create"]);
 function setStartPredictionText(prediction: string) {
     startData.value.locationText = prediction;
     startData.value.isOk = true;
@@ -88,16 +76,14 @@ async function gotoJourneyMap() {
         const geocodedEnd = await getGeocodedData(endData.value.locationText);
 
         if (geocodedStart.error === undefined && geocodedEnd.error === undefined) {
-            const route = {
-                name: "map",
-                params: {
-                    start: JSON.stringify(geocodedStart),
-                    end: JSON.stringify(geocodedEnd)
-                }
-            };
-            router.push(route);
+            modalController.dismiss(
+                {
+                    start: geocodedStart,
+                    end: geocodedEnd
+                },
+                "create"
+            );
         }
-        modalController.dismiss();
     }
 }
 </script>

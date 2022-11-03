@@ -32,6 +32,7 @@ export const useJourneyStore = defineStore("journey", () => {
             longitude: -1
         }
     });
+
     function journeyToGeojson(journey: JourneyDto): GeoJSON.Feature[] {
         const obj: GeoJSON.Feature[] = [
             {
@@ -162,6 +163,19 @@ export const useJourneyStore = defineStore("journey", () => {
             longitude: -1
         };
         editJourney.value = {
+            experiences: []
+        };
+        viewJourney.value!.start = {
+            address: "",
+            latitude: -1,
+            longitude: -1
+        };
+        viewJourney.value!.end = {
+            address: "",
+            latitude: -1,
+            longitude: -1
+        };
+        viewJourney.value = {
             experiences: []
         };
     }

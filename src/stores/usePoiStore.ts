@@ -45,6 +45,11 @@ export const usePoiStore = defineStore("poi", () => {
                 return false;
             });
     }
-
-    return { poiRef, searchBetween, getThumbnail };
+    function clear() {
+        poiRef.value = {
+            features: [],
+            type: "FeatureCollection"
+        };
+    }
+    return { poiRef, searchBetween, getThumbnail, clear };
 });

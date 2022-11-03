@@ -1,46 +1,44 @@
 <template>
-    <ion-content>
-        <ion-item-sliding :disabled="props.mode == 'view'">
-            <ion-item lines="full">
-                <ion-icon slot="start" size="large" src="/src/assets/icon/pin-svgrepo-com.svg"></ion-icon>
-                <ion-label>{{ props.start?.address }}</ion-label>
-            </ion-item>
-            <ion-item-options>
-                <ion-item-option color="tertiary">
-                    <ion-icon size="large" src="/src/assets/icon/pencil-outline.svg"></ion-icon>
-                </ion-item-option>
-            </ion-item-options>
-        </ion-item-sliding>
+    <ion-item-sliding :disabled="props.mode == 'view'">
+        <ion-item lines="full">
+            <ion-icon slot="start" size="large" src="/src/assets/icon/pin-svgrepo-com.svg"></ion-icon>
+            <ion-label>{{ props.start?.address }}</ion-label>
+        </ion-item>
+        <ion-item-options>
+            <ion-item-option color="tertiary">
+                <ion-icon size="large" src="/src/assets/icon/pencil-outline.svg"></ion-icon>
+            </ion-item-option>
+        </ion-item-options>
+    </ion-item-sliding>
 
-        <IonReorderGroup @ionItemReorder="reordered($event)" disabled="false">
-            <ion-item-sliding
-                v-for="experience in useJourney.editJourney?.experiences"
-                v-bind:key="experience"
-                :disabled="props.mode == 'view'">
-                <ion-item>
-                    <ion-icon slot="start" size="large" src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
-                    <ion-label>{{ experience.poi.name }}</ion-label>
-                    <ion-reorder v-if="props.mode == 'edit'" slot="end"></ion-reorder>
-                </ion-item>
-                <ion-item-options>
-                    <ion-item-option color="danger" @click="remove(experience.poi.id!)">
-                        <ion-icon size="large" src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
-                    </ion-item-option>
-                </ion-item-options>
-            </ion-item-sliding>
-        </IonReorderGroup>
-        <ion-item-sliding :disabled="props.mode == 'view'">
-            <ion-item lines="full">
-                <ion-icon slot="start" size="large" src="/src/assets/icon/pin-svgrepo-com.svg"></ion-icon>
-                <ion-label>{{ props.end?.address }}</ion-label>
+    <IonReorderGroup @ionItemReorder="reordered($event)" disabled="false">
+        <ion-item-sliding
+            v-for="experience in useJourney.editJourney?.experiences"
+            v-bind:key="experience"
+            :disabled="props.mode == 'view'">
+            <ion-item>
+                <ion-icon slot="start" size="large" src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
+                <ion-label>{{ experience.poi.name }}</ion-label>
+                <ion-reorder v-if="props.mode == 'edit'" slot="end"></ion-reorder>
             </ion-item>
             <ion-item-options>
-                <ion-item-option color="tertiary">
-                    <ion-icon size="large" src="/src/assets/icon/pencil-outline.svg"></ion-icon>
+                <ion-item-option color="danger" @click="remove(experience.poi.id!)">
+                    <ion-icon size="large" src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
                 </ion-item-option>
             </ion-item-options>
         </ion-item-sliding>
-    </ion-content>
+    </IonReorderGroup>
+    <ion-item-sliding :disabled="props.mode == 'view'">
+        <ion-item lines="full">
+            <ion-icon slot="start" size="large" src="/src/assets/icon/pin-svgrepo-com.svg"></ion-icon>
+            <ion-label>{{ props.end?.address }}</ion-label>
+        </ion-item>
+        <ion-item-options>
+            <ion-item-option color="tertiary">
+                <ion-icon size="large" src="/src/assets/icon/pencil-outline.svg"></ion-icon>
+            </ion-item-option>
+        </ion-item-options>
+    </ion-item-sliding>
 </template>
 <script lang="ts" setup>
 import { ItemReorderCustomEvent } from "@ionic/vue";
