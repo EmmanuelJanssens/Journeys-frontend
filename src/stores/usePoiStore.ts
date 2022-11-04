@@ -5,6 +5,7 @@ import { PoiDto } from "types/dtos";
 import { ref } from "vue";
 
 export const usePoiStore = defineStore("poi", () => {
+    const poisBetween = ref<PoiDto[]>();
     const poiRef = ref<GeoJSON.FeatureCollection>({
         features: [],
         type: "FeatureCollection"
@@ -19,26 +20,10 @@ export const usePoiStore = defineStore("poi", () => {
         return await axios
             .get(`api/poi?lat=${lat}&lng=${lng}&radius=${radius}`)
             .then((response) => {
-                if (poiRef.value?.features?.length > 0) {
-                    poiRef.value.features = [];
+                if (poisBetween.value?.length! > 0) {
+                    poisBetween.value = [];
                 }
-
-                poiRef.value = {
-                    type: "FeatureCollection",
-                    features: []
-                };
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                (response.data.data as PoiDto[]).forEach((poi) => {
-                    poiRef.value.features.push({
-                        type: "Feature",
-                        geometry: {
-                            type: "Point",
-                            coordinates: [poi.location!.longitude, poi.location!.latitude]
-                        },
-                        properties: poi,
-                        id: poi.id
-                    });
-                });
+                poisBetween.value = response.data.data;
                 return true;
             })
             .catch((error: AxiosError) => {
@@ -51,5 +36,5 @@ export const usePoiStore = defineStore("poi", () => {
             type: "FeatureCollection"
         };
     }
-    return { poiRef, searchBetween, getThumbnail, clear };
+    return { poiRef, searchBetween, getThumbnail, clear, poisBetween };
 });

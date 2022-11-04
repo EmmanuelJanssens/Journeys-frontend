@@ -17,17 +17,15 @@
     </ion-content>
 </template>
 <script lang="ts" setup>
-import { IonIcon, IonFab, IonFabButton, IonContent, modalController, onIonViewWillEnter } from "@ionic/vue";
+import { IonIcon, IonFab, IonFabButton, IonContent, modalController } from "@ionic/vue";
 import { onMounted, ref, watch } from "vue";
-import mapboxgl, { Marker } from "mapbox-gl";
+import mapboxgl from "mapbox-gl";
 import CreateJourneyModal from "components/Modals/CreateJourneyModal.vue";
 import { GeocodedData } from "types/journeys";
 import { JourneysMap } from "journeys-capacitor-mapbox";
 import GeoJSON from "geojson";
-import { JourneyDto } from "types/dtos";
+import { ExperienceDto, PoiDto } from "types/dtos";
 import { useJourneyStore } from "stores/useJourneyStore";
-import { start } from "repl";
-import { Journeys } from "map/JourneysMap";
 
 const mapLayer = {
     journey_route: "journey_route",
@@ -41,13 +39,24 @@ const mapLayer = {
 
 const props = defineProps<{
     mode: string;
-    pois: GeoJSON.FeatureCollection | undefined;
+    pois: GeoJSON.FeatureCollection;
     journeyExperiences: GeoJSON.FeatureCollection;
-    journeys: JourneyDto[] | undefined;
-    stopPoints: number[][] | undefined;
+    journeys: GeoJSON.FeatureCollection;
+    stopPoints: ExperienceDto[] | undefined;
 }>();
 
-const emit = defineEmits(["loaded", "createNew"]);
+const emit = defineEmits<{
+    (e: "loaded"): void;
+    (e: "createNew", data: { start: GeocodedData; end: GeocodedData }): void;
+    (e: "markerDragged", pos: mapboxgl.LngLat, marker: string): void;
+    (
+        e: "poiClicked",
+        poi: PoiDto,
+        evt: mapboxgl.MapMouseEvent & {
+            features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
+        } & mapboxgl.EventData
+    ): void;
+}>();
 const map = ref<mapboxgl.Map>();
 
 const useJourney = useJourneyStore();
@@ -64,63 +73,77 @@ onMounted(async () => {
         map.value?.setFog({});
         emit("loaded");
     });
+
+    map.value.on(
+        "click",
+        mapLayer.poi_list + "_unclustered",
+        (
+            e: mapboxgl.MapMouseEvent & {
+                features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
+            } & mapboxgl.EventData
+        ) => {
+            e.features![0].properties!.location = JSON.parse(e.features![0].properties!.location);
+            emit("poiClicked", e.features![0].properties as PoiDto, e);
+        }
+    );
 });
+
 watch(
     () => props.journeyExperiences,
-    async (newVal, oldVal) => {
+    async (newVal) => {
         if (props.mode == "viewJourney") {
-            const map = await JourneysMap.getMap();
-            JourneysMap.addJourneysExperiencesLayer(props.journeyExperiences);
-            //JourneysMap.addSource(mapLayer.journey_experiences, props.journeyExperiences, useJourney.viewJourney);
+            JourneysMap.addJourneysExperiencesLayer(newVal!);
         }
     }
 );
+
 watch(
     () => props.journeys,
-    async (newValue, oldvalue) => {
-        const geoJSONJourney: GeoJSON.FeatureCollection = {
-            type: "FeatureCollection",
-            features: []
-        };
-
-        newValue!.forEach((journey) => {
-            geoJSONJourney.features.push(useJourney.journeyToGeojson(journey)[0]);
-            geoJSONJourney.features.push(useJourney.journeyToGeojson(journey)[1]);
-            geoJSONJourney.features.push({
-                type: "Feature",
-                geometry: {
-                    type: "LineString",
-                    coordinates: [
-                        [journey.start?.longitude!, journey.start?.latitude!],
-                        [journey.end?.longitude!, journey.end?.latitude!]
-                    ]
-                },
-                properties: {
-                    title: journey.title
-                },
-                id: journey.id
-            });
-        });
-        JourneysMap.addJourneyListLayer(geoJSONJourney);
+    async (newValue) => {
+        JourneysMap.addJourneyListLayer(newValue);
     },
     { deep: true }
 );
+
 watch(
-    () => props.mode,
-    async (newval, oldVal) => {
-        if (newval == "edition") {
-            console.log(useJourney.editJourney);
-            const map = await JourneysMap.getMap();
-            JourneysMap.clearSource(mapLayer.journey_list);
-            JourneysMap.clearSource(mapLayer.journey_route);
-            JourneysMap.addSource(mapLayer.poi_list, props.pois, useJourney.editJourney);
+    () => props.pois,
+    async (newVal) => {
+        if (newVal.features.length > 0) {
+            JourneysMap.addPoiListLayer(newVal!);
+            const start = await JourneysMap.getmarkerbyId("journey_start")!;
+            start.setDraggable(true);
+            start.on("dragend", () => {
+                console.log("changed");
+                emit("markerDragged", start.getLngLat(), "journey_start");
+            });
+            const end = await JourneysMap.getmarkerbyId("journey_end")!;
+            end.setDraggable(true);
+            end.on("dragend", () => {
+                emit("markerDragged", end.getLngLat(), "journey_end");
+            });
         }
     }
 );
 watch(
     () => props.stopPoints,
-    (newVal, oldVal) => {
-        JourneysMap.addStopPoint(newVal!);
+    (newVal) => {
+        const array: Array<number[]> = new Array();
+
+        array.push([useJourney.editJourney.start?.longitude!, useJourney.editJourney.start?.latitude!]);
+        newVal?.forEach((exp) => {
+            array.push([exp.poi.location.longitude, exp.poi.location.latitude]);
+        });
+        array.push([useJourney.editJourney.end?.longitude!, useJourney.editJourney.end?.latitude!]);
+
+        const feature: GeoJSON.Feature = {
+            type: "Feature",
+            geometry: {
+                type: "LineString",
+                coordinates: array
+            },
+            properties: {}
+        };
+        JourneysMap.addStopPoint(feature);
     },
     { deep: true }
 );
@@ -149,35 +172,6 @@ async function openJourneyCreationModal() {
             end: endPoint.value
         });
     }
-}
-
-function getMidPoint(start: mapboxgl.LngLat, end: mapboxgl.LngLat) {
-    const lat1 = (start.lat * Math.PI) / 180;
-    const lon1 = (start.lng * Math.PI) / 180;
-    const X1 = Math.cos(lat1) * Math.cos(lon1);
-    const Y1 = Math.cos(lat1) * Math.sin(lon1);
-    const Z1 = Math.sin(lat1);
-
-    const lat2 = (end.lat * Math.PI) / 180;
-    const lon2 = (end.lng * Math.PI) / 180;
-    const X2 = Math.cos(lat2) * Math.cos(lon2);
-    const Y2 = Math.cos(lat2) * Math.sin(lon2);
-    const Z2 = Math.sin(lat2);
-
-    const x = (X1 + X2) / 2;
-    const y = (Y1 + Y2) / 2;
-    const z = (Z1 + Z2) / 2;
-
-    let lon = Math.atan2(y, x);
-    const hyp = Math.sqrt(x * x + y * y);
-    let lat = Math.atan2(z, hyp);
-    lat = (lat * 180) / Math.PI;
-    lon = (lon * 180) / Math.PI;
-
-    return {
-        lat: lat,
-        lng: lon
-    };
 }
 </script>
 <style></style>
