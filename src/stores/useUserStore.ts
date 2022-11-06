@@ -71,21 +71,23 @@ export const useUserStore = defineStore("user", () => {
     }
 
     function fetchMyJourneys(): Promise<boolean> {
-        const token = JSON.parse(localStorage.getItem("user")!).token;
+        if (localStorage.getItem("user")) {
+            const token = JSON.parse(localStorage.getItem("user")!).token;
 
-        return axios
-            .get("/api/user/journeys", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-            .then((response) => {
-                myJourneys.value = response.data.journeys as JourneyDto[];
-                return true;
-            })
-            .catch(() => {
-                return false;
-            });
+            return axios
+                .get("/api/user/journeys", {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+                .then((response) => {
+                    myJourneys.value = response.data.journeys as JourneyDto[];
+                    return true;
+                })
+                .catch(() => {
+                    return false;
+                });
+        } else return new Promise<boolean>(() => false);
     }
 
     function fetchMyExperiences(): Promise<boolean> {

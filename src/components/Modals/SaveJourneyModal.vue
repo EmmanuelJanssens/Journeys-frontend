@@ -15,7 +15,7 @@
             <section class="modal-content">
                 <div class="form-field">
                     <ion-item class="ion-margin">
-                        <ion-label position="floating"> Journey Title </ion-label>
+                        <ion-label position="stacked"> Journey Title </ion-label>
                         <ion-input type="text" v-model="title"> </ion-input>
                     </ion-item>
                 </div>
@@ -46,16 +46,27 @@ import {
     modalController,
     alertController
 } from "@ionic/vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useUserStore } from "stores/useUserStore";
 const title = ref();
-const useJourney = useJourneyStore();
+const journeyStore = useJourneyStore();
+const userStore = useUserStore();
 
+const props = defineProps(["mode"]);
+
+onMounted(() => {
+    console.log(props.mode);
+    if (props.mode) title.value = journeyStore.editJourney.title;
+});
 function dismissModal() {
     modalController.dismiss("dismiss", "discarded");
 }
 
 async function saveJourney() {
-    if (useJourney.editJourney.start?.address!.length! <= 0 || useJourney.editJourney.end?.address!.length! <= 0) {
+    if (!userStore.IsLoggedIn()) {
+        throw new Error("User is not logged in");
+    }
+    if (journeyStore.editJourney.start?.address!.length! <= 0 || journeyStore.editJourney.end?.address!.length! <= 0) {
         let alert = await alertController.create({
             header: "Error",
             message: "Your journey is not valid, Some values may be missing",
@@ -63,7 +74,14 @@ async function saveJourney() {
         });
         alert.present();
     } else {
-        const journeyId = await useJourney.saveJourney(title.value);
+        var journeyId: string;
+        if (props.mode == "editJourney") {
+            journeyStore.editJourney.title = title.value;
+            journeyId = await journeyStore.updateJourney(journeyStore.editJourney);
+            console.log("updated");
+        } else {
+            journeyId = await journeyStore.saveJourney(title.value);
+        }
 
         const alert = await alertController.create({
             header: "Notification",

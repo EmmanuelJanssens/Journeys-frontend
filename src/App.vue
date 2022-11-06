@@ -13,7 +13,7 @@ import { IonApp, IonRouterOutlet, IonContent } from "@ionic/vue";
 import UserDetailMenu from "components/UserDetailMenu.vue";
 import JourneysHeader from "components/JourneysHeader.vue";
 import { useUserStore } from "stores/useUserStore";
-import { onBeforeMount } from "vue";
+import { onBeforeMount, watch } from "vue";
 import axios from "axios";
 const userStore = useUserStore();
 function readFromStorage() {

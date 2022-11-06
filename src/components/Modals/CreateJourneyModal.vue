@@ -1,31 +1,49 @@
+<!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <section class="fullpage">
-        <ion-header>
-            <ion-toolbar>
-                <ion-title>Create new journey</ion-title>
-                <ion-buttons slot="end">
-                    <ion-button @click="modalController.dismiss()">
-                        <ion-icon size="large" src="/src/assets/icon/close-outline.svg"></ion-icon>
-                    </ion-button>
-                </ion-buttons>
-            </ion-toolbar>
-        </ion-header>
-        <ion-content class="ion-text-center ion-padding">
-            <GautoCompletePredictionList
-                class="ion-padding"
-                placeholder="Start"
-                :input="startData.locationText"
-                @prediction-chosen="setStartPredictionText($event)" />
-
-            <GautoCompletePredictionList
-                class="ion-padding"
-                placeholder="End"
-                :input="endData.locationText"
-                @prediction-chosen="setEndPredictionText($event)" />
-
-            <ion-button class="ion-padding" @click="gotoJourneyMap"> Create </ion-button>
-        </ion-content>
-    </section>
+    <ion-header>
+        <ion-toolbar>
+            <ion-title color="primary">Create new journey</ion-title>
+            <ion-buttons slot="end">
+                <ion-button @click="modalController.dismiss()">
+                    <ion-icon size="large" src="/src/assets/icon/close-outline.svg"></ion-icon>
+                </ion-button>
+            </ion-buttons>
+        </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-text-center ion-padding">
+        <ion-grid>
+            <ion-row>
+                <ion-col>
+                    <GautoCompletePredictionList
+                        class="ion-padding"
+                        placeholder="Start"
+                        :input="startData.locationText"
+                        @prediction-chosen="setStartPredictionText($event)" />
+                </ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col>
+                    <GautoCompletePredictionList
+                        class="ion-padding"
+                        placeholder="End"
+                        :input="endData.locationText"
+                        @prediction-chosen="setEndPredictionText($event)"
+                /></ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col> </ion-col>
+                <ion-col> </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-content>
+    <ion-footer>
+        <ion-toolbar>
+            <ion-buttons slot="end">
+                <ion-button @click="modalController.dismiss()" color="secondary"> Cancel </ion-button>
+                <ion-button @click="gotoJourneyMap" color="primary"> Create </ion-button>
+            </ion-buttons>
+        </ion-toolbar>
+    </ion-footer>
 </template>
 
 <script lang="ts" setup>
@@ -37,15 +55,18 @@ import {
     IonButtons,
     IonButton,
     IonIcon,
-    onIonViewDidLeave
+    IonGrid,
+    IonCol,
+    IonRow,
+    IonImg,
+    IonFooter
 } from "@ionic/vue";
 
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { LngLat } from "maplibre-gl";
 
 import GautoCompletePredictionList from "components/GautoCompletePredictionList.vue";
 import { getGeocodedData } from "google/googleGeocoder";
-import router from "router/router";
 import { modalController } from "@ionic/core";
 
 const startData = ref({
@@ -60,7 +81,6 @@ const endData = ref({
     isOk: false
 });
 
-const emit = defineEmits(["create"]);
 function setStartPredictionText(prediction: string) {
     startData.value.locationText = prediction;
     startData.value.isOk = true;
@@ -89,7 +109,7 @@ async function gotoJourneyMap() {
 </script>
 
 <style scoped>
-.fullpage {
-    height: 100%;
+ion-button {
+    z-index: 999;
 }
 </style>

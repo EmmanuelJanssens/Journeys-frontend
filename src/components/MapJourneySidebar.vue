@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-multiple-template-root -->
 <template>
     <ion-item-sliding :disabled="props.mode == 'view'">
         <ion-item lines="full">
@@ -11,10 +12,10 @@
         </ion-item-options>
     </ion-item-sliding>
 
-    <IonReorderGroup @ionItemReorder="reordered($event)" disabled="false">
+    <IonReorderGroup @ionItemReorder="reordered($event)" :disabled="false">
         <ion-item-sliding
             v-for="experience in useJourney.editJourney?.experiences"
-            v-bind:key="experience"
+            v-bind:key="experience.poi.id"
             :disabled="props.mode == 'view'">
             <ion-item>
                 <ion-icon slot="start" size="large" src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>

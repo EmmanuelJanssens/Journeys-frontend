@@ -1,30 +1,39 @@
+<!-- eslint-disable vue/no-multiple-template-root -->
 <template>
     <ion-page>
         <ion-header>
             <ion-toolbar>
-                <ion-title>Edit Experience {{ currentData?.poi.name }}</ion-title>
+                <ion-title
+                    >Edit Experience at <ion-text color="secondary">{{ currentData?.poi.name }}</ion-text></ion-title
+                >
                 <ion-progress-bar v-if="uploading" type="indeterminate"></ion-progress-bar>
             </ion-toolbar>
         </ion-header>
         <ion-content>
             <ion-grid>
-                <ion-row class="gallery ion-justify-content-center">
-                    <ion-thumbnail v-for="image in currentData?.experience.images" v-bind:key="image">
-                        <ion-img :src="image"></ion-img>
-                    </ion-thumbnail>
-                </ion-row>
                 <ion-row>
-                    <ion-button @click="selectImage"> Add Images </ion-button>
-                </ion-row>
-                <ion-row>
-                    <ion-thumbnail v-for="file in files" v-bind:key="file">
-                        <ion-img :src="file.url"></ion-img>
-                    </ion-thumbnail>
+                    <ion-col>
+                        <ion-item>
+                            <ion-label position="fixed">Title</ion-label>
+                            <ion-input
+                                v-model="title"
+                                @ionInput="title = $event.target.value"
+                                :value="title"></ion-input>
+                        </ion-item>
+                    </ion-col>
                 </ion-row>
                 <ion-row>
                     <ion-col>
                         <ion-item>
-                            <ion-label position="stacked">Description</ion-label>
+                            <ion-label>When</ion-label><ion-datetime-button datetime="datetime"></ion-datetime-button>
+                        </ion-item>
+                    </ion-col>
+                </ion-row>
+
+                <ion-row>
+                    <ion-col>
+                        <ion-item>
+                            <ion-label position="fixed">Description</ion-label>
                             <ion-textarea
                                 :value="currentData?.experience.description"
                                 v-model="description"
@@ -34,6 +43,29 @@
                         </ion-item>
                     </ion-col>
                 </ion-row>
+
+                <ion-row>
+                    <ion-col>
+                        <ion-item>
+                            <ion-label position="fixed">Your pictures</ion-label>
+                            <div class="images">
+                                <div class="image-item" v-for="image in images" v-bind:key="image.url">
+                                    <ion-thumbnail>
+                                        <ion-img :src="image.url" />
+                                    </ion-thumbnail>
+                                    <ion-icon
+                                        slot="icon-only"
+                                        src="src/assets/icon/close-outline.svg"
+                                        @click="removeImage(image.url)"></ion-icon>
+                                </div>
+
+                                <ion-button class="add-image" @click="selectImage" slot="icon-only">
+                                    <ion-icon src="src/assets/icon/add-outline.svg"> </ion-icon>
+                                </ion-button>
+                            </div> </ion-item
+                    ></ion-col>
+                </ion-row>
+                <ion-row> </ion-row>
             </ion-grid>
         </ion-content>
         <ion-footer>
@@ -43,9 +75,18 @@
             </ion-toolbar>
         </ion-footer>
     </ion-page>
+    <ion-modal :keep-contents-mounted="true">
+        <ion-datetime id="datetime" @ion-change="selectDate($event)"></ion-datetime>
+    </ion-modal>
 </template>
 <script lang="ts" setup>
 import {
+    IonDatetime,
+    IonIcon,
+    IonPicker,
+    IonButtons,
+    IonDatetimeButton,
+    IonModal,
     IonProgressBar,
     IonButton,
     IonGrid,
@@ -62,6 +103,7 @@ import {
     IonImg,
     IonThumbnail,
     IonTextarea,
+    IonText,
     modalController
 } from "@ionic/vue";
 import { useJourneyStore } from "stores/useJourneyStore";
@@ -69,37 +111,81 @@ import { useUserStore } from "stores/useUserStore";
 import { ExperienceDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
-import { storageRef } from "google/storage";
-import { ref as fref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storageRef, storageApp } from "google/storage";
+import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
 import { showToast } from "utils/utils";
 
 const description = ref();
+const title = ref();
 const useJourney = useJourneyStore();
 const props = defineProps(["experience", "journey"]);
 const emit = defineEmits(["saved"]);
 const files = ref<Array<any>>([]);
 const uploading = ref(false);
 let currentData = ref<ExperienceDto>();
-
+let images = ref<
+    {
+        url: string;
+        isFs: boolean;
+    }[]
+>([]);
+let selectedDate = ref<string>();
 onMounted(() => {
     currentData.value = props.experience as ExperienceDto;
+    title.value = currentData.value.experience.title;
+    currentData.value?.experience.images.forEach((image) => {
+        images.value?.push({
+            url: image,
+            isFs: true
+        });
+    });
+    console.log(typeof currentData.value.experience.date);
+    selectedDate.value = currentData.value.experience.date;
 });
 
+function selectDate(e: any) {
+    selectedDate.value = e.detail.value;
+}
 async function selectImage() {
     const result = await FilePicker.pickFiles({
         multiple: true
     });
     result.files.forEach((file) => {
+        const url = URL.createObjectURL(file.blob!);
         files.value.push({
             file: file,
-            url: URL.createObjectURL(file.blob!)
+            url: url
+        });
+        images.value?.push({
+            url: url,
+            isFs: false
         });
     });
 }
+
+function removeImage(image: string) {
+    const img = images.value?.find((img) => image == img.url);
+    if (img) {
+        images.value = images.value?.filter((img) => image != img.url)!;
+    }
+}
+
+const taskList = Array<UploadTask>();
 async function save() {
+    const deleted = currentData.value?.experience.images.filter(
+        (img) => !images.value.find((search) => img == search.url)
+    );
+
+    console.log(deleted);
+    uploading.value = true;
+    await deleted?.forEach(async (img) => {
+        const imgRef = fref(storageRef.storage, img);
+        await deleteObject(imgRef);
+    });
+    console.log(currentData.value!.experience.images.filter((img) => images.value.find((search) => img == search.url)));
+    console.log(title.value);
     if (files.value.length > 0) {
         await files.value.forEach(async (f) => {
-            uploading.value = true;
             const id = (f.url as string).slice((f.url as string).lastIndexOf("/") + 1);
             const imageRef = fref(
                 storageRef,
@@ -109,56 +195,81 @@ async function save() {
                 contentType: f.file.mimeType
             };
 
-            const task = uploadBytesResumable(imageRef, f.file.blob, metadata);
-            task.on(
-                "state_changed",
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    switch (snapshot.state) {
-                        case "paused":
-                            break;
-                        case "running":
-                            break;
-                        case "success":
-                            break;
-                    }
-                },
-                (error) => {
-                    //TODO send error message
-                    //TODO remove successfully uploaded image
-                },
-                () => {
-                    getDownloadURL(task.snapshot.ref).then(async (downloadUrl) => {
-                        if (currentData.value!.experience.images == null) currentData.value!.experience.images = [];
-                        currentData.value!.experience.images.push(downloadUrl);
-                        currentData.value!.experience.description = description.value;
-                        await useJourney.updateExperience(currentData.value!);
-
-                        modalController.dismiss({ status: "success" });
-                        uploading.value = false;
-                        showToast("Modification saved", "success");
-                        emit("saved");
-                    });
-                }
-            );
+            taskList.push(uploadBytesResumable(imageRef, f.file.blob, metadata));
         });
-    } else if (description.value != currentData.value!.experience.description) {
+    }
+
+    var error = false;
+    const uploaded: string[] = [];
+    for (const task of taskList) {
+        const res = await task;
+        const url = await getDownloadURL(task.snapshot.ref);
+        uploaded.push(url);
+        if (res.state == "error") {
+            error = true;
+        }
+    }
+    if (error) {
+        uploaded.forEach((img) => {
+            const imgRef = fref(storageRef.storage, img);
+            deleteObject(imgRef);
+        });
+        modalController.dismiss({ status: "error" });
+        uploading.value = false;
+        showToast("An error occured while uploading your image try again", "danger");
+    } else {
+        console.log("horay");
+        console.log(uploaded);
+        currentData.value!.experience.images = currentData.value!.experience.images.filter((img) =>
+            images.value.find((search) => img == search.url)
+        );
+        currentData.value!.experience.images = currentData.value!.experience.images.concat(...uploaded);
+        currentData.value!.experience.title = title.value;
+        currentData.value!.experience.date = new Date(selectedDate.value!).toUTCString();
         currentData.value!.experience.description = description.value;
         await useJourney.updateExperience(currentData.value!);
         modalController.dismiss({ status: "success" });
+        showToast("Your modifications were successfuly saved", "success");
+
         uploading.value = false;
-        showToast("Modification saved", "success");
-        emit("saved");
     }
 }
 </script>
-<style scoped>
-.gallery {
-    max-height: 200px;
-    overflow-y: auto;
-}
+<style scoped lang="less">
 ion-thumbnail {
-    min-width: 100px;
-    min-height: 100px;
+    min-width: 80px;
+    min-height: 80px;
+}
+.image-item {
+    position: relative;
+    padding: 8px;
+    margin: 5px;
+    border-radius: 10%;
+    border: solid;
+    border-color: var(--ion-color-primary);
+    border-width: 1px;
+    & ion-icon {
+        border-radius: 50%;
+        background-color: var(--ion-color-danger);
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        cursor: pointer;
+    }
+    & ion-img {
+        border-radius: 10%;
+    }
+}
+
+.images {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.add-image {
+    min-width: 90px;
+    min-height: 90px;
 }
 </style>

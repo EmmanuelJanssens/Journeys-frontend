@@ -91,6 +91,7 @@ export const useJourneyStore = defineStore("journey", () => {
     function updateExperience(experience: ExperienceDto) {
         const token = JSON.parse(localStorage.getItem("user")!).token;
         const data = experience;
+        console.log(data);
         return axios
             .put("api/journey/experience", data, {
                 headers: {
@@ -130,7 +131,7 @@ export const useJourneyStore = defineStore("journey", () => {
             }
         });
     }
-    function updateJourney(journey: JourneyDto) {
+    function updateJourney(journey: JourneyDto): Promise<string> {
         const token = JSON.parse(localStorage.getItem("user")!).token;
         return axios.put("/api/journey/", journey, {
             headers: {

@@ -21,3 +21,4 @@ const firebaseConfig = {
 const fbapp = initializeApp(firebaseConfig);
 const storage = getStorage(fbapp, "gs://journeys-v2");
 export const storageRef = ref(storage, "images/");
+export const storageApp = fbapp;

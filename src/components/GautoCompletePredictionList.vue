@@ -4,16 +4,19 @@
             id="end-point"
             class="ion-no-padding"
             :placeholder="props.placeholder"
-            debounce="500"
+            :debounce="500"
             :value="props.input"
             @ionClear="clearInput"
-            @ionChange="startAutocomplete($event)" />
+            @ionChange="startAutocomplete"
+            @ionFocus="toggleFocus(true)"
+            @ionBlur="toggleFocus(false)"
+            v-on:keydown="selectFirst($event)" />
         <ion-content class="search" v-if="predictions.length">
             <ion-list>
                 <ion-item
                     v-for="prediction in predictions"
                     button
-                    v-bind:key="prediction"
+                    v-bind:key="prediction.description"
                     @click="setPredictionText(prediction.description)">
                     <ion-label>
                         {{ prediction.description }}
@@ -51,7 +54,6 @@ const props = defineProps(["placeholder", "input"]);
 var service: google.maps.places.AutocompleteService;
 
 const emit = defineEmits(["predictionChosen"]);
-
 onMounted(() => {
     googleLoader.load().then((google) => {
         service = new google.maps.places.AutocompleteService();
@@ -75,6 +77,17 @@ function startAutocomplete(event: SearchbarCustomEvent) {
     }
 }
 
+const hasFocus = ref(false);
+function toggleFocus(focus: boolean) {
+    hasFocus.value = focus;
+}
+function selectFirst(event: KeyboardEvent) {
+    if (hasFocus.value == true && predictions.value.length > 0) {
+        if (event.key == "Enter" || event.key == "Tab") {
+            setPredictionText(predictions.value[0].description);
+        }
+    }
+}
 function setPredictionText(value: string) {
     predictions.value = [];
     emit("predictionChosen", value);

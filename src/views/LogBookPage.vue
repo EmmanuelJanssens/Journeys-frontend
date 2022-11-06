@@ -1,55 +1,46 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template>
     <ion-page id="main-content">
-        <!--<ion-loading v-if="isLoading" />-->
+        <ion-loading v-if="isLoading" />
         <ion-content>
-            <ion-grid class="full-page">
+            <ion-grid class="full-page ion-no-padding">
                 <ion-row class="full-page">
-                    <ion-col v-bind:class="{ side: true, 'ion-hide-md-down': true }" ref="statisticsCol">
+                    <ion-col
+                        v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney"
+                        class="side ion-hide-md-down">
+                        <!--<ion-header class="sticky">
+                           <ion-toolbar color="secondary">
+                                <ion-buttons slot="start">
+                                    <ion-button @click="fetchJourneys()">
+                                        <ion-icon src="/src/assets/icon/return-up-back-outline.svg" slot="icon-only">
+                                        </ion-icon>
+                                    </ion-button>
+                                </ion-buttons>
+                                <ion-title> Points of interest </ion-title>
+                                <ion-buttons slot="end">
+                                    <ion-button>
+                                        <ion-icon src="/src/assets/icon/filter-outline.svg" slot="icon-only">
+                                        </ion-icon>
+                                    </ion-button>
+                                </ion-buttons>
+                            </ion-toolbar>
+                            <ion-toolbar>
+                                <ion-searchbar @ionChange="filterPois" debounce="500"> </ion-searchbar>
+                            </ion-toolbar>
+                        </ion-header>-->
                         <ion-content>
-                            <ion-row>
-                                <ion-header>
-                                    <ion-toolbar color="secondary">
-                                        <ion-buttons slot="start">
-                                            <ion-button @click="fetchJourneys()">
-                                                <ion-icon
-                                                    src="/src/assets/icon/return-up-back-outline.svg"
-                                                    slot="icon-only">
-                                                </ion-icon>
-                                            </ion-button>
-                                        </ion-buttons>
-                                        <ion-title> Points of interest </ion-title>
-                                        <ion-buttons slot="end">
-                                            <ion-button>
-                                                <ion-icon src="/src/assets/icon/filter-outline.svg" slot="icon-only">
-                                                </ion-icon>
-                                            </ion-button>
-                                        </ion-buttons>
-                                    </ion-toolbar>
-                                    <ion-toolbar>
-                                        <ion-searchbar> </ion-searchbar>
-                                    </ion-toolbar>
-                                </ion-header>
-                            </ion-row>
-                            <ion-row class="experience-list">
+                            <ion-row
+                                v-if="(mode == modes.edition || mode == modes.editJourney) && filteredPois"
+                                class="experience-list">
                                 <ion-col>
-                                    <DynamicScroller
-                                        :items="usePoi.poiRef.features"
-                                        :min-item-size="54"
-                                        style="height: 100%">
+                                    <DynamicScroller :items="filteredPois" :min-item-size="54" style="height: 100%">
                                         <template v-slot="{ item, index, active }">
                                             <DynamicScrollerItem :item="item" :active="active" :data-index="index">
-                                                <ion-item
-                                                    button
-                                                    style="
-                                                         {
-                                                            width: 100%;
-                                                        }
-                                                    ">
+                                                <ion-item button style="width: 100%" @click="panTo(item)">
                                                     <ion-thumbnail slot="start">
-                                                        <ion-img :src="item.properties.thumbnail"> </ion-img>
+                                                        <ion-img :src="item.thumbnail"> </ion-img>
                                                     </ion-thumbnail>
-                                                    <ion-label>{{ item.properties.name }}</ion-label>
+                                                    <ion-label>{{ item.name }}</ion-label>
                                                 </ion-item>
                                             </DynamicScrollerItem>
                                         </template>
@@ -59,26 +50,80 @@
                         </ion-content>
                     </ion-col>
                     <ion-col ref="mapCol">
-                        <JourneyMap
-                            :mode="mode"
-                            :stop-points="useJourney.editJourney.experiences!"
-                            :journeys="myJourneysGeoJSON!"
-                            :pois="poisBetweenGeoJSON!"
-                            :journey-experiences="journeyExperiencesGeoJSON!"
-                            @loaded="fetchJourneys"
-                            @create-new="fetchPois"
-                            @marker-dragged="onMarkerDragend"
-                            @poi-clicked="onPoiClicked" />
-                        <section v-if="mode == modes.logbook || mode == modes.viewJourney" class="journeys-slides">
+                        <ion-content>
+                            <ion-fab v-if="mode == modes.logbook" slot="fixed" vertical="top" horizontal="end">
+                                <ion-fab-button @click="openJourneyCreationModal">
+                                    <ion-icon size="large" src="/src/assets/icon/add-outline.svg"></ion-icon>
+                                </ion-fab-button>
+                            </ion-fab>
+                            <ion-fab v-else-if="mode == modes.viewJourney" slot="fixed" vertical="top" horizontal="end">
+                                <ion-fab-button>
+                                    <ion-icon size="large" src="/src/assets/icon/grid-outline.svg"></ion-icon>
+                                </ion-fab-button>
+                                <ion-fab-list>
+                                    <ion-fab-button @click="editJourney">
+                                        <ion-icon size="default" src="/src/assets/icon/pencil-outline.svg"></ion-icon>
+                                    </ion-fab-button>
+                                    <ion-fab-button @click="fetchJourneys">
+                                        <ion-icon
+                                            size="default"
+                                            src="/src/assets/icon/return-up-back-outline.svg"></ion-icon>
+                                    </ion-fab-button>
+                                    <ion-fab-button>
+                                        <ion-icon
+                                            size="default"
+                                            src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
+                                    </ion-fab-button>
+                                </ion-fab-list>
+                            </ion-fab>
+                            <ion-fab
+                                v-else-if="mode == modes.edition || mode == modes.editJourney"
+                                slot="fixed"
+                                vertical="top"
+                                horizontal="end">
+                                <ion-fab-button>
+                                    <ion-icon size="large" src="/src/assets/icon/grid-outline.svg"></ion-icon>
+                                </ion-fab-button>
+                                <ion-fab-list>
+                                    <ion-fab-button @click="openJourneySaveModal">
+                                        <ion-icon size="default" src="/src/assets/icon/save-outline.svg"></ion-icon>
+                                    </ion-fab-button>
+                                    <ion-fab-button @click="fetchJourneys">
+                                        <ion-icon
+                                            size="default"
+                                            src="/src/assets/icon/return-up-back-outline.svg"></ion-icon>
+                                    </ion-fab-button>
+                                    <ion-fab-button>
+                                        <ion-icon
+                                            size="default"
+                                            src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
+                                    </ion-fab-button>
+                                </ion-fab-list>
+                            </ion-fab>
+                            <JourneyMap
+                                :mode="mode"
+                                :stop-points="journeyStore.editJourney.experiences!"
+                                :journeys="myJourneysGeoJSON!"
+                                :pois="poisBetweenGeoJSON!"
+                                :journey-experiences="journeyExperiencesGeoJSON!"
+                                @create-pressed="openJourneyCreationModal"
+                                @loaded="fetchJourneys"
+                                @marker-dragged="onMarkerDragend"
+                                @poi-clicked="onPoiClicked"
+                                @ready="setLoading(false)" />
+                        </ion-content>
+
+                        <section v-if="mode == modes.logbook" class="journeys-slides">
                             <swiper
                                 :slides-per-view="slidesPerView"
-                                :initial-slide="useUser.myJourneys?.length"
+                                :initial-slide="userStore.myJourneys?.length"
                                 :pagination="{ clickable: true }"
                                 lazy
                                 :modules="modules"
                                 class="journeys"
+                                :center-insufficient-slides="true"
                                 ref="slides">
-                                <swiper-slide v-for="item in useUser.myJourneys">
+                                <swiper-slide v-for="item in userStore.myJourneys">
                                     <JourneyCard
                                         :journey="item"
                                         class="journey-card ion-margin"
@@ -87,38 +132,19 @@
                             </swiper>
                         </section>
                     </ion-col>
-                    <ion-col v-bind:class="{ side: true, 'ion-hide-sm-down': true }" ref="experiencesCol">
+                    <ion-col class="side ion-hide-sm-down" ref="experiencesCol">
                         <ion-content>
-                            <ion-row>
-                                <ion-toolbar color="secondary">
-                                    <ion-buttons slot="start">
-                                        <ion-button @click="fetchJourneys()">
-                                            <ion-icon
-                                                src="/src/assets/icon/return-up-back-outline.svg"
-                                                slot="icon-only">
-                                            </ion-icon>
-                                        </ion-button>
-                                    </ion-buttons>
-                                    <ion-title> Experiences </ion-title>
-                                    <ion-buttons slot="end">
-                                        <ion-button>
-                                            <ion-icon src="/src/assets/icon/filter-outline.svg" slot="icon-only">
-                                            </ion-icon>
-                                        </ion-button>
-                                    </ion-buttons>
-                                </ion-toolbar>
-                            </ion-row>
                             <ion-row class="experience-list">
                                 <ion-col
                                     v-if="
                                         mode == modes.viewJourney &&
-                                        useJourney.viewJourney &&
-                                        useJourney.viewJourney.experiences &&
-                                        useJourney.viewJourney.experiences.length > 0
+                                        journeyStore.viewJourney &&
+                                        journeyStore.viewJourney.experiences &&
+                                        journeyStore.viewJourney.experiences.length > 0
                                     ">
                                     <DynamicScroller
-                                        v-if="useJourney.viewJourney.experiences.length > 0"
-                                        :items="useJourney.viewJourney.experiences"
+                                        v-if="journeyStore.viewJourney.experiences.length > 0"
+                                        :items="journeyStore.viewJourney.experiences"
                                         :min-item-size="54"
                                         style="height: 100%">
                                         <template v-slot="{ item, index, active }">
@@ -128,17 +154,17 @@
                                                 :data-index="index">
                                                 <ExperienceCard
                                                     :experience="item"
-                                                    :journey="useJourney.viewJourney.id"
-                                                    @updated="showExperiences(useJourney.viewJourney.id!)" />
+                                                    :journey="journeyStore.viewJourney.id"
+                                                    @updated="showExperiences(journeyStore.viewJourney.id!)" />
                                             </DynamicScrollerItem>
                                         </template>
                                     </DynamicScroller>
                                 </ion-col>
-                                <ion-col v-else-if="mode === modes.edition">
+                                <ion-col v-else-if="mode === modes.edition || mode == modes.editJourney">
                                     <MapJourneySidebar
-                                        v-if="mode === modes.edition"
-                                        :start="useJourney.editJourney.start"
-                                        :end="useJourney.editJourney.end"
+                                        v-if="mode === modes.edition || mode == modes.editJourney"
+                                        :start="journeyStore.editJourney.start"
+                                        :end="journeyStore.editJourney.end"
                                         mode="edit"
                                 /></ion-col>
                             </ion-row>
@@ -151,6 +177,7 @@
 </template>
 <script lang="ts" setup>
 import {
+    IonLoading,
     IonHeader,
     IonIcon,
     IonPage,
@@ -168,8 +195,13 @@ import {
     IonThumbnail,
     IonItem,
     IonLabel,
+    IonFab,
+    IonFabList,
+    IonFabButton,
     popoverController,
-    onIonViewDidEnter
+    onIonViewDidEnter,
+    modalController,
+    SearchbarCustomEvent
 } from "@ionic/vue";
 // Import Swiper and modules
 // Import Swiper styles
@@ -181,8 +213,10 @@ import "swiper/css/scrollbar";
 import JourneyCard from "components/Cards/JourneyCard.vue";
 import PoiCard from "components/Cards/PoiCard.vue";
 import ExperienceCard from "components/Cards/ExperienceCard.vue";
+import CreateJourneyModal from "components/Modals/CreateJourneyModal.vue";
+import { JourneyMapCapacitor } from "journeys-capacitor-mapbox";
 
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
 import { usePoiStore } from "stores/usePoiStore";
@@ -191,26 +225,30 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy } from "swiper";
 
-import { ExperienceDto, PoiDto } from "types/dtos";
+import { ExperienceDto, JourneyDto, PoiDto } from "types/dtos";
 import GeoJSON from "geojson";
 
 import { GeocodedData } from "types/journeys";
 import JourneyMap from "components/JourneyMap.vue";
-import mapboxgl, { MapMouseEvent } from "mapbox-gl";
+import mapboxgl, { LngLat, MapMouseEvent } from "mapbox-gl";
 import haversine from "haversine";
 import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
 import MapJourneySidebar from "components/MapJourneySidebar.vue";
+import SaveJourneyModal from "components/Modals/SaveJourneyModal.vue";
 
 const modes = {
     logbook: "logbook",
     exploration: "exploration",
     edition: "edition",
-    viewJourney: "viewJourney"
+    viewJourney: "viewJourney",
+    editJourney: "editJourney"
 };
 
-const useUser = useUserStore();
-const useJourney = useJourneyStore();
-const usePoi = usePoiStore();
+const isLoading = ref(true);
+
+const userStore = useUserStore();
+const journeyStore = useJourneyStore();
+const poiStore = usePoiStore();
 
 const mode = ref(modes.logbook);
 
@@ -218,26 +256,49 @@ const slidesPerView = ref(3);
 const modules = ref([Pagination, Navigation, Lazy]);
 const slides = ref();
 
-let statisticsCol = ref<typeof IonCol>();
-let experiencesCol = ref();
-let mapCol = ref();
-
 const journeyExperiencesGeoJSON = ref<GeoJSON.FeatureCollection>();
 const poisBetweenGeoJSON = ref<GeoJSON.FeatureCollection>();
 const myJourneysGeoJSON = ref<GeoJSON.FeatureCollection>();
 
+watch(
+    () => userStore.loggedIn,
+    (newValue) => {
+        if (newValue) {
+            console.log("logged in " + userStore.userRef.username);
+            if (mode.value == modes.logbook) fetchJourneys();
+        } else {
+            journeyStore.clearMapView();
+            myJourneysGeoJSON.value = {
+                type: "FeatureCollection",
+                features: []
+            };
+        }
+    }
+);
+
+async function panTo(poi: PoiDto) {
+    const map = await JourneyMapCapacitor.getMap();
+    map?.flyTo({
+        center: [poi.location.longitude, poi.location.latitude],
+        zoom: 20
+    });
+}
+function setLoading(loading: boolean) {
+    isLoading.value = loading;
+}
 async function fetchJourneys() {
+    setLoading(true);
     mode.value = modes.logbook;
-    await useUser.fetchMyJourneys();
+    await userStore.fetchMyJourneys();
 
     const geoJSONJourney: GeoJSON.FeatureCollection = {
         type: "FeatureCollection",
         features: []
     };
 
-    useUser.myJourneys!.forEach((journey) => {
-        geoJSONJourney.features.push(useJourney.journeyToGeojson(journey)[0]);
-        geoJSONJourney.features.push(useJourney.journeyToGeojson(journey)[1]);
+    userStore.myJourneys!.forEach((journey) => {
+        geoJSONJourney.features.push(journeyStore.journeyToGeojson(journey)[0]);
+        geoJSONJourney.features.push(journeyStore.journeyToGeojson(journey)[1]);
         geoJSONJourney.features.push({
             type: "Feature",
             geometry: {
@@ -255,20 +316,16 @@ async function fetchJourneys() {
     });
     myJourneysGeoJSON.value = geoJSONJourney;
     updateView();
+    isLoading.value = false;
 }
-async function fetchPois(data: { start: GeocodedData; end: GeocodedData }) {
-    mode.value = modes.edition;
-    const radius = getRadius(data.start.coordinates, data.end.coordinates);
-    const mid = getMidPoint(data.start.coordinates, data.end.coordinates);
-    useJourney.setJourneyStartEnd(data.start, data.end);
-    await usePoi.searchBetween(mid.lat, mid.lng, radius);
 
+const filteredPois = ref<PoiDto[]>();
+function buildPoiGeoData(pois: PoiDto[], journey?: JourneyDto) {
     const geoJsonData: GeoJSON.FeatureCollection = {
         type: "FeatureCollection",
         features: []
     };
-
-    usePoi.poisBetween?.forEach((poi) => {
+    pois.forEach((poi) => {
         geoJsonData.features.push({
             type: "Feature",
             geometry: {
@@ -279,55 +336,101 @@ async function fetchPois(data: { start: GeocodedData; end: GeocodedData }) {
             id: poi.id
         });
     });
+
+    const coords = Array<number[]>();
+
+    coords.push([journeyStore.editJourney.start?.longitude!, journeyStore.editJourney.start?.latitude!]);
+    journeyStore.editJourney.experiences?.forEach((element) => {
+        coords.push([element.poi.location.longitude, element.poi.location.latitude]);
+    });
+    coords.push([journeyStore.editJourney.end?.longitude!, journeyStore.editJourney.end?.latitude!]);
+
     geoJsonData.features.push({
         type: "Feature",
         geometry: {
             type: "LineString",
-            coordinates: [
-                [useJourney.editJourney.start?.longitude!, useJourney.editJourney.start?.latitude!],
-                [useJourney.editJourney.end?.longitude!, useJourney.editJourney.end?.latitude!]
-            ]
+            coordinates: coords
         },
         properties: {
-            start: useJourney.editJourney.start,
-            end: useJourney.editJourney.end
+            start: journeyStore.editJourney.start,
+            end: journeyStore.editJourney.end
         },
         id: "editJourney"
     });
     poisBetweenGeoJSON.value = geoJsonData;
 }
+function filterPois(evt: SearchbarCustomEvent) {
+    if (evt.detail.value!.length < 3) {
+        filteredPois.value = poiStore.poisBetween;
+    } else {
+        filteredPois.value = poiStore.poisBetween?.filter((poi) =>
+            poi.name.toLocaleLowerCase().includes(evt.detail.value!.toLocaleLowerCase())
+        );
+    }
+    buildPoiGeoData(filteredPois.value!);
+}
+
+async function editJourney() {
+    journeyStore.editJourney = journeyStore.viewJourney;
+    mode.value = modes.editJourney;
+    await fetchPois({
+        start: {
+            address: journeyStore.editJourney.start?.address!,
+            coordinates: new LngLat(
+                journeyStore.editJourney.start?.longitude!,
+                journeyStore.editJourney.start?.latitude!
+            )
+        },
+        end: {
+            address: journeyStore.editJourney.end?.address!,
+            coordinates: new LngLat(journeyStore.editJourney.end?.longitude!, journeyStore.editJourney.end?.latitude!)
+        }
+    });
+}
+async function fetchPois(data: { start: GeocodedData; end: GeocodedData }) {
+    setLoading(true);
+    const radius = getRadius(data.start.coordinates, data.end.coordinates);
+    const mid = getMidPoint(data.start.coordinates, data.end.coordinates);
+    journeyStore.setJourneyStartEnd(data.start, data.end);
+    await poiStore.searchBetween(mid.lat, mid.lng, radius);
+    filteredPois.value = poiStore.poisBetween;
+    buildPoiGeoData(poiStore.poisBetween!);
+    isLoading.value = false;
+}
 async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
+    setLoading(true);
     const response = await reverseGeocode(pos.lat, pos.lng);
-    useJourney.editJourney.experiences = [];
+    journeyStore.editJourney.experiences = [];
     const result = getLocalityAndCountry(response!);
     if (result.country != undefined && result.locality != undefined) {
         if (marker == "journey_start") {
-            useJourney.editJourney.start = {
+            journeyStore.editJourney.start = {
                 address: result.locality + ", " + result.country,
                 latitude: pos.lat,
                 longitude: pos.lng
             };
         } else if (marker == "journey_end") {
-            useJourney.editJourney.end = {
+            journeyStore.editJourney.end = {
                 address: result.locality + ", " + result.country,
                 latitude: pos.lat,
                 longitude: pos.lng
             };
         }
     }
+    mode.value = modes.edition;
     await fetchPois({
         start: {
-            address: useJourney.editJourney.start?.address!,
+            address: journeyStore.editJourney.start?.address!,
             coordinates: new mapboxgl.LngLat(
-                useJourney.editJourney.start?.longitude!,
-                useJourney.editJourney.start?.latitude!
+                journeyStore.editJourney.start?.longitude!,
+                journeyStore.editJourney.start?.latitude!
             )
         },
         end: {
-            address: useJourney.editJourney.end?.address!,
+            address: journeyStore.editJourney.end?.address!,
             coordinates: new mapboxgl.LngLat(
-                useJourney.editJourney.end?.longitude!,
-                useJourney.editJourney.end?.latitude!
+                journeyStore.editJourney.end?.longitude!,
+                journeyStore.editJourney.end?.latitude!
             )
         }
     });
@@ -394,13 +497,13 @@ function getRadius(start: mapboxgl.LngLat, end: mapboxgl.LngLat): number {
 }
 
 async function showExperiences(id: string) {
-    if (useJourney.viewJourney.id !== id) useJourney.viewJourney = await useJourney.getJourney(id);
+    if (journeyStore.viewJourney.id !== id) journeyStore.viewJourney = await journeyStore.getJourney(id);
     mode.value = modes.viewJourney;
     const featureCollection: GeoJSON.FeatureCollection = {
         type: "FeatureCollection",
         features: []
     };
-    useJourney.viewJourney.experiences?.forEach((exp) => {
+    journeyStore.viewJourney.experiences?.forEach((exp) => {
         featureCollection.features.push({
             type: "Feature",
             geometry: {
@@ -414,29 +517,29 @@ async function showExperiences(id: string) {
 
     const coords = Array<number[]>();
 
-    coords.push([useJourney.viewJourney.start?.longitude!, useJourney.viewJourney.start?.latitude!]);
+    coords.push([journeyStore.viewJourney.start?.longitude!, journeyStore.viewJourney.start?.latitude!]);
     featureCollection.features.forEach((element) => {
         coords.push((element.geometry as GeoJSON.Point).coordinates);
     });
-    coords.push([useJourney.viewJourney.end?.longitude!, useJourney.viewJourney.end?.latitude!]);
+    coords.push([journeyStore.viewJourney.end?.longitude!, journeyStore.viewJourney.end?.latitude!]);
 
     const center = getMidPoint(
-        new mapboxgl.LngLat(useJourney.viewJourney.start?.longitude!, useJourney.viewJourney.start?.latitude!),
-        new mapboxgl.LngLat(useJourney.viewJourney.end?.longitude!, useJourney.viewJourney.end?.latitude!)
+        new mapboxgl.LngLat(journeyStore.viewJourney.start?.longitude!, journeyStore.viewJourney.start?.latitude!),
+        new mapboxgl.LngLat(journeyStore.viewJourney.end?.longitude!, journeyStore.viewJourney.end?.latitude!)
     );
 
     featureCollection.features.push({
         type: "Feature",
         properties: {
-            start: useJourney.viewJourney.start,
-            end: useJourney.viewJourney.end,
+            start: journeyStore.viewJourney.start,
+            end: journeyStore.viewJourney.end,
             center: center
         },
         geometry: {
             type: "LineString",
             coordinates: coords
         },
-        id: useJourney.viewJourney.id
+        id: journeyStore.viewJourney.id
     });
 
     journeyExperiencesGeoJSON.value = featureCollection;
@@ -452,8 +555,8 @@ function updateView() {
         } else if (width < 1500) {
             slidesPerView.value = 3;
         } else {
-            if (useUser.myJourneys?.length! < 4) {
-                slidesPerView.value = useUser.myJourneys?.length!;
+            if (userStore.myJourneys?.length! < 4) {
+                slidesPerView.value = userStore.myJourneys?.length!;
             } else {
                 slidesPerView.value = Math.floor(width / 300);
             }
@@ -461,6 +564,36 @@ function updateView() {
     }
 }
 
+async function openJourneyCreationModal() {
+    const modal = await modalController.create({
+        component: CreateJourneyModal
+    });
+    modal.present();
+
+    const result = await modal.onDidDismiss();
+
+    if (result.role == "create") {
+        mode.value = modes.edition;
+        journeyStore.editJourney.experiences = [];
+
+        fetchPois(result.data);
+    }
+}
+
+async function openJourneySaveModal() {
+    const modal = await modalController.create({
+        component: SaveJourneyModal,
+        componentProps: { mode: mode.value }
+    });
+    modal.present();
+
+    const result = await modal.onDidDismiss();
+
+    if (result.role == "view") {
+        console.log(result);
+        showExperiences(result.data.data);
+    }
+}
 onIonViewWillLeave(() => {
     window.removeEventListener("resize", updateView);
 });
@@ -566,5 +699,9 @@ function onClusterClick(e: MapMouseEvent) {
     min-height: 400px;
     width: 100%;
     z-index: 999;
+}
+
+.sticky {
+    position: absolute;
 }
 </style>

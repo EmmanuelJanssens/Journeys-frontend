@@ -22,10 +22,11 @@ export type LocationDto = {
 export type ExperienceDto = {
     poi: PoiDto;
     experience: {
+        title: string;
         description: string;
         order: number;
         images: string[];
-        date: Date;
+        date: string;
     };
     journey?: JourneyDto;
     id?: number;

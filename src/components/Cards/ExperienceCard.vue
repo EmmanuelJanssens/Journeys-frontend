@@ -3,6 +3,7 @@
         <ion-card-header>
             <ion-toolbar color="none">
                 <ion-card-title>{{ props.experience.poi.name }}</ion-card-title>
+                <ion-card-subtitle>{{ props.experience.experience.title }}</ion-card-subtitle>
                 <ion-buttons slot="end">
                     <ion-button @click="onEdit">
                         <ion-icon src="/src/assets/icon/pencil-outline.svg" slot="icon-only"></ion-icon>
@@ -12,7 +13,7 @@
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
-            <ion-card-subtitle>{{ props.experience.experience.date }}</ion-card-subtitle>
+            <ion-card-subtitle>{{ new Date(props.experience.experience.date).toDateString() }}</ion-card-subtitle>
         </ion-card-header>
         <swiper
             :slides-per-view="1"
@@ -74,20 +75,16 @@ const modules = ref([Navigation, Lazy, Pagination, Autoplay]);
 const useJourney = useJourneyStore();
 
 async function onEdit() {
+    console.log(props.experience);
     const experience = props.experience as ExperienceDto;
     experience.journey = {
         id: props.journey
     };
 
-    popoverController.dismiss();
     const modal = await modalController.create({
         component: EditExperienceModal,
         componentProps: {
-            experience: {
-                experience: experience.experience,
-                journey: experience.journey,
-                poi: experience.poi
-            }
+            experience
         },
         keyboardClose: false
     });
@@ -105,7 +102,6 @@ async function onDelete() {
     exp.journey = {
         id: props.journey
     };
-    popoverController.dismiss();
 
     const alert = await alertController.create({
         header: "Warning",
@@ -134,7 +130,7 @@ async function onDelete() {
 <style scoped>
 ion-img {
     width: 90%;
-    height: 100%;
+    height: 300px;
 }
 .content {
     height: 100%;

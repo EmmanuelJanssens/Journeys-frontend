@@ -53,6 +53,7 @@ function addToJourney(poi: PoiDto) {
     const experience: ExperienceDto = {
         poi: poi,
         experience: {
+            title: "",
             date: new Date(),
             description: "",
             images: [],
