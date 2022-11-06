@@ -62,7 +62,6 @@ onMounted(async () => {
     map = await JourneyMapCapacitor.getMap()!;
     map.on("load", () => {
         emit("loaded");
-        emit("ready");
     });
 
     map.on("style.load", () => {

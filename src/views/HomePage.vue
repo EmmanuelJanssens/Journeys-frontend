@@ -138,14 +138,13 @@ async function gotoJourneyMap() {
         const geocodedEnd = await getGeocodedData(endData.value.address);
 
         if (geocodedStart.error === undefined && geocodedEnd.error === undefined) {
-            const route = {
-                name: "map",
-                params: {
-                    start: JSON.stringify(geocodedStart),
-                    end: JSON.stringify(geocodedEnd)
+            router.push({
+                name: "logbook",
+                query: {
+                    start: startData.value.address,
+                    end: endData.value.address
                 }
-            };
-            router.push(route);
+            });
         }
     }
 }

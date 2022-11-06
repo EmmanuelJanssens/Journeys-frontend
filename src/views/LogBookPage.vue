@@ -107,7 +107,7 @@
                                 :pois="poisBetweenGeoJSON!"
                                 :journey-experiences="journeyExperiencesGeoJSON!"
                                 @create-pressed="openJourneyCreationModal"
-                                @loaded="fetchJourneys"
+                                @loaded="readQuery"
                                 @marker-dragged="onMarkerDragend"
                                 @poi-clicked="onPoiClicked"
                                 @ready="setLoading(false)" />
@@ -201,7 +201,8 @@ import {
     popoverController,
     onIonViewDidEnter,
     modalController,
-    SearchbarCustomEvent
+    SearchbarCustomEvent,
+    onIonViewWillEnter
 } from "@ionic/vue";
 // Import Swiper and modules
 // Import Swiper styles
@@ -232,9 +233,11 @@ import { GeocodedData } from "types/journeys";
 import JourneyMap from "components/JourneyMap.vue";
 import mapboxgl, { LngLat, MapMouseEvent } from "mapbox-gl";
 import haversine from "haversine";
-import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
+import { reverseGeocode, getLocalityAndCountry, getGeocodedData } from "google/googleGeocoder";
+
 import MapJourneySidebar from "components/MapJourneySidebar.vue";
 import SaveJourneyModal from "components/Modals/SaveJourneyModal.vue";
+import router from "router/router";
 
 const modes = {
     logbook: "logbook",
@@ -275,6 +278,13 @@ watch(
         }
     }
 );
+onIonViewWillLeave(() => {
+    window.removeEventListener("resize", updateView);
+});
+
+onIonViewDidEnter(async () => {
+    window.addEventListener("resize", updateView);
+});
 
 async function panTo(poi: PoiDto) {
     const map = await JourneyMapCapacitor.getMap();
@@ -285,6 +295,22 @@ async function panTo(poi: PoiDto) {
 }
 function setLoading(loading: boolean) {
     isLoading.value = loading;
+}
+
+async function readQuery() {
+    if (router.currentRoute.value.query.start && router.currentRoute.value.query.end) {
+        const geocodedStart = await getGeocodedData(router.currentRoute.value.query.start as string);
+        const geocodedEnd = await getGeocodedData(router.currentRoute.value.query.end as string);
+        router.replace({ query: undefined });
+
+        mode.value = modes.edition;
+        fetchPois({
+            start: geocodedStart,
+            end: geocodedEnd
+        });
+    } else {
+        fetchJourneys();
+    }
 }
 async function fetchJourneys() {
     setLoading(true);
@@ -395,7 +421,6 @@ async function fetchPois(data: { start: GeocodedData; end: GeocodedData }) {
     await poiStore.searchBetween(mid.lat, mid.lng, radius);
     filteredPois.value = poiStore.poisBetween;
     buildPoiGeoData(poiStore.poisBetween!);
-    isLoading.value = false;
 }
 async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
     setLoading(true);
@@ -594,12 +619,7 @@ async function openJourneySaveModal() {
         showExperiences(result.data.data);
     }
 }
-onIonViewWillLeave(() => {
-    window.removeEventListener("resize", updateView);
-});
-onIonViewDidEnter(async () => {
-    window.addEventListener("resize", updateView);
-});
+
 /*
 function reorderedSteps() {
     var steps: number[][] = [];
