@@ -88,6 +88,7 @@ function reordered(evt: ItemReorderCustomEvent) {
         });
     }
     useJourney.editJourney.journey?.experiences!.sort((a, b) => a.experience.order - b.experience.order);
+    useJourney.editJourney.updated = useJourney.editJourney.journey?.experiences;
     evt.detail.complete();
     emit("reordered");
 }

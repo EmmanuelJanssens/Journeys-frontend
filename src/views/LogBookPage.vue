@@ -395,6 +395,7 @@ function filterPois(evt: SearchbarCustomEvent) {
 }
 
 async function editJourney() {
+    journeyStore.clearData();
     journeyStore.editJourney.journey! = journeyStore.viewJourney;
     mode.value = modes.editJourney;
     await fetchPois({
