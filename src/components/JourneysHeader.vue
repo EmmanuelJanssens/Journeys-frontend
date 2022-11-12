@@ -29,8 +29,8 @@ import RegisterModal from "components/Modals/RegisterModal.vue";
 const userStore = useUserStore();
 
 function toggleProfile() {
-    menuController.toggle("profileMenu").then((e) => {
-        menuController.isOpen("profileMenu").then((b) => {});
+    menuController.toggle("right-side-menu").then((e) => {
+        menuController.isOpen("right-side-menu").then((b) => {});
     });
 }
 

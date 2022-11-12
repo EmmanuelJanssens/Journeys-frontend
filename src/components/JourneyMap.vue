@@ -140,11 +140,14 @@ watch(
     (newVal) => {
         const array: Array<number[]> = new Array();
 
-        array.push([useJourney.editJourney.start?.longitude!, useJourney.editJourney.start?.latitude!]);
+        array.push([
+            useJourney.editJourney.journey?.start?.longitude!,
+            useJourney.editJourney.journey?.start?.latitude!
+        ]);
         newVal?.forEach((exp) => {
             array.push([exp.poi.location.longitude, exp.poi.location.latitude]);
         });
-        array.push([useJourney.editJourney.end?.longitude!, useJourney.editJourney.end?.latitude!]);
+        array.push([useJourney.editJourney.journey?.end?.longitude!, useJourney.editJourney.journey?.end?.latitude!]);
 
         const feature: GeoJSON.Feature = {
             type: "Feature",

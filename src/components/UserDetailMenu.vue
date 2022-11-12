@@ -1,5 +1,5 @@
 <template>
-    <ion-menu menuId="profileMenu" content-id="main-content" type="overlay" side="end">
+    <ion-menu menuId="right-side-menu" content-id="main-content" type="overlay" side="end">
         <ion-header>
             <ion-toolbar>
                 <ion-title>{{ userStore.userRef.username }}</ion-title>
@@ -19,6 +19,7 @@ const userStore = useUserStore();
 
 async function logout() {
     userStore.logout();
-    menuController.toggle("profileMenu");
+    menuController.toggle("right-side-menu");
 }
 </script>
+<style scoped></style>

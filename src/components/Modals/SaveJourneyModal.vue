@@ -55,8 +55,7 @@ const userStore = useUserStore();
 const props = defineProps(["mode"]);
 
 onMounted(() => {
-    console.log(props.mode);
-    if (props.mode) title.value = journeyStore.editJourney.title;
+    if (props.mode) title.value = journeyStore.editJourney.journey?.title;
 });
 function dismissModal() {
     modalController.dismiss("dismiss", "discarded");
@@ -66,7 +65,10 @@ async function saveJourney() {
     if (!userStore.IsLoggedIn()) {
         throw new Error("User is not logged in");
     }
-    if (journeyStore.editJourney.start?.address!.length! <= 0 || journeyStore.editJourney.end?.address!.length! <= 0) {
+    if (
+        journeyStore.editJourney.journey?.start?.address!.length! <= 0 ||
+        journeyStore.editJourney.journey?.end?.address!.length! <= 0
+    ) {
         let alert = await alertController.create({
             header: "Error",
             message: "Your journey is not valid, Some values may be missing",
@@ -76,7 +78,7 @@ async function saveJourney() {
     } else {
         var journeyId: string;
         if (props.mode == "editJourney") {
-            journeyStore.editJourney.title = title.value;
+            journeyStore.editJourney.journey!.title = title.value;
             journeyId = await journeyStore.updateJourney(journeyStore.editJourney);
             console.log("updated");
         } else {

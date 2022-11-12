@@ -2,22 +2,29 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
 import { GeocodedData } from "types/journeys";
-import { ExperienceDto, JourneyDto } from "types/dtos";
+import { ExperienceDto, JourneyDto, UpdateJourneyDto } from "types/dtos";
 export const useJourneyStore = defineStore("journey", () => {
-    const editJourney = ref<JourneyDto>({
-        title: "wolol",
-        experiences: [],
-        start: {
-            address: "",
-            latitude: -1,
-            longitude: -1
+    const editJourney = ref<UpdateJourneyDto>({
+        journey: {
+            title: "",
+            experiences: [],
+            description: "",
+            start: {
+                address: "",
+                latitude: -1,
+                longitude: -1
+            },
+            end: {
+                address: "",
+                latitude: -1,
+                longitude: -1
+            }
         },
-        end: {
-            address: "",
-            latitude: -1,
-            longitude: -1
-        }
+        updated: [],
+        deleted: { poi_ids: [] },
+        connected: { poi_ids: [] }
     });
+
     const viewJourney = ref<JourneyDto>({
         title: "wolol",
         experiences: [],
@@ -65,13 +72,15 @@ export const useJourneyStore = defineStore("journey", () => {
 
     function addToJourney(experience: ExperienceDto): void {
         if (!alreadyInJourney(experience)) {
-            editJourney.value?.experiences?.push(experience);
+            editJourney.value?.journey?.experiences?.push(experience);
         }
     }
 
     function removeFromJourney(id: string) {
-        const removed = editJourney.value.experiences?.find((p) => p.poi.id == id);
-        editJourney.value!.experiences = editJourney.value?.experiences?.filter((item) => item.poi.id !== id);
+        const removed = editJourney.value.journey?.experiences?.find((p) => p.poi.id == id);
+        editJourney.value!.journey!.experiences = editJourney.value?.journey?.experiences?.filter(
+            (item) => item.poi.id !== id
+        );
         return removed;
     }
 
@@ -104,34 +113,22 @@ export const useJourneyStore = defineStore("journey", () => {
             });
     }
     function alreadyInJourney(expDto: ExperienceDto): boolean {
-        return editJourney.value?.experiences!.find((item) => item.poi.id === expDto.poi.id) !== undefined;
+        return editJourney.value?.journey?.experiences!.find((item) => item.poi.id === expDto.poi.id) !== undefined;
     }
 
     function saveJourney(name: string): Promise<string> {
         const token = JSON.parse(localStorage.getItem("user")!).token;
-        editJourney.value!.title = name;
+        editJourney.value!.journey!.title = name;
 
-        const dto: JourneyDto = {
-            title: editJourney.value.title,
-            start: {
-                address: editJourney.value.start?.address!,
-                latitude: editJourney.value.start?.latitude!,
-                longitude: editJourney.value.start?.longitude!
-            },
-            end: {
-                address: editJourney.value.end?.address!,
-                latitude: editJourney.value.end?.latitude!,
-                longitude: editJourney.value.end?.longitude!
-            },
-            experiences: editJourney.value.experiences!
-        };
+        const dto: JourneyDto = editJourney.value.journey!;
+        console.log(dto);
         return axios.post("/api/journey/", dto, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
     }
-    function updateJourney(journey: JourneyDto): Promise<string> {
+    function updateJourney(journey: UpdateJourneyDto): Promise<string> {
         const token = JSON.parse(localStorage.getItem("user")!).token;
         return axios.put("/api/journey/", journey, {
             headers: {
@@ -140,12 +137,12 @@ export const useJourneyStore = defineStore("journey", () => {
         });
     }
     function setJourneyStartEnd(start: GeocodedData, end: GeocodedData) {
-        editJourney.value!.start = {
+        editJourney.value!.journey!.start = {
             address: start.address,
             latitude: start.coordinates.lat,
             longitude: start.coordinates.lng
         };
-        editJourney.value!.end = {
+        editJourney.value!.journey!.end = {
             address: end.address,
             latitude: end.coordinates.lat,
             longitude: end.coordinates.lng
@@ -153,19 +150,22 @@ export const useJourneyStore = defineStore("journey", () => {
     }
 
     function clearMapView() {
-        editJourney.value!.start = {
+        editJourney.value!.journey!.start = {
             address: "",
             latitude: -1,
             longitude: -1
         };
-        editJourney.value!.end = {
+        editJourney.value!.journey!.end = {
             address: "",
             latitude: -1,
             longitude: -1
         };
-        editJourney.value = {
+        editJourney.value.journey! = {
             experiences: []
         };
+        editJourney.value.deleted = { poi_ids: [] };
+        editJourney.value.connected = { poi_ids: [] };
+        editJourney.value.updated = [];
         viewJourney.value!.start = {
             address: "",
             latitude: -1,

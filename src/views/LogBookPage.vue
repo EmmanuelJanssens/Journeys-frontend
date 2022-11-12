@@ -102,7 +102,7 @@
                             </ion-fab>
                             <JourneyMap
                                 :mode="mode"
-                                :stop-points="journeyStore.editJourney.experiences!"
+                                :stop-points="journeyStore.editJourney.journey?.experiences!"
                                 :journeys="myJourneysGeoJSON!"
                                 :pois="poisBetweenGeoJSON!"
                                 :journey-experiences="journeyExperiencesGeoJSON!"
@@ -132,7 +132,10 @@
                             </swiper>
                         </section>
                     </ion-col>
-                    <ion-col class="side ion-hide-sm-down" ref="experiencesCol">
+                    <ion-col
+                        v-if="mode == modes.viewJourney || mode == modes.edition || mode == modes.editJourney"
+                        class="side ion-hide-sm-down"
+                        ref="experiencesCol">
                         <ion-content>
                             <ion-row class="experience-list">
                                 <ion-col
@@ -162,9 +165,8 @@
                                 </ion-col>
                                 <ion-col v-else-if="mode === modes.edition || mode == modes.editJourney">
                                     <MapJourneySidebar
-                                        v-if="mode === modes.edition || mode == modes.editJourney"
-                                        :start="journeyStore.editJourney.start"
-                                        :end="journeyStore.editJourney.end"
+                                        :start="journeyStore.editJourney.journey?.start"
+                                        :end="journeyStore.editJourney.journey?.end"
                                         mode="edit"
                                 /></ion-col>
                             </ion-row>
@@ -358,11 +360,14 @@ function buildPoiGeoData(pois: PoiDto[], journey?: JourneyDto) {
 
     const coords = Array<number[]>();
 
-    coords.push([journeyStore.editJourney.start?.longitude!, journeyStore.editJourney.start?.latitude!]);
-    journeyStore.editJourney.experiences?.forEach((element) => {
+    coords.push([
+        journeyStore.editJourney.journey?.start?.longitude!,
+        journeyStore.editJourney.journey?.start?.latitude!
+    ]);
+    journeyStore.editJourney.journey?.experiences?.forEach((element) => {
         coords.push([element.poi.location.longitude, element.poi.location.latitude]);
     });
-    coords.push([journeyStore.editJourney.end?.longitude!, journeyStore.editJourney.end?.latitude!]);
+    coords.push([journeyStore.editJourney.journey?.end?.longitude!, journeyStore.editJourney.journey?.end?.latitude!]);
 
     geoJsonData.features.push({
         type: "Feature",
@@ -371,8 +376,8 @@ function buildPoiGeoData(pois: PoiDto[], journey?: JourneyDto) {
             coordinates: coords
         },
         properties: {
-            start: journeyStore.editJourney.start,
-            end: journeyStore.editJourney.end
+            start: journeyStore.editJourney.journey?.start,
+            end: journeyStore.editJourney.journey?.end
         },
         id: "editJourney"
     });
@@ -390,19 +395,22 @@ function filterPois(evt: SearchbarCustomEvent) {
 }
 
 async function editJourney() {
-    journeyStore.editJourney = journeyStore.viewJourney;
+    journeyStore.editJourney.journey! = journeyStore.viewJourney;
     mode.value = modes.editJourney;
     await fetchPois({
         start: {
-            address: journeyStore.editJourney.start?.address!,
+            address: journeyStore.editJourney.journey?.start?.address!,
             coordinates: new LngLat(
-                journeyStore.editJourney.start?.longitude!,
-                journeyStore.editJourney.start?.latitude!
+                journeyStore.editJourney.journey?.start?.longitude!,
+                journeyStore.editJourney.journey?.start?.latitude!
             )
         },
         end: {
-            address: journeyStore.editJourney.end?.address!,
-            coordinates: new LngLat(journeyStore.editJourney.end?.longitude!, journeyStore.editJourney.end?.latitude!)
+            address: journeyStore.editJourney.journey?.end?.address!,
+            coordinates: new LngLat(
+                journeyStore.editJourney.journey?.end?.longitude!,
+                journeyStore.editJourney.journey?.end?.latitude!
+            )
         }
     });
 }
@@ -418,17 +426,17 @@ async function fetchPois(data: { start: GeocodedData; end: GeocodedData }) {
 async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
     setLoading(true);
     const response = await reverseGeocode(pos.lat, pos.lng);
-    journeyStore.editJourney.experiences = [];
+    journeyStore.editJourney.journey!.experiences = [];
     const result = getLocalityAndCountry(response!);
     if (result.country != undefined && result.locality != undefined) {
         if (marker == "journey_start") {
-            journeyStore.editJourney.start = {
+            journeyStore.editJourney.journey!.start = {
                 address: result.locality + ", " + result.country,
                 latitude: pos.lat,
                 longitude: pos.lng
             };
         } else if (marker == "journey_end") {
-            journeyStore.editJourney.end = {
+            journeyStore.editJourney.journey!.end = {
                 address: result.locality + ", " + result.country,
                 latitude: pos.lat,
                 longitude: pos.lng
@@ -438,17 +446,17 @@ async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
     mode.value = modes.edition;
     await fetchPois({
         start: {
-            address: journeyStore.editJourney.start?.address!,
+            address: journeyStore.editJourney.journey?.start?.address!,
             coordinates: new mapboxgl.LngLat(
-                journeyStore.editJourney.start?.longitude!,
-                journeyStore.editJourney.start?.latitude!
+                journeyStore.editJourney.journey?.start?.longitude!,
+                journeyStore.editJourney.journey?.start?.latitude!
             )
         },
         end: {
-            address: journeyStore.editJourney.end?.address!,
+            address: journeyStore.editJourney.journey?.end?.address!,
             coordinates: new mapboxgl.LngLat(
-                journeyStore.editJourney.end?.longitude!,
-                journeyStore.editJourney.end?.latitude!
+                journeyStore.editJourney.journey?.end?.longitude!,
+                journeyStore.editJourney.journey?.end?.latitude!
             )
         }
     });
@@ -592,7 +600,7 @@ async function openJourneyCreationModal() {
 
     if (result.role == "create") {
         mode.value = modes.edition;
-        journeyStore.editJourney.experiences = [];
+        journeyStore.editJourney.journey!.experiences = [];
 
         fetchPois(result.data);
     }

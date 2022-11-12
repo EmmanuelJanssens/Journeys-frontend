@@ -57,7 +57,7 @@ function addToJourney(poi: PoiDto) {
             date: new Date(),
             description: "",
             images: [],
-            order: useJourney.editJourney.experiences!.length
+            order: useJourney.editJourney.journey!.experiences!.length
         }
     };
     useJourney.addToJourney(experience);

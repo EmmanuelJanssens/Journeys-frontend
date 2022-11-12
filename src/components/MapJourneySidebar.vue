@@ -14,7 +14,7 @@
 
     <IonReorderGroup @ionItemReorder="reordered($event)" :disabled="false">
         <ion-item-sliding
-            v-for="experience in useJourney.editJourney?.experiences"
+            v-for="experience in useJourney.editJourney?.journey?.experiences"
             v-bind:key="experience.poi.id"
             :disabled="props.mode == 'view'">
             <ion-item>
@@ -64,14 +64,14 @@ const useJourney = useJourneyStore();
 function remove(id: string) {
     const removed = useJourney.removeFromJourney(id);
 
-    useJourney.editJourney.experiences!.forEach((item: { experience: { order: number } }) => {
+    useJourney.editJourney.journey?.experiences!.forEach((item: { experience: { order: number } }) => {
         if (item.experience.order > removed!.experience.order) item.experience.order--;
     });
     emit("reordered");
 }
 function reordered(evt: ItemReorderCustomEvent) {
     if (evt.detail.from < evt.detail.to) {
-        useJourney.editJourney.experiences!.forEach((item: { experience: { order: number } }) => {
+        useJourney.editJourney.journey?.experiences!.forEach((item: { experience: { order: number } }) => {
             if (item.experience.order == evt.detail.from) {
                 item.experience.order = evt.detail.to;
             } else if (item.experience.order <= evt.detail.to && item.experience.order >= evt.detail.from) {
@@ -79,7 +79,7 @@ function reordered(evt: ItemReorderCustomEvent) {
             }
         });
     } else {
-        useJourney.editJourney.experiences!.forEach((item: { experience: { order: number } }) => {
+        useJourney.editJourney.journey?.experiences!.forEach((item: { experience: { order: number } }) => {
             if (item.experience.order == evt.detail.from) {
                 item.experience.order = evt.detail.to;
             } else if (item.experience.order >= evt.detail.to && item.experience.order <= evt.detail.from) {
@@ -87,7 +87,7 @@ function reordered(evt: ItemReorderCustomEvent) {
             }
         });
     }
-    useJourney.editJourney.experiences!.sort((a, b) => a.experience.order - b.experience.order);
+    useJourney.editJourney.journey?.experiences!.sort((a, b) => a.experience.order - b.experience.order);
     evt.detail.complete();
     emit("reordered");
 }

@@ -37,9 +37,22 @@ export type AddressDto = {
     latitude: number;
     longitude: number;
 };
+
+export type UpdateJourneyDto = {
+    journey?: JourneyDto;
+    updated?: ExperienceDto[];
+    deleted?: {
+        poi_ids: string[];
+    };
+    connected?: {
+        poi_ids: string[];
+    };
+};
+
 export type JourneyDto = {
     id?: string;
     title?: string;
+    description?: string;
     start?: AddressDto;
     end?: AddressDto;
     creator?: UserDto;

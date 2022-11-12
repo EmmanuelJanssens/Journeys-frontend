@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import { IonApp, IonRouterOutlet, IonContent } from "@ionic/vue";
+import { IonApp, IonRouterOutlet, IonContent, IonSplitPane } from "@ionic/vue";
 import UserDetailMenu from "components/UserDetailMenu.vue";
 import JourneysHeader from "components/JourneysHeader.vue";
 import { useUserStore } from "stores/useUserStore";
