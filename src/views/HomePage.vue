@@ -3,21 +3,7 @@
         <ion-content :fullscreen="true">
             <ion-grid :fixed="true" class="ion-no-padding">
                 <ion-row class="ion-align-items-center ion-justify-content-center ion-hide-sm-down journey">
-                    <ion-col size="3" class="ion-margin">
-                        <GautoCompletePredictionList
-                            placeholder="Start"
-                            :input="startData.address"
-                            @prediction-chosen="setStartPredictionText($event)" />
-                    </ion-col>
-                    <ion-col size="3" class="ion-margin">
-                        <GautoCompletePredictionList
-                            placeholder="Destination"
-                            :input="endData.address"
-                            @prediction-chosen="setEndPredictionText($event)" />
-                    </ion-col>
-                    <ion-col size="3" class="ion-margin">
-                        <ion-button color="primary" @click="gotoJourneyMap()">Start </ion-button>
-                    </ion-col>
+                    <ion-button @click="gotoJourneyMap"> Start your Journey</ion-button>
                 </ion-row>
                 <ion-row class="ion-align-items-center" id="row">
                     <ion-col size="7">
@@ -78,75 +64,14 @@
 </template>
 
 <script lang="ts" setup>
-import {
-    IonContent,
-    IonPage,
-    IonTitle,
-    IonFooter,
-    IonButton,
-    IonLabel,
-    IonGrid,
-    IonCol,
-    IonRow,
-    onIonViewWillEnter
-} from "@ionic/vue";
-import { LngLat } from "mapbox-gl";
-import { ref } from "vue";
+import { IonContent, IonPage, IonTitle, IonFooter, IonButton, IonLabel, IonGrid, IonCol, IonRow } from "@ionic/vue";
 
 import router from "router/router";
-import GautoCompletePredictionList from "components/GautoCompletePredictionList.vue";
-import { getGeocodedData } from "google/googleGeocoder";
-import { JourneyLocation } from "types/journeys";
-
-const startData = ref<JourneyLocation>({
-    address: "",
-    coordinates: new LngLat(-1, -1),
-    isOk: false
-});
-
-const endData = ref<JourneyLocation>({
-    address: "",
-    coordinates: new LngLat(-1, -1),
-    isOk: false
-});
-
-function setStartPredictionText(prediction: string) {
-    startData.value.address = prediction;
-    startData.value.isOk = true;
-}
-function setEndPredictionText(prediction: string) {
-    endData.value.address = prediction;
-    endData.value.isOk = true;
-}
-
-onIonViewWillEnter(() => {
-    startData.value = {
-        address: "",
-        coordinates: new LngLat(-1, -1),
-        isOk: false
-    };
-    endData.value = {
-        address: "",
-        coordinates: new LngLat(-1, -1),
-        isOk: false
-    };
-});
 
 async function gotoJourneyMap() {
-    if (startData.value.isOk && endData.value.isOk) {
-        const geocodedStart = await getGeocodedData(startData.value.address);
-        const geocodedEnd = await getGeocodedData(endData.value.address);
-
-        if (geocodedStart.error === undefined && geocodedEnd.error === undefined) {
-            router.push({
-                name: "logbook",
-                query: {
-                    start: startData.value.address,
-                    end: endData.value.address
-                }
-            });
-        }
-    }
+    router.push({
+        name: "logbook"
+    });
 }
 </script>
 

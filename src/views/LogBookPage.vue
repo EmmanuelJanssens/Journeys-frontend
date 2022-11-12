@@ -107,7 +107,7 @@
                                 :pois="poisBetweenGeoJSON!"
                                 :journey-experiences="journeyExperiencesGeoJSON!"
                                 @create-pressed="openJourneyCreationModal"
-                                @loaded="readQuery"
+                                @loaded="fetchJourneys"
                                 @marker-dragged="onMarkerDragend"
                                 @poi-clicked="onPoiClicked"
                                 @ready="setLoading(false)" />
@@ -278,11 +278,18 @@ watch(
         }
     }
 );
+
+onIonViewDidEnter(() => {
+    if (!userStore.IsLoggedIn()) {
+        openJourneyCreationModal();
+    }
+});
+
 onIonViewWillLeave(() => {
     window.removeEventListener("resize", updateView);
 });
 
-onIonViewDidEnter(async () => {
+onIonViewWillEnter(async () => {
     window.addEventListener("resize", updateView);
 });
 
@@ -294,24 +301,10 @@ async function panTo(poi: PoiDto) {
     });
 }
 function setLoading(loading: boolean) {
+    console.log(loading);
     isLoading.value = loading;
 }
 
-async function readQuery() {
-    if (router.currentRoute.value.query.start && router.currentRoute.value.query.end) {
-        const geocodedStart = await getGeocodedData(router.currentRoute.value.query.start as string);
-        const geocodedEnd = await getGeocodedData(router.currentRoute.value.query.end as string);
-        router.replace({ query: undefined });
-
-        mode.value = modes.edition;
-        fetchPois({
-            start: geocodedStart,
-            end: geocodedEnd
-        });
-    } else {
-        fetchJourneys();
-    }
-}
 async function fetchJourneys() {
     setLoading(true);
     mode.value = modes.logbook;
@@ -342,7 +335,6 @@ async function fetchJourneys() {
     });
     myJourneysGeoJSON.value = geoJSONJourney;
     updateView();
-    isLoading.value = false;
 }
 
 const filteredPois = ref<PoiDto[]>();

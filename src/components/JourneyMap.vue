@@ -62,6 +62,7 @@ onMounted(async () => {
     map = await JourneyMapCapacitor.getMap()!;
     map.on("load", () => {
         emit("loaded");
+        emit("ready");
     });
 
     map.on("style.load", () => {
@@ -115,7 +116,6 @@ watch(
     async (newVal, oldValue) => {
         if (newVal?.features.length! > 0) {
             map.resize();
-
             await JourneyMapCapacitor.addPoiListLayer(newVal!);
             const start = await JourneyMapCapacitor.getmarkerbyId("journey_start")!;
             if (props.mode != "editJourney") {
