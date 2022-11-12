@@ -185,6 +185,7 @@ import {
     IonGrid,
     IonCol,
     IonRow,
+    IonAlert,
     IonButton,
     IonToolbar,
     IonButtons,
@@ -202,7 +203,8 @@ import {
     onIonViewDidEnter,
     modalController,
     SearchbarCustomEvent,
-    onIonViewWillEnter
+    onIonViewWillEnter,
+    alertController
 } from "@ionic/vue";
 // Import Swiper and modules
 // Import Swiper styles
@@ -237,7 +239,8 @@ import { reverseGeocode, getLocalityAndCountry, getGeocodedData } from "google/g
 
 import MapJourneySidebar from "components/MapJourneySidebar.vue";
 import SaveJourneyModal from "components/Modals/SaveJourneyModal.vue";
-import router from "router/router";
+import LoginModal from "components/Modals/LoginModal.vue";
+import RegisterModal from "components/Modals/RegisterModal.vue";
 
 const modes = {
     logbook: "logbook",
@@ -267,7 +270,6 @@ watch(
     () => userStore.loggedIn,
     (newValue) => {
         if (newValue) {
-            console.log("logged in " + userStore.userRef.username);
             if (mode.value == modes.logbook) fetchJourneys();
         } else {
             journeyStore.clearMapView();
@@ -301,7 +303,6 @@ async function panTo(poi: PoiDto) {
     });
 }
 function setLoading(loading: boolean) {
-    console.log(loading);
     isLoading.value = loading;
 }
 
@@ -596,19 +597,52 @@ async function openJourneyCreationModal() {
         fetchPois(result.data);
     }
 }
+async function openModal(component: any) {
+    let modal = await modalController.create({
+        component: component,
+        keyboardClose: false,
+        backdropDismiss: false
+    });
+    await modal.present();
+}
 
 async function openJourneySaveModal() {
-    const modal = await modalController.create({
-        component: SaveJourneyModal,
-        componentProps: { mode: mode.value }
-    });
-    modal.present();
+    if (!userStore.IsLoggedIn()) {
+        const alert = await alertController.create({
+            message: "To Continue with this action pleas login with your account or register a new Account",
+            header: "Connect with your account",
+            buttons: [
+                {
+                    text: "Login",
+                    role: "Login",
+                    handler: () => {
+                        alertController.dismiss();
+                        openModal(LoginModal);
+                    }
+                },
+                {
+                    text: "Register",
+                    role: "Register",
+                    handler: () => {
+                        alertController.dismiss();
+                        openModal(RegisterModal);
+                    }
+                }
+            ]
+        });
+        (await alert).present();
+    } else {
+        const modal = await modalController.create({
+            component: SaveJourneyModal,
+            componentProps: { mode: mode.value }
+        });
+        modal.present();
 
-    const result = await modal.onDidDismiss();
+        const result = await modal.onDidDismiss();
 
-    if (result.role == "view") {
-        console.log(result);
-        showExperiences(result.data.data);
+        if (result.role == "view") {
+            showExperiences(result.data.data);
+        }
     }
 }
 
