@@ -49,11 +49,16 @@ import {
 import { onMounted, ref } from "vue";
 
 const predictions = ref<google.maps.places.AutocompletePrediction[]>([]);
-const props = defineProps(["placeholder", "input"]);
+const props = defineProps<{
+    placeholder: string;
+    input: string;
+}>();
 
 var service: google.maps.places.AutocompleteService;
 
-const emit = defineEmits(["predictionChosen"]);
+const emit = defineEmits<{
+    (e: "predictionChosen", value: string): void;
+}>();
 onMounted(() => {
     googleLoader.load().then((google) => {
         service = new google.maps.places.AutocompleteService();

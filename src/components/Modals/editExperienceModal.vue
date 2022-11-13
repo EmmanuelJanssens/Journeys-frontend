@@ -83,8 +83,6 @@
 import {
     IonDatetime,
     IonIcon,
-    IonPicker,
-    IonButtons,
     IonDatetimeButton,
     IonModal,
     IonProgressBar,
@@ -107,19 +105,19 @@ import {
     modalController
 } from "@ionic/vue";
 import { useJourneyStore } from "stores/useJourneyStore";
-import { useUserStore } from "stores/useUserStore";
 import { ExperienceDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
-import { storageRef, storageApp } from "google/storage";
+import { storageRef } from "google/storage";
 import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
 import { showToast } from "utils/utils";
 
 const description = ref();
 const title = ref();
 const useJourney = useJourneyStore();
-const props = defineProps(["experience", "journey"]);
-const emit = defineEmits(["saved"]);
+const props = defineProps<{
+    experience: ExperienceDto;
+}>();
 const files = ref<Array<any>>([]);
 const uploading = ref(false);
 let currentData = ref<ExperienceDto>();
@@ -129,7 +127,7 @@ let images = ref<
         isFs: boolean;
     }[]
 >([]);
-let selectedDate = ref<string>();
+let selectedDate = ref<Date>();
 onMounted(() => {
     currentData.value = props.experience as ExperienceDto;
     title.value = currentData.value.experience.title;
@@ -219,7 +217,7 @@ async function save() {
         );
         currentData.value!.experience.images = currentData.value!.experience.images.concat(...uploaded);
         currentData.value!.experience.title = title.value;
-        currentData.value!.experience.date = new Date(selectedDate.value!).toUTCString();
+        currentData.value!.experience.date = new Date(selectedDate.value!);
         currentData.value!.experience.description = description.value;
         await useJourney.updateExperience(currentData.value!);
         modalController.dismiss({ status: "success" });

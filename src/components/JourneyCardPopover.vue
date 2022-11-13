@@ -5,13 +5,16 @@
     </ion-list>
 </template>
 <script lang="ts" setup>
-import { IonItem, IonList, IonAlert, popoverController, alertController, modalController } from "@ionic/vue";
+import { IonItem, IonList, popoverController, alertController, modalController } from "@ionic/vue";
 import EditJourneyModal from "components/Modals/EditJourneyModal.vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
+import { JourneyDto } from "types/dtos";
 import { showToast } from "utils/utils";
 
-const props = defineProps(["journey"]);
+const props = defineProps<{
+    journey: JourneyDto;
+}>();
 
 const useJourney = useJourneyStore();
 const useUser = useUserStore();
@@ -38,8 +41,8 @@ async function onDelete() {
                 text: "Yes",
                 role: "proceed",
                 handler: async () => {
-                    await useJourney.removeJourney(props.journey.id);
-                    useUser.removeJourney(props.journey.id);
+                    await useJourney.removeJourney(props.journey.id!);
+                    useUser.removeJourney(props.journey.id!);
                     showToast("Journey deleted", "success");
                 }
             },

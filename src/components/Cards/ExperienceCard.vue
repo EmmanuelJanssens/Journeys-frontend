@@ -50,7 +50,6 @@ import {
     IonImg,
     IonCardSubtitle,
     IonIcon,
-    popoverController,
     alertController,
     modalController
 } from "@ionic/vue";
@@ -69,8 +68,15 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto } from "types/dtos";
 import { showToast } from "utils/utils";
 
-const props = defineProps(["experience", "journey"]);
-const emit = defineEmits(["updated"]);
+const props = defineProps<{
+    experience: ExperienceDto;
+    journey: string;
+}>();
+
+const emit = defineEmits<{
+    (e: "updated"): void;
+}>();
+
 const modules = ref([Navigation, Lazy, Pagination, Autoplay]);
 const useJourney = useJourneyStore();
 

@@ -48,7 +48,6 @@ import {
     IonHeader,
     IonToolbar,
     IonTitle,
-    toastController,
     IonText,
     IonButtons,
     IonFooter

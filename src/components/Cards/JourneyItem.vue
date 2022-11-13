@@ -15,12 +15,17 @@
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonItem, IonThumbnail, IonSpinner, IonImg, IonLabel } from "@ionic/vue";
-import { onMounted, onUnmounted, ref } from "vue";
+import { IonItem, IonThumbnail, IonImg, IonLabel } from "@ionic/vue";
+import { JourneyDto } from "types/dtos";
+import { onUnmounted, ref } from "vue";
 
 var loaded = ref(false);
-const props = defineProps(["journey"]);
-const emit = defineEmits(["selected"]);
+const props = defineProps<{
+    journey: JourneyDto;
+}>();
+const emit = defineEmits<{
+    (e: "selected"): void;
+}>();
 
 onUnmounted(() => {
     loaded.value = false;

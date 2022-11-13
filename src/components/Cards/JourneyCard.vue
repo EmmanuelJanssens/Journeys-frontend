@@ -4,7 +4,7 @@
             <ion-toolbar color="none">
                 <ion-card-title>{{ props.journey.title }}</ion-card-title>
                 <ion-buttons slot="end">
-                    <ion-button @click="goToJourney(props.journey.id)">
+                    <ion-button @click="goToJourney(props.journey.id!)">
                         <ion-icon src="/src/assets/icon/eye-outline.svg" slot="icon-only"></ion-icon>
                     </ion-button>
                     <ion-button @click="onEdit">
@@ -46,8 +46,13 @@ import {
 import EditJourneyModal from "components/Modals/EditJourneyModal.vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
+import { JourneyDto } from "types/dtos";
 import { showToast } from "utils/utils";
-const props = defineProps(["journey"]);
+
+const props = defineProps<{
+    journey: JourneyDto;
+}>();
+
 const emit = defineEmits(["headerClicked", "upated"]);
 const useJourney = useJourneyStore();
 const useUser = useUserStore();
@@ -75,8 +80,8 @@ async function onDelete() {
                 text: "Yes",
                 role: "proceed",
                 handler: async () => {
-                    await useJourney.removeJourney(props.journey.id);
-                    useUser.removeJourney(props.journey.id);
+                    await useJourney.removeJourney(props.journey.id!);
+                    useUser.removeJourney(props.journey.id!);
                     showToast("Journey deleted", "success");
                     emit("upated");
                 }

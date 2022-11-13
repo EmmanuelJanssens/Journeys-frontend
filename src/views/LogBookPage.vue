@@ -8,26 +8,6 @@
                     <ion-col
                         v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney"
                         class="side ion-hide-md-down">
-                        <!--<ion-header class="sticky">
-                           <ion-toolbar color="secondary">
-                                <ion-buttons slot="start">
-                                    <ion-button @click="fetchJourneys()">
-                                        <ion-icon src="/src/assets/icon/return-up-back-outline.svg" slot="icon-only">
-                                        </ion-icon>
-                                    </ion-button>
-                                </ion-buttons>
-                                <ion-title> Points of interest </ion-title>
-                                <ion-buttons slot="end">
-                                    <ion-button>
-                                        <ion-icon src="/src/assets/icon/filter-outline.svg" slot="icon-only">
-                                        </ion-icon>
-                                    </ion-button>
-                                </ion-buttons>
-                            </ion-toolbar>
-                            <ion-toolbar>
-                                <ion-searchbar @ionChange="filterPois" debounce="500"> </ion-searchbar>
-                            </ion-toolbar>
-                        </ion-header>-->
                         <ion-content>
                             <ion-row
                                 v-if="(mode == modes.edition || mode == modes.editJourney) && filteredPois"
@@ -108,7 +88,7 @@
                                 @ready="setLoading(false)" />
                         </ion-content>
 
-                        <section v-if="mode == modes.logbook" class="journeys-slides">
+                        <section v-if="mode == modes.logbook && userStore.myJourneys" class="journeys-slides">
                             <swiper
                                 :slides-per-view="slidesPerView"
                                 :initial-slide="userStore.myJourneys?.length"
@@ -152,7 +132,7 @@
                                                 :data-index="index">
                                                 <ExperienceCard
                                                     :experience="item"
-                                                    :journey="journeyStore.viewJourney.id"
+                                                    :journey="journeyStore.viewJourney.id!"
                                                     @updated="showExperiences(journeyStore.viewJourney.id!)" />
                                             </DynamicScrollerItem>
                                         </template>
@@ -160,8 +140,8 @@
                                 </ion-col>
                                 <ion-col v-else-if="mode === modes.edition || mode == modes.editJourney">
                                     <MapJourneySidebar
-                                        :start="journeyStore.editJourney.journey?.start"
-                                        :end="journeyStore.editJourney.journey?.end"
+                                        :start="journeyStore.editJourney.journey?.start!"
+                                        :end="journeyStore.editJourney.journey?.end!"
                                         mode="edit"
                                 /></ion-col>
                             </ion-row>
@@ -218,11 +198,10 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy } from "swiper";
 
-import { ExperienceDto, PoiDto } from "types/dtos";
+import { AddressDto, ExperienceDto, getAddressCoordinates, PoiDto } from "types/dtos";
 
-import { GeocodedData } from "types/journeys";
 import JourneyMap from "components/JourneyMap.vue";
-import mapboxgl, { LngLat, MapMouseEvent } from "mapbox-gl";
+import mapboxgl, { MapMouseEvent } from "mapbox-gl";
 import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
 
 import MapJourneySidebar from "components/MapJourneySidebar.vue";
@@ -315,26 +294,22 @@ async function editJourney() {
         start: {
             placeId: journeyStore.editJourney.journey?.start?.placeId!,
             address: journeyStore.editJourney.journey?.start?.address!,
-            coordinates: new LngLat(
-                journeyStore.editJourney.journey?.start?.longitude!,
-                journeyStore.editJourney.journey?.start?.latitude!
-            )
+            longitude: journeyStore.editJourney.journey?.start?.longitude!,
+            latitude: journeyStore.editJourney.journey?.start?.latitude!
         },
         end: {
             placeId: journeyStore.editJourney.journey?.end?.placeId!,
             address: journeyStore.editJourney.journey?.end?.address!,
-            coordinates: new LngLat(
-                journeyStore.editJourney.journey?.end?.longitude!,
-                journeyStore.editJourney.journey?.end?.latitude!
-            )
+            longitude: journeyStore.editJourney.journey?.end?.longitude!,
+            latitude: journeyStore.editJourney.journey?.end?.latitude!
         }
     });
 }
 
-async function fetchPois(data: { start: GeocodedData; end: GeocodedData }) {
+async function fetchPois(data: { start: AddressDto; end: AddressDto }) {
     setLoading(true);
-    const radius = getRadius(data.start.coordinates, data.end.coordinates);
-    const mid = getMidPoint(data.start.coordinates, data.end.coordinates);
+    const radius = getRadius(getAddressCoordinates(data.start), getAddressCoordinates(data.end));
+    const mid = getMidPoint(getAddressCoordinates(data.start), getAddressCoordinates(data.end));
     journeyStore.setJourneyStartEnd(data.start, data.end);
     await poiStore.searchBetween(mid.lat, mid.lng, radius);
     filteredPois.value = poiStore.poisBetween;
@@ -366,18 +341,14 @@ async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
         start: {
             placeId: journeyStore.editJourney.journey?.start?.placeId!,
             address: journeyStore.editJourney.journey?.start?.address!,
-            coordinates: new mapboxgl.LngLat(
-                journeyStore.editJourney.journey?.start?.longitude!,
-                journeyStore.editJourney.journey?.start?.latitude!
-            )
+            longitude: journeyStore.editJourney.journey?.start?.longitude!,
+            latitude: journeyStore.editJourney.journey?.start?.latitude!
         },
         end: {
             placeId: journeyStore.editJourney.journey?.end?.placeId!,
             address: journeyStore.editJourney.journey?.end?.address!,
-            coordinates: new mapboxgl.LngLat(
-                journeyStore.editJourney.journey?.end?.longitude!,
-                journeyStore.editJourney.journey?.end?.latitude!
-            )
+            longitude: journeyStore.editJourney.journey?.end?.longitude!,
+            latitude: journeyStore.editJourney.journey?.end?.latitude!
         }
     });
 }

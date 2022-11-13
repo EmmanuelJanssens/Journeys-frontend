@@ -52,7 +52,9 @@ const title = ref();
 const journeyStore = useJourneyStore();
 const userStore = useUserStore();
 
-const props = defineProps(["mode"]);
+const props = defineProps<{
+    mode: string;
+}>();
 
 onMounted(() => {
     if (props.mode) title.value = journeyStore.editJourney.journey?.title;

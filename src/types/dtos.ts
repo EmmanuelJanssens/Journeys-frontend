@@ -1,3 +1,5 @@
+import mapboxgl from "mapbox-gl";
+
 export type SearchPoiDto = {
     lat: number;
     lng: number;
@@ -26,7 +28,7 @@ export type ExperienceDto = {
         description: string;
         order: number;
         images: string[];
-        date: string;
+        date: Date;
     };
     journey?: JourneyDto;
     id?: string;
@@ -37,7 +39,12 @@ export type AddressDto = {
     address: string;
     latitude: number;
     longitude: number;
+    error?: string;
 };
+
+export function getAddressCoordinates(address: AddressDto): mapboxgl.LngLat {
+    return new mapboxgl.LngLat(address.longitude, address.latitude);
+}
 
 export type UpdateJourneyDto = {
     journey?: JourneyDto;

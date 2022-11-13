@@ -1,6 +1,5 @@
-import { LngLat } from "mapbox-gl";
 import googleLoader from "google/googleLoader";
-import { GeocodedData } from "types/journeys";
+import { AddressDto } from "types/dtos";
 
 let googleGeocoder: google.maps.Geocoder;
 
@@ -8,7 +7,7 @@ googleLoader.load().then((google) => {
     googleGeocoder = new google.maps.Geocoder();
 });
 
-async function getGeocodedData(value: string): Promise<GeocodedData> {
+async function getGeocodedData(value: string): Promise<AddressDto> {
     const request: google.maps.GeocoderRequest = {
         address: value,
         componentRestrictions: { country: "ch" }
@@ -19,17 +18,16 @@ async function getGeocodedData(value: string): Promise<GeocodedData> {
             return {
                 placeId: response.results[0].place_id,
                 address: value,
-                coordinates: new LngLat(
-                    response.results[0].geometry.location.lng(),
-                    response.results[0].geometry.location.lat()
-                )
+                longitude: response.results[0].geometry.location.lng(),
+                latitude: response.results[0].geometry.location.lat()
             };
         })
         .catch((error) => {
             return {
                 placeId: "",
                 address: value,
-                coordinates: new LngLat(-1, -1),
+                latitude: -1,
+                longitude: -1,
                 error
             };
         });

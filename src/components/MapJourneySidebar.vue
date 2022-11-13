@@ -14,7 +14,7 @@
 
     <IonReorderGroup @ionItemReorder="reordered($event)" :disabled="false">
         <ion-item-sliding
-            v-for="experience in useJourney.editJourney?.journey?.experiences"
+            v-for="experience in journeyStore.editJourney?.journey?.experiences"
             v-bind:key="experience.poi.id"
             :disabled="props.mode == 'view'">
             <ion-item>
@@ -44,7 +44,6 @@
 <script lang="ts" setup>
 import { ItemReorderCustomEvent } from "@ionic/vue";
 import {
-    IonContent,
     IonItemOptions,
     IonItemOption,
     IonItem,
@@ -56,26 +55,34 @@ import {
 } from "@ionic/vue";
 
 import { useJourneyStore } from "stores/useJourneyStore";
-import { ExperienceDto } from "types/dtos";
+import { AddressDto, ExperienceDto } from "types/dtos";
 
-const props = defineProps(["start", "end", "mode"]);
+const props = defineProps<{
+    start: AddressDto;
+    end: AddressDto;
+    mode: string;
+}>();
 
-const emit = defineEmits(["reordered"]);
-const useJourney = useJourneyStore();
+const emit = defineEmits<{
+    (e: "reordered"): void;
+}>();
+
+const journeyStore = useJourneyStore();
+
 function remove(id: string) {
-    const removed = useJourney.removeFromJourney(id);
-
-    useJourney.editJourney.journey?.experiences!.forEach((item: { experience: { order: number } }) => {
-        if (item.experience.order > removed!.experience.order) item.experience.order--;
+    journeyStore.removeFromJourney(id);
+    journeyStore.editJourney.journey?.experiences!.forEach((item, idx) => {
+        item.experience.order = idx;
     });
     emit("reordered");
 }
+
 function reordered(evt: ItemReorderCustomEvent) {
-    const res = evt.detail.complete(useJourney.editJourney.journey?.experiences) as ExperienceDto[];
+    const res = evt.detail.complete(journeyStore.editJourney.journey?.experiences) as ExperienceDto[];
     res.forEach((exp, idx) => {
         exp.experience.order = idx;
     });
-    useJourney.editJourney.journey!.experiences = res;
+    journeyStore.editJourney.journey!.experiences = res;
     emit("reordered");
 }
 </script>

@@ -1,14 +1,14 @@
 <template>
     <ion-card>
         <ion-card-header>
-            <ion-card-title>{{ (data.poi as PoiDto).name }}</ion-card-title>
+            <ion-card-title>{{ (props.poi as PoiDto).name }}</ion-card-title>
             <ion-card-subtitle>Subtitle</ion-card-subtitle>
         </ion-card-header>
         <ion-card-content>
             <ion-grid>
                 <ion-row>
                     <ion-col>
-                        <ion-img :src="data.poi.thumbnail"></ion-img>
+                        <ion-img :src="props.poi.thumbnail"></ion-img>
                     </ion-col>
                 </ion-row>
                 <ion-row>
@@ -16,7 +16,7 @@
                 </ion-row>
                 <ion-row>
                     <ion-col>
-                        <ion-button @click="addToJourney(data.poi)"> Add </ion-button>
+                        <ion-button @click="addToJourney(props.poi)"> Add </ion-button>
                     </ion-col>
                 </ion-row>
             </ion-grid>
@@ -44,7 +44,9 @@ import { onMounted } from "vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto, PoiDto } from "types/dtos";
 
-const data = defineProps(["poi"]);
+const props = defineProps<{
+    poi: PoiDto;
+}>();
 
 const useJourney = useJourneyStore();
 
@@ -64,8 +66,7 @@ function addToJourney(poi: PoiDto) {
     useJourney.addToJourney(experience);
     popoverController.dismiss({ poi });
 }
-onMounted(() => {
-    const poi = data.poi as PoiDto;
-    axios.get(`/api/poi/${poi.id}/experiences`).then((response: any) => {});
+onMounted(async () => {
+    await axios.get(`/api/poi/${props.poi.id}/experiences`);
 });
 </script>

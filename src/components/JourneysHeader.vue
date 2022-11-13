@@ -21,17 +21,16 @@
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonHeader, IonToolbar, IonButtons, IonButton, modalController, menuController } from "@ionic/vue";
+import { IonHeader, IonToolbar, IonButtons, IonButton, modalController, menuController } from "@ionic/vue";
 
 import { useUserStore } from "stores/useUserStore";
 import LoginModal from "components/Modals/LoginModal.vue";
 import RegisterModal from "components/Modals/RegisterModal.vue";
 const userStore = useUserStore();
 
-function toggleProfile() {
-    menuController.toggle("right-side-menu").then((e) => {
-        menuController.isOpen("right-side-menu").then((b) => {});
-    });
+async function toggleProfile() {
+    await menuController.toggle("right-side-menu");
+    await menuController.isOpen("right-side-menu");
 }
 
 async function openModal(component: any) {

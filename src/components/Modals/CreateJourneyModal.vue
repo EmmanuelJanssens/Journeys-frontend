@@ -58,11 +58,10 @@ import {
     IonGrid,
     IonCol,
     IonRow,
-    IonImg,
     IonFooter
 } from "@ionic/vue";
 
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { LngLat } from "maplibre-gl";
 
 import GautoCompletePredictionList from "components/GautoCompletePredictionList.vue";

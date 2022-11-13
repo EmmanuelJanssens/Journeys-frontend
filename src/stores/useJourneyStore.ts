@@ -1,8 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
-import { GeocodedData } from "types/journeys";
-import { ExperienceDto, JourneyDto, UpdateJourneyDto } from "types/dtos";
+import { AddressDto, ExperienceDto, JourneyDto, UpdateJourneyDto } from "types/dtos";
 export const useJourneyStore = defineStore("journey", () => {
     const editJourney = ref<UpdateJourneyDto>({
         journey: {
@@ -167,18 +166,18 @@ export const useJourneyStore = defineStore("journey", () => {
             }
         });
     }
-    function setJourneyStartEnd(start: GeocodedData, end: GeocodedData) {
+    function setJourneyStartEnd(start: AddressDto, end: AddressDto) {
         editJourney.value!.journey!.start = {
             placeId: start.placeId,
             address: start.address,
-            latitude: start.coordinates.lat,
-            longitude: start.coordinates.lng
+            latitude: start.latitude,
+            longitude: start.longitude
         };
         editJourney.value!.journey!.end = {
             placeId: end.placeId,
             address: end.address,
-            latitude: end.coordinates.lat,
-            longitude: end.coordinates.lng
+            latitude: end.latitude,
+            longitude: end.longitude
         };
     }
     function clear() {

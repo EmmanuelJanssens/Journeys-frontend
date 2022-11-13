@@ -52,16 +52,19 @@ import {
 } from "@ionic/vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
+import { JourneyDto } from "types/dtos";
 import { showToast } from "utils/utils";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 
 const userStore = useUserStore();
 const useJourney = useJourneyStore();
-const props = defineProps(["journey"]);
+const props = defineProps<{
+    journey: JourneyDto;
+}>();
 const title = ref();
 const description = ref();
 async function save() {
-    useJourney.editJourney.journey = await useJourney.getJourney(props.journey.id);
+    useJourney.editJourney.journey = await useJourney.getJourney(props.journey.id!);
     useJourney.editJourney.journey!.title = title.value ? title.value : useJourney.editJourney.journey!.title;
     useJourney.editJourney.journey!.description = description.value
         ? description.value
