@@ -29,7 +29,7 @@ export type ExperienceDto = {
         date: string;
     };
     journey?: JourneyDto;
-    id?: number;
+    id?: string;
 };
 
 export type AddressDto = {
@@ -45,8 +45,7 @@ export type UpdateJourneyDto = {
         poi_ids: string[];
     };
     connected?: {
-        order: number;
-        poi_id: string;
+        experience: ExperienceDto;
     }[];
 };
 

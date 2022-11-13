@@ -149,8 +149,7 @@ export const useJourneyStore = defineStore("journey", () => {
             editJourney.value.journey?.experiences?.forEach((exp) => {
                 if (!findExp(exp.poi.id, viewJourney.value.experiences!)) {
                     editJourney.value.connected?.push({
-                        order: exp.experience.order,
-                        poi_id: exp.poi.id
+                        experience: exp
                     });
                 } else {
                     //TODO add only differences

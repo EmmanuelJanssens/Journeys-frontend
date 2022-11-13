@@ -57,7 +57,7 @@ async function onDelete() {
                 role: "proceed",
                 handler: async () => {
                     await useJourney.removeExperience(exp);
-                    useJourney.editJourney.experiences = useJourney.editJourney.experiences!.filter(
+                    useJourney.editJourney.journey!.experiences = useJourney.editJourney.journey!.experiences!.filter(
                         (el) => el.poi.id != exp.poi.id
                     );
                     showToast("Experience deleted", "success");

@@ -58,7 +58,8 @@ function addToJourney(poi: PoiDto) {
             description: "",
             images: [],
             order: useJourney.editJourney.journey!.experiences!.length
-        }
+        },
+        id: poi.id
     };
     useJourney.addToJourney(experience);
     popoverController.dismiss({ poi });

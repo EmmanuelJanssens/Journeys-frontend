@@ -436,13 +436,13 @@ async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
     if (result.country != undefined && result.locality != undefined) {
         if (marker == "journey_start") {
             journeyStore.editJourney.journey!.start = {
-                address: result.locality + ", " + result.country,
+                address: result.postal_code + " " + result.locality + ", " + result.country,
                 latitude: pos.lat,
                 longitude: pos.lng
             };
         } else if (marker == "journey_end") {
             journeyStore.editJourney.journey!.end = {
-                address: result.locality + ", " + result.country,
+                address: result.postal_code + " " + result.locality + ", " + result.country,
                 latitude: pos.lat,
                 longitude: pos.lng
             };

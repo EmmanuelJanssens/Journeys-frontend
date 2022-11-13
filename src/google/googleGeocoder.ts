@@ -53,13 +53,18 @@ async function reverseGeocode(lat: number, lng: number): Promise<google.maps.Geo
 function getLocalityAndCountry(results: google.maps.GeocoderResult): {
     locality: string;
     country: string;
+    postal_code: string;
 } {
     const result = results.address_components.filter(
-        (f) => f.types.includes("locality") || f.types.includes("country")
+        (f) => f.types.includes("locality") || f.types.includes("country") || f.types.includes("postal_code")
     );
+
+    console.log(result);
+
     return {
         locality: result[0].long_name,
-        country: result[1].long_name
+        country: result[1].long_name,
+        postal_code: result[2].long_name
     };
 }
 export { getGeocodedData, reverseGeocode, getLocalityAndCountry };
