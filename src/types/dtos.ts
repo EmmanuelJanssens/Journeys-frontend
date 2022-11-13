@@ -45,8 +45,9 @@ export type UpdateJourneyDto = {
         poi_ids: string[];
     };
     connected?: {
-        poi_ids: string[];
-    };
+        order: number;
+        poi_id: string;
+    }[];
 };
 
 export type JourneyDto = {

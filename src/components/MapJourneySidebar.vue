@@ -56,6 +56,7 @@ import {
 } from "@ionic/vue";
 
 import { useJourneyStore } from "stores/useJourneyStore";
+import { ExperienceDto } from "types/dtos";
 
 const props = defineProps(["start", "end", "mode"]);
 
@@ -70,26 +71,11 @@ function remove(id: string) {
     emit("reordered");
 }
 function reordered(evt: ItemReorderCustomEvent) {
-    if (evt.detail.from < evt.detail.to) {
-        useJourney.editJourney.journey?.experiences!.forEach((item: { experience: { order: number } }) => {
-            if (item.experience.order == evt.detail.from) {
-                item.experience.order = evt.detail.to;
-            } else if (item.experience.order <= evt.detail.to && item.experience.order >= evt.detail.from) {
-                item.experience.order--;
-            }
-        });
-    } else {
-        useJourney.editJourney.journey?.experiences!.forEach((item: { experience: { order: number } }) => {
-            if (item.experience.order == evt.detail.from) {
-                item.experience.order = evt.detail.to;
-            } else if (item.experience.order >= evt.detail.to && item.experience.order <= evt.detail.from) {
-                item.experience.order++;
-            }
-        });
-    }
-    useJourney.editJourney.journey?.experiences!.sort((a, b) => a.experience.order - b.experience.order);
-    useJourney.editJourney.updated = useJourney.editJourney.journey?.experiences;
-    evt.detail.complete();
+    const res = evt.detail.complete(useJourney.editJourney.journey?.experiences) as ExperienceDto[];
+    res.forEach((exp, idx) => {
+        exp.experience.order = idx;
+    });
+    useJourney.editJourney.journey!.experiences = res;
     emit("reordered");
 }
 </script>

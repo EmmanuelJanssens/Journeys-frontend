@@ -61,7 +61,7 @@ const title = ref();
 async function save() {
     const updated = props.journey;
     updated.title = title.value;
-    await useJourney.updateJourney(updated);
+    await useJourney.updateJourney();
     modalController.dismiss({ status: "success" });
     await showToast("Your journey  was successfully updated", "success");
 }

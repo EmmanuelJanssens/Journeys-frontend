@@ -396,7 +396,8 @@ function filterPois(evt: SearchbarCustomEvent) {
 
 async function editJourney() {
     journeyStore.clearData();
-    journeyStore.editJourney.journey! = journeyStore.viewJourney;
+    //TODO check if alright
+    journeyStore.editJourney.journey! = JSON.parse(JSON.stringify(journeyStore.viewJourney));
     mode.value = modes.editJourney;
     await fetchPois({
         start: {
@@ -421,6 +422,9 @@ async function fetchPois(data: { start: GeocodedData; end: GeocodedData }) {
     const mid = getMidPoint(data.start.coordinates, data.end.coordinates);
     journeyStore.setJourneyStartEnd(data.start, data.end);
     await poiStore.searchBetween(mid.lat, mid.lng, radius);
+    console.log(mid);
+    console.log(radius);
+    console.log(poiStore.poisBetween);
     filteredPois.value = poiStore.poisBetween;
     buildPoiGeoData(poiStore.poisBetween!);
 }
