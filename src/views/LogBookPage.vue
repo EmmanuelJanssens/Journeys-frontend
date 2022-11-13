@@ -105,8 +105,6 @@
                                 :stop-points="journeyStore.editJourney.journey?.experiences!"
                                 :journeys="myJourneysGeoJSON!"
                                 :pois="poisBetweenGeoJSON!"
-                                :journey-experiences="journeyExperiencesGeoJSON!"
-                                @create-pressed="openJourneyCreationModal"
                                 @loaded="fetchJourneys"
                                 @marker-dragged="onMarkerDragend"
                                 @poi-clicked="onPoiClicked"
@@ -528,52 +526,8 @@ function getRadius(start: mapboxgl.LngLat, end: mapboxgl.LngLat): number {
 }
 
 async function showExperiences(id: string) {
-    if (journeyStore.viewJourney.id !== id) journeyStore.viewJourney = await journeyStore.getJourney(id);
     mode.value = modes.viewJourney;
-    const featureCollection: GeoJSON.FeatureCollection = {
-        type: "FeatureCollection",
-        features: []
-    };
-    journeyStore.viewJourney.experiences?.forEach((exp) => {
-        featureCollection.features.push({
-            type: "Feature",
-            geometry: {
-                type: "Point",
-                coordinates: [exp.poi.location.longitude, exp.poi.location.latitude]
-            },
-            properties: exp.experience,
-            id: exp.poi.id
-        });
-    });
-
-    const coords = Array<number[]>();
-
-    coords.push([journeyStore.viewJourney.start?.longitude!, journeyStore.viewJourney.start?.latitude!]);
-    featureCollection.features.forEach((element) => {
-        coords.push((element.geometry as GeoJSON.Point).coordinates);
-    });
-    coords.push([journeyStore.viewJourney.end?.longitude!, journeyStore.viewJourney.end?.latitude!]);
-
-    const center = getMidPoint(
-        new mapboxgl.LngLat(journeyStore.viewJourney.start?.longitude!, journeyStore.viewJourney.start?.latitude!),
-        new mapboxgl.LngLat(journeyStore.viewJourney.end?.longitude!, journeyStore.viewJourney.end?.latitude!)
-    );
-
-    featureCollection.features.push({
-        type: "Feature",
-        properties: {
-            start: journeyStore.viewJourney.start,
-            end: journeyStore.viewJourney.end,
-            center: center
-        },
-        geometry: {
-            type: "LineString",
-            coordinates: coords
-        },
-        id: journeyStore.viewJourney.id
-    });
-
-    journeyExperiencesGeoJSON.value = featureCollection;
+    if (journeyStore.viewJourney.id !== id) journeyStore.viewJourney = await journeyStore.getJourney(id);
 }
 
 function updateView() {
