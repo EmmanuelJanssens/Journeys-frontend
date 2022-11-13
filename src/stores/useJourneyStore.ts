@@ -10,11 +10,13 @@ export const useJourneyStore = defineStore("journey", () => {
             experiences: [],
             description: "",
             start: {
+                placeId: "",
                 address: "",
                 latitude: -1,
                 longitude: -1
             },
             end: {
+                placeId: "",
                 address: "",
                 latitude: -1,
                 longitude: -1
@@ -29,11 +31,13 @@ export const useJourneyStore = defineStore("journey", () => {
         title: "",
         experiences: [],
         start: {
+            placeId: "",
             address: "",
             latitude: -1,
             longitude: -1
         },
         end: {
+            placeId: "",
             address: "",
             latitude: -1,
             longitude: -1
@@ -77,7 +81,7 @@ export const useJourneyStore = defineStore("journey", () => {
     }
 
     function removeFromJourney(id: string) {
-        const removed = editJourney.value.journey?.experiences?.find((p) => p.poi.id == id);
+        const removed = editJourney.value!.journey?.experiences?.find((p) => p.poi.id == id);
         editJourney.value!.journey!.experiences = editJourney.value?.journey?.experiences?.filter(
             (item) => item.poi.id !== id
         );
@@ -119,7 +123,7 @@ export const useJourneyStore = defineStore("journey", () => {
         const token = JSON.parse(localStorage.getItem("user")!).token;
         editJourney.value!.journey!.title = name;
 
-        const dto: JourneyDto = editJourney.value.journey!;
+        const dto: JourneyDto = editJourney.value!.journey!;
         return axios.post("/api/journey/", dto, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -131,8 +135,8 @@ export const useJourneyStore = defineStore("journey", () => {
     }
     function filterDeleted() {
         const deleted: string[] = [];
-        viewJourney.value.experiences?.forEach((exp) => {
-            if (!findExp(exp.poi.id, editJourney.value.journey?.experiences!)) {
+        viewJourney.value!.experiences?.forEach((exp) => {
+            if (!findExp(exp.poi.id, editJourney.value!.journey?.experiences!)) {
                 deleted.push(exp.poi.id);
             }
         });
@@ -141,20 +145,20 @@ export const useJourneyStore = defineStore("journey", () => {
     function updateJourney(mode: string): Promise<string> {
         const token = JSON.parse(localStorage.getItem("user")!).token;
         if (mode == "deep") {
-            editJourney.value.connected = [];
-            editJourney.value.deleted = { poi_ids: [] };
-            editJourney.value.updated = [];
-            editJourney.value.journey?.experiences?.forEach((exp) => {
-                if (!findExp(exp.poi.id, viewJourney.value.experiences!)) {
-                    editJourney.value.connected?.push({
+            editJourney.value!.connected = [];
+            editJourney.value!.deleted = { poi_ids: [] };
+            editJourney.value!.updated = [];
+            editJourney.value!.journey?.experiences?.forEach((exp) => {
+                if (!findExp(exp.poi.id, viewJourney.value!.experiences!)) {
+                    editJourney.value!.connected?.push({
                         experience: exp
                     });
                 } else {
                     //TODO add only differences
-                    editJourney.value.updated?.push(exp);
+                    editJourney.value!.updated?.push(exp);
                 }
             });
-            editJourney.value.deleted!.poi_ids = filterDeleted();
+            editJourney.value!.deleted!.poi_ids = filterDeleted();
         }
 
         return axios.put("/api/journey/", editJourney.value, {
@@ -165,50 +169,23 @@ export const useJourneyStore = defineStore("journey", () => {
     }
     function setJourneyStartEnd(start: GeocodedData, end: GeocodedData) {
         editJourney.value!.journey!.start = {
+            placeId: start.placeId,
             address: start.address,
             latitude: start.coordinates.lat,
             longitude: start.coordinates.lng
         };
         editJourney.value!.journey!.end = {
+            placeId: end.placeId,
             address: end.address,
             latitude: end.coordinates.lat,
             longitude: end.coordinates.lng
         };
     }
+    function clear() {
+        editJourney.value = {};
+        viewJourney.value = {};
+    }
 
-    function clearData() {
-        editJourney.value.deleted = { poi_ids: [] };
-        editJourney.value.connected = [];
-        editJourney.value.updated = [];
-    }
-    function clearMapView() {
-        editJourney.value!.journey!.start = {
-            address: "",
-            latitude: -1,
-            longitude: -1
-        };
-        editJourney.value!.journey!.end = {
-            address: "",
-            latitude: -1,
-            longitude: -1
-        };
-        editJourney.value.journey! = {
-            experiences: []
-        };
-        viewJourney.value!.start = {
-            address: "",
-            latitude: -1,
-            longitude: -1
-        };
-        viewJourney.value!.end = {
-            address: "",
-            latitude: -1,
-            longitude: -1
-        };
-        viewJourney.value = {
-            experiences: []
-        };
-    }
     function removeJourney(id: string): Promise<Boolean> {
         const token = JSON.parse(localStorage.getItem("user")!).token;
 
@@ -239,8 +216,7 @@ export const useJourneyStore = defineStore("journey", () => {
         updateJourney,
         alreadyExists: alreadyInJourney,
         setJourneyStartEnd,
-        clearMapView,
         getJourney,
-        clearData
+        clear
     };
 });

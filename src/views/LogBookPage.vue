@@ -257,7 +257,7 @@ watch(
         if (newValue) {
             if (mode.value == modes.logbook) fetchJourneys();
         } else {
-            journeyStore.clearMapView();
+            //
         }
     }
 );
@@ -308,13 +308,12 @@ function filterPois(evt: SearchbarCustomEvent) {
 }
 
 async function editJourney() {
-    journeyStore.clearData();
-    poiStore.clear();
-    //TODO check if alright
     mode.value = modes.editJourney;
+    //TODO check if alright
     journeyStore.editJourney.journey! = JSON.parse(JSON.stringify(journeyStore.viewJourney));
     await fetchPois({
         start: {
+            placeId: journeyStore.editJourney.journey?.start?.placeId!,
             address: journeyStore.editJourney.journey?.start?.address!,
             coordinates: new LngLat(
                 journeyStore.editJourney.journey?.start?.longitude!,
@@ -322,6 +321,7 @@ async function editJourney() {
             )
         },
         end: {
+            placeId: journeyStore.editJourney.journey?.end?.placeId!,
             address: journeyStore.editJourney.journey?.end?.address!,
             coordinates: new LngLat(
                 journeyStore.editJourney.journey?.end?.longitude!,
@@ -348,13 +348,15 @@ async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
     if (result.country != undefined && result.locality != undefined) {
         if (marker == "journey_start") {
             journeyStore.editJourney.journey!.start = {
-                address: result.postal_code + " " + result.locality + ", " + result.country,
+                placeId: result.placeId,
+                address: result.locality + ", " + result.country,
                 latitude: pos.lat,
                 longitude: pos.lng
             };
         } else if (marker == "journey_end") {
             journeyStore.editJourney.journey!.end = {
-                address: result.postal_code + " " + result.locality + ", " + result.country,
+                placeId: result.placeId,
+                address: result.locality + ", " + result.country,
                 latitude: pos.lat,
                 longitude: pos.lng
             };
@@ -362,6 +364,7 @@ async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
     }
     await fetchPois({
         start: {
+            placeId: journeyStore.editJourney.journey?.start?.placeId!,
             address: journeyStore.editJourney.journey?.start?.address!,
             coordinates: new mapboxgl.LngLat(
                 journeyStore.editJourney.journey?.start?.longitude!,
@@ -369,6 +372,7 @@ async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
             )
         },
         end: {
+            placeId: journeyStore.editJourney.journey?.end?.placeId!,
             address: journeyStore.editJourney.journey?.end?.address!,
             coordinates: new mapboxgl.LngLat(
                 journeyStore.editJourney.journey?.end?.longitude!,

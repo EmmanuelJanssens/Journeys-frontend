@@ -17,6 +17,7 @@ async function getGeocodedData(value: string): Promise<GeocodedData> {
         .geocode(request)
         .then((response) => {
             return {
+                placeId: response.results[0].place_id,
                 address: value,
                 coordinates: new LngLat(
                     response.results[0].geometry.location.lng(),
@@ -26,6 +27,7 @@ async function getGeocodedData(value: string): Promise<GeocodedData> {
         })
         .catch((error) => {
             return {
+                placeId: "",
                 address: value,
                 coordinates: new LngLat(-1, -1),
                 error
@@ -41,8 +43,8 @@ async function reverseGeocode(lat: number, lng: number): Promise<google.maps.Geo
             lng
         }
     };
-    const result = await googleGeocoder.geocode(request);
 
+    const result = await googleGeocoder.geocode(request);
     if (result.results[0]) {
         return result.results[0];
     } else {
@@ -51,18 +53,17 @@ async function reverseGeocode(lat: number, lng: number): Promise<google.maps.Geo
 }
 
 function getLocalityAndCountry(results: google.maps.GeocoderResult): {
+    placeId: string;
     locality: string;
     country: string;
-    postal_code: string;
 } {
     const result = results.address_components.filter(
         (f) => f.types.includes("locality") || f.types.includes("country") || f.types.includes("postal_code")
     );
-
     return {
         locality: result[0].long_name,
         country: result[1].long_name,
-        postal_code: result[2].long_name
+        placeId: results.place_id
     };
 }
 export { getGeocodedData, reverseGeocode, getLocalityAndCountry };

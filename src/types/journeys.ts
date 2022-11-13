@@ -9,6 +9,7 @@ export type User = {
 };
 
 export type GeocodedData = {
+    placeId: string;
     address: string;
     coordinates: LngLat;
     error?: any;

@@ -33,6 +33,7 @@ export type ExperienceDto = {
 };
 
 export type AddressDto = {
+    placeId: string;
     address: string;
     latitude: number;
     longitude: number;
