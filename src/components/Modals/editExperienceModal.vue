@@ -81,6 +81,7 @@
 </template>
 <script lang="ts" setup>
 import {
+    IonInput,
     IonDatetime,
     IonIcon,
     IonDatetimeButton,

@@ -272,7 +272,7 @@ watch(
 
 watch(
     () => props.mode,
-    async (newVal) => {
+    async () => {
         const m = await JourneyMapCapacitor.getMap();
         m?.resize();
     }

@@ -58,11 +58,14 @@ import { ref } from "vue";
 
 const userStore = useUserStore();
 const useJourney = useJourneyStore();
+
 const props = defineProps<{
     journey: JourneyDto;
 }>();
+
 const title = ref();
 const description = ref();
+
 async function save() {
     useJourney.editJourney.journey = await useJourney.getJourney(props.journey.id!);
     useJourney.editJourney.journey!.title = title.value ? title.value : useJourney.editJourney.journey!.title;
@@ -70,9 +73,13 @@ async function save() {
         ? description.value
         : useJourney.editJourney.journey!.description;
     useJourney.editJourney.journey!.id = props.journey.id;
+
     await useJourney.updateJourney("");
+
     modalController.dismiss({ status: "success" });
+
     const edited = userStore.myJourneys?.find((journey) => journey.id == props.journey.id);
+
     if (edited) {
         edited.title = useJourney.editJourney.journey!.title;
         edited.description = useJourney.editJourney.journey!.description;

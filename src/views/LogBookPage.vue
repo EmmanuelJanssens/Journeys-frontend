@@ -8,26 +8,7 @@
                     <ion-col
                         v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney"
                         class="side ion-hide-md-down">
-                        <ion-content>
-                            <ion-row
-                                v-if="(mode == modes.edition || mode == modes.editJourney) && filteredPois"
-                                class="experience-list">
-                                <ion-col>
-                                    <DynamicScroller :items="filteredPois" :min-item-size="54" style="height: 100%">
-                                        <template v-slot="{ item, index, active }">
-                                            <DynamicScrollerItem :item="item" :active="active" :data-index="index">
-                                                <ion-item button style="width: 100%" @click="panTo(item)">
-                                                    <ion-thumbnail slot="start">
-                                                        <ion-img :src="item.thumbnail"> </ion-img>
-                                                    </ion-thumbnail>
-                                                    <ion-label>{{ item.name }}</ion-label>
-                                                </ion-item>
-                                            </DynamicScrollerItem>
-                                        </template>
-                                    </DynamicScroller>
-                                </ion-col>
-                            </ion-row>
-                        </ion-content>
+                        <ThePoiListSidebar :poi-list="filteredPois" @poi-item-clicked="panTo" />
                     </ion-col>
                     <ion-col ref="mapCol">
                         <ion-content>
@@ -80,6 +61,7 @@
                                     </ion-fab-button>
                                 </ion-fab-list>
                             </ion-fab>
+
                             <JourneyMap
                                 :mode="mode"
                                 @loaded="fetchJourneys"
@@ -88,24 +70,7 @@
                                 @ready="setLoading(false)" />
                         </ion-content>
 
-                        <section v-if="mode == modes.logbook && userStore.myJourneys" class="journeys-slides">
-                            <swiper
-                                :slides-per-view="slidesPerView"
-                                :initial-slide="userStore.myJourneys?.length"
-                                :pagination="{ clickable: true }"
-                                lazy
-                                :modules="modules"
-                                class="journeys"
-                                :center-insufficient-slides="true"
-                                ref="slides">
-                                <swiper-slide v-for="item in userStore.myJourneys">
-                                    <JourneyCard
-                                        :journey="item"
-                                        class="journey-card ion-margin"
-                                        @header-clicked="showExperiences(item.id!)" />
-                                </swiper-slide>
-                            </swiper>
-                        </section>
+                        <TheJourneysSlider @header-clicked="showExperiences" />
                     </ion-col>
                     <ion-col
                         v-if="mode == modes.viewJourney || mode == modes.edition || mode == modes.editJourney"
@@ -120,23 +85,7 @@
                                         journeyStore.viewJourney.experiences &&
                                         journeyStore.viewJourney.experiences.length > 0
                                     ">
-                                    <DynamicScroller
-                                        v-if="journeyStore.viewJourney.experiences.length > 0"
-                                        :items="journeyStore.viewJourney.experiences"
-                                        :min-item-size="54"
-                                        style="height: 100%">
-                                        <template v-slot="{ item, index, active }">
-                                            <DynamicScrollerItem
-                                                :item="item as ExperienceDto"
-                                                :active="active"
-                                                :data-index="index">
-                                                <ExperienceCard
-                                                    :experience="item"
-                                                    :journey="journeyStore.viewJourney.id!"
-                                                    @updated="showExperiences(journeyStore.viewJourney.id!)" />
-                                            </DynamicScrollerItem>
-                                        </template>
-                                    </DynamicScroller>
+                                    <TheJourneyExperienceList @updated="showExperiences" />
                                 </ion-col>
                                 <ion-col v-else-if="mode === modes.edition || mode == modes.editJourney">
                                     <MapJourneySidebar
@@ -162,10 +111,6 @@ import {
     IonCol,
     IonRow,
     onIonViewWillLeave,
-    IonImg,
-    IonThumbnail,
-    IonItem,
-    IonLabel,
     IonFab,
     IonFabList,
     IonFabButton,
@@ -183,9 +128,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 
-import JourneyCard from "components/Cards/JourneyCard.vue";
 import PoiCard from "components/Cards/PoiCard.vue";
-import ExperienceCard from "components/Cards/ExperienceCard.vue";
 import CreateJourneyModal from "components/Modals/CreateJourneyModal.vue";
 import { JourneyMapCapacitor } from "journeys-capacitor-mapbox";
 
@@ -195,20 +138,20 @@ import { useUserStore } from "stores/useUserStore";
 import { usePoiStore } from "stores/usePoiStore";
 import { useJourneyStore } from "stores/useJourneyStore";
 
-import { Swiper, SwiperSlide } from "swiper/vue";
-import { Pagination, Navigation, Lazy } from "swiper";
+import { AddressDto, getAddressCoordinates, PoiDto } from "types/dtos";
 
-import { AddressDto, ExperienceDto, getAddressCoordinates, PoiDto } from "types/dtos";
-
-import JourneyMap from "components/JourneyMap.vue";
+import JourneyMap from "components/TheJourneyMap.vue";
 import mapboxgl, { MapMouseEvent } from "mapbox-gl";
 import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
 
-import MapJourneySidebar from "components/MapJourneySidebar.vue";
+import MapJourneySidebar from "components/TheJourneyEditSidebar.vue";
 import SaveJourneyModal from "components/Modals/SaveJourneyModal.vue";
 import LoginModal from "components/Modals/LoginModal.vue";
 import RegisterModal from "components/Modals/RegisterModal.vue";
 import { getMidPoint, openModal, getRadius } from "utils/utils";
+import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
+import TheJourneysSlider from "components/TheJourneysSlider.vue";
+import TheJourneyExperienceList from "components/TheJourneyExperienceList.vue";
 
 const modes = {
     logbook: "logbook",
@@ -227,7 +170,6 @@ const poiStore = usePoiStore();
 const mode = ref(modes.logbook);
 
 const slidesPerView = ref(3);
-const modules = ref([Pagination, Navigation, Lazy]);
 const slides = ref();
 
 watch(
@@ -245,14 +187,6 @@ onIonViewDidEnter(() => {
     if (!userStore.IsLoggedIn()) {
         openJourneyCreationModal();
     }
-});
-
-onIonViewWillLeave(() => {
-    window.removeEventListener("resize", updateView);
-});
-
-onIonViewWillEnter(async () => {
-    window.addEventListener("resize", updateView);
 });
 
 async function panTo(poi: PoiDto) {
@@ -448,7 +382,7 @@ async function openJourneySaveModal() {
     }
 }
 </script>
-<style lang="scss">
+<style lang="less">
 .side {
     min-width: 200px;
     max-width: 400px;
@@ -466,56 +400,7 @@ async function openJourneySaveModal() {
     overflow-y: auto;
 }
 
-.swiper-slide {
-    text-align: left;
-    font-size: 18px;
-    /* Center slide text vertically */
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-pack: center;
-    -ms-flex-pack: center;
-    -webkit-justify-content: center;
-    justify-content: center;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    -webkit-align-items: center;
-    align-items: center;
-}
-
 .experience-list {
     overflow-y: auto;
-}
-
-.journey-card {
-    min-width: 300px;
-    max-width: 350px;
-
-    min-height: 400px;
-    max-height: 450px;
-
-    height: 90%;
-    width: 100%;
-}
-
-.journeys {
-    min-height: 300px;
-    height: 100%;
-    width: 100%;
-}
-
-.journeys-slides {
-    position: absolute;
-    bottom: 20px;
-    height: 35%;
-    max-height: 450px;
-    min-height: 400px;
-    width: 100%;
-    z-index: 999;
-}
-
-.sticky {
-    position: absolute;
 }
 </style>

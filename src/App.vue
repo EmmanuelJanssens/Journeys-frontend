@@ -10,8 +10,8 @@
 
 <script lang="ts" setup>
 import { IonApp, IonRouterOutlet, IonContent, IonSplitPane } from "@ionic/vue";
-import UserDetailMenu from "components/UserDetailMenu.vue";
-import JourneysHeader from "components/JourneysHeader.vue";
+import UserDetailMenu from "components/TheUserDetailMenu.vue";
+import JourneysHeader from "components/TheJourneysHeader.vue";
 import { useUserStore } from "stores/useUserStore";
 import { onBeforeMount, watch } from "vue";
 import axios from "axios";

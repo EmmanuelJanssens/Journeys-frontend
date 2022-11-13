@@ -2,7 +2,7 @@ import type { AxiosError } from "axios";
 import axios from "axios";
 import { defineStore } from "pinia";
 import { ExperienceDto, JourneyDto, UserDto } from "types/dtos";
-import { User, ApiAuthenticationResponse, ApiError } from "types/journeys";
+import { ApiAuthenticationResponse } from "types/journeys";
 
 import { ref } from "vue";
 
