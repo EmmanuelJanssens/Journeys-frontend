@@ -140,23 +140,25 @@ export const useJourneyStore = defineStore("journey", () => {
         });
         return deleted;
     }
-    function updateJourney(): Promise<string> {
+    function updateJourney(mode: string): Promise<string> {
         const token = JSON.parse(localStorage.getItem("user")!).token;
-        editJourney.value.connected = [];
-        editJourney.value.deleted = { poi_ids: [] };
-        editJourney.value.updated = [];
-        editJourney.value.journey?.experiences?.forEach((exp) => {
-            if (!findExp(exp.poi.id, viewJourney.value.experiences!)) {
-                editJourney.value.connected?.push({
-                    order: exp.experience.order,
-                    poi_id: exp.poi.id
-                });
-            } else {
-                //TODO add only differences
-                editJourney.value.updated?.push(exp);
-            }
-        });
-        editJourney.value.deleted!.poi_ids = filterDeleted();
+        if (mode == "deep") {
+            editJourney.value.connected = [];
+            editJourney.value.deleted = { poi_ids: [] };
+            editJourney.value.updated = [];
+            editJourney.value.journey?.experiences?.forEach((exp) => {
+                if (!findExp(exp.poi.id, viewJourney.value.experiences!)) {
+                    editJourney.value.connected?.push({
+                        order: exp.experience.order,
+                        poi_id: exp.poi.id
+                    });
+                } else {
+                    //TODO add only differences
+                    editJourney.value.updated?.push(exp);
+                }
+            });
+            editJourney.value.deleted!.poi_ids = filterDeleted();
+        }
 
         viewJourney.value = JSON.parse(JSON.stringify(editJourney.value.journey));
 

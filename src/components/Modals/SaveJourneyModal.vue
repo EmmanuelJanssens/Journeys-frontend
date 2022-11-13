@@ -79,7 +79,7 @@ async function saveJourney() {
         var journeyId: string;
         if (props.mode == "editJourney") {
             journeyStore.editJourney.journey!.title = title.value;
-            journeyId = await journeyStore.updateJourney();
+            journeyId = await journeyStore.updateJourney("deep");
             console.log("updated");
         } else {
             journeyId = await journeyStore.saveJourney(title.value);

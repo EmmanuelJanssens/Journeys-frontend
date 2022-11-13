@@ -18,7 +18,7 @@
                     <ion-col>
                         <ion-item>
                             <ion-label position="stacked">Description</ion-label>
-                            <ion-textarea :value="props.journey?.description"> </ion-textarea>
+                            <ion-textarea :value="props.journey?.description" v-model="description"> </ion-textarea>
                         </ion-item>
                     </ion-col>
                 </ion-row>
@@ -51,18 +51,29 @@ import {
     modalController
 } from "@ionic/vue";
 import { useJourneyStore } from "stores/useJourneyStore";
+import { useUserStore } from "stores/useUserStore";
 import { showToast } from "utils/utils";
 import { onMounted, ref } from "vue";
 
+const userStore = useUserStore();
 const useJourney = useJourneyStore();
 const props = defineProps(["journey"]);
 const title = ref();
-
+const description = ref();
 async function save() {
-    const updated = props.journey;
-    updated.title = title.value;
-    await useJourney.updateJourney();
+    useJourney.editJourney.journey = await useJourney.getJourney(props.journey.id);
+    useJourney.editJourney.journey!.title = title.value ? title.value : useJourney.editJourney.journey!.title;
+    useJourney.editJourney.journey!.description = description.value
+        ? description.value
+        : useJourney.editJourney.journey!.description;
+    useJourney.editJourney.journey!.id = props.journey.id;
+    await useJourney.updateJourney("");
     modalController.dismiss({ status: "success" });
+    const edited = userStore.myJourneys?.find((journey) => journey.id == props.journey.id);
+    if (edited) {
+        edited.title = useJourney.editJourney.journey!.title;
+        edited.description = useJourney.editJourney.journey!.description;
+    }
     await showToast("Your journey  was successfully updated", "success");
 }
 </script>
