@@ -90,7 +90,6 @@ export namespace Journeys {
                         );
                     }
                     collection = data as GeoJSON.FeatureCollection;
-                    console.log(data);
                     if (collection) {
                         collection.features.forEach((exp) => {
                             const el = document.createElement("div");

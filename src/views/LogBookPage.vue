@@ -102,9 +102,6 @@
                             </ion-fab>
                             <JourneyMap
                                 :mode="mode"
-                                :stop-points="journeyStore.editJourney.journey?.experiences!"
-                                :journeys="myJourneysGeoJSON!"
-                                :pois="poisBetweenGeoJSON!"
                                 @loaded="fetchJourneys"
                                 @marker-dragged="onMarkerDragend"
                                 @poi-clicked="onPoiClicked"
@@ -178,19 +175,12 @@
 <script lang="ts" setup>
 import {
     IonLoading,
-    IonHeader,
     IonIcon,
     IonPage,
     IonContent,
     IonGrid,
     IonCol,
     IonRow,
-    IonAlert,
-    IonButton,
-    IonToolbar,
-    IonButtons,
-    IonSearchbar,
-    IonTitle,
     onIonViewWillLeave,
     IonImg,
     IonThumbnail,
@@ -228,19 +218,18 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy } from "swiper";
 
-import { ExperienceDto, JourneyDto, PoiDto } from "types/dtos";
-import GeoJSON from "geojson";
+import { ExperienceDto, PoiDto } from "types/dtos";
 
 import { GeocodedData } from "types/journeys";
 import JourneyMap from "components/JourneyMap.vue";
 import mapboxgl, { LngLat, MapMouseEvent } from "mapbox-gl";
-import haversine from "haversine";
-import { reverseGeocode, getLocalityAndCountry, getGeocodedData } from "google/googleGeocoder";
+import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
 
 import MapJourneySidebar from "components/MapJourneySidebar.vue";
 import SaveJourneyModal from "components/Modals/SaveJourneyModal.vue";
 import LoginModal from "components/Modals/LoginModal.vue";
 import RegisterModal from "components/Modals/RegisterModal.vue";
+import { getMidPoint, openModal, getRadius } from "utils/utils";
 
 const modes = {
     logbook: "logbook",
@@ -262,10 +251,6 @@ const slidesPerView = ref(3);
 const modules = ref([Pagination, Navigation, Lazy]);
 const slides = ref();
 
-const journeyExperiencesGeoJSON = ref<GeoJSON.FeatureCollection>();
-const poisBetweenGeoJSON = ref<GeoJSON.FeatureCollection>();
-const myJourneysGeoJSON = ref<GeoJSON.FeatureCollection>();
-
 watch(
     () => userStore.loggedIn,
     (newValue) => {
@@ -273,10 +258,6 @@ watch(
             if (mode.value == modes.logbook) fetchJourneys();
         } else {
             journeyStore.clearMapView();
-            myJourneysGeoJSON.value = {
-                type: "FeatureCollection",
-                features: []
-            };
         }
     }
 );
@@ -302,6 +283,7 @@ async function panTo(poi: PoiDto) {
         zoom: 20
     });
 }
+
 function setLoading(loading: boolean) {
     isLoading.value = loading;
 }
@@ -310,77 +292,11 @@ async function fetchJourneys() {
     setLoading(true);
     mode.value = modes.logbook;
     await userStore.fetchMyJourneys();
-
-    const geoJSONJourney: GeoJSON.FeatureCollection = {
-        type: "FeatureCollection",
-        features: []
-    };
-
-    userStore.myJourneys!.forEach((journey) => {
-        geoJSONJourney.features.push(journeyStore.journeyToGeojson(journey)[0]);
-        geoJSONJourney.features.push(journeyStore.journeyToGeojson(journey)[1]);
-        geoJSONJourney.features.push({
-            type: "Feature",
-            geometry: {
-                type: "LineString",
-                coordinates: [
-                    [journey.start?.longitude!, journey.start?.latitude!],
-                    [journey.end?.longitude!, journey.end?.latitude!]
-                ]
-            },
-            properties: {
-                title: journey.title
-            },
-            id: journey.id
-        });
-    });
-    myJourneysGeoJSON.value = geoJSONJourney;
     updateView();
 }
 
 const filteredPois = ref<PoiDto[]>();
-function buildPoiGeoData(pois: PoiDto[], journey?: JourneyDto) {
-    const geoJsonData: GeoJSON.FeatureCollection = {
-        type: "FeatureCollection",
-        features: []
-    };
-    pois.forEach((poi) => {
-        geoJsonData.features.push({
-            type: "Feature",
-            geometry: {
-                type: "Point",
-                coordinates: [poi.location.longitude, poi.location.latitude]
-            },
-            properties: poi,
-            id: poi.id
-        });
-    });
 
-    const coords = Array<number[]>();
-
-    coords.push([
-        journeyStore.editJourney.journey?.start?.longitude!,
-        journeyStore.editJourney.journey?.start?.latitude!
-    ]);
-    journeyStore.editJourney.journey?.experiences?.forEach((element) => {
-        coords.push([element.poi.location.longitude, element.poi.location.latitude]);
-    });
-    coords.push([journeyStore.editJourney.journey?.end?.longitude!, journeyStore.editJourney.journey?.end?.latitude!]);
-
-    geoJsonData.features.push({
-        type: "Feature",
-        geometry: {
-            type: "LineString",
-            coordinates: coords
-        },
-        properties: {
-            start: journeyStore.editJourney.journey?.start,
-            end: journeyStore.editJourney.journey?.end
-        },
-        id: "editJourney"
-    });
-    poisBetweenGeoJSON.value = geoJsonData;
-}
 function filterPois(evt: SearchbarCustomEvent) {
     if (evt.detail.value!.length < 3) {
         filteredPois.value = poiStore.poisBetween;
@@ -389,14 +305,14 @@ function filterPois(evt: SearchbarCustomEvent) {
             poi.name.toLocaleLowerCase().includes(evt.detail.value!.toLocaleLowerCase())
         );
     }
-    buildPoiGeoData(filteredPois.value!);
 }
 
 async function editJourney() {
     journeyStore.clearData();
+    poiStore.clear();
     //TODO check if alright
-    journeyStore.editJourney.journey! = JSON.parse(JSON.stringify(journeyStore.viewJourney));
     mode.value = modes.editJourney;
+    journeyStore.editJourney.journey! = JSON.parse(JSON.stringify(journeyStore.viewJourney));
     await fetchPois({
         start: {
             address: journeyStore.editJourney.journey?.start?.address!,
@@ -414,18 +330,16 @@ async function editJourney() {
         }
     });
 }
+
 async function fetchPois(data: { start: GeocodedData; end: GeocodedData }) {
     setLoading(true);
     const radius = getRadius(data.start.coordinates, data.end.coordinates);
     const mid = getMidPoint(data.start.coordinates, data.end.coordinates);
     journeyStore.setJourneyStartEnd(data.start, data.end);
     await poiStore.searchBetween(mid.lat, mid.lng, radius);
-    console.log(mid);
-    console.log(radius);
-    console.log(poiStore.poisBetween);
     filteredPois.value = poiStore.poisBetween;
-    buildPoiGeoData(poiStore.poisBetween!);
 }
+
 async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
     setLoading(true);
     const response = await reverseGeocode(pos.lat, pos.lng);
@@ -446,7 +360,6 @@ async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
             };
         }
     }
-    mode.value = modes.edition;
     await fetchPois({
         start: {
             address: journeyStore.editJourney.journey?.start?.address!,
@@ -476,58 +389,13 @@ async function onPoiClicked(poi: PoiDto, e: MapMouseEvent) {
         alignment: "center"
     });
     await popover.present();
-
-    const didDissmiss = await popover.onDidDismiss();
-    if (didDissmiss.data != undefined) {
-        //stopPoints.value?.splice(stopPoints.value.length - 1, 0, [poi.location.longitude, poi.location.latitude]);
-    }
-}
-function getMidPoint(start: mapboxgl.LngLat, end: mapboxgl.LngLat) {
-    const lat1 = (start.lat * Math.PI) / 180;
-    const lon1 = (start.lng * Math.PI) / 180;
-    const X1 = Math.cos(lat1) * Math.cos(lon1);
-    const Y1 = Math.cos(lat1) * Math.sin(lon1);
-    const Z1 = Math.sin(lat1);
-
-    const lat2 = (end.lat * Math.PI) / 180;
-    const lon2 = (end.lng * Math.PI) / 180;
-    const X2 = Math.cos(lat2) * Math.cos(lon2);
-    const Y2 = Math.cos(lat2) * Math.sin(lon2);
-    const Z2 = Math.sin(lat2);
-
-    const x = (X1 + X2) / 2;
-    const y = (Y1 + Y2) / 2;
-    const z = (Z1 + Z2) / 2;
-
-    let lon = Math.atan2(y, x);
-    const hyp = Math.sqrt(x * x + y * y);
-    let lat = Math.atan2(z, hyp);
-    lat = (lat * 180) / Math.PI;
-    lon = (lon * 180) / Math.PI;
-
-    return {
-        lat: lat,
-        lng: lon
-    };
-}
-function getRadius(start: mapboxgl.LngLat, end: mapboxgl.LngLat): number {
-    const r = haversine(
-        {
-            latitude: start.lat,
-            longitude: start.lng
-        },
-        {
-            latitude: end.lat,
-            longitude: end.lng
-        },
-        { unit: "meter" }
-    );
-    return r / 2;
 }
 
 async function showExperiences(id: string) {
+    setLoading(true);
+    poiStore.clear();
     mode.value = modes.viewJourney;
-    if (journeyStore.viewJourney.id !== id) journeyStore.viewJourney = await journeyStore.getJourney(id);
+    journeyStore.viewJourney = await journeyStore.getJourney(id);
 }
 
 function updateView() {
@@ -563,14 +431,6 @@ async function openJourneyCreationModal() {
 
         fetchPois(result.data);
     }
-}
-async function openModal(component: any) {
-    let modal = await modalController.create({
-        component: component,
-        keyboardClose: false,
-        backdropDismiss: false
-    });
-    await modal.present();
 }
 
 async function openJourneySaveModal() {
@@ -612,40 +472,6 @@ async function openJourneySaveModal() {
         }
     }
 }
-
-/*
-function reorderedSteps() {
-    var steps: number[][] = [];
-    steps.push([startPoint.value.coordinates.lng, startPoint.value.coordinates.lat]);
-    useJourney.editJourney.experiences?.forEach((exp) => {
-        steps.push([exp.poi.location.longitude!, exp.poi.location.latitude!]);
-    });
-    steps.push([endPoint.value.coordinates.lng, endPoint.value.coordinates.lat]);
-    stopPoints.value = steps;
-    isSaved.value = false;
-}
-function addStep(coord: number[]) {
-    console.log(coord);
-    stopPoints.value.splice(stopPoints.value.length - 1, 0, coord);
-    JourneysMap.addStopPoint(stopPoints.value);
-}
-
-function onClusterClick(e: MapMouseEvent) {
-    const features = map.value?.queryRenderedFeatures(e.point, {
-        layers: [mapLayer.poi_cluster]
-    });
-    const clusterId = features![0].properties!.cluster_id;
-    const source: maplibregl.GeoJSONSource = map.value?.getSource(mapLayer.poi_list) as maplibregl.GeoJSONSource;
-    source.getClusterExpansionZoom(clusterId, (err: any, zoom: any) => {
-        if (err) return;
-        if (features![0].geometry.type === "Point") {
-            map.value?.easeTo({
-                center: [features![0].geometry.coordinates[0], features![0].geometry.coordinates[1]],
-                zoom: zoom
-            });
-        }
-    });
-}*/
 </script>
 <style lang="scss">
 .side {

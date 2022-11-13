@@ -6,10 +6,6 @@ import { ref } from "vue";
 
 export const usePoiStore = defineStore("poi", () => {
     const poisBetween = ref<PoiDto[]>();
-    const poiRef = ref<GeoJSON.FeatureCollection>({
-        features: [],
-        type: "FeatureCollection"
-    });
 
     async function getThumbnail(poi: PoiDto) {
         return await axios.post("api/poi/thumbnail", poi).then((r) => {
@@ -31,10 +27,7 @@ export const usePoiStore = defineStore("poi", () => {
             });
     }
     function clear() {
-        poiRef.value = {
-            features: [],
-            type: "FeatureCollection"
-        };
+        poisBetween.value = [];
     }
-    return { poiRef, searchBetween, getThumbnail, clear, poisBetween };
+    return { searchBetween, getThumbnail, clear, poisBetween };
 });

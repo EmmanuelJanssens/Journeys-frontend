@@ -59,8 +59,6 @@ function getLocalityAndCountry(results: google.maps.GeocoderResult): {
         (f) => f.types.includes("locality") || f.types.includes("country") || f.types.includes("postal_code")
     );
 
-    console.log(result);
-
     return {
         locality: result[0].long_name,
         country: result[1].long_name,

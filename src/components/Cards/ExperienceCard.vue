@@ -75,7 +75,6 @@ const modules = ref([Navigation, Lazy, Pagination, Autoplay]);
 const useJourney = useJourneyStore();
 
 async function onEdit() {
-    console.log(props.experience);
     const experience = props.experience as ExperienceDto;
     experience.journey = {
         id: props.journey

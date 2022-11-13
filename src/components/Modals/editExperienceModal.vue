@@ -139,7 +139,6 @@ onMounted(() => {
             isFs: true
         });
     });
-    console.log(typeof currentData.value.experience.date);
     selectedDate.value = currentData.value.experience.date;
 });
 
@@ -176,14 +175,11 @@ async function save() {
         (img) => !images.value.find((search) => img == search.url)
     );
 
-    console.log(deleted);
     uploading.value = true;
     await deleted?.forEach(async (img) => {
         const imgRef = fref(storageRef.storage, img);
         await deleteObject(imgRef);
     });
-    console.log(currentData.value!.experience.images.filter((img) => images.value.find((search) => img == search.url)));
-    console.log(title.value);
     if (files.value.length > 0) {
         await files.value.forEach(async (f) => {
             const id = (f.url as string).slice((f.url as string).lastIndexOf("/") + 1);
@@ -218,8 +214,6 @@ async function save() {
         uploading.value = false;
         showToast("An error occured while uploading your image try again", "danger");
     } else {
-        console.log("horay");
-        console.log(uploaded);
         currentData.value!.experience.images = currentData.value!.experience.images.filter((img) =>
             images.value.find((search) => img == search.url)
         );

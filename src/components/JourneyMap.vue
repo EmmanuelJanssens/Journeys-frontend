@@ -14,9 +14,11 @@ import { onMounted, watch } from "vue";
 import mapboxgl from "mapbox-gl";
 import { JourneyMapCapacitor } from "journeys-capacitor-mapbox";
 import GeoJSON from "geojson";
-import { ExperienceDto, PoiDto } from "types/dtos";
+import { PoiDto } from "types/dtos";
 import { useJourneyStore } from "stores/useJourneyStore";
-import exp from "constants";
+import { usePoiStore } from "stores/usePoiStore";
+import { useUserStore } from "stores/useUserStore";
+import { getMidPoint } from "utils/utils";
 
 const mapLayer = {
     journey_route: "journey_route",
@@ -30,9 +32,6 @@ const mapLayer = {
 
 const props = defineProps<{
     mode: string;
-    pois?: GeoJSON.FeatureCollection;
-    journeys?: GeoJSON.FeatureCollection;
-    stopPoints?: ExperienceDto[] | undefined;
 }>();
 
 //const emit = defineEmits(["loaded", "createNew", "markerDragged", "poiClicked"]);
@@ -50,6 +49,9 @@ const emit = defineEmits<{
 }>();
 
 const journeyStore = useJourneyStore();
+const poiStore = usePoiStore();
+const userStore = useUserStore();
+
 var map: mapboxgl.Map;
 onMounted(async () => {
     await JourneyMapCapacitor.loadMap(
@@ -84,12 +86,8 @@ onMounted(async () => {
 
 watch(
     () => journeyStore.viewJourney,
-    async (newVal, oldValue) => {
-        console.log(newVal);
-        console.log(props.mode);
+    async (newVal) => {
         if (props.mode == "viewJourney" && newVal != undefined) {
-            map.resize();
-
             let featureCollection: GeoJSON.FeatureCollection = {
                 type: "FeatureCollection",
                 features: []
@@ -134,7 +132,6 @@ watch(
                 },
                 id: journeyStore.viewJourney.id
             });
-            console.log(featureCollection);
             await JourneyMapCapacitor.addJourneysExperiencesLayer(featureCollection);
             emit("ready");
         }
@@ -142,11 +139,33 @@ watch(
 );
 
 watch(
-    () => props.journeys,
+    () => userStore.myJourneys,
     async (newValue) => {
-        map.resize();
         if (newValue != undefined) {
-            await JourneyMapCapacitor.addJourneyListLayer(newValue!);
+            const geoJSONJourney: GeoJSON.FeatureCollection = {
+                type: "FeatureCollection",
+                features: []
+            };
+
+            userStore.myJourneys!.forEach((journey) => {
+                geoJSONJourney.features.push(journeyStore.journeyToGeojson(journey)[0]);
+                geoJSONJourney.features.push(journeyStore.journeyToGeojson(journey)[1]);
+                geoJSONJourney.features.push({
+                    type: "Feature",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [
+                            [journey.start?.longitude!, journey.start?.latitude!],
+                            [journey.end?.longitude!, journey.end?.latitude!]
+                        ]
+                    },
+                    properties: {
+                        title: journey.title
+                    },
+                    id: journey.id
+                });
+            });
+            await JourneyMapCapacitor.addJourneyListLayer(geoJSONJourney);
         } else {
             await JourneyMapCapacitor.clearMap(false);
         }
@@ -156,12 +175,55 @@ watch(
     { deep: true }
 );
 
+function buildPoiGeoData(pois: PoiDto[]) {
+    const geoJsonData: GeoJSON.FeatureCollection = {
+        type: "FeatureCollection",
+        features: []
+    };
+    pois.forEach((poi) => {
+        geoJsonData.features.push({
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [poi.location.longitude, poi.location.latitude]
+            },
+            properties: poi,
+            id: poi.id
+        });
+    });
+
+    const coords = Array<number[]>();
+
+    coords.push([
+        journeyStore.editJourney.journey?.start?.longitude!,
+        journeyStore.editJourney.journey?.start?.latitude!
+    ]);
+    journeyStore.editJourney.journey?.experiences?.forEach((element) => {
+        coords.push([element.poi.location.longitude, element.poi.location.latitude]);
+    });
+    coords.push([journeyStore.editJourney.journey?.end?.longitude!, journeyStore.editJourney.journey?.end?.latitude!]);
+
+    geoJsonData.features.push({
+        type: "Feature",
+        geometry: {
+            type: "LineString",
+            coordinates: coords
+        },
+        properties: {
+            start: journeyStore.editJourney.journey?.start,
+            end: journeyStore.editJourney.journey?.end
+        },
+        id: "editJourney"
+    });
+    return geoJsonData;
+}
+
 watch(
-    () => props.pois,
-    async (newVal, oldValue) => {
-        if (newVal?.features.length! > 0) {
-            map.resize();
-            await JourneyMapCapacitor.addPoiListLayer(newVal!);
+    () => poiStore.poisBetween,
+    async (newVal) => {
+        const data = buildPoiGeoData(newVal!);
+        if (data?.features.length! > 0) {
+            await JourneyMapCapacitor.addPoiListLayer(data!);
             const start = await JourneyMapCapacitor.getmarkerbyId("journey_start")!;
             if (props.mode != "editJourney") {
                 start.setDraggable(true);
@@ -174,13 +236,12 @@ watch(
                     emit("markerDragged", end.getLngLat(), "journey_end");
                 });
             }
-
             emit("ready");
         }
     }
 );
 watch(
-    () => props.stopPoints,
+    () => journeyStore.editJourney.journey?.experiences!,
     (newVal) => {
         const array: Array<number[]> = new Array();
 
@@ -209,33 +270,12 @@ watch(
     { deep: true }
 );
 
-function getMidPoint(start: mapboxgl.LngLat, end: mapboxgl.LngLat) {
-    const lat1 = (start.lat * Math.PI) / 180;
-    const lon1 = (start.lng * Math.PI) / 180;
-    const X1 = Math.cos(lat1) * Math.cos(lon1);
-    const Y1 = Math.cos(lat1) * Math.sin(lon1);
-    const Z1 = Math.sin(lat1);
-
-    const lat2 = (end.lat * Math.PI) / 180;
-    const lon2 = (end.lng * Math.PI) / 180;
-    const X2 = Math.cos(lat2) * Math.cos(lon2);
-    const Y2 = Math.cos(lat2) * Math.sin(lon2);
-    const Z2 = Math.sin(lat2);
-
-    const x = (X1 + X2) / 2;
-    const y = (Y1 + Y2) / 2;
-    const z = (Z1 + Z2) / 2;
-
-    let lon = Math.atan2(y, x);
-    const hyp = Math.sqrt(x * x + y * y);
-    let lat = Math.atan2(z, hyp);
-    lat = (lat * 180) / Math.PI;
-    lon = (lon * 180) / Math.PI;
-
-    return {
-        lat: lat,
-        lng: lon
-    };
-}
+watch(
+    () => props.mode,
+    async (newVal) => {
+        const m = await JourneyMapCapacitor.getMap();
+        m?.resize();
+    }
+);
 </script>
 <style></style>

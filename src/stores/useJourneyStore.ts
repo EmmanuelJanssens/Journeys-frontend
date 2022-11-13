@@ -100,7 +100,6 @@ export const useJourneyStore = defineStore("journey", () => {
     function updateExperience(experience: ExperienceDto) {
         const token = JSON.parse(localStorage.getItem("user")!).token;
         const data = experience;
-        console.log(data);
         return axios
             .put("api/journey/experience", data, {
                 headers: {
@@ -121,7 +120,6 @@ export const useJourneyStore = defineStore("journey", () => {
         editJourney.value!.journey!.title = name;
 
         const dto: JourneyDto = editJourney.value.journey!;
-        console.log(dto);
         return axios.post("/api/journey/", dto, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -158,8 +156,6 @@ export const useJourneyStore = defineStore("journey", () => {
             });
             editJourney.value.deleted!.poi_ids = filterDeleted();
         }
-
-        viewJourney.value = JSON.parse(JSON.stringify(editJourney.value.journey));
 
         return axios.put("/api/journey/", editJourney.value, {
             headers: {
