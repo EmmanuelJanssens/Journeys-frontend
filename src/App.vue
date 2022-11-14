@@ -30,7 +30,7 @@ function readFromStorage() {
             },
             loggedIn: true
         });
-        userStore.refreshInterval = setInterval(userStore.startRefreshInterval, 10000);
+        userStore.refreshInterval = setInterval(userStore.startRefreshInterval, 20000);
     }
 }
 

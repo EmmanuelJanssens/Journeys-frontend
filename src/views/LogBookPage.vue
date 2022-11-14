@@ -70,7 +70,7 @@
                                 @ready="setLoading(false)" />
                         </ion-content>
 
-                        <TheJourneysSlider @header-clicked="showExperiences" />
+                        <TheJourneysSlider v-if="mode == modes.logbook" @header-clicked="showExperiences" />
                     </ion-col>
                     <ion-col
                         v-if="mode == modes.viewJourney || mode == modes.edition || mode == modes.editJourney"
@@ -78,17 +78,15 @@
                         ref="experiencesCol">
                         <ion-content>
                             <ion-row class="experience-list">
-                                <ion-col
-                                    v-if="
+                                <ion-col>
+                                    <TheJourneyExperienceList
+                                        v-if="
                                         mode == modes.viewJourney &&
-                                        journeyStore.viewJourney &&
-                                        journeyStore.viewJourney.experiences &&
-                                        journeyStore.viewJourney.experiences.length > 0
-                                    ">
-                                    <TheJourneyExperienceList @updated="showExperiences" />
-                                </ion-col>
-                                <ion-col v-else-if="mode === modes.edition || mode == modes.editJourney">
+                                        journeyStore.viewJourney?.experiencesConnection?.edges?.length! > 0
+                                    "
+                                        @updated="showExperiences" />
                                     <MapJourneySidebar
+                                        v-else-if="mode === modes.edition || mode == modes.editJourney"
                                         :start="journeyStore.editJourney.journey?.start!"
                                         :end="journeyStore.editJourney.journey?.end!"
                                         mode="edit"
@@ -302,9 +300,8 @@ async function onPoiClicked(poi: PoiDto, e: MapMouseEvent) {
 
 async function showExperiences(id: string) {
     setLoading(true);
-    poiStore.clear();
     mode.value = modes.viewJourney;
-    journeyStore.viewJourney = await journeyStore.getJourney(id);
+    await journeyStore.getJourney(id);
 }
 
 function updateView() {

@@ -2,8 +2,8 @@
     <ion-card>
         <ion-card-header>
             <ion-toolbar color="none">
-                <ion-card-title>{{ props.experience.poi.name }}</ion-card-title>
-                <ion-card-subtitle>{{ props.experience.experience.title }}</ion-card-subtitle>
+                <ion-card-title>{{ props.experience.node.name }}</ion-card-title>
+                <ion-card-subtitle>{{ props.experience.title }}</ion-card-subtitle>
                 <ion-buttons slot="end">
                     <ion-button @click="onEdit">
                         <ion-icon src="/src/assets/icon/pencil-outline.svg" slot="icon-only"></ion-icon>
@@ -13,7 +13,7 @@
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
-            <ion-card-subtitle>{{ new Date(props.experience.experience.date).toDateString() }}</ion-card-subtitle>
+            <ion-card-subtitle>{{ new Date(props.experience.date).toDateString() }}</ion-card-subtitle>
         </ion-card-header>
         <swiper
             :slides-per-view="1"
@@ -28,13 +28,13 @@
             }"
             :loop="true"
             :modules="modules">
-            <swiper-slide v-for="image in props.experience.experience.images" v-bind:key="image">
+            <swiper-slide v-for="image in props.experience.images" v-bind:key="image">
                 <ion-img :src="image"></ion-img>
             </swiper-slide>
         </swiper>
 
         <section class="content ion-margin">
-            {{ props.experience.experience.description }}
+            {{ props.experience.description }}
         </section>
     </ion-card>
 </template>
@@ -82,9 +82,6 @@ const useJourney = useJourneyStore();
 
 async function onEdit() {
     const experience = props.experience as ExperienceDto;
-    experience.journey = {
-        id: props.journey
-    };
 
     const modal = await modalController.create({
         component: EditExperienceModal,
@@ -104,9 +101,6 @@ async function onEdit() {
 
 async function onDelete() {
     const exp = props.experience as ExperienceDto;
-    exp.journey = {
-        id: props.journey
-    };
 
     const alert = await alertController.create({
         header: "Warning",
@@ -119,7 +113,7 @@ async function onDelete() {
                 handler: async () => {
                     await useJourney.removeExperience(exp);
                     useJourney.viewJourney.experiences = useJourney.viewJourney.experiences!.filter(
-                        (el) => el.poi.id != exp.poi.id
+                        (el) => el.node.id != exp.node.id
                     );
                     showToast("Experience deleted", "success");
                     emit("updated");

@@ -1,11 +1,12 @@
 <template>
     <DynamicScroller
-        v-if="journeyStore.viewJourney?.experiences?.length! > 0"
-        :items="journeyStore.viewJourney.experiences"
+        v-if="journeyStore.viewJourney?.experiencesAggregate?.count! > 0"
+        :items="journeyStore.viewJourney.experiencesConnection?.edges"
         :min-item-size="54"
-        style="height: 100%">
+        style="height: 100%"
+        key-field="order">
         <template v-slot="{ item, index, active }">
-            <DynamicScrollerItem :item="item as ExperienceDto" :active="active" :data-index="index">
+            <DynamicScrollerItem :item="item" :active="active" :data-index="index">
                 <ExperienceCard
                     :experience="item"
                     :journey="journeyStore.viewJourney.id!"
@@ -16,7 +17,6 @@
 </template>
 <script lang="ts" setup>
 import { useJourneyStore } from "stores/useJourneyStore";
-import { ExperienceDto } from "types/dtos";
 import ExperienceCard from "components/Cards/ExperienceCard.vue";
 
 const journeyStore = useJourneyStore();

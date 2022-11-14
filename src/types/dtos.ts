@@ -22,16 +22,13 @@ export type LocationDto = {
 };
 
 export type ExperienceDto = {
-    poi: PoiDto;
-    experience: {
-        title: string;
-        description: string;
-        order: number;
-        images: string[];
-        date: Date;
-    };
+    title: string;
+    description: string;
+    order: number;
+    images: string[];
+    date: string;
+    node: PoiDto;
     journey?: JourneyDto;
-    id?: string;
 };
 
 export type AddressDto = {
@@ -52,9 +49,7 @@ export type UpdateJourneyDto = {
     deleted?: {
         poi_ids: string[];
     };
-    connected?: {
-        experience: ExperienceDto;
-    }[];
+    connected?: ExperienceDto[];
 };
 
 export type JourneyDto = {
@@ -64,7 +59,28 @@ export type JourneyDto = {
     start?: AddressDto;
     end?: AddressDto;
     creator?: UserDto;
+    experienceCount?: number;
     experiences?: ExperienceDto[];
+    experiencesAggregate?: { count: number };
+    experiencesConnection?: {
+        edges:
+            | {
+                  title: string;
+                  date: string;
+                  description: string;
+                  images: string[];
+                  order: number;
+                  node: {
+                      id: string;
+                      name: string;
+                      location: {
+                          latitude: number;
+                          longitude: number;
+                      };
+                  };
+              }[]
+            | undefined;
+    };
 };
 
 export type UserDto = {

@@ -4,7 +4,8 @@
         <ion-header>
             <ion-toolbar>
                 <ion-title
-                    >Edit Experience at <ion-text color="secondary">{{ currentData?.poi.name }}</ion-text></ion-title
+                    >Edit Experience at
+                    <ion-text color="secondary">{{ currentData?.experience?.node.name }}</ion-text></ion-title
                 >
                 <ion-progress-bar v-if="uploading" type="indeterminate"></ion-progress-bar>
             </ion-toolbar>
@@ -35,7 +36,7 @@
                         <ion-item>
                             <ion-label position="fixed">Description</ion-label>
                             <ion-textarea
-                                :value="currentData?.experience.description"
+                                :value="currentData?.experience?.description"
                                 v-model="description"
                                 wrap="soft"
                                 :rows="10">
@@ -106,7 +107,7 @@ import {
     modalController
 } from "@ionic/vue";
 import { useJourneyStore } from "stores/useJourneyStore";
-import { ExperienceDto } from "types/dtos";
+import { ExperienceDto, JourneyDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
 import { storageRef } from "google/storage";
@@ -115,30 +116,35 @@ import { showToast } from "utils/utils";
 
 const description = ref();
 const title = ref();
-const useJourney = useJourneyStore();
+const journeyStore = useJourneyStore();
 const props = defineProps<{
     experience: ExperienceDto;
 }>();
 const files = ref<Array<any>>([]);
 const uploading = ref(false);
-let currentData = ref<ExperienceDto>();
+let currentData = ref<{
+    experience?: ExperienceDto;
+    journey?: JourneyDto;
+}>({});
 let images = ref<
     {
         url: string;
         isFs: boolean;
     }[]
 >([]);
-let selectedDate = ref<Date>();
+let selectedDate = ref<string>();
 onMounted(() => {
-    currentData.value = props.experience as ExperienceDto;
-    title.value = currentData.value.experience.title;
+    currentData.value!.experience = props.experience as ExperienceDto;
+    title.value = currentData.value?.experience.title;
     currentData.value?.experience.images.forEach((image) => {
         images.value?.push({
             url: image,
             isFs: true
         });
     });
-    selectedDate.value = currentData.value.experience.date;
+    currentData.value!.journey = { id: journeyStore.viewJourney.id };
+
+    selectedDate.value = currentData.value?.experience.date;
 });
 
 function selectDate(e: any) {
@@ -170,10 +176,10 @@ function removeImage(image: string) {
 
 const taskList = Array<UploadTask>();
 async function save() {
-    const deleted = currentData.value?.experience.images.filter(
+    console.log(currentData.value);
+    const deleted = currentData.value?.experience?.images.filter(
         (img) => !images.value.find((search) => img == search.url)
     );
-
     uploading.value = true;
     await deleted?.forEach(async (img) => {
         const imgRef = fref(storageRef.storage, img);
@@ -184,16 +190,14 @@ async function save() {
             const id = (f.url as string).slice((f.url as string).lastIndexOf("/") + 1);
             const imageRef = fref(
                 storageRef,
-                currentData.value!.journey!.id + "/" + currentData.value!.poi.id + "/" + id
+                journeyStore.viewJourney.id + "/" + currentData.value!.experience?.node.id + "/" + id
             );
             const metadata = {
                 contentType: f.file.mimeType
             };
-
             taskList.push(uploadBytesResumable(imageRef, f.file.blob, metadata));
         });
     }
-
     var error = false;
     const uploaded: string[] = [];
     for (const task of taskList) {
@@ -213,17 +217,16 @@ async function save() {
         uploading.value = false;
         showToast("An error occured while uploading your image try again", "danger");
     } else {
-        currentData.value!.experience.images = currentData.value!.experience.images.filter((img) =>
+        currentData.value!.experience!.images = currentData.value!.experience!.images.filter((img) =>
             images.value.find((search) => img == search.url)
         );
-        currentData.value!.experience.images = currentData.value!.experience.images.concat(...uploaded);
-        currentData.value!.experience.title = title.value;
-        currentData.value!.experience.date = new Date(selectedDate.value!);
-        currentData.value!.experience.description = description.value;
-        await useJourney.updateExperience(currentData.value!);
+        currentData.value!.experience!.images = currentData.value!.experience!.images.concat(...uploaded);
+        currentData.value!.experience!.title = title.value;
+        currentData.value!.experience!.date = selectedDate.value!;
+        currentData.value!.experience!.description = description.value;
+        await journeyStore.updateExperience(currentData.value!);
         modalController.dismiss({ status: "success" });
         showToast("Your modifications were successfuly saved", "success");
-
         uploading.value = false;
     }
 }

@@ -93,15 +93,15 @@ watch(
                 features: []
             };
 
-            journeyStore.viewJourney.experiences?.forEach((experience) => {
+            journeyStore.viewJourney.experiencesConnection?.edges?.forEach((experience) => {
                 featureCollection.features.push({
                     type: "Feature",
                     geometry: {
                         type: "Point",
-                        coordinates: [experience.poi.location.longitude, experience.poi.location.latitude]
+                        coordinates: [experience.node.location.longitude, experience.node.location.latitude]
                     },
-                    properties: experience.experience,
-                    id: experience.poi.id
+                    properties: experience,
+                    id: experience.node.id
                 });
             });
 
@@ -133,6 +133,7 @@ watch(
                 id: journeyStore.viewJourney.id
             });
             await JourneyMapCapacitor.addJourneysExperiencesLayer(featureCollection);
+
             emit("ready");
         }
     }
@@ -199,7 +200,7 @@ function buildPoiGeoData(pois: PoiDto[]) {
         journeyStore.editJourney.journey?.start?.latitude!
     ]);
     journeyStore.editJourney.journey?.experiences?.forEach((element) => {
-        coords.push([element.poi.location.longitude, element.poi.location.latitude]);
+        coords.push([element.node.location.longitude, element.node.location.latitude]);
     });
     coords.push([journeyStore.editJourney.journey?.end?.longitude!, journeyStore.editJourney.journey?.end?.latitude!]);
 
@@ -221,23 +222,25 @@ function buildPoiGeoData(pois: PoiDto[]) {
 watch(
     () => poiStore.poisBetween,
     async (newVal) => {
-        const data = buildPoiGeoData(newVal!);
-        if (data?.features.length! > 0) {
-            await JourneyMapCapacitor.addPoiListLayer(data!);
-            const start = await JourneyMapCapacitor.getmarkerbyId("journey_start")!;
-            if (props.mode != "editJourney") {
-                start.setDraggable(true);
-                start.on("dragend", () => {
-                    emit("markerDragged", start.getLngLat(), "journey_start");
-                });
-                const end = await JourneyMapCapacitor.getmarkerbyId("journey_end")!;
-                end.setDraggable(true);
-                end.on("dragend", () => {
-                    emit("markerDragged", end.getLngLat(), "journey_end");
-                });
+        if (newVal?.length! > 0) {
+            const data = buildPoiGeoData(newVal!);
+            if (data?.features.length! > 0) {
+                await JourneyMapCapacitor.addPoiListLayer(data!);
+                const start = await JourneyMapCapacitor.getmarkerbyId("journey_start")!;
+                if (props.mode != "editJourney") {
+                    start.setDraggable(true);
+                    start.on("dragend", () => {
+                        emit("markerDragged", start.getLngLat(), "journey_start");
+                    });
+                    const end = await JourneyMapCapacitor.getmarkerbyId("journey_end")!;
+                    end.setDraggable(true);
+                    end.on("dragend", () => {
+                        emit("markerDragged", end.getLngLat(), "journey_end");
+                    });
+                }
             }
-            emit("ready");
         }
+        emit("ready");
     }
 );
 watch(
@@ -250,7 +253,7 @@ watch(
             journeyStore.editJourney.journey?.start?.latitude!
         ]);
         newVal?.forEach((exp) => {
-            array.push([exp.poi.location.longitude, exp.poi.location.latitude]);
+            array.push([exp.node.location.longitude, exp.node.location.latitude]);
         });
         array.push([
             journeyStore.editJourney.journey?.end?.longitude!,
