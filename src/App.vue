@@ -13,8 +13,7 @@ import { IonApp, IonRouterOutlet, IonContent, IonSplitPane } from "@ionic/vue";
 import UserDetailMenu from "components/TheUserDetailMenu.vue";
 import JourneysHeader from "components/TheJourneysHeader.vue";
 import { useUserStore } from "stores/useUserStore";
-import { onBeforeMount, watch } from "vue";
-import axios from "axios";
+import { onBeforeMount } from "vue";
 const userStore = useUserStore();
 function readFromStorage() {
     if (localStorage.getItem("user")) {
@@ -31,6 +30,7 @@ function readFromStorage() {
             },
             loggedIn: true
         });
+        userStore.refreshInterval = setInterval(userStore.startRefreshInterval, 10000);
     }
 }
 

@@ -174,8 +174,8 @@ const slides = ref();
 
 watch(
     () => userStore.loggedIn,
-    (newValue) => {
-        if (newValue) {
+    (newValue, oldValue) => {
+        if (newValue && !oldValue) {
             if (mode.value == modes.logbook) fetchJourneys();
         } else {
             //

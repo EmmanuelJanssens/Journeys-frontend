@@ -1,6 +1,7 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
 import { defineStore } from "pinia";
+import { clearInterval } from "timers";
 import { ExperienceDto, JourneyDto, UserDto } from "types/dtos";
 import { ApiAuthenticationResponse } from "types/journeys";
 
@@ -19,6 +20,12 @@ export const useUserStore = defineStore("user", () => {
 
     const myJourneys = ref<JourneyDto[]>();
     const myExperiences = ref<ExperienceDto[]>([]);
+
+    const refreshInterval = ref();
+
+    function startRefreshInterval() {
+        refreshToken();
+    }
     async function login(user: string, password: string): Promise<boolean> {
         const dto: UserDto = {
             username: user,
@@ -124,6 +131,24 @@ export const useUserStore = defineStore("user", () => {
         localStorage.removeItem("user");
     }
 
+    async function refreshToken(): Promise<boolean> {
+        const authToken = JSON.parse(localStorage.getItem("user")!).token;
+        const result = await axios.get("/api/authentication/refresh", {
+            headers: {
+                Authorization: `Bearer ${authToken}`
+            }
+        });
+        localStorage.setItem(
+            "user",
+            JSON.stringify({
+                user: userRef.value,
+                token: result.data.token
+            })
+        );
+        token.value = result.data.token;
+
+        return true;
+    }
     function removeJourney(id: string) {
         myJourneys.value = myJourneys.value?.filter((j) => j.id != id);
         myExperiences.value = myExperiences.value.filter((e) => e.journey != id);
@@ -137,9 +162,12 @@ export const useUserStore = defineStore("user", () => {
         register,
         IsLoggedIn,
         removeJourney,
+        refreshToken,
         myJourneys,
         myExperiences,
         fetchMyJourneys,
-        fetchMyExperiences
+        fetchMyExperiences,
+        refreshInterval,
+        startRefreshInterval
     };
 });
