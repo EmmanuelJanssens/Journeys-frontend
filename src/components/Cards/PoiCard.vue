@@ -53,15 +53,12 @@ const useJourney = useJourneyStore();
 function addToJourney(poi: PoiDto) {
     if (poi.thumbnail != undefined) delete poi.thumbnail;
     const experience: ExperienceDto = {
-        poi: poi,
-        experience: {
-            title: "",
-            date: new Date(),
-            description: "",
-            images: [],
-            order: useJourney.editJourney.journey!.experiences!.length
-        },
-        id: poi.id
+        title: "",
+        date: new Date(),
+        description: "",
+        images: [],
+        order: useJourney.editJourney.journey!.experiencesConnection?.edges?.length!,
+        node: poi
     };
     useJourney.addToJourney(experience);
     popoverController.dismiss({ poi });

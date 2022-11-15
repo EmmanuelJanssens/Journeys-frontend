@@ -333,7 +333,8 @@ async function openJourneyCreationModal() {
 
     if (result.role == "create") {
         mode.value = modes.edition;
-        journeyStore.editJourney.journey!.experiences = [];
+        journeyStore.editJourney.journey = {};
+        journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
 
         fetchPois(result.data);
     }

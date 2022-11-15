@@ -132,6 +132,7 @@ watch(
                 },
                 id: journeyStore.viewJourney.id
             });
+            console.log(featureCollection);
             await JourneyMapCapacitor.addJourneysExperiencesLayer(featureCollection);
 
             emit("ready");
@@ -199,7 +200,7 @@ function buildPoiGeoData(pois: PoiDto[]) {
         journeyStore.editJourney.journey?.start?.longitude!,
         journeyStore.editJourney.journey?.start?.latitude!
     ]);
-    journeyStore.editJourney.journey?.experiences?.forEach((element) => {
+    journeyStore.editJourney.journey?.experiencesConnection?.edges?.forEach((element) => {
         coords.push([element.node.location.longitude, element.node.location.latitude]);
     });
     coords.push([journeyStore.editJourney.journey?.end?.longitude!, journeyStore.editJourney.journey?.end?.latitude!]);
@@ -244,7 +245,7 @@ watch(
     }
 );
 watch(
-    () => journeyStore.editJourney.journey?.experiences!,
+    () => journeyStore.editJourney.journey?.experiencesConnection?.edges!,
     (newVal) => {
         const array: Array<number[]> = new Array();
 

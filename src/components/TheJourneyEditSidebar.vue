@@ -14,16 +14,16 @@
 
     <IonReorderGroup @ionItemReorder="reordered($event)" :disabled="false">
         <ion-item-sliding
-            v-for="experience in journeyStore.editJourney?.journey?.experiences"
-            v-bind:key="experience.poi.id"
+            v-for="experience in journeyStore.editJourney?.journey?.experiencesConnection?.edges"
+            v-bind:key="experience.node.id"
             :disabled="props.mode == 'view'">
             <ion-item>
                 <ion-icon slot="start" size="large" src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
-                <ion-label>{{ experience.poi.name }}</ion-label>
+                <ion-label>{{ experience.node.name }}</ion-label>
                 <ion-reorder v-if="props.mode == 'edit'" slot="end"></ion-reorder>
             </ion-item>
             <ion-item-options>
-                <ion-item-option color="danger" @click="remove(experience.poi.id!)">
+                <ion-item-option color="danger" @click="remove(experience.node.id!)">
                     <ion-icon size="large" src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
                 </ion-item-option>
             </ion-item-options>
@@ -71,18 +71,18 @@ const journeyStore = useJourneyStore();
 
 function remove(id: string) {
     journeyStore.removeFromJourney(id);
-    journeyStore.editJourney.journey?.experiences!.forEach((item, idx) => {
-        item.experience.order = idx;
+    journeyStore.editJourney.journey?.experiencesConnection?.edges?.forEach((item, idx) => {
+        item.order = idx;
     });
     emit("reordered");
 }
 
 function reordered(evt: ItemReorderCustomEvent) {
-    const res = evt.detail.complete(journeyStore.editJourney.journey?.experiences) as ExperienceDto[];
+    const res = evt.detail.complete(journeyStore.editJourney.journey?.experiencesConnection?.edges) as ExperienceDto[];
     res.forEach((exp, idx) => {
-        exp.experience.order = idx;
+        exp.order = idx;
     });
-    journeyStore.editJourney.journey!.experiences = res;
+    journeyStore.editJourney.journey!.experiencesConnection!.edges = res;
     emit("reordered");
 }
 </script>
