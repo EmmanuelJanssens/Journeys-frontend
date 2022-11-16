@@ -35,7 +35,6 @@ function readFromStorage() {
 }
 
 onBeforeMount(() => {
-    console.log(getPlatforms());
     readFromStorage();
 });
 </script>

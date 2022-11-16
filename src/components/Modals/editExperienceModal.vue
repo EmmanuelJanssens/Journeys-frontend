@@ -5,7 +5,9 @@
             <ion-toolbar>
                 <ion-title
                     >Edit Experience at
-                    <ion-text color="secondary">{{ currentData?.experience?.node.name }}</ion-text></ion-title
+                    <ion-text color="secondary">{{
+                        (currentData?.experience?.node as PoiDto)?.name
+                    }}</ion-text></ion-title
                 >
                 <ion-progress-bar v-if="uploading" type="indeterminate"></ion-progress-bar>
             </ion-toolbar>
@@ -107,7 +109,7 @@ import {
     modalController
 } from "@ionic/vue";
 import { useJourneyStore } from "stores/useJourneyStore";
-import { ExperienceDto, JourneyDto } from "types/dtos";
+import { ExperienceDto, JourneyDto, PoiDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
 import { storageRef } from "google/storage";
@@ -176,7 +178,6 @@ function removeImage(image: string) {
 
 const taskList = Array<UploadTask>();
 async function save() {
-    console.log(currentData.value);
     const deleted = currentData.value?.experience?.images.filter(
         (img) => !images.value.find((search) => img == search.url)
     );

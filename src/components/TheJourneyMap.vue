@@ -132,7 +132,6 @@ watch(
                 },
                 id: journeyStore.viewJourney.id
             });
-            console.log(featureCollection);
             await JourneyMapCapacitor.addJourneysExperiencesLayer(featureCollection);
 
             emit("ready");

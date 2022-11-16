@@ -75,7 +75,6 @@ async function save() {
         ? description.value
         : journeyStore.editJourney.journey!.description;
     journeyStore.editJourney.journey!.id = props.journey.id;
-    console.log(journeyStore.editJourney.journey);
     await journeyStore.updateJourney("");
 
     modalController.dismiss({ status: "success" });

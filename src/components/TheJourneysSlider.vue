@@ -62,7 +62,6 @@ function updateView() {
                 slidesPerView.value = Math.floor(width / 310);
             }
         }
-        console.log(slidesPerView.value);
     }
 }
 </script>

@@ -26,8 +26,13 @@ export const usePoiStore = defineStore("poi", () => {
                 return false;
             });
     }
+    async function getPoiExperiences(poi: PoiDto) {
+        return await (
+            await axios.get("api/poi/" + poi.id)
+        ).data;
+    }
     function clear() {
         poisBetween.value = [];
     }
-    return { searchBetween, getThumbnail, clear, poisBetween };
+    return { searchBetween, getThumbnail, clear, poisBetween, getPoiExperiences };
 });

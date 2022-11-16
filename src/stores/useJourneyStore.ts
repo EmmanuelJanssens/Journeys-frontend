@@ -41,8 +41,6 @@ export const useJourneyStore = defineStore("journey", () => {
     }
 
     function removeFromJourney(id: string) {
-        console.log(editJourney.value.journey);
-
         const removed = editJourney.value!.journey?.experiencesConnection?.edges?.find((p) => p.node.id == id);
         editJourney.value!.journey!.experiencesConnection!.edges =
             editJourney.value?.journey?.experiencesConnection?.edges?.filter((item) => item.node.id !== id);
