@@ -82,6 +82,7 @@ onMounted(async () => {
             emit("poiClicked", e.features![0].properties as PoiDto, e);
         }
     );
+    map.on("click", () => {});
 });
 
 watch(

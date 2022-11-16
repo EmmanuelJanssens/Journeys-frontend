@@ -11,6 +11,9 @@
                         <ThePoiListSidebar :poi-list="filteredPois" @poi-item-clicked="panTo" />
                     </ion-col>
                     <ion-col ref="mapCol">
+                        <ThePoiSearchbar
+                            @poi-item-clicked="panTo"
+                            v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney" />
                         <ion-content>
                             <ion-fab v-if="mode == modes.logbook" slot="fixed" vertical="top" horizontal="end">
                                 <ion-fab-button @click="openJourneyCreationModal">
@@ -30,11 +33,6 @@
                                             size="default"
                                             src="/src/assets/icon/return-up-back-outline.svg"></ion-icon>
                                     </ion-fab-button>
-                                    <ion-fab-button>
-                                        <ion-icon
-                                            size="default"
-                                            src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
-                                    </ion-fab-button>
                                 </ion-fab-list>
                             </ion-fab>
                             <ion-fab
@@ -53,11 +51,6 @@
                                         <ion-icon
                                             size="default"
                                             src="/src/assets/icon/return-up-back-outline.svg"></ion-icon>
-                                    </ion-fab-button>
-                                    <ion-fab-button>
-                                        <ion-icon
-                                            size="default"
-                                            src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
                                     </ion-fab-button>
                                 </ion-fab-list>
                             </ion-fab>
@@ -150,6 +143,7 @@ import { getMidPoint, openModal, getRadius } from "utils/utils";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
 import TheJourneysSlider from "components/TheJourneysSlider.vue";
 import TheJourneyExperienceList from "components/TheJourneyExperienceList.vue";
+import ThePoiSearchbar from "components/ThePoiSearchbar.vue";
 
 const modes = {
     logbook: "logbook",
