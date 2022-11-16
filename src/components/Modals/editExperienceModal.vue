@@ -224,7 +224,8 @@ async function save() {
         currentData.value!.experience!.title = title.value;
         currentData.value!.experience!.date = selectedDate.value!;
         currentData.value!.experience!.description = description.value;
-        await journeyStore.updateExperience(currentData.value!);
+        currentData.value.experience!.journey = { id: journeyStore.viewJourney.id };
+        await journeyStore.updateExperience(currentData.value!.experience!);
         modalController.dismiss({ status: "success" });
         showToast("Your modifications were successfuly saved", "success");
         uploading.value = false;

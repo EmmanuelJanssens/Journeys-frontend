@@ -11,7 +11,7 @@
             @ionFocus="toggleFocus(true)"
             @ionBlur="toggleFocus(false)"
             v-on:keydown="selectFirst($event)" />
-        <ion-content class="search" v-if="predictions.length">
+        <ion-content class="search ion-no-padding" v-if="predictions.length">
             <ion-list>
                 <ion-item
                     v-for="prediction in predictions"
@@ -104,22 +104,13 @@ function clearInput() {
 </script>
 
 <style scoped>
-modal-content {
-    height: 300px;
-}
 .search {
-    position: absolute;
+    position: relative;
     z-index: 999;
     height: 200px;
-    width: 100%;
     min-width: 200px;
     max-width: 1280px;
 }
-
-ion-icon {
-    font-size: 10px;
-}
-
 .google {
     font-size: 10px;
 }

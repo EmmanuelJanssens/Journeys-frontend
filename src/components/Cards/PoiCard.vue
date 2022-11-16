@@ -14,18 +14,19 @@
                 <ion-row>
                     <ion-col> description </ion-col>
                 </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <ion-button @click="addToJourney(props.poi)"> Add </ion-button>
-                    </ion-col>
-                </ion-row>
             </ion-grid>
+            <ion-item>
+                <ion-button @click="addToJourney(props.poi)" fill="clear" slot="end" size="default">
+                    <ion-icon src="src/assets/icon/add-outline.svg"> </ion-icon>
+                </ion-button>
+            </ion-item>
         </ion-card-content>
     </ion-card>
 </template>
 
 <script lang="ts" setup>
 import {
+    IonIcon,
     IonCard,
     IonCardHeader,
     IonCardContent,
@@ -34,6 +35,7 @@ import {
     IonGrid,
     IonRow,
     IonCol,
+    IonItem,
     IonButton,
     IonImg,
     popoverController
@@ -50,6 +52,9 @@ const props = defineProps<{
 
 const useJourney = useJourneyStore();
 
+onMounted(() => {
+    console.log(props.poi);
+});
 function addToJourney(poi: PoiDto) {
     if (poi.thumbnail != undefined) delete poi.thumbnail;
     const experience: ExperienceDto = {

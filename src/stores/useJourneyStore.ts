@@ -62,7 +62,7 @@ export const useJourneyStore = defineStore("journey", () => {
                 return journey;
             });
     }
-    function updateExperience(experience: { journey?: JourneyDto; experience?: ExperienceDto }) {
+    function updateExperience(experience: ExperienceDto) {
         const token = JSON.parse(localStorage.getItem("user")!).token;
         const data = experience;
         return axios

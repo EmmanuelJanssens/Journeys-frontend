@@ -9,7 +9,7 @@
                     <ion-col size="7">
                         <ion-label class="ion-text-wrap">
                             <h1>Find your next adventure</h1>
-                            <p class="ion-text-justify">
+                            <p>
                                 Plan places you want to visit be it local, cantonal or national, plan as you go and
                                 visualize your trip. Choose from many of our Points Of Interest, shared by other members
                                 Save your journey and come back to it anytime to edit your story Inspire Others by
@@ -28,9 +28,9 @@
                             src="https://firebasestorage.googleapis.com/v0/b/journeys-v2/o/images%2FfeatureImg2.png?alt=media&token=a45d6184-2074-40e6-bbc3-e86e659b6e08" />
                     </ion-col>
                     <ion-col size="7">
-                        <ion-label class="ion-text-wrap ion-text-justify">
+                        <ion-label class="ion-text-wrap">
                             <h1>share your story</h1>
-                            <p class="ion-text-justif">
+                            <p>
                                 Have you been to a place that no one else has seen ? Share them on our site and show the
                                 world your experiences. Create an account to add your new points of interest Look for
                                 the place you want to add on our interactive map Upload your pictures, and write your
@@ -43,7 +43,7 @@
                     <ion-col size="7">
                         <ion-label class="ion-text-wrap">
                             <h1>Journayl your trip</h1>
-                            <p class="ion-text-justify">
+                            <p>
                                 Complete your dashboard with various adventures, save your memories to keep them
                                 forever. Thanks to our user friendly dashboard you will be able to edit your cards on
                                 the go or after you have completed your trip.

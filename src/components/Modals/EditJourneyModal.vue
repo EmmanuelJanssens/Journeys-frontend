@@ -26,7 +26,7 @@
         </ion-content>
         <ion-footer>
             <ion-toolbar>
-                <ion-button slot="end" color="secondary"> cancel </ion-button>
+                <ion-button slot="end" color="secondary" @click="modalController.dismiss()"> cancel </ion-button>
                 <ion-button slot="end" @click="save"> Save </ion-button>
             </ion-toolbar>
         </ion-footer>
@@ -35,6 +35,7 @@
 <script lang="ts" setup>
 import {
     IonButton,
+    IonButtons,
     IonGrid,
     IonRow,
     IonCol,
@@ -57,7 +58,7 @@ import { showToast } from "utils/utils";
 import { ref } from "vue";
 
 const userStore = useUserStore();
-const useJourney = useJourneyStore();
+const journeyStore = useJourneyStore();
 
 const props = defineProps<{
     journey: JourneyDto;
@@ -67,22 +68,23 @@ const title = ref();
 const description = ref();
 
 async function save() {
-    useJourney.editJourney.journey = await useJourney.getJourney(props.journey.id!);
-    useJourney.editJourney.journey!.title = title.value ? title.value : useJourney.editJourney.journey!.title;
-    useJourney.editJourney.journey!.description = description.value
+    await journeyStore.getJourney(props.journey.id!);
+    journeyStore.editJourney.journey = journeyStore.viewJourney;
+    journeyStore.editJourney.journey!.title = title.value ? title.value : journeyStore.editJourney.journey!.title;
+    journeyStore.editJourney.journey!.description = description.value
         ? description.value
-        : useJourney.editJourney.journey!.description;
-    useJourney.editJourney.journey!.id = props.journey.id;
-
-    await useJourney.updateJourney("");
+        : journeyStore.editJourney.journey!.description;
+    journeyStore.editJourney.journey!.id = props.journey.id;
+    console.log(journeyStore.editJourney.journey);
+    await journeyStore.updateJourney("");
 
     modalController.dismiss({ status: "success" });
 
     const edited = userStore.myJourneys?.find((journey) => journey.id == props.journey.id);
 
     if (edited) {
-        edited.title = useJourney.editJourney.journey!.title;
-        edited.description = useJourney.editJourney.journey!.description;
+        edited.title = journeyStore.editJourney.journey!.title;
+        edited.description = journeyStore.editJourney.journey!.description;
     }
     await showToast("Your journey  was successfully updated", "success");
 }

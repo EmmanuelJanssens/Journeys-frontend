@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import { IonApp, IonRouterOutlet, IonContent, IonSplitPane } from "@ionic/vue";
+import { IonApp, IonRouterOutlet, IonContent, IonSplitPane, getPlatforms } from "@ionic/vue";
 import UserDetailMenu from "components/TheUserDetailMenu.vue";
 import JourneysHeader from "components/TheJourneysHeader.vue";
 import { useUserStore } from "stores/useUserStore";
@@ -35,6 +35,7 @@ function readFromStorage() {
 }
 
 onBeforeMount(() => {
+    console.log(getPlatforms());
     readFromStorage();
 });
 </script>
