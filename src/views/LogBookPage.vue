@@ -101,15 +101,12 @@ import {
     IonGrid,
     IonCol,
     IonRow,
-    onIonViewWillLeave,
     IonFab,
     IonFabList,
     IonFabButton,
     popoverController,
     onIonViewDidEnter,
     modalController,
-    SearchbarCustomEvent,
-    onIonViewWillEnter,
     alertController
 } from "@ionic/vue";
 // Import Swiper and modules
@@ -240,7 +237,6 @@ async function fetchPois(data: { start: AddressDto; end: AddressDto }) {
 async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
     setLoading(true);
     const response = await reverseGeocode(pos.lat, pos.lng);
-    journeyStore.editJourney.journey!.experiences = [];
     const result = getLocalityAndCountry(response!);
     if (result.country != undefined && result.locality != undefined) {
         if (marker == "journey_start") {
@@ -365,7 +361,7 @@ async function openJourneySaveModal() {
         const result = await modal.onDidDismiss();
 
         if (result.role == "view") {
-            showExperiences(result.data.data);
+            showExperiences(result.data);
         }
     }
 }

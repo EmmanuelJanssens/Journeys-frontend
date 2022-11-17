@@ -62,26 +62,9 @@ export type JourneyDto = {
     end?: AddressDto;
     creator?: UserDto;
     experienceCount?: number;
-    experiences?: ExperienceDto[];
     experiencesAggregate?: { count: number };
     experiencesConnection?: {
-        edges:
-            | {
-                  title: string;
-                  date: string;
-                  description: string;
-                  images: string[];
-                  order: number;
-                  node: {
-                      id: string;
-                      name: string;
-                      location: {
-                          latitude: number;
-                          longitude: number;
-                      };
-                  };
-              }[]
-            | undefined;
+        edges: ExperienceDto[] | undefined;
     };
 };
 

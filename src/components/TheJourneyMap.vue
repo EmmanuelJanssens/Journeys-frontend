@@ -94,15 +94,16 @@ watch(
                 features: []
             };
 
-            journeyStore.viewJourney.experiencesConnection?.edges?.forEach((experience) => {
+            journeyStore.viewJourney.experiencesConnection?.edges?.forEach((exp) => {
+                const n = exp.node as PoiDto;
                 featureCollection.features.push({
                     type: "Feature",
                     geometry: {
                         type: "Point",
-                        coordinates: [experience.node.location.longitude, experience.node.location.latitude]
+                        coordinates: [n.location.longitude, n.location.latitude]
                     },
-                    properties: experience,
-                    id: experience.node.id
+                    properties: exp,
+                    id: exp.node.id
                 });
             });
 
@@ -200,8 +201,10 @@ function buildPoiGeoData(pois: PoiDto[]) {
         journeyStore.editJourney.journey?.start?.longitude!,
         journeyStore.editJourney.journey?.start?.latitude!
     ]);
-    journeyStore.editJourney.journey?.experiencesConnection?.edges?.forEach((element) => {
-        coords.push([element.node.location.longitude, element.node.location.latitude]);
+    journeyStore.editJourney.journey?.experiencesConnection?.edges?.forEach((exp) => {
+        const n = exp.node as PoiDto;
+
+        coords.push([n.location.longitude, n.location.latitude]);
     });
     coords.push([journeyStore.editJourney.journey?.end?.longitude!, journeyStore.editJourney.journey?.end?.latitude!]);
 
@@ -256,7 +259,8 @@ watch(
             journeyStore.editJourney.journey?.start?.latitude!
         ]);
         newVal?.forEach((exp) => {
-            array.push([exp.node.location.longitude, exp.node.location.latitude]);
+            const n = exp.node as PoiDto;
+            array.push([n.location.longitude, n.location.latitude]);
         });
         array.push([
             journeyStore.editJourney.journey?.end?.longitude!,

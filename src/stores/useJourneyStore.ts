@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
-import { AddressDto, ExperienceDto, JourneyDto, UpdateJourneyDto } from "types/dtos";
+import { AddressDto, ExperienceDto, JourneyDto, PoiDto, UpdateJourneyDto } from "types/dtos";
 export const useJourneyStore = defineStore("journey", () => {
     const editJourney = ref<UpdateJourneyDto>({});
     const viewJourney = ref<JourneyDto>({});
@@ -34,65 +34,86 @@ export const useJourneyStore = defineStore("journey", () => {
         return true;
     }
 
-    function addToJourney(experience: ExperienceDto): void {
-        if (!alreadyInJourney(experience)) {
-            editJourney.value?.journey?.experiencesConnection?.edges?.push(experience);
+    function addToJourney(experience: ExperienceDto): Boolean {
+        try {
+            if (alreadyInJourney(experience)) {
+                editJourney.value!.journey!.experiencesConnection!.edges!.push(experience);
+                console.log(editJourney.value.journey?.experiencesConnection?.edges);
+            }
+            return true;
+        } catch (e) {
+            return false;
         }
     }
 
-    function removeFromJourney(id: string) {
-        const removed = editJourney.value!.journey?.experiencesConnection?.edges?.find((p) => p.node.id == id);
-        editJourney.value!.journey!.experiencesConnection!.edges =
-            editJourney.value?.journey?.experiencesConnection?.edges?.filter((item) => item.node.id !== id);
-        return removed;
+    function removeFromJourney(id: string): ExperienceDto | undefined {
+        try {
+            const removed = editJourney.value!.journey!.experiencesConnection!.edges!.find(
+                (p) => p.node.id == id
+            ) as ExperienceDto;
+            editJourney.value!.journey!.experiencesConnection!.edges =
+                editJourney.value!.journey!.experiencesConnection!.edges!.filter((item) => item.node.id !== id);
+            return removed;
+        } catch (e) {
+            return undefined;
+        }
     }
 
-    function removeExperience(expDto: ExperienceDto) {
-        const token = JSON.parse(localStorage.getItem("user")!).token;
-        return axios
-            .patch("api/journey/experience", expDto, {
+    async function removeExperience(expDto: ExperienceDto): Promise<JourneyDto | undefined> {
+        try {
+            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const response = await axios.patch("api/journey/experience", expDto, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
-            })
-            .then((response) => {
-                const journey = response.data as JourneyDto;
-                return journey;
             });
+            return (await response.data) as JourneyDto;
+        } catch (e) {
+            return undefined;
+        }
     }
-    function updateExperience(experience: ExperienceDto) {
-        const token = JSON.parse(localStorage.getItem("user")!).token;
-        const data = experience;
-        return axios
-            .put("api/journey/experience", data, {
+
+    async function updateExperience(experience: ExperienceDto): Promise<JourneyDto | undefined> {
+        try {
+            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const response = await axios.put("api/journey/experience", experience, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
-            })
-            .then((response) => {
-                const journey = response.data as JourneyDto;
-                return journey;
             });
-    }
-    function alreadyInJourney(expDto: ExperienceDto): boolean {
-        return (
-            editJourney.value?.journey?.experiencesConnection?.edges?.find(
-                (item) => item.node.id === expDto.node.id
-            ) !== undefined
-        );
+            return response.data as JourneyDto;
+        } catch (e) {
+            return undefined;
+        }
     }
 
-    function saveJourney(name: string) {
-        const token = JSON.parse(localStorage.getItem("user")!).token;
-        editJourney.value!.journey!.title = name;
+    function alreadyInJourney(expDto: ExperienceDto): Boolean {
+        try {
+            const result =
+                editJourney.value!.journey!.experiencesConnection!.edges!.find(
+                    (item) => item.node.id === expDto.node.id
+                ) !== undefined;
+            return result;
+        } catch (e) {
+            return false;
+        }
+    }
 
-        const dto: JourneyDto = editJourney.value!.journey!;
-        return axios.post("/api/journey/", dto, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        return "";
+    async function saveJourney(name: string): Promise<JourneyDto | undefined> {
+        try {
+            const token = JSON.parse(localStorage.getItem("user")!).token;
+            editJourney.value!.journey!.title = name;
+
+            const dto: JourneyDto = editJourney.value!.journey!;
+            const response = await axios.post("/api/journey/", dto, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return response.data as JourneyDto;
+        } catch (e) {
+            return undefined;
+        }
     }
     function findExp(poi_id: string, expList: ExperienceDto[]) {
         return expList.find((exp) => exp.node.id === poi_id);
@@ -100,8 +121,9 @@ export const useJourneyStore = defineStore("journey", () => {
     function filterDeleted() {
         const deleted: string[] = [];
         viewJourney.value!.experiencesConnection?.edges?.forEach((exp) => {
-            if (!findExp(exp.node.id, editJourney.value!.journey?.experiencesConnection?.edges!)) {
-                deleted.push(exp.node.id);
+            const node = exp.node as PoiDto;
+            if (!findExp(node.id, editJourney.value!.journey?.experiencesConnection?.edges!)) {
+                deleted.push(node.id);
             }
         });
         return deleted;
@@ -113,7 +135,8 @@ export const useJourneyStore = defineStore("journey", () => {
             editJourney.value!.deleted = { poi_ids: [] };
             editJourney.value!.updated = [];
             editJourney.value!.journey?.experiencesConnection?.edges?.forEach((exp) => {
-                if (!findExp(exp.node.id, viewJourney.value!.experiencesConnection!.edges!)) {
+                const node = exp.node as PoiDto;
+                if (!findExp(node.id, viewJourney.value!.experiencesConnection!.edges!)) {
                     editJourney.value!.connected?.push(exp);
                 } else {
                     //TODO add only differences

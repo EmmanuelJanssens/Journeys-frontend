@@ -83,7 +83,7 @@ async function saveJourney() {
             journeyStore.editJourney.journey!.title = title.value;
             journeyId = await journeyStore.updateJourney("deep");
         } else {
-            journeyId = await journeyStore.saveJourney(title.value);
+            journeyId = (await journeyStore.saveJourney(title.value))?.id!;
         }
 
         const alert = await alertController.create({
