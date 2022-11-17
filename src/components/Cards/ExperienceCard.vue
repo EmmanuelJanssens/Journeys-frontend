@@ -2,7 +2,7 @@
     <ion-card>
         <ion-card-header>
             <ion-toolbar color="none">
-                <ion-card-title>{{ props.experience.node.name }}</ion-card-title>
+                <ion-card-title>{{ (props.experience.node as PoiDto).name }}</ion-card-title>
                 <ion-card-subtitle>{{ props.experience.title }}</ion-card-subtitle>
                 <ion-buttons slot="end">
                     <ion-button @click="onEdit">
@@ -65,7 +65,7 @@ import "swiper/css/scrollbar";
 import { ref } from "vue";
 import EditExperienceModal from "components/Modals/EditExperienceModal.vue";
 import { useJourneyStore } from "stores/useJourneyStore";
-import { ExperienceDto } from "types/dtos";
+import { ExperienceDto, PoiDto } from "types/dtos";
 import { showToast } from "utils/utils";
 
 const props = defineProps<{
@@ -112,9 +112,8 @@ async function onDelete() {
                 role: "proceed",
                 handler: async () => {
                     await useJourney.removeExperience(exp);
-                    useJourney.viewJourney.experiences = useJourney.viewJourney.experiences!.filter(
-                        (el) => el.node.id != exp.node.id
-                    );
+                    useJourney.viewJourney.experiencesConnection!.edges =
+                        useJourney.viewJourney.experiencesConnection?.edges?.filter((el) => el.node.id != exp.node.id);
                     showToast("Experience deleted", "success");
                     emit("updated");
                 }
