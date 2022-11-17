@@ -15,7 +15,7 @@ import JourneysHeader from "components/TheJourneysHeader.vue";
 import { useUserStore } from "stores/useUserStore";
 import { onBeforeMount } from "vue";
 const userStore = useUserStore();
-function readFromStorage() {
+async function readFromStorage() {
     if (localStorage.getItem("user")) {
         const userRef = JSON.parse(localStorage.getItem("user")!).user;
         const token = JSON.parse(localStorage.getItem("user")!).token;
@@ -30,7 +30,9 @@ function readFromStorage() {
             },
             loggedIn: true
         });
-        userStore.refreshInterval = setInterval(userStore.startRefreshInterval, 20000);
+        if (await userStore.refreshToken()) {
+            userStore.refreshInterval = setInterval(userStore.startRefreshInterval, 24000);
+        }
     }
 }
 

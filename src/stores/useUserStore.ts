@@ -1,7 +1,5 @@
-import type { AxiosError } from "axios";
 import axios from "axios";
 import { defineStore } from "pinia";
-import { clearInterval } from "timers";
 import { ExperienceDto, JourneyDto, UserDto } from "types/dtos";
 import { ApiAuthenticationResponse } from "types/journeys";
 
@@ -31,88 +29,74 @@ export const useUserStore = defineStore("user", () => {
             username: user,
             password: password
         };
-        return await axios
-            .post("/api/authentication/login", dto)
-            .then((response) => {
-                const result = response.data as ApiAuthenticationResponse;
-                userRef.value.username = result.username;
-                userRef.value.firstName = result.firstName;
-                userRef.value.lastName = result.lastName;
-                userRef.value.email = result.email;
-                token.value = result.token;
-                loggedIn.value = true;
-                localStorage.setItem(
-                    "user",
-                    JSON.stringify({
-                        user: userRef.value,
-                        token: token.value
-                    })
-                );
-                return true;
-            })
-            .catch((error: AxiosError) => {
-                return false;
-            });
+        let result = undefined;
+
+        try {
+            const response = await await axios.post("/api/authentication/login", dto);
+            result = response.data;
+            userRef.value.username = result.username;
+            userRef.value.firstName = result.firstName;
+            userRef.value.lastName = result.lastName;
+            userRef.value.email = result.email;
+            token.value = result.token;
+            loggedIn.value = true;
+            localStorage.setItem(
+                "user",
+                JSON.stringify({
+                    user: userRef.value,
+                    token: token.value
+                })
+            );
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 
     async function register(user: UserDto): Promise<boolean> {
-        return await axios
-            .post("/api/authentication/register", user)
-            .then((response) => {
-                const result = response.data as ApiAuthenticationResponse;
-                userRef.value.username = result.username;
-                userRef.value.firstName = result.firstName;
-                userRef.value.lastName = result.lastName;
-                userRef.value.email = result.email;
-                return login(user.username!, user.password!)
-                    .then(() => {
-                        return true;
-                    })
-                    .catch(() => {
-                        return false;
-                    });
-            })
-            .catch((error: AxiosError) => {
-                return false;
-            });
+        try {
+            const response = await axios.post("/api/authentication/register", user);
+            const result = response.data as ApiAuthenticationResponse;
+            userRef.value.username = result.username;
+            userRef.value.firstName = result.firstName;
+            userRef.value.lastName = result.lastName;
+            userRef.value.email = result.email;
+            await login(user.username!, user.password!);
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 
-    function fetchMyJourneys(): Promise<boolean> {
-        if (localStorage.getItem("user")) {
+    async function fetchMyJourneys(): Promise<boolean> {
+        try {
             const token = JSON.parse(localStorage.getItem("user")!).token;
-
-            return axios
-                .get("/api/user/journeys", {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                })
-                .then((response) => {
-                    myJourneys.value = response.data.journeys as JourneyDto[];
-                    return true;
-                })
-                .catch(() => {
-                    return false;
-                });
-        } else return new Promise<boolean>(() => false);
-    }
-
-    function fetchMyExperiences(): Promise<boolean> {
-        const token = JSON.parse(localStorage.getItem("user")!).token;
-
-        return axios
-            .get("/api/user/experiences", {
+            const response = await axios.get("/api/user/journeys", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
-            })
-            .then((response) => {
-                myExperiences.value = response.data as ExperienceDto[];
-                return true;
-            })
-            .catch(() => {
-                return false;
             });
+            myJourneys.value = response.data.journeys as JourneyDto[];
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    async function fetchMyExperiences(): Promise<boolean> {
+        try {
+            const token = JSON.parse(localStorage.getItem("user")!).token;
+
+            const response = await axios.get("/api/user/experiences", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            myExperiences.value = response.data as ExperienceDto[];
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
     function IsLoggedIn(): boolean {
         return loggedIn.value;
@@ -132,22 +116,27 @@ export const useUserStore = defineStore("user", () => {
     }
 
     async function refreshToken(): Promise<boolean> {
-        const authToken = JSON.parse(localStorage.getItem("user")!).token;
-        const result = await axios.get("/api/authentication/refresh", {
-            headers: {
-                Authorization: `Bearer ${authToken}`
-            }
-        });
-        localStorage.setItem(
-            "user",
-            JSON.stringify({
-                user: userRef.value,
-                token: result.data.token
-            })
-        );
-        token.value = result.data.token;
-
-        return true;
+        try {
+            if (!IsLoggedIn()) return false;
+            const authToken = JSON.parse(localStorage.getItem("user")!).token;
+            const result = await axios.get("/api/authentication/refresh", {
+                headers: {
+                    Authorization: `Bearer ${authToken}`
+                }
+            });
+            localStorage.setItem(
+                "user",
+                JSON.stringify({
+                    user: userRef.value,
+                    token: result.data.token
+                })
+            );
+            token.value = result.data.token;
+            return true;
+        } catch (e) {
+            logout();
+            return false;
+        }
     }
     function removeJourney(id: string) {
         myJourneys.value = myJourneys.value?.filter((j) => j.id != id);
@@ -157,17 +146,17 @@ export const useUserStore = defineStore("user", () => {
         userRef,
         token,
         loggedIn,
+        myJourneys,
+        myExperiences,
+        refreshInterval,
         login,
         logout,
         register,
         IsLoggedIn,
         removeJourney,
         refreshToken,
-        myJourneys,
-        myExperiences,
         fetchMyJourneys,
         fetchMyExperiences,
-        refreshInterval,
         startRefreshInterval
     };
 });

@@ -10,12 +10,11 @@
             </ion-buttons>
         </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-text-center ion-padding">
+    <ion-content class="ion-text-center">
         <ion-grid>
             <ion-row>
                 <ion-col>
                     <GautoCompletePredictionList
-                        class="ion-padding"
                         placeholder="Start"
                         :input="startData.locationText"
                         @prediction-chosen="setStartPredictionText($event)" />
@@ -24,7 +23,6 @@
             <ion-row>
                 <ion-col>
                     <GautoCompletePredictionList
-                        class="ion-padding"
                         placeholder="End"
                         :input="endData.locationText"
                         @prediction-chosen="setEndPredictionText($event)"

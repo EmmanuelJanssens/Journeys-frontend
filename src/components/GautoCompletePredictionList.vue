@@ -1,8 +1,8 @@
+<!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <section>
+    <span>
         <ion-searchbar
             id="end-point"
-            class="ion-no-padding"
             :placeholder="props.placeholder"
             :debounce="500"
             :value="props.input"
@@ -11,7 +11,8 @@
             @ionFocus="toggleFocus(true)"
             @ionBlur="toggleFocus(false)"
             v-on:keydown="selectFirst($event)" />
-        <ion-content class="search ion-no-padding" v-if="predictions.length">
+
+        <div class="search ion-no-padding" v-if="predictions.length">
             <ion-list>
                 <ion-item
                     v-for="prediction in predictions"
@@ -29,8 +30,8 @@
                     <ion-text class="google" color="medium"> Powered by google</ion-text>
                 </ion-label>
             </ion-item>
-        </ion-content>
-    </section>
+        </div>
+    </span>
 </template>
 
 <script lang="ts" setup>
@@ -105,11 +106,11 @@ function clearInput() {
 
 <style scoped>
 .search {
-    position: relative;
+    overflow-y: auto;
+    position: absolute;
+    max-height: 300px;
     z-index: 999;
-    height: 200px;
-    min-width: 200px;
-    max-width: 1280px;
+    width: 100%;
 }
 .google {
     font-size: 10px;

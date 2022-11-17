@@ -240,6 +240,8 @@ watch(
                     });
                 }
             }
+        } else {
+            JourneyMapCapacitor.clearMap(false);
         }
         emit("ready");
     }

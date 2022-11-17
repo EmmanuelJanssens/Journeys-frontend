@@ -2,7 +2,7 @@
 <template>
     <div class="search-wrapper">
         <ion-searchbar class="ion-no-padding" @ion-change="filterPois" :debounce="500" :value="search"></ion-searchbar>
-        <ion-content class="search ion-no-padding" v-if="filtered?.length! > 0">
+        <div class="search ion-no-padding" v-if="filtered?.length! > 0">
             <ion-list>
                 <ion-item v-for="poi in filtered" button v-bind:key="poi.id" @click="emitClick(poi)">
                     <ion-label>
@@ -16,7 +16,7 @@
                     <ion-text class="google" color="medium"> Not finding what you're looking for?</ion-text>
                 </ion-label>
             </ion-item>
-        </ion-content>
+        </div>
     </div>
 </template>
 <script lang="ts" setup>
@@ -30,7 +30,6 @@ import {
     IonText,
     IonContent
 } from "@ionic/vue";
-import { help } from "ionicons/icons";
 
 import { usePoiStore } from "stores/usePoiStore";
 import { PoiDto } from "types/dtos";
@@ -79,8 +78,10 @@ function addPoiModal() {}
 }
 
 .search {
+    overflow-y: auto;
     position: absolute;
+    max-height: 300px;
     z-index: 999;
-    height: 200px;
+    width: 100%;
 }
 </style>

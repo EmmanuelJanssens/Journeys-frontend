@@ -196,21 +196,17 @@ function setLoading(loading: boolean) {
 async function fetchJourneys() {
     setLoading(true);
     mode.value = modes.logbook;
-    await userStore.fetchMyJourneys();
+    if (userStore.IsLoggedIn()) {
+        await userStore.fetchMyJourneys();
+    } else {
+        journeyStore.clear();
+        poiStore.clear();
+        setLoading(false);
+    }
     updateView();
 }
 
 const filteredPois = ref<PoiDto[]>();
-
-function filterPois(evt: SearchbarCustomEvent) {
-    if (evt.detail.value!.length < 3) {
-        filteredPois.value = poiStore.poisBetween;
-    } else {
-        filteredPois.value = poiStore.poisBetween?.filter((poi) =>
-            poi.name.toLocaleLowerCase().includes(evt.detail.value!.toLocaleLowerCase())
-        );
-    }
-}
 
 async function editJourney() {
     mode.value = modes.editJourney;
