@@ -1,6 +1,9 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template>
-    <ion-page id="main-content">
+    <ion-page>
+        <ion-header>
+            <TheJourneysHeader />
+        </ion-header>
         <ion-loading v-if="isLoading" />
         <ion-content>
             <ion-grid class="full-page ion-no-padding">
@@ -107,6 +110,7 @@ import {
     popoverController,
     onIonViewDidEnter,
     modalController,
+    IonHeader,
     alertController
 } from "@ionic/vue";
 // Import Swiper and modules
@@ -141,6 +145,7 @@ import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
 import TheJourneysSlider from "components/TheJourneysSlider.vue";
 import TheJourneyExperienceList from "components/TheJourneyExperienceList.vue";
 import ThePoiSearchbar from "components/ThePoiSearchbar.vue";
+import TheJourneysHeader from "components/TheJourneysHeader.vue";
 
 const modes = {
     logbook: "logbook",

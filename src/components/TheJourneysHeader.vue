@@ -1,31 +1,26 @@
 <template>
-    <ion-header>
-        <ion-toolbar color="tertiary">
-            <ion-buttons slot="end">
-                <ion-button color="secondary" router-link="/home">Home</ion-button>
-                <ion-button color="primary" @click="openModal(LoginModal)" v-if="userStore.IsLoggedIn() == false"
-                    >Login</ion-button
-                >
-                <ion-button color="primary" @click="openModal(RegisterModal)" v-if="userStore.IsLoggedIn() == false"
-                    >Register</ion-button
-                >
-                <ion-button color="secondary" v-if="userStore.IsLoggedIn() == true" router-link="/logbook"
-                    >Journeys</ion-button
-                >
-                <ion-button color="secondary" v-if="userStore.IsLoggedIn() == true" @click="toggleProfile()">{{
-                    userStore.userRef.username
-                }}</ion-button>
-            </ion-buttons>
-        </ion-toolbar>
-    </ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="end">
+            <ion-button router-link="/home"> HOME </ion-button>
+            <ion-button router-link="/about"> ABOUT </ion-button>
+            <ion-button router-link="/logbook"> LOGBOOK </ion-button>
+            <ion-button @click="openModal(LoginModal)" v-if="userStore.IsLoggedIn() == false">Login</ion-button>
+            <ion-button @click="openModal(RegisterModal)" v-if="userStore.IsLoggedIn() == false">Register</ion-button>
+            <ion-button v-if="userStore.IsLoggedIn() == true">
+                PROFILE <ion-icon slot="end" :src="caretDownOutline"> </ion-icon
+            ></ion-button>
+        </ion-buttons>
+    </ion-toolbar>
 </template>
 
 <script lang="ts" setup>
-import { IonHeader, IonToolbar, IonButtons, IonButton, modalController, menuController } from "@ionic/vue";
+import { IonToolbar, IonButtons, IonButton, modalController, IonIcon, menuController } from "@ionic/vue";
 
 import { useUserStore } from "stores/useUserStore";
 import LoginModal from "components/Modals/LoginModal.vue";
 import RegisterModal from "components/Modals/RegisterModal.vue";
+import { caretDownOutline } from "ionicons/icons";
+
 const userStore = useUserStore();
 
 async function toggleProfile() {
@@ -43,4 +38,9 @@ async function openModal(component: any) {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+ion-toolbar {
+    --background: black;
+    --opacity: 90%;
+}
+</style>

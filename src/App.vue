@@ -1,9 +1,7 @@
 <template>
     <ion-app>
-        <user-detail-menu />
-        <journeys-header />
         <ion-content>
-            <ion-router-outlet content-id="main-content" />
+            <ion-router-outlet />
         </ion-content>
     </ion-app>
 </template>

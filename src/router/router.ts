@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "@ionic/vue-router";
 import type { RouteRecordRaw } from "vue-router";
-
+// import HomePage from "views/HomePage.vue";
+// import LogBookPage from "views/LogBookPage.vue";
 const HomePage = () => import("views/HomePage.vue");
 const LogBookPage = () => import("views/LogBookPage.vue");
 const routes: RouteRecordRaw[] = [
