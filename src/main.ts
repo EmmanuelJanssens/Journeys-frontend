@@ -4,7 +4,7 @@ import { createPinia } from "pinia";
 import { createApp } from "vue";
 import VueAxios from "vue-axios";
 import { RecycleScroller, DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
-
+import { MotionPlugin } from "@vueuse/motion";
 import App from "./App.vue";
 import router from "./router/router";
 
@@ -36,6 +36,7 @@ const app = createApp(App);
 app.use(IonicVue);
 app.use(router);
 app.use(pinia);
+app.use(MotionPlugin);
 app.use(VueAxios, axios);
 app.component("RecycleScroller", RecycleScroller);
 app.component("DynamicScroller", DynamicScroller);

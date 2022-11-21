@@ -75,4 +75,13 @@ export type UserDto = {
     email?: string;
     password?: string;
     token?: string;
+    public?: boolean;
+    citation?: string;
+    banner?: string[];
+    journeysAggregate?: {
+        count: number;
+    };
+    journeysConnection?: {
+        edges: [{ node: { experiencesAggregate: { count: number } } }];
+    };
 };

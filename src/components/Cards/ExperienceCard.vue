@@ -68,6 +68,7 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto, PoiDto } from "types/dtos";
 import { showToast } from "utils/utils";
 import { pencilOutline, trashBinOutline } from "ionicons/icons";
+import { async } from "@firebase/util";
 
 const props = defineProps<{
     experience: ExperienceDto;

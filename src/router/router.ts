@@ -4,6 +4,7 @@ import type { RouteRecordRaw } from "vue-router";
 // import LogBookPage from "views/LogBookPage.vue";
 const HomePage = () => import("views/HomePage.vue");
 const LogBookPage = () => import("views/LogBookPage.vue");
+const ProfilePage = () => import("views/ProfilePage.vue");
 const routes: RouteRecordRaw[] = [
     {
         path: "/",
@@ -18,6 +19,11 @@ const routes: RouteRecordRaw[] = [
         path: "/logbook",
         name: "logbook",
         component: LogBookPage
+    },
+    {
+        path: "/profile",
+        name: "profile",
+        component: ProfilePage
     }
 ];
 

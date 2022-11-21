@@ -67,6 +67,23 @@ export const useUserStore = defineStore("user", () => {
             return false;
         }
     }
+    async function saveUser(user: UserDto, oldUsername: string): Promise<UserDto | undefined> {
+        try {
+            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const update = {
+                user: user,
+                oldUsername: oldUsername
+            };
+            const response = await axios.put("/api/user", update, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return response.data as UserDto;
+        } catch (e) {
+            return undefined;
+        }
+    }
 
     async function fetchMyJourneys(): Promise<boolean> {
         try {
@@ -93,6 +110,64 @@ export const useUserStore = defineStore("user", () => {
                 }
             });
             myExperiences.value = response.data as ExperienceDto[];
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    async function fetchMyProfile(): Promise<boolean> {
+        try {
+            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const response = await axios.get("/api/user/", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            userRef.value = response.data as UserDto;
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    async function checkUserName(username: string): Promise<boolean> {
+        try {
+            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const user = {
+                user: {
+                    username: username
+                }
+            };
+            const response = await axios.post("/api/user/username", user, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (response.data) return true;
+            else return false;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    async function updatePassword(data: {
+        oldPassword: string;
+        newPassword: string;
+        public: boolean;
+    }): Promise<boolean> {
+        try {
+            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const response = await axios.put("api/authentication/update", data, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            console.log(response.data);
+            if (!response.data) {
+                return false;
+            }
+
             return true;
         } catch (e) {
             return false;
@@ -157,6 +232,10 @@ export const useUserStore = defineStore("user", () => {
         refreshToken,
         fetchMyJourneys,
         fetchMyExperiences,
-        startRefreshInterval
+        fetchMyProfile,
+        saveUser,
+        checkUserName,
+        startRefreshInterval,
+        updatePassword
     };
 });

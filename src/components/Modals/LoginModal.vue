@@ -5,7 +5,7 @@
             <ion-toolbar>
                 <ion-title>Login</ion-title>
                 <ion-buttons slot="end">
-                    <ion-button @click="dismissLoginModal()">
+                    <ion-button @click="dismissLoginModal(false)">
                         <ion-icon size="large" :icon="closeOutline" />
                     </ion-button>
                 </ion-buttons>
@@ -77,7 +77,7 @@ function submitForm() {
     if (!v$.value.$error) {
         userStore.login(state.value.username, state.value.password).then((response) => {
             if (response == true) {
-                dismissLoginModal();
+                dismissLoginModal(true);
                 showToast("Welcome " + userStore.userRef.username, "success");
             } else {
                 showToast("Authentication error", "danger");
@@ -92,8 +92,8 @@ function clearModal() {
     v$.value.$reset();
 }
 
-function dismissLoginModal() {
-    modalController.dismiss();
+function dismissLoginModal(success: boolean) {
+    modalController.dismiss(success);
     clearModal();
 }
 </script>

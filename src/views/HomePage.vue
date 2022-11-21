@@ -1,6 +1,6 @@
 <template>
     <ion-page>
-        <ion-header class="ion-no-border">
+        <ion-header class="ion-no-border ion-no-margin">
             <TheJourneysHeader class="toolbar" />
             <div class="banner-content center">
                 <div id="info">
@@ -44,7 +44,16 @@
         </ion-header>
         <ion-content class="main-body">
             <div class="center w1000">
-                <div v-if="currentTab == tabs.exploring" class="body">
+                <div
+                    v-if="currentTab == tabs.exploring"
+                    class="body"
+                    v-motion
+                    :initial="{
+                        opacity: 0
+                    }"
+                    :enter="{
+                        opacity: 1
+                    }">
                     <p class="w400">
                         Plan places you want to visit be it local, cantonal or national, plan as you go and visualize
                         your trip. Choose from many of our Points Of Interest, shared by other members Save your journey
@@ -55,7 +64,16 @@
                         <ion-img src="assets/images/features/featureImg1.png" />
                     </span>
                 </div>
-                <div v-else-if="currentTab == tabs.sharing" class="body">
+                <div
+                    v-else-if="currentTab == tabs.sharing"
+                    class="body"
+                    v-motion
+                    :initial="{
+                        opacity: 0
+                    }"
+                    :enter="{
+                        opacity: 1
+                    }">
                     <p class="w400">
                         Have you been to a place that no one else has seen ? Share them on our site and show the world
                         your experiences. Create an account to add your new points of interest Look for the place you
@@ -65,7 +83,16 @@
                         <ion-img src="assets/images/features/featureImg2.png" />
                     </span>
                 </div>
-                <div v-if="currentTab == tabs.journaling" class="body">
+                <div
+                    v-if="currentTab == tabs.journaling"
+                    class="body"
+                    v-motion
+                    :initial="{
+                        opacity: 0
+                    }"
+                    :enter="{
+                        opacity: 1
+                    }">
                     <p class="w400">
                         Complete your dashboard with various adventures, save your memories to keep them forever. Thanks
                         to our user friendly dashboard you will be able to edit your cards on the go or after you have
@@ -152,8 +179,12 @@ async function toggle(tab: tabs) {
 </script>
 
 <style scoped lang="less">
+ion-content {
+    --ion-background-color: #eaf0eb;
+    --padding-top: 64px;
+}
 .toolbar {
-    position: absolute;
+    //position: absolute;
 }
 .banner-img {
     width: 100%;
@@ -187,7 +218,7 @@ async function toggle(tab: tabs) {
     height: 100%;
 }
 ion-header {
-    height: 600px;
+    height: 540;
 }
 .title {
     font-size: 5em;
