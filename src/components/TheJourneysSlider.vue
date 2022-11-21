@@ -79,9 +79,8 @@ function updateView() {
 
 .journey-card {
     max-width: 350px;
-    min-height: 400px;
     max-height: 450px;
-
+    min-height: 450px;
     height: 90%;
     width: 100%;
 }

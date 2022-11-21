@@ -15,10 +15,12 @@
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
-            <ion-card-subtitle>Subtitle</ion-card-subtitle>
         </ion-card-header>
-        <ion-img src="/assets/featureImg3.png"></ion-img>
-
+        <ion-img v-if="props.journey.thumbnail" class="thumbnail" :src="props.journey.thumbnail"></ion-img>
+        <ion-img
+            v-else
+            class="thumbnail"
+            src="https://firebasestorage.googleapis.com/v0/b/journeys-v2/o/images%2Fplaceholder.png?alt=media"></ion-img>
         <section class="content ion-margin">
             <ion-text>
                 {{ props.journey.description }}
@@ -96,12 +98,16 @@ async function goToJourney(id: string) {
     emit("headerClicked", id);
 }
 </script>
-<style scoped>
+<style scoped lang="less">
+.thumbnail {
+    height: 200px;
+}
 ion-card-header {
     cursor: pointer;
 }
 ion-card {
-    max-height: 100%;
+    max-height: 400px;
+    min-height: 400px;
     display: flex;
     flex-direction: column;
 }

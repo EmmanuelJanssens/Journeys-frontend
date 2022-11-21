@@ -142,7 +142,6 @@ import mapboxgl, { MapMouseEvent } from "mapbox-gl";
 import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
 
 import MapJourneySidebar from "components/TheJourneyEditSidebar.vue";
-import SaveJourneyModal from "components/Modals/SaveJourneyModal.vue";
 import LoginModal from "components/Modals/LoginModal.vue";
 import RegisterModal from "components/Modals/RegisterModal.vue";
 import { getMidPoint, openModal, getRadius } from "utils/utils";
@@ -362,17 +361,75 @@ async function openJourneySaveModal() {
         });
         (await alert).present();
     } else {
-        const modal = await modalController.create({
-            component: SaveJourneyModal,
-            componentProps: { mode: mode.value }
+        const mainAlert = await alertController.create({
+            header: "Give your journey a name",
+            inputs: [
+                {
+                    label: "Title",
+                    name: "journeyTitle",
+                    id: "journeyTitle",
+                    placeholder: "title"
+                }
+            ],
+            buttons: [
+                {
+                    text: "Save",
+                    handler: async (data) => {
+                        const title = data.journeyTitle as string;
+                        if (
+                            journeyStore.editJourney.journey?.start?.address!.length! <= 0 ||
+                            journeyStore.editJourney.journey?.end?.address!.length! <= 0 ||
+                            title.length <= 0
+                        ) {
+                            let alert = await alertController.create({
+                                header: "Error",
+                                message: "Your journey is not valid, Some values may be missing",
+                                buttons: ["Dismiss"]
+                            });
+                            alert.present();
+                        } else {
+                            var journeyId: string;
+                            if (mode.value == "editJourney") {
+                                journeyStore.editJourney.journey!.title = title;
+                                journeyId = (await journeyStore.updateJourney("deep"))?.id!;
+                            } else {
+                                journeyId = (await journeyStore.saveJourney(title))?.id!;
+                            }
+
+                            const alert = await alertController.create({
+                                header: "Notification",
+                                message: "Your journey was saved successfuly",
+                                backdropDismiss: false,
+                                buttons: [
+                                    {
+                                        text: "View",
+                                        role: "view",
+                                        handler: () => {
+                                            showExperiences(journeyId);
+                                        }
+                                    },
+                                    {
+                                        text: "Stay",
+                                        role: "stay",
+                                        handler: () => {
+                                            popoverController.dismiss(null, "stay");
+                                        }
+                                    }
+                                ]
+                            });
+                            alert.present();
+                        }
+                    }
+                },
+                {
+                    text: "Cancel",
+                    handler: () => {
+                        popoverController.dismiss();
+                    }
+                }
+            ]
         });
-        modal.present();
-
-        const result = await modal.onDidDismiss();
-
-        if (result.role == "view") {
-            showExperiences(result.data);
-        }
+        await mainAlert.present();
     }
 }
 </script>

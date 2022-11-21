@@ -93,7 +93,7 @@ export const useUserStore = defineStore("user", () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            myJourneys.value = response.data.journeys as JourneyDto[];
+            myJourneys.value = response.data as JourneyDto[];
             return true;
         } catch (e) {
             return false;
@@ -163,7 +163,6 @@ export const useUserStore = defineStore("user", () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            console.log(response.data);
             if (!response.data) {
                 return false;
             }

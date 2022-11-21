@@ -61,6 +61,7 @@ export type JourneyDto = {
     start?: AddressDto;
     end?: AddressDto;
     creator?: UserDto;
+    thumbnail?: string;
     experienceCount?: number;
     experiencesAggregate?: { count: number };
     experiencesConnection?: {

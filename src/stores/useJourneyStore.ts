@@ -65,6 +65,14 @@ export const useJourneyStore = defineStore("journey", () => {
                     }
                 });
                 editJourney.value!.deleted!.poi_ids = filterDeleted();
+            } else {
+                editJourney.value!.connected = [];
+                editJourney.value!.deleted = { poi_ids: [] };
+
+                editJourney.value!.updated = [];
+                editJourney.value!.journey?.experiencesConnection?.edges?.forEach((exp) => {
+                    editJourney.value!.updated?.push(exp);
+                });
             }
 
             const result = await axios.put("/api/journey/", editJourney.value, {
