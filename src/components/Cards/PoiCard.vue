@@ -17,7 +17,7 @@
             thumbnail="https://firebasestorage.googleapis.com/v0/b/journeys-v2/o/images%2Fplaceholder.png?alt=media" />
         <ion-item>
             <ion-button @click="addToJourney(props.poi)" fill="clear" slot="end" size="default">
-                <ion-icon src="src/assets/icon/add-outline.svg"> </ion-icon>
+                <ion-icon :icon="addOutline"> </ion-icon>
             </ion-button>
         </ion-item>
     </ion-content>
@@ -50,6 +50,7 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto, PoiDto } from "types/dtos";
 import { usePoiStore } from "stores/usePoiStore";
 import ExperienceSlide from "components/ExperienceSlide.vue";
+import { addOutline } from "ionicons/icons";
 
 const props = defineProps<{
     poi: PoiDto;
@@ -77,7 +78,7 @@ function addToJourney(poi: PoiDto) {
     if (poi.thumbnail != undefined) delete poi.thumbnail;
     const experience: ExperienceDto = {
         title: "",
-        date: new Date(),
+        date: new Date().toISOString(),
         description: "",
         images: [],
         order: useJourney.editJourney.journey!.experiencesConnection?.edges?.length!,
@@ -90,7 +91,7 @@ onMounted(async () => {
     await axios.get(`/api/poi/${props.poi.id}/experiences`);
 });
 
-function setTitle(e) {
+function setTitle(e: any) {
     title.value = poiDetail.value?.journeysConnection.edges[e.activeIndex].title!;
     //title.value = str;
 }

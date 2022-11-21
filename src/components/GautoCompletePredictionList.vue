@@ -26,7 +26,7 @@
             </ion-list>
             <ion-item>
                 <ion-label>
-                    <ion-icon src="/src/assets/icon/logo-google.svg"></ion-icon>
+                    <ion-icon :icon="logoGoogle"></ion-icon>
                     <ion-text class="google" color="medium"> Powered by google</ion-text>
                 </ion-label>
             </ion-item>
@@ -48,6 +48,7 @@ import {
     SearchbarCustomEvent
 } from "@ionic/vue";
 import { onMounted, ref } from "vue";
+import { logoGoogle } from "ionicons/icons";
 
 const predictions = ref<google.maps.places.AutocompletePrediction[]>([]);
 const props = defineProps<{

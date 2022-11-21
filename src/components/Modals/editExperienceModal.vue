@@ -58,12 +58,12 @@
                                     </ion-thumbnail>
                                     <ion-icon
                                         slot="icon-only"
-                                        src="src/assets/icon/close-outline.svg"
+                                        :icon="closeOutline"
                                         @click="removeImage(image.url)"></ion-icon>
                                 </div>
 
                                 <ion-button class="add-image" @click="selectImage" slot="icon-only">
-                                    <ion-icon src="src/assets/icon/add-outline.svg"> </ion-icon>
+                                    <ion-icon size="large" :icon="addOutline"> </ion-icon>
                                 </ion-button>
                             </div> </ion-item
                     ></ion-col>
@@ -115,6 +115,7 @@ import { FilePicker } from "@capawesome/capacitor-file-picker";
 import { storageRef } from "google/storage";
 import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
 import { showToast } from "utils/utils";
+import { addOutline, closeOutline } from "ionicons/icons";
 
 const description = ref();
 const title = ref();

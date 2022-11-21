@@ -6,7 +6,7 @@
                 <ion-title>Login</ion-title>
                 <ion-buttons slot="end">
                     <ion-button @click="dismissLoginModal()">
-                        <ion-icon size="large" src="/src/assets/icon/close-outline.svg" />
+                        <ion-icon size="large" :icon="closeOutline" />
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
@@ -57,6 +57,7 @@ import { required } from "@vuelidate/validators";
 import { ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
 import { showToast } from "utils/utils";
+import { closeOutline } from "ionicons/icons";
 
 const state = ref({
     username: "",

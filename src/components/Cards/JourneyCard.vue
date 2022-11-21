@@ -5,19 +5,19 @@
                 <ion-card-title>{{ props.journey.title }}</ion-card-title>
                 <ion-buttons slot="end">
                     <ion-button @click="goToJourney(props.journey.id!)">
-                        <ion-icon src="/src/assets/icon/eye-outline.svg" slot="icon-only"></ion-icon>
+                        <ion-icon :icon="eyeOutline" slot="icon-only"></ion-icon>
                     </ion-button>
                     <ion-button @click="onEdit">
-                        <ion-icon src="/src/assets/icon/pencil-outline.svg" slot="icon-only"></ion-icon>
+                        <ion-icon :icon="pencilOutline" slot="icon-only"></ion-icon>
                     </ion-button>
                     <ion-button @click="onDelete">
-                        <ion-icon src="/src/assets/icon/trash-bin-outline.svg" slot="icon-only"></ion-icon>
+                        <ion-icon :icon="trashBinOutline" slot="icon-only"></ion-icon>
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
             <ion-card-subtitle>Subtitle</ion-card-subtitle>
         </ion-card-header>
-        <ion-img src="/src/assets/featureImg3.png"></ion-img>
+        <ion-img src="/assets/featureImg3.png"></ion-img>
 
         <section class="content ion-margin">
             <ion-text>
@@ -44,6 +44,7 @@ import {
     alertController
 } from "@ionic/vue";
 import EditJourneyModal from "components/Modals/EditJourneyModal.vue";
+import { eyeOutline, pencilOutline, trashBinOutline } from "ionicons/icons";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
 import { JourneyDto } from "types/dtos";

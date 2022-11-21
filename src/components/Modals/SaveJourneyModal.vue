@@ -5,7 +5,7 @@
                 <ion-title> Save your journey </ion-title>
                 <ion-buttons slot="end">
                     <ion-button @click="dismissModal">
-                        <ion-icon size="large" src="/src/assets/icon/close-outline.svg"></ion-icon>
+                        <ion-icon size="large" :icon="closeOutline"></ion-icon>
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
@@ -48,6 +48,7 @@ import {
 } from "@ionic/vue";
 import { onMounted, ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
+import { closeOutline } from "ionicons/icons";
 const title = ref();
 const journeyStore = useJourneyStore();
 const userStore = useUserStore();

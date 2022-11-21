@@ -20,21 +20,19 @@
                         <ion-content>
                             <ion-fab v-if="mode == modes.logbook" slot="fixed" vertical="top" horizontal="end">
                                 <ion-fab-button @click="openJourneyCreationModal">
-                                    <ion-icon size="large" src="/src/assets/icon/add-outline.svg"></ion-icon>
+                                    <ion-icon size="large" :icon="addOutline"></ion-icon>
                                 </ion-fab-button>
                             </ion-fab>
                             <ion-fab v-else-if="mode == modes.viewJourney" slot="fixed" vertical="top" horizontal="end">
                                 <ion-fab-button>
-                                    <ion-icon size="large" src="/src/assets/icon/grid-outline.svg"></ion-icon>
+                                    <ion-icon size="large" :icon="gridOutline"></ion-icon>
                                 </ion-fab-button>
                                 <ion-fab-list>
                                     <ion-fab-button @click="editJourney">
-                                        <ion-icon size="default" src="/src/assets/icon/pencil-outline.svg"></ion-icon>
+                                        <ion-icon size="default" :icon="pencilOutline"></ion-icon>
                                     </ion-fab-button>
                                     <ion-fab-button @click="fetchJourneys">
-                                        <ion-icon
-                                            size="default"
-                                            src="/src/assets/icon/return-up-back-outline.svg"></ion-icon>
+                                        <ion-icon size="default" :icon="returnUpBackOutline"></ion-icon>
                                     </ion-fab-button>
                                 </ion-fab-list>
                             </ion-fab>
@@ -44,16 +42,14 @@
                                 vertical="top"
                                 horizontal="end">
                                 <ion-fab-button>
-                                    <ion-icon size="large" src="/src/assets/icon/grid-outline.svg"></ion-icon>
+                                    <ion-icon size="large" :icon="gridOutline"></ion-icon>
                                 </ion-fab-button>
                                 <ion-fab-list>
                                     <ion-fab-button @click="openJourneySaveModal">
-                                        <ion-icon size="default" src="/src/assets/icon/save-outline.svg"></ion-icon>
+                                        <ion-icon size="default" :icon="saveOutline"></ion-icon>
                                     </ion-fab-button>
                                     <ion-fab-button @click="fetchJourneys">
-                                        <ion-icon
-                                            size="default"
-                                            src="/src/assets/icon/return-up-back-outline.svg"></ion-icon>
+                                        <ion-icon size="default" :icon="returnUpBackOutline"></ion-icon>
                                     </ion-fab-button>
                                 </ion-fab-list>
                             </ion-fab>
@@ -113,6 +109,15 @@ import {
     IonHeader,
     alertController
 } from "@ionic/vue";
+
+import {
+    addOutline,
+    gridOutline,
+    pencilOutline,
+    trashBinOutline,
+    returnUpBackOutline,
+    saveOutline
+} from "ionicons/icons";
 // Import Swiper and modules
 // Import Swiper styles
 import "swiper/css";

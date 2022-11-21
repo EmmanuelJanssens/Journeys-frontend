@@ -6,10 +6,10 @@
                 <ion-card-subtitle>{{ props.experience.title }}</ion-card-subtitle>
                 <ion-buttons slot="end">
                     <ion-button @click="onEdit">
-                        <ion-icon src="/src/assets/icon/pencil-outline.svg" slot="icon-only"></ion-icon>
+                        <ion-icon :icon="pencilOutline" slot="icon-only"></ion-icon>
                     </ion-button>
                     <ion-button @click="onDelete">
-                        <ion-icon src="/src/assets/icon/trash-bin-outline.svg" slot="icon-only"></ion-icon>
+                        <ion-icon :icon="trashBinOutline" slot="icon-only"></ion-icon>
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
@@ -67,6 +67,7 @@ import EditExperienceModal from "components/Modals/EditExperienceModal.vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto, PoiDto } from "types/dtos";
 import { showToast } from "utils/utils";
+import { pencilOutline, trashBinOutline } from "ionicons/icons";
 
 const props = defineProps<{
     experience: ExperienceDto;

@@ -1,5 +1,5 @@
 <template>
-    <ion-toolbar>
+    <ion-toolbar color="dark">
         <ion-buttons slot="end">
             <ion-button router-link="/home"> HOME </ion-button>
             <ion-button router-link="/about"> ABOUT </ion-button>
@@ -41,6 +41,6 @@ async function openModal(component: any) {
 <style scoped>
 ion-toolbar {
     --background: black;
-    --opacity: 90%;
+    --opacity: 100%;
 }
 </style>

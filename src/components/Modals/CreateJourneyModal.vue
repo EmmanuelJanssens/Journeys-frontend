@@ -5,7 +5,7 @@
             <ion-title color="primary">Create new journey</ion-title>
             <ion-buttons slot="end">
                 <ion-button @click="modalController.dismiss()">
-                    <ion-icon size="large" src="/src/assets/icon/close-outline.svg"></ion-icon>
+                    <ion-icon size="large" :icon="closeOutline"></ion-icon>
                 </ion-button>
             </ion-buttons>
         </ion-toolbar>
@@ -65,6 +65,7 @@ import { LngLat } from "maplibre-gl";
 import GautoCompletePredictionList from "components/GautoCompletePredictionList.vue";
 import { getGeocodedData } from "google/googleGeocoder";
 import { modalController } from "@ionic/core";
+import { closeOutline } from "ionicons/icons";
 
 const startData = ref({
     locationText: "",

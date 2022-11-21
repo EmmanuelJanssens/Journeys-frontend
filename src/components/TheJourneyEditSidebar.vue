@@ -2,12 +2,12 @@
 <template>
     <ion-item-sliding :disabled="props.mode == 'view'">
         <ion-item lines="full">
-            <ion-icon slot="start" size="large" src="/src/assets/icon/pin-svgrepo-com.svg"></ion-icon>
+            <ion-icon slot="start" size="large" :icon="locationOutline"></ion-icon>
             <ion-label>{{ props.start?.address }}</ion-label>
         </ion-item>
         <ion-item-options>
             <ion-item-option color="tertiary">
-                <ion-icon size="large" src="/src/assets/icon/pencil-outline.svg"></ion-icon>
+                <ion-icon size="large" :icon="pencilOutline"></ion-icon>
             </ion-item-option>
         </ion-item-options>
     </ion-item-sliding>
@@ -18,25 +18,25 @@
             v-bind:key="experience.node.id"
             :disabled="props.mode == 'view'">
             <ion-item>
-                <ion-icon slot="start" size="large" src="/src/assets/icon/trail-sign-outline.svg"></ion-icon>
-                <ion-label>{{ experience.node.name }}</ion-label>
+                <ion-icon slot="start" size="large" :icon="trailSignOutline"></ion-icon>
+                <ion-label>{{ (experience.node as PoiDto).name }}</ion-label>
                 <ion-reorder v-if="props.mode == 'edit'" slot="end"></ion-reorder>
             </ion-item>
             <ion-item-options>
                 <ion-item-option color="danger" @click="remove(experience.node.id!)">
-                    <ion-icon size="large" src="/src/assets/icon/trash-bin-outline.svg"></ion-icon>
+                    <ion-icon size="large" :icon="trashBinOutline"></ion-icon>
                 </ion-item-option>
             </ion-item-options>
         </ion-item-sliding>
     </IonReorderGroup>
     <ion-item-sliding :disabled="props.mode == 'view'">
         <ion-item lines="full">
-            <ion-icon slot="start" size="large" src="/src/assets/icon/pin-svgrepo-com.svg"></ion-icon>
+            <ion-icon slot="start" size="large" :icon="locationOutline"></ion-icon>
             <ion-label>{{ props.end?.address }}</ion-label>
         </ion-item>
         <ion-item-options>
             <ion-item-option color="tertiary">
-                <ion-icon size="large" src="/src/assets/icon/pencil-outline.svg"></ion-icon>
+                <ion-icon size="large" :icon="pencilOutline"></ion-icon>
             </ion-item-option>
         </ion-item-options>
     </ion-item-sliding>
@@ -53,9 +53,10 @@ import {
     IonReorder,
     IonReorderGroup
 } from "@ionic/vue";
+import { locationOutline, pencilOutline, trailSignOutline, trashBinOutline } from "ionicons/icons";
 
 import { useJourneyStore } from "stores/useJourneyStore";
-import { AddressDto, ExperienceDto } from "types/dtos";
+import { AddressDto, ExperienceDto, PoiDto } from "types/dtos";
 
 const props = defineProps<{
     start: AddressDto;

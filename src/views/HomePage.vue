@@ -6,8 +6,8 @@
                 <div id="info">
                     <p></p>
                     <span>
-                        <h1 class="title">JOURNEYS</h1>
-                        <p>IT'S NOT ALWAYS ABOUT WHERE YOU GO</p>
+                        <ion-text color="light"><h1 class="title">JOURNEYS</h1></ion-text>
+                        <ion-text color="light"><p>IT'S NOT ALWAYS ABOUT WHERE YOU GO</p></ion-text>
                     </span>
                     <ion-button color="tertiary" router-link="/logbook">START YOUR ADVENTURE</ion-button>
                 </div>
@@ -26,13 +26,19 @@
                     </div>
                 </div>
             </div>
-            <swiper class="image-carrousel">
+            <swiper
+                class="image-carrousel"
+                :modules="modules"
+                :autoplay="{
+                    delay: 2500,
+                    disableOnInteraction: true
+                }">
                 <span class="overlay"></span>
                 <swiper-slide>
-                    <img src="/src/assets/mountains.jpg" class="banner-img" />
+                    <ion-img src="assets/images/banner/mountains.jpg" class="banner-img" />
                 </swiper-slide>
                 <swiper-slide>
-                    <img src="/src/assets/mountains2.jpg" class="banner-img" />
+                    <ion-img src="assets/images/banner/mountains2.jpg" class="banner-img" />
                 </swiper-slide>
             </swiper>
         </ion-header>
@@ -46,7 +52,7 @@
                         the community
                     </p>
                     <span class="w400">
-                        <ion-img src="/src/assets/map_carte.png"></ion-img>
+                        <ion-img src="assets/images/features/featureImg1.png" />
                     </span>
                 </div>
                 <div v-else-if="currentTab == tabs.sharing" class="body">
@@ -56,7 +62,7 @@
                         want to add on our interactive map Upload your pictures, and write your experience
                     </p>
                     <span class="w400">
-                        <ion-img src="/src/assets/train.jpg"></ion-img>
+                        <ion-img src="assets/images/features/featureImg2.png" />
                     </span>
                 </div>
                 <div v-if="currentTab == tabs.journaling" class="body">
@@ -66,7 +72,7 @@
                         completed your trip.
                     </p>
                     <span class="w400">
-                        <ion-img src="/src/assets/featureImg3.png"></ion-img>
+                        <ion-img src="assets/images/features/featureImg3.png" />
                     </span>
                 </div>
             </div>
@@ -75,12 +81,11 @@
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonImg, IonPage, IonFooter, IonButton, IonHeader } from "@ionic/vue";
+import { IonText, IonContent, IonPage, IonImg, IonButton, IonHeader } from "@ionic/vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
+import { Autoplay } from "swiper";
 
 import "swiper/less";
-import "swiper/less/navigation";
-import "swiper/less/pagination";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
 import { ref, watch } from "vue";
 
@@ -94,6 +99,8 @@ const currentTab = ref<tabs>(tabs.exploring);
 const exploring = ref();
 const sharing = ref();
 const journaling = ref();
+
+const modules = ref([Autoplay]);
 
 function setActive(element: any) {
     (element.$el.classList as DOMTokenList).add("ion-color-tertiary");

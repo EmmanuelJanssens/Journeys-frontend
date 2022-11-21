@@ -5,7 +5,7 @@
                 <ion-title>Register</ion-title>
                 <ion-buttons slot="end">
                     <ion-button @click="dismissRegisterModal()">
-                        <ion-icon size="large" src="/src/assets/icon/close-outline.svg" />
+                        <ion-icon size="large" :icon="closeOutline" />
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
@@ -109,6 +109,7 @@ import { required, minLength, email, sameAs } from "@vuelidate/validators";
 import { computed, ref } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
+import { closeOutline } from "ionicons/icons";
 
 const state = ref({
     username: "",

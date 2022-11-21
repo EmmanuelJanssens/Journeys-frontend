@@ -12,7 +12,7 @@
             </ion-list>
             <ion-item @click="addPoiModal">
                 <ion-label>
-                    <ion-icon src="/src/assets/icon/help-outline.svg"></ion-icon>
+                    <ion-icon :icon="helpOutline"></ion-icon>
                     <ion-text class="google" color="medium"> Not finding what you're looking for?</ion-text>
                 </ion-label>
             </ion-item>
@@ -30,6 +30,7 @@ import {
     IonText,
     IonContent
 } from "@ionic/vue";
+import { helpOutline } from "ionicons/icons";
 
 import { usePoiStore } from "stores/usePoiStore";
 import { PoiDto } from "types/dtos";
