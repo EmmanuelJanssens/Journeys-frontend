@@ -8,17 +8,17 @@ import { getStorage, ref } from "firebase/storage";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyDJgfsYVyKqz9zgsa8hVZmYeVx6xJpYpGY",
-    authDomain: "my-journeys-361916.firebaseapp.com",
-    projectId: "my-journeys-361916",
-    storageBucket: "my-journeys-361916.appspot.com",
-    messagingSenderId: "188333725607",
-    appId: "1:188333725607:web:c7fc338e84e76ebf554882",
-    measurementId: "G-SXM7DZNGG6"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGE_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_BUCKET
 };
 
 // Initialize Firebase
 const fbapp = initializeApp(firebaseConfig);
-const storage = getStorage(fbapp, "gs://journeys-v2");
+const storage = getStorage(fbapp, import.meta.env.VITE_FIREBASE_BUCKET);
 export const storageRef = ref(storage, "images/");
 export const storageApp = fbapp;
