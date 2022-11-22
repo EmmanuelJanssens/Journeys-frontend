@@ -59,7 +59,6 @@ var map: mapboxgl.Map;
 onMounted(async () => {
     await JourneyMapCapacitor.loadMap(
         "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg",
-        import.meta.env.VITE_MAPTILER_API_KEY,
         "Map"
     );
     map = await JourneyMapCapacitor.getMap()!;

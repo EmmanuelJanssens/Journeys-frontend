@@ -7,10 +7,12 @@
                     <p></p>
                     <span>
                         <ion-text
-                            ><h1 class="title">{{ userStore.userRef.username?.toLocaleUpperCase() }}</h1></ion-text
+                            ><h1 class="title white">
+                                {{ userStore.userRef.username?.toLocaleUpperCase() }}
+                            </h1></ion-text
                         >
                         <ion-text
-                            ><p>{{ userStore.userRef.citation }}</p></ion-text
+                            ><p class="white">{{ userStore.userRef.citation }}</p></ion-text
                         >
                     </span>
                     <ion-button color="tertiary" @click="openEdit">Edit your profile</ion-button>
@@ -342,9 +344,13 @@ onIonViewDidEnter(async () => {
 
 <style scoped lang="less">
 ion-content {
-    --ion-background-color: #eaf0eb;
     --padding-top: 64px;
 }
+
+.white {
+    color: white;
+}
+
 .toolbar {
     //position: absolute;
 }
