@@ -10,7 +10,7 @@
                     </ion-label>
                 </ion-item>
             </ion-list>
-            <ion-item @click="addPoiModal">
+            <ion-item button @click="addPoiModal">
                 <ion-label>
                     <ion-icon :icon="helpOutline"></ion-icon>
                     <ion-text class="google" color="medium"> Not finding what you're looking for?</ion-text>
@@ -20,16 +20,9 @@
     </div>
 </template>
 <script lang="ts" setup>
-import {
-    IonSearchbar,
-    IonList,
-    IonLabel,
-    IonItem,
-    SearchbarCustomEvent,
-    IonIcon,
-    IonText,
-    IonContent
-} from "@ionic/vue";
+import { async } from "@firebase/util";
+import { alertController, modalController } from "@ionic/core";
+import { IonSearchbar, IonList, IonLabel, IonItem, SearchbarCustomEvent, IonIcon, IonText } from "@ionic/vue";
 import { helpOutline } from "ionicons/icons";
 
 import { usePoiStore } from "stores/usePoiStore";
@@ -47,7 +40,7 @@ const emit = defineEmits<{
 function filterPois(event: SearchbarCustomEvent) {
     if (event.detail.value?.length! > 3) {
         filtered.value = poiStore.poisBetween?.filter((el) =>
-            el.name.toLocaleLowerCase().includes(event.detail.value!.toLocaleLowerCase())
+            el.name!.toLocaleLowerCase().includes(event.detail.value!.toLocaleLowerCase())
         );
     } else {
         filtered.value = [];
@@ -60,7 +53,23 @@ function emitClick(poi: PoiDto) {
     emit("poiItemClicked", poi);
 }
 
-function addPoiModal() {}
+async function addPoiModal() {
+    const alert = await alertController.create({
+        header: "Right click on the map to add a Poi",
+        buttons: [
+            "cancel",
+            {
+                text: "Ok",
+                handler: async () => {
+                    search.value = "";
+                    filtered.value = [];
+                    alertController.dismiss(null, "ok");
+                }
+            }
+        ]
+    });
+    await alert.present();
+}
 </script>
 <style lang="less" scoped>
 .search-wrapper {

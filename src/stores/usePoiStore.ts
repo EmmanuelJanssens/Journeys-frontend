@@ -31,8 +31,24 @@ export const usePoiStore = defineStore("poi", () => {
             await axios.get("api/poi/" + poi.id)
         ).data;
     }
+
+    async function addPoi(poi: PoiDto) {
+        try {
+            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const result = await axios.post("api/poi/", poi, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            poisBetween.value?.push(result.data);
+            return result.data as PoiDto;
+        } catch (e) {
+            return undefined;
+        }
+    }
     function clear() {
         poisBetween.value = [];
     }
-    return { searchBetween, getThumbnail, clear, poisBetween, getPoiExperiences };
+    return { searchBetween, getThumbnail, clear, poisBetween, getPoiExperiences, addPoi };
 });

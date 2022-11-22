@@ -2,7 +2,7 @@
 <template>
     <ion-header>
         <ion-toolbar>
-            <ion-title color="primary">Create new journey</ion-title>
+            <ion-title>Create new journey</ion-title>
             <ion-buttons slot="end">
                 <ion-button @click="modalController.dismiss()">
                     <ion-icon size="large" :icon="closeOutline"></ion-icon>
@@ -38,7 +38,7 @@
         <ion-toolbar>
             <ion-buttons slot="end">
                 <ion-button @click="modalController.dismiss()" color="secondary"> Cancel </ion-button>
-                <ion-button @click="gotoJourneyMap" color="primary"> Create </ion-button>
+                <ion-button @click="gotoJourneyMap"> Create </ion-button>
             </ion-buttons>
         </ion-toolbar>
     </ion-footer>

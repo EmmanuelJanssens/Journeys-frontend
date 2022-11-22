@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <ion-item button @click="popoverController.dismiss('profile')">
+    <ion-item button router-link="profile" @click="popoverController.dismiss('profile')">
         <ion-label>Profile</ion-label>
         <ion-icon :icon="personOutline" slot="start"></ion-icon>
     </ion-item>
@@ -12,9 +12,4 @@
 <script lang="ts" setup>
 import { IonIcon, IonItem, IonLabel, popoverController } from "@ionic/vue";
 import { exitOutline, personOutline } from "ionicons/icons";
-
-const emits = defineEmits<{
-    (e: "logout"): void;
-    (e: "profile"): void;
-}>();
 </script>

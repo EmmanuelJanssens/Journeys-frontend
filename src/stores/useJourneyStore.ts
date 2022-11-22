@@ -57,7 +57,7 @@ export const useJourneyStore = defineStore("journey", () => {
                 editJourney.value!.updated = [];
                 editJourney.value!.journey?.experiencesConnection?.edges?.forEach((exp) => {
                     const node = exp.node as PoiDto;
-                    if (!findExp(node.id, viewJourney.value!.experiencesConnection!.edges!)) {
+                    if (!findExp(node.id!, viewJourney.value!.experiencesConnection!.edges!)) {
                         editJourney.value!.connected?.push(exp);
                     } else {
                         //TODO add only differences
@@ -66,9 +66,6 @@ export const useJourneyStore = defineStore("journey", () => {
                 });
                 editJourney.value!.deleted!.poi_ids = filterDeleted();
             } else {
-                editJourney.value!.connected = [];
-                editJourney.value!.deleted = { poi_ids: [] };
-
                 editJourney.value!.updated = [];
                 editJourney.value!.journey?.experiencesConnection?.edges?.forEach((exp) => {
                     editJourney.value!.updated?.push(exp);
@@ -166,8 +163,8 @@ export const useJourneyStore = defineStore("journey", () => {
         const deleted: string[] = [];
         viewJourney.value!.experiencesConnection?.edges?.forEach((exp) => {
             const node = exp.node as PoiDto;
-            if (!findExp(node.id, editJourney.value!.journey?.experiencesConnection?.edges!)) {
-                deleted.push(node.id);
+            if (!findExp(node.id!, editJourney.value!.journey?.experiencesConnection?.edges!)) {
+                deleted.push(node.id!);
             }
         });
         return deleted;

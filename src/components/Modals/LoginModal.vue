@@ -30,7 +30,10 @@
         </section>
         <ion-footer>
             <ion-toolbar>
-                <ion-button slot="end" @click="submitForm()" color="primary">login</ion-button>
+                <ion-buttons slot="end">
+                    <ion-button @click="modalController.dismiss()" color="secondary">cancel</ion-button>
+                    <ion-button @click="submitForm()">login</ion-button>
+                </ion-buttons>
             </ion-toolbar>
         </ion-footer>
     </ion-page>

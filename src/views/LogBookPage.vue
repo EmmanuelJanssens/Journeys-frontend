@@ -45,6 +45,9 @@
                                     <ion-icon size="large" :icon="gridOutline"></ion-icon>
                                 </ion-fab-button>
                                 <ion-fab-list>
+                                    <ion-fab-button @click="openAddPoiAlert">
+                                        <ion-icon size="default" :icon="addOutline"></ion-icon>
+                                    </ion-fab-button>
                                     <ion-fab-button @click="openJourneySaveModal">
                                         <ion-icon size="default" :icon="saveOutline"></ion-icon>
                                     </ion-fab-button>
@@ -150,6 +153,7 @@ import TheJourneysSlider from "components/TheJourneysSlider.vue";
 import TheJourneyExperienceList from "components/TheJourneyExperienceList.vue";
 import ThePoiSearchbar from "components/ThePoiSearchbar.vue";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
+import { dismiss } from "@ionic/core/dist/types/utils/overlays";
 
 const modes = {
     logbook: "logbook",
@@ -187,10 +191,13 @@ onIonViewDidEnter(() => {
     }
 });
 
+function SwitchMode(newMode: string) {
+    mode.value = newMode;
+}
 async function panTo(poi: PoiDto) {
     const map = await JourneyMapCapacitor.getMap();
     map?.flyTo({
-        center: [poi.location.longitude, poi.location.latitude],
+        center: [poi.location!.longitude, poi.location!.latitude],
         zoom: 20
     });
 }
@@ -334,7 +341,25 @@ async function openJourneyCreationModal() {
         fetchPois(result.data);
     }
 }
-
+async function openAddPoiAlert() {
+    const alert = await alertController.create({
+        header: "Right click on the map to add a Poi",
+        buttons: [
+            "cancel",
+            {
+                text: "Ok",
+                handler: async () => {
+                    alertController.dismiss(null, "ok");
+                }
+            }
+        ]
+    });
+    await alert.present();
+    const { role } = await alert.onDidDismiss();
+    if (role != "ok") {
+        SwitchMode(modes.editJourney);
+    }
+}
 async function openJourneySaveModal() {
     if (!userStore.IsLoggedIn()) {
         const alert = await alertController.create({
@@ -368,6 +393,7 @@ async function openJourneySaveModal() {
                     label: "Title",
                     name: "journeyTitle",
                     id: "journeyTitle",
+                    value: journeyStore.editJourney.journey?.title ? journeyStore.editJourney.journey.title : "",
                     placeholder: "title"
                 }
             ],
@@ -395,29 +421,38 @@ async function openJourneySaveModal() {
                             } else {
                                 journeyId = (await journeyStore.saveJourney(title))?.id!;
                             }
-
-                            const alert = await alertController.create({
-                                header: "Notification",
-                                message: "Your journey was saved successfuly",
-                                backdropDismiss: false,
-                                buttons: [
-                                    {
-                                        text: "View",
-                                        role: "view",
-                                        handler: () => {
-                                            showExperiences(journeyId);
+                            if (journeyId) {
+                                const alert = await alertController.create({
+                                    header: "Notification",
+                                    message: "Your journey was saved successfuly",
+                                    backdropDismiss: false,
+                                    buttons: [
+                                        {
+                                            text: "View",
+                                            role: "view",
+                                            handler: () => {
+                                                showExperiences(journeyId);
+                                            }
+                                        },
+                                        {
+                                            text: "Stay",
+                                            role: "stay",
+                                            handler: () => {
+                                                popoverController.dismiss(null, "stay");
+                                            }
                                         }
-                                    },
-                                    {
-                                        text: "Stay",
-                                        role: "stay",
-                                        handler: () => {
-                                            popoverController.dismiss(null, "stay");
-                                        }
-                                    }
-                                ]
-                            });
-                            alert.present();
+                                    ]
+                                });
+                                alert.present();
+                            } else {
+                                const alert = await alertController.create({
+                                    header: "Notification",
+                                    message: "An error occured while saving your journey",
+                                    backdropDismiss: false,
+                                    buttons: ["ok"]
+                                });
+                                alert.present();
+                            }
                         }
                     }
                 },

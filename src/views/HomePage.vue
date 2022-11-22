@@ -6,8 +6,8 @@
                 <div id="info">
                     <p></p>
                     <span>
-                        <ion-text color="light"><h1 class="title">JOURNEYS</h1></ion-text>
-                        <ion-text color="light"><p>IT'S NOT ALWAYS ABOUT WHERE YOU GO</p></ion-text>
+                        <ion-text><h1 class="title">JOURNEYS</h1></ion-text>
+                        <ion-text><p>IT'S NOT ALWAYS ABOUT THE DESTINATION</p></ion-text>
                     </span>
                     <ion-button color="tertiary" router-link="/logbook">START YOUR ADVENTURE</ion-button>
                 </div>

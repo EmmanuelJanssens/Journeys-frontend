@@ -6,7 +6,7 @@
             <ion-card-subtitle>{{ title }}</ion-card-subtitle>
         </ion-card-header>
         <swiper @transitionEnd="setTitle" :slides-per-view="1" v-if="poiDetail?.journeysConnection?.edges?.length! > 0">
-            <swiper-slide v-for="item in poiDetail?.journeysConnection.edges" v-bind:key="item.node.id">
+            <swiper-slide v-for="item in poiDetail?.journeysConnection!.edges" v-bind:key="item.node.id">
                 <ExperienceSlide v-if="item.images.length > 0" :exp="item" :thumbnail="item.images[0]" />
                 <ExperienceSlide v-else :exp="item" :thumbnail="props.poi.thumbnail!" />
             </swiper-slide>
@@ -16,7 +16,7 @@
             :exp="empty"
             thumbnail="https://firebasestorage.googleapis.com/v0/b/journeys-v2/o/images%2Fplaceholder.png?alt=media" />
         <ion-item>
-            <ion-button @click="addToJourney(props.poi)" fill="clear" slot="end" size="default">
+            <ion-button @click="addToJourney" fill="clear" slot="end" size="default">
                 <ion-icon :icon="addOutline"> </ion-icon>
             </ion-button>
         </ion-item>
@@ -74,25 +74,30 @@ onMounted(async () => {
     title.value = poiDetail.value?.journeysConnection?.edges[0]?.title!;
     if (!title.value && !poiDetail.value?.journeysConnection?.edges) title.value = "Be the first";
 });
-function addToJourney(poi: PoiDto) {
-    if (poi.thumbnail != undefined) delete poi.thumbnail;
+function addToJourney() {
+    if (poiDetail.value?.thumbnail != undefined) delete poiDetail.value.thumbnail;
     const experience: ExperienceDto = {
         title: "",
         date: new Date().toISOString(),
         description: "",
         images: [],
         order: useJourney.editJourney.journey!.experiencesConnection?.edges?.length!,
-        node: poi
+        node: {
+            id: poiDetail.value?.id,
+            location: poiDetail.value?.location,
+            name: poiDetail.value?.name,
+            thumbnail: undefined
+        }
     };
     useJourney.addToJourney(experience);
-    popoverController.dismiss({ poi });
+    popoverController.dismiss({ poi: poiDetail.value });
 }
 onMounted(async () => {
     await axios.get(`/api/poi/${props.poi.id}/experiences`);
 });
 
 function setTitle(e: any) {
-    title.value = poiDetail.value?.journeysConnection.edges[e.activeIndex].title!;
+    title.value = poiDetail.value?.journeysConnection!.edges[e.activeIndex].title!;
     //title.value = str;
 }
 </script>

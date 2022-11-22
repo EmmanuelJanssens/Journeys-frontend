@@ -73,8 +73,12 @@
         </ion-content>
         <ion-footer>
             <ion-toolbar>
-                <ion-button slot="end" color="secondary" @click="() => modalController.dismiss()"> cancel </ion-button>
-                <ion-button slot="end" @click="save"> Save </ion-button>
+                <ion-buttons slot="end">
+                    <ion-button slot="end" color="secondary" @click="() => modalController.dismiss()">
+                        cancel
+                    </ion-button>
+                    <ion-button slot="end" @click="save"> Save </ion-button>
+                </ion-buttons>
             </ion-toolbar>
         </ion-footer>
     </ion-page>
@@ -84,6 +88,7 @@
 </template>
 <script lang="ts" setup>
 import {
+    IonButtons,
     IonInput,
     IonDatetime,
     IonIcon,

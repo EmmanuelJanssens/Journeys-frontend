@@ -9,10 +9,10 @@ export type SearchPoiDto = {
 };
 
 export type PoiDto = {
-    id: string;
-    name: string;
-    location: LocationDto;
-    journeysConnection: {
+    id?: string;
+    name?: string;
+    location?: LocationDto;
+    journeysConnection?: {
         edges: ExperienceDto[];
     };
     thumbnail?: string;

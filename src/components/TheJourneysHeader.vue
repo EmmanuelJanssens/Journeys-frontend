@@ -49,17 +49,11 @@ async function onPopOver(e: Event) {
     await popover.present();
 
     const data = await popover.onDidDismiss();
-    if (data.data == "profile") {
-        router.push("profile");
-        //
-    } else if (data.data == "logout") {
+    if (data.data == "logout") {
         userStore.logout();
+        router.push("home");
         showToast("goodbye", "success");
     }
-}
-async function toggleProfile() {
-    await menuController.toggle("right-side-menu");
-    await menuController.isOpen("right-side-menu");
 }
 
 async function openModal(component: any) {

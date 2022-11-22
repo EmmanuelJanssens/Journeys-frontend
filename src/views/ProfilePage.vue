@@ -6,10 +6,10 @@
                 <div id="info">
                     <p></p>
                     <span>
-                        <ion-text color="light"
+                        <ion-text
                             ><h1 class="title">{{ userStore.userRef.username?.toLocaleUpperCase() }}</h1></ion-text
                         >
-                        <ion-text color="light"
+                        <ion-text
                             ><p>{{ userStore.userRef.citation }}</p></ion-text
                         >
                     </span>
@@ -83,7 +83,11 @@
                                     <ion-label position="stacked">confirm password</ion-label>
                                     <ion-input type="password" v-model="state.confirmPassword"></ion-input>
                                 </ion-item>
-                                <ion-button @click="securityUpdate()"> Confirm changes</ion-button>
+                                <ion-buttons>
+                                    <ion-button @click="securityUpdate()" color="secondary" fill="solid">
+                                        Confirm changes</ion-button
+                                    >
+                                </ion-buttons>
                             </ion-list>
                         </ion-col>
                     </ion-row>
@@ -117,6 +121,7 @@ import {
     alertController,
     IonCardSubtitle,
     IonCardTitle,
+    IonButtons,
     ToggleCustomEvent
 } from "@ionic/vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
@@ -147,59 +152,71 @@ const state = ref({
 
 const passwordRef = computed(() => state.value.newPassword);
 const rules = {
-    oldPassword: { required, minlength: minLength(6) },
-    newPassword: { required, minLength: minLength(6) },
+    oldPassword: { minlength: minLength(6) },
+    newPassword: { minLength: minLength(6) },
     confirmPassword: { sameAs: sameAs(passwordRef) }
 };
 const v$ = useVuelidate(rules, state);
 
 async function securityUpdate() {
     if (!v$.value.$error) {
-        const alert = await alertController.create({
-            header: "Warning",
-            subHeader: "You will have to reconnect",
-            message: "Do you wish to proceed?",
-            buttons: [
-                {
-                    text: "Yes",
-                    role: "proceed",
-                    handler: async () => {
-                        const res = await userStore.updatePassword({
-                            oldPassword: state.value.oldPassword,
-                            newPassword: state.value.newPassword,
-                            public: userStore.userRef.public!
-                        });
-                        if (res) {
-                            await userStore.logout();
-                            router.push("home");
-                            await openModal(LoginModal);
-                            showToast("Modifications  saved", "success");
-                            state.value.newPassword = "";
-                            state.value.oldPassword = "";
-                            state.value.confirmPassword = "";
-                            v$.value.$reset();
-                        } else {
-                            showToast("Error saving", "danger");
+        if (
+            (state.value.confirmPassword.length == 0 && state.value.newPassword.length == 0,
+            state.value.oldPassword.length == 0)
+        ) {
+            const res = await userStore.saveUser(userStore.userRef, userStore.userRef.username!);
+            if (res) {
+                showToast("Modification saved", "success");
+            } else {
+                showToast("Could not save modifications", "danger");
+            }
+        } else {
+            const alert = await alertController.create({
+                header: "Warning",
+                subHeader: "You will have to reconnect",
+                message: "Do you wish to proceed?",
+                buttons: [
+                    {
+                        text: "Yes",
+                        role: "proceed",
+                        handler: async () => {
+                            const res = await userStore.updatePassword({
+                                oldPassword: state.value.oldPassword,
+                                newPassword: state.value.newPassword,
+                                public: userStore.userRef.public!
+                            });
+                            if (res) {
+                                await userStore.logout();
+                                router.push("home");
+                                await openModal(LoginModal);
+                                showToast("Modifications  saved", "success");
+                                state.value.newPassword = "";
+                                state.value.oldPassword = "";
+                                state.value.confirmPassword = "";
+                                v$.value.$reset();
+                            } else {
+                                showToast("Error saving", "danger");
+                                state.value.newPassword = "";
+                                state.value.oldPassword = "";
+                                state.value.confirmPassword = "";
+                                v$.value.$reset();
+                            }
+                        }
+                    },
+                    {
+                        text: "No",
+                        handler: async () => {
+                            showToast("Modifications not saved", "success");
                             state.value.newPassword = "";
                             state.value.oldPassword = "";
                             state.value.confirmPassword = "";
                             v$.value.$reset();
                         }
                     }
-                },
-                {
-                    text: "No",
-                    handler: async () => {
-                        showToast("Modifications not saved", "success");
-                        state.value.newPassword = "";
-                        state.value.oldPassword = "";
-                        state.value.confirmPassword = "";
-                        v$.value.$reset();
-                    }
-                }
-            ]
-        });
-        await alert.present();
+                ]
+            });
+            await alert.present();
+        }
     }
 }
 function toggle(content: string) {

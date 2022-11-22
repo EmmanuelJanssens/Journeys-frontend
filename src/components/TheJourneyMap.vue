@@ -11,14 +11,16 @@
 </template>
 <script lang="ts" setup>
 import { onMounted, watch } from "vue";
-import mapboxgl from "mapbox-gl";
+import mapboxgl, { LngLat, MapMouseEvent } from "mapbox-gl";
 import { JourneyMapCapacitor } from "journeys-capacitor-mapbox";
 import GeoJSON from "geojson";
-import { PoiDto } from "types/dtos";
+import { ExperienceDto, PoiDto } from "types/dtos";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { usePoiStore } from "stores/usePoiStore";
 import { useUserStore } from "stores/useUserStore";
 import { getMidPoint } from "utils/utils";
+import { alertController, popoverController } from "@ionic/core";
+import { dismiss } from "@ionic/core/dist/types/utils/overlays";
 
 const mapLayer = {
     journey_route: "journey_route",
@@ -38,6 +40,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: "loaded"): void;
     (e: "ready"): void;
+    (e: "modeSwitch", mode: string): void;
     (e: "markerDragged", pos: mapboxgl.LngLat, marker: string): void;
     (
         e: "poiClicked",
@@ -78,11 +81,56 @@ onMounted(async () => {
                 features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
             } & mapboxgl.EventData
         ) => {
-            e.features![0].properties!.location = JSON.parse(e.features![0].properties!.location);
             emit("poiClicked", e.features![0].properties as PoiDto, e);
         }
     );
-    map.on("click", () => {});
+
+    map.on("contextmenu", async (e: MapMouseEvent) => {
+        if (props.mode == "editJourney" || props.mode == "edition") {
+            const alert = await alertController.create({
+                header: "Confirm poi details",
+                inputs: [
+                    {
+                        label: "Poi Name",
+                        name: "poiName",
+                        placeholder: "Enter name"
+                    }
+                ],
+                buttons: [
+                    "Cancel",
+                    {
+                        text: "OK",
+                        handler: (data) => {
+                            alertController.dismiss(data.poiName, "ok");
+                        }
+                    }
+                ]
+            });
+            await alert.present();
+            const { data, role } = await alert.onDidDismiss();
+            if (role == "ok" && data?.length! > 0) {
+                const poi: PoiDto = {
+                    name: data,
+                    location: {
+                        latitude: e.lngLat.lat,
+                        longitude: e.lngLat.lng
+                    }
+                };
+                if (poi.thumbnail != undefined) delete poi.thumbnail;
+                const added = await poiStore.addPoi(poi);
+
+                const experience: ExperienceDto = {
+                    title: "",
+                    date: new Date().toISOString(),
+                    description: "",
+                    images: [],
+                    order: journeyStore.editJourney.journey!.experiencesConnection?.edges?.length!,
+                    node: added!
+                };
+                journeyStore.addToJourney(experience);
+            }
+        }
+    });
 });
 
 watch(
@@ -100,7 +148,7 @@ watch(
                     type: "Feature",
                     geometry: {
                         type: "Point",
-                        coordinates: [n.location.longitude, n.location.latitude]
+                        coordinates: [n.location!.longitude, n.location!.latitude]
                     },
                     properties: exp,
                     id: exp.node.id
@@ -188,7 +236,7 @@ function buildPoiGeoData(pois: PoiDto[]) {
             type: "Feature",
             geometry: {
                 type: "Point",
-                coordinates: [poi.location.longitude, poi.location.latitude]
+                coordinates: [poi.location!.longitude, poi.location!.latitude]
             },
             properties: poi,
             id: poi.id
@@ -204,7 +252,7 @@ function buildPoiGeoData(pois: PoiDto[]) {
     journeyStore.editJourney.journey?.experiencesConnection?.edges?.forEach((exp) => {
         const n = exp.node as PoiDto;
 
-        coords.push([n.location.longitude, n.location.latitude]);
+        coords.push([n.location!.longitude, n.location!.latitude]);
     });
     coords.push([journeyStore.editJourney.journey?.end?.longitude!, journeyStore.editJourney.journey?.end?.latitude!]);
 
@@ -247,7 +295,8 @@ watch(
             JourneyMapCapacitor.clearMap(false);
         }
         emit("ready");
-    }
+    },
+    { deep: true }
 );
 watch(
     () => journeyStore.editJourney.journey?.experiencesConnection?.edges!,
@@ -260,7 +309,7 @@ watch(
         ]);
         newVal?.forEach((exp) => {
             const n = exp.node as PoiDto;
-            array.push([n.location.longitude, n.location.latitude]);
+            array.push([n.location!.longitude, n.location!.latitude]);
         });
         array.push([
             journeyStore.editJourney.journey?.end?.longitude!,
