@@ -18,7 +18,7 @@
                 with a different stack for learning purpose and further improvements.
             </p>
             <p>
-                This app is still in active developpement, therefore a daily database wipe is done. You can still see
+                This app is still in active developpement, therefore a weekly database wipe is done. You can still see
                 what this app has to offer and follow it's devellopement. That is also in it's way some kind of Journey.
             </p>
             <p>
@@ -26,6 +26,10 @@
                 <a :href="`mailto:${mail}`">email</a>.
             </p>
 
+            <p>
+                <ion-icon :icon="warningOutline" /> your profile is private by default go to your profile page to change
+                this setting
+            </p>
             <ion-list>
                 <ion-item>
                     <ion-label
@@ -73,7 +77,7 @@ import {
     IonTitle,
     CheckboxCustomEvent
 } from "@ionic/vue";
-import { closeOutline, logoGithub, logoGitlab } from "ionicons/icons";
+import { closeOutline, logoGithub, logoGitlab, warningOutline } from "ionicons/icons";
 import { ref } from "vue";
 
 const mail = ref("journeys.feedback@gmail.com");

@@ -8,7 +8,7 @@
 
 <script lang="ts" setup>
 import { IonApp, IonRouterOutlet, IonContent, IonModal, modalController } from "@ionic/vue";
-import DisclaimerModal from "components/DisclaimerModal.vue";
+import DisclaimerModal from "components/Modals/DisclaimerModal.vue";
 
 import { useUserStore } from "stores/useUserStore";
 import { onBeforeMount, onMounted } from "vue";

@@ -19,8 +19,9 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { usePoiStore } from "stores/usePoiStore";
 import { useUserStore } from "stores/useUserStore";
 import { getMidPoint } from "utils/utils";
-import { alertController, popoverController } from "@ionic/core";
-import { dismiss } from "@ionic/core/dist/types/utils/overlays";
+import { alertController } from "@ionic/core";
+import { Geolocation } from "@capacitor/geolocation";
+import axios from "axios";
 
 const mapLayer = {
     journey_route: "journey_route",
@@ -56,10 +57,16 @@ const poiStore = usePoiStore();
 const userStore = useUserStore();
 
 var map: mapboxgl.Map;
+async function getCountryLoc() {
+    const loc = await axios.get(`https://api.ipregistry.co/?key=${import.meta.env.VITE_IP_REGESTRY_KEY}`);
+    return new LngLat(loc.data.location.longitude, loc.data.location.latitude);
+}
 onMounted(async () => {
+    const center = await getCountryLoc();
     await JourneyMapCapacitor.loadMap(
         "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg",
-        "Map"
+        "Map",
+        center
     );
     map = await JourneyMapCapacitor.getMap()!;
     map.on("load", () => {
