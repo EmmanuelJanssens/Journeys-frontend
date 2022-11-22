@@ -66,12 +66,10 @@ export const useJourneyStore = defineStore("journey", () => {
                 });
                 editJourney.value!.deleted!.poi_ids = filterDeleted();
             } else {
-                editJourney.value!.updated = [];
-                editJourney.value!.journey?.experiencesConnection?.edges?.forEach((exp) => {
-                    editJourney.value!.updated?.push(exp);
-                });
+                delete editJourney.value.connected;
+                delete editJourney.value.deleted;
+                delete editJourney.value.updated;
             }
-
             const result = await axios.put("/api/journey/", editJourney.value, {
                 headers: {
                     Authorization: `Bearer ${token}`

@@ -65,25 +65,56 @@
                         </ion-col>
                         <ion-col v-else-if="currentContent == 'security'">
                             <ion-list>
-                                <ion-item>
+                                <ion-item
+                                    :class="{
+                                        'ion-margin': true
+                                    }">
                                     <ion-label>Make profile public</ion-label>
                                     <ion-toggle
                                         :checked="userStore.userRef.public!"
                                         @ion-change="togglePublic"></ion-toggle>
                                 </ion-item>
-                                <ion-item>
+                                <ion-item
+                                    :class="{
+                                        'ion-margin': true
+                                    }">
                                     <ion-label position="stacked">Old password</ion-label>
                                     <ion-input type="password" v-model="state.oldPassword"></ion-input>
                                 </ion-item>
-                                <ion-item>
+                                <ion-item
+                                    :class="{
+                                        'ion-margin': true,
+                                        'ion-invalid': v$.newPassword.$error
+                                    }">
                                     <ion-label position="stacked">new password</ion-label>
-                                    <ion-input type="password" v-model="state.newPassword"></ion-input>
+                                    <ion-input
+                                        type="password"
+                                        v-model="state.newPassword"
+                                        @ion-input="v$.newPassword.$validate()"
+                                        @ion-change="ifZero($event, () => v$.newPassword.$reset())"></ion-input>
+                                    <ion-note v-if="v$.newPassword.$error" slot="error">{{
+                                        v$.newPassword.$errors[0].$message
+                                    }}</ion-note>
                                 </ion-item>
-                                <ion-item>
+                                <ion-item
+                                    :class="{
+                                        'ion-margin': true,
+                                        'ion-invalid': v$.confirmPassword.$error
+                                    }">
                                     <ion-label position="stacked">confirm password</ion-label>
-                                    <ion-input type="password" v-model="state.confirmPassword"></ion-input>
+                                    <ion-input
+                                        type="password"
+                                        v-model="state.confirmPassword"
+                                        @ion-input="v$.confirmPassword.$validate()"
+                                        @ion-change="ifZero($event, () => v$.confirmPassword.$reset())"></ion-input>
+                                    <ion-note v-if="v$.confirmPassword.$error" slot="error">{{
+                                        v$.confirmPassword.$errors[0].$message
+                                    }}</ion-note>
                                 </ion-item>
-                                <ion-buttons>
+                                <ion-buttons
+                                    :class="{
+                                        'ion-margin': true
+                                    }">
                                     <ion-button @click="securityUpdate()" color="secondary" fill="solid">
                                         Confirm changes</ion-button
                                     >
@@ -99,6 +130,7 @@
 
 <script lang="ts" setup>
 import {
+    IonNote,
     IonInput,
     IonToggle,
     IonIcon,
@@ -122,7 +154,8 @@ import {
     IonCardSubtitle,
     IonCardTitle,
     IonButtons,
-    ToggleCustomEvent
+    ToggleCustomEvent,
+    InputCustomEvent
 } from "@ionic/vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Autoplay } from "swiper";
@@ -136,7 +169,7 @@ import EditProfileModal from "components/Modals/EditProfileModal.vue";
 import { openModal, showToast } from "utils/utils";
 import LoginModal from "components/Modals/LoginModal.vue";
 import router from "router/router";
-import { required, minLength, sameAs } from "@vuelidate/validators";
+import { required, minLength, sameAs, helpers } from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
 
 const modules = ref([Autoplay]);
@@ -152,12 +185,23 @@ const state = ref({
 
 const passwordRef = computed(() => state.value.newPassword);
 const rules = {
-    oldPassword: { minlength: minLength(6) },
-    newPassword: { minLength: minLength(6) },
-    confirmPassword: { sameAs: sameAs(passwordRef) }
+    newPassword: {
+        minLength: minLength(8),
+        containsUppercase: helpers.withMessage("At least one upper case", (value: string) => /[A-Z]/.test(value)),
+        numeric: helpers.withMessage("At least one number is needed", (value: string) => /[0-9]/.test(value)),
+        special: helpers.withMessage("At least one special character", (value: string) => /[^a-zA-Z\d\s:]/.test(value))
+    },
+    confirmPassword: {
+        sameAs: sameAs(passwordRef)
+    }
 };
 const v$ = useVuelidate(rules, state);
 
+function ifZero(event: InputCustomEvent, reset: Function) {
+    if (event.detail.value?.length == 0) {
+        reset();
+    }
+}
 async function securityUpdate() {
     if (!v$.value.$error) {
         if (

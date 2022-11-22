@@ -9,6 +9,7 @@
                         <ion-icon size="large" :icon="closeOutline" />
                     </ion-button>
                 </ion-buttons>
+                <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
             </ion-toolbar>
         </ion-header>
         <section>
@@ -42,6 +43,7 @@
 <script lang="ts" setup>
 import { modalController } from "@ionic/core";
 import {
+    IonProgressBar,
     IonIcon,
     IonPage,
     IonInput,
@@ -72,20 +74,21 @@ const rules = {
 };
 
 const userStore = useUserStore();
-
+const isLoading = ref(false);
 const v$ = useVuelidate(rules, state);
 
-function submitForm() {
+async function submitForm() {
     v$.value.$validate();
     if (!v$.value.$error) {
-        userStore.login(state.value.username, state.value.password).then((response) => {
-            if (response == true) {
-                dismissLoginModal(true);
-                showToast("Welcome " + userStore.userRef.username, "success");
-            } else {
-                showToast("Authentication error", "danger");
-            }
-        });
+        isLoading.value = true;
+        const response = await userStore.login(state.value.username, state.value.password);
+        if (response == true) {
+            dismissLoginModal(true);
+            showToast("Welcome " + userStore.userRef.username, "success");
+        } else {
+            showToast("Authentication error", "danger");
+        }
+        isLoading.value = false;
     }
 }
 

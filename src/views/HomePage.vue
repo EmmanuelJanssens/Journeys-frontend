@@ -6,8 +6,8 @@
                 <div id="info">
                     <p></p>
                     <span>
-                        <ion-text><h1 class="title">JOURNEYS</h1></ion-text>
-                        <ion-text><p>IT'S NOT ALWAYS ABOUT THE DESTINATION</p></ion-text>
+                        <ion-text class="white"><h1 class="title">JOURNEYS</h1></ion-text>
+                        <ion-text class="white"><p>IT'S NOT ALWAYS ABOUT THE DESTINATION</p></ion-text>
                     </span>
                     <ion-button color="tertiary" router-link="/logbook">START YOUR ADVENTURE</ion-button>
                 </div>
@@ -180,8 +180,10 @@ async function toggle(tab: tabs) {
 
 <style scoped lang="less">
 ion-content {
-    --ion-background-color: #eaf0eb;
     --padding-top: 64px;
+}
+.white {
+    color: white;
 }
 .toolbar {
     //position: absolute;
