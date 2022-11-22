@@ -7,11 +7,11 @@
 </template>
 
 <script lang="ts" setup>
-import { IonApp, IonRouterOutlet, IonContent, IonSplitPane, getPlatforms } from "@ionic/vue";
-import UserDetailMenu from "components/TheUserDetailMenu.vue";
-import JourneysHeader from "components/TheJourneysHeader.vue";
+import { IonApp, IonRouterOutlet, IonContent, IonModal, modalController } from "@ionic/vue";
+import DisclaimerModal from "components/DisclaimerModal.vue";
+
 import { useUserStore } from "stores/useUserStore";
-import { onBeforeMount } from "vue";
+import { onBeforeMount, onMounted } from "vue";
 const userStore = useUserStore();
 async function readFromStorage() {
     if (localStorage.getItem("user")) {
@@ -36,5 +36,23 @@ async function readFromStorage() {
 
 onBeforeMount(() => {
     readFromStorage();
+});
+
+onMounted(async () => {
+    const disclaimer = localStorage.getItem("disclaimer") == "true";
+
+    if (!disclaimer) {
+        const modal = await modalController.create({
+            component: DisclaimerModal
+        });
+
+        await modal.present();
+
+        const { data, role } = await modal.onDidDismiss();
+        console.log(data.doNotShowagain);
+        if (data?.doNotShowagain) {
+            localStorage.setItem("disclaimer", data?.doNotShowagain);
+        }
+    }
 });
 </script>

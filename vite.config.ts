@@ -34,7 +34,7 @@ export default defineConfig({
         proxy: {
             "/api": {
                 changeOrigin: true,
-                target: `${process.env.JOURNEYS_API_HOST}:4000/api`,
+                target: `${process.env.VITE_JOURNEYS_API_HOST}:4000/api`,
                 rewrite: (path) => path.replace(/^\/api/, "")
             }
         }
