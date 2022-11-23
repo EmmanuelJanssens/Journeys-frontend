@@ -21,7 +21,7 @@
                         </div>
                     </div>
 
-                    <div class="absolute bottom-0 invisible sm:visible w-full">
+                    <!-- <div class="absolute bottom-0 invisible sm:visible w-full">
                         <div class="flex flex-row justify-center space-x-2">
                             <ion-button
                                 class="transition transform hover:-translate-y-1"
@@ -48,7 +48,7 @@
                                 >JOURNALING</ion-button
                             >
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <swiper
@@ -66,45 +66,66 @@
                 </swiper-slide>
             </swiper>
         </div>
-        <ion-content>
-            <!-- <div class="h-full">
-                <WebFeature
-                    v-for="featureTab in featureTabs"
-                    v-bind:key="featureTab.tabTitle"
-                    v-motion
-                    :initial="{
-                        opacity: 0
-                    }"
-                    :enter="{
-                        opacity: 1
-                    }"
-                    :features="featureTab.features"
-                    class="h-full"
-                    :mobile="false"
-                    ref="featureComponents" />
-            </div> -->
-            <div class="relative h-full bg-blue-600">
-                <p>Exploring</p>
-                <div class="absolute w-4 h-2/3 left-4 top-8 bg-green-600"></div>
-                <ion-img class="h-2/3" src="assets/images/features/featureImg1.png"></ion-img>
+        <div class="overflow-auto">
+            <div class="relative sm:h-full">
+                <p class="text-2xl p-4 sm:text-5xl text-center">Journaling</p>
+                <div class="p-4 sm:flex sm:flex-col sm:items-center">
+                    <p class="p-4 max-w-4xl">
+                        Have you been to a place that no one else has seen ? Share them on our site and show the world
+                        your experiences. Create an account to add your new points of interest Look for the place you
+                        want to add on our interactive map Upload your pictures, and write your experience
+                    </p>
+                    <div class="max-w-4xl transition transform hover:scale-150">
+                        <img class="object-contain" src="assets/images/features/featureImg3_5.png" />
+                    </div>
+                </div>
             </div>
-            <div class="h-full bg-red-600">
-                <p>some random shit</p>
-                <ion-img class="h-2/3" src="assets/images/features/featureImg1.png"></ion-img>
+
+            <div class="relative h-full">
+                <p class="text-2xl p-4 sm:text-5xl text-center">Exploring</p>
+                <div class="p-4 sm:flex sm:flex-col sm:items-center">
+                    <p class="p-4 max-w-4xl">
+                        Plan places you want to visit be it local, cantonal or national, plan as you go and visualize
+                        your trip. Choose from many of our Points Of Interest, shared by other members Save your journey
+                        and come back to it anytime to edit your story Inspire Others by sharing your experiences within
+                        the community
+                    </p>
+                    <div class="max-w-4xl transition transform hover:scale-150">
+                        <img class="object-contain" src="assets/images/features/featureImg1.png" />
+                    </div>
+                </div>
             </div>
-            <div class="h-full bg-green-600"></div>
-        </ion-content>
+
+            <div class="relative h-full">
+                <div class="h-full">
+                    <p class="text-2xl p-4 sm:text-5xl text-center">Sharing</p>
+                    <div class="p-4 sm:flex sm:flex-col sm:items-center">
+                        <p class="p-4 max-w-4xl">
+                            Have you been to a place that no one else has seen ? Share them on our site and show the
+                            world your experiences. Create an account to add your new points of interest Look for the
+                            place you want to add on our interactive map Upload your pictures, and write your experience
+                        </p>
+                        <div class="max-w-4xl transition transform hover:scale-150">
+                            <img class="object-contain" src="assets/images/features/featureImg1.png" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </ion-page>
 </template>
 
 <script lang="ts" setup>
-import { IonText, IonContent, IonPage, IonImg, IonButton, IonHeader } from "@ionic/vue";
+import { IonText, IonContent, IonPage, IonImg, IonButton, IonHeader, onIonViewDidEnter } from "@ionic/vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Autoplay } from "swiper";
-import { useElementVisibility } from "@vueuse/core";
 import "swiper/less";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
 import { onMounted, ref, watch } from "vue";
+
+const journalingElement = ref();
+const sharingElement = ref();
+const exploringElement = ref();
 
 const enum tabs {
     exploring = "exploring",
@@ -118,63 +139,12 @@ const sharingTab = ref();
 const journalingTab = ref();
 
 const modules = ref([Autoplay]);
+
 type JourneysFeature = {
     title: string;
     description: string;
     image: string;
 };
-
-const exploringFeatures: JourneysFeature[] = [
-    {
-        title: "Start your research",
-        description: `Even if a journey is not always about a destination there will always at some point be a moment where you'll have to finish. Begin by entering your start location and desired destination`,
-        image: `assets/images/features/featureImg1.png`
-    },
-    {
-        title: "Find your desired activities",
-        description: `Choose one from many activities that are shown to you, read about what user  say for that activity or be the first to leave an impression`,
-        image: `assets/images/features/featureImg1.png`
-    }
-];
-
-const sharingFeatures: JourneysFeature[] = [
-    {
-        title: "1",
-        description: `Have you been to a place that no one else has seen ? Share them on our site and show the world
-                        your experiences. Create an account to add your new points of interest Look for the place you
-                        want to add on our interactive map Upload your pictures, and write your experience`,
-        image: "assets/images/features/featureImg2.png"
-    }
-];
-
-const journalingFeatures: JourneysFeature[] = [
-    {
-        title: "1",
-        description: `Complete your dashboard with various adventures, save your memories to keep them forever. Thanks
-                        to our user friendly dashboard you will be able to edit your cards on the go or after you have
-                        completed your trip.`,
-        image: "assets/images/features/featureImg3.png"
-    }
-];
-
-const featureTabs = [
-    {
-        tabTitle: "exploring",
-        features: exploringFeatures
-    },
-    {
-        tabTitle: "sharing",
-        features: sharingFeatures
-    },
-    {
-        tabTitle: "journaling",
-        features: journalingFeatures
-    }
-];
-
-const featureComponents = ref();
-
-let exploringVisible = ref<Boolean>(false);
 
 function setActive(element: any) {
     (element.$el.classList as DOMTokenList).add("ion-color-tertiary");
@@ -224,10 +194,8 @@ async function toggle(tab: tabs) {
     }
 }
 
-onMounted(() => {
-    exploringVisible.value = useElementVisibility(featureComponents.value[0]).value;
-    console.log(exploringVisible.value);
-});
+onIonViewDidEnter(() => {});
+onMounted(() => {});
 </script>
 
 <style scoped lang="less">

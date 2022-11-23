@@ -36,11 +36,11 @@ const app = createApp(App);
 app.use(IonicVue);
 app.use(router);
 app.use(pinia);
-app.use(MotionPlugin);
 app.use(VueAxios, axios);
 app.component("RecycleScroller", RecycleScroller);
 app.component("DynamicScroller", DynamicScroller);
 app.component("DynamicScrollerItem", DynamicScrollerItem);
+app.use(MotionPlugin);
 router.isReady().then(() => {
     app.mount("#app");
 });

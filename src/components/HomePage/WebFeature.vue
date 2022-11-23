@@ -1,25 +1,19 @@
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <div class="flex flex-row overflow-auto">
-        <div v-for="feature in features" v-bind:key="feature.title" class="h-full">
-            <ion-card-header>
-                <ion-card-title>{{ feature.title }}</ion-card-title>
-                <ion-card-content>
-                    <ion-img v-motion-slide-top class="h-64 p-2" :src="feature.image" />
-                    <p v-motion-fade class="h-40 p-2">
-                        {{ feature.description }}
-                    </p>
-                </ion-card-content>
-            </ion-card-header>
+    <div class="relative sm:h-full" v-motion="parentMotion">
+        <p class="text-2xl p-4 sm:text-5xl" v-motion="titleMotion">Journaling</p>
+        <div class="p-4 sm:flex sm:flex-col sm:items-center">
+            <p class="p-4 max-w-4xl" v-motion="textMotion">
+                {{ description }}
+            </p>
+            <div class="max-w-4xl" v-motion="imageMotion">
+                <img class="object-contain" :src="image" />
+            </div>
         </div>
     </div>
 </template>
 <script setup lang="ts">
-import { IonImg, IonCardTitle, IonCardHeader, IonCardContent } from "@ionic/vue";
 import { defineProps } from "vue";
-defineProps<{
-    features: { title: string; description: string; image: string }[];
-    mobile: boolean;
-}>();
+defineProps(["parentMotion", "titleMotion", "textMotion", "imageMotion", "description", "image"]);
 </script>
 <style scoped lang="less"></style>
