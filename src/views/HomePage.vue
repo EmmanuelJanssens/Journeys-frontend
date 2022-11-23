@@ -3,7 +3,7 @@
         <ion-header class="ion-no-border">
             <TheJourneysHeader class="" />
         </ion-header>
-        <div class="relative h-1/5 md:h-1/4" id="banner">
+        <div class="relative min-h-[250px] max-h-[400px]" id="banner">
             <div class="absolute z-50 h-full w-full">
                 <div class="h-full w-full p-4">
                     <div class="flex flex-col text-center m-0 text-white">
@@ -67,7 +67,7 @@
             </swiper>
         </div>
         <div class="overflow-auto">
-            <div class="relative sm:h-full">
+            <div class="relative min-h-[400]">
                 <p class="text-2xl p-4 sm:text-5xl text-center">Journaling</p>
                 <div class="p-4 sm:flex sm:flex-col sm:items-center">
                     <p class="p-4 max-w-4xl">
@@ -76,12 +76,12 @@
                         want to add on our interactive map Upload your pictures, and write your experience
                     </p>
                     <div class="max-w-4xl transition transform hover:scale-150">
-                        <img class="object-contain" src="assets/images/features/featureImg3_5.png" />
+                        <ion-img class="object-contain" src="assets/images/features/featureImg3_2.png" />
                     </div>
                 </div>
             </div>
 
-            <div class="relative h-full">
+            <div class="relative min-h-[540]">
                 <p class="text-2xl p-4 sm:text-5xl text-center">Exploring</p>
                 <div class="p-4 sm:flex sm:flex-col sm:items-center">
                     <p class="p-4 max-w-4xl">
@@ -91,12 +91,12 @@
                         the community
                     </p>
                     <div class="max-w-4xl transition transform hover:scale-150">
-                        <img class="object-contain" src="assets/images/features/featureImg1.png" />
+                        <ion-img class="object-contain" src="assets/images/features/featureImg3_6.png" />
                     </div>
                 </div>
             </div>
 
-            <div class="relative h-full">
+            <div class="relativemin-h-[540]">
                 <div class="h-full">
                     <p class="text-2xl p-4 sm:text-5xl text-center">Sharing</p>
                     <div class="p-4 sm:flex sm:flex-col sm:items-center">
@@ -106,7 +106,7 @@
                             place you want to add on our interactive map Upload your pictures, and write your experience
                         </p>
                         <div class="max-w-4xl transition transform hover:scale-150">
-                            <img class="object-contain" src="assets/images/features/featureImg1.png" />
+                            <ion-img class="object-contain" src="assets/images/features/featureImg3_5.png" />
                         </div>
                     </div>
                 </div>
