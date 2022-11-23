@@ -1,37 +1,61 @@
 <template>
     <ion-page>
-        <ion-header class="ion-no-border ion-no-margin">
-            <TheJourneysHeader class="toolbar" />
-            <div class="banner-content center">
-                <div id="info">
-                    <p></p>
-                    <span>
-                        <ion-text class="white"><h1 class="title">JOURNEYS</h1></ion-text>
-                        <ion-text class="white"><p>IT'S NOT ALWAYS ABOUT THE DESTINATION</p></ion-text>
-                    </span>
-                    <ion-button color="tertiary" router-link="/logbook">START YOUR ADVENTURE</ion-button>
-                </div>
+        <ion-header class="ion-no-border">
+            <TheJourneysHeader class="" />
+        </ion-header>
+        <div class="relative h-1/5 md:h-1/4" id="banner">
+            <div class="absolute z-50 h-full w-full">
+                <div class="h-full w-full p-4">
+                    <div class="flex flex-col text-center m-0 text-white">
+                        <div class="flex flex-col justify-items-center">
+                            <ion-text><h1 class="text-4xl md:text-8xl">JOURNEYS</h1></ion-text>
+                            <ion-text><p class="text-sm sm:text-lg">IT'S NOT ALWAYS ABOUT THE DESTINATION</p></ion-text>
+                        </div>
+                        <div>
+                            <ion-button
+                                class="transition transform hover:scale-110"
+                                color="tertiary"
+                                router-link="/logbook"
+                                >START YOUR ADVENTURE</ion-button
+                            >
+                        </div>
+                    </div>
 
-                <div class="tabs center">
-                    <div id="tab-buttons">
-                        <ion-button color="tertiary" @click="toggle(tabs.exploring)" ref="exploring"
-                            >EXPLORING</ion-button
-                        >
-                        <span class="rectangle"></span>
-                        <ion-button color="light" @click="toggle(tabs.sharing)" ref="sharing">SHARING</ion-button>
-                        <span class="rectangle"></span>
-                        <ion-button color="light" @click="toggle(tabs.journaling)" ref="journaling"
-                            >JOURNALING</ion-button
-                        >
+                    <div class="absolute bottom-0 invisible sm:visible w-full">
+                        <div class="flex flex-row justify-center space-x-2">
+                            <ion-button
+                                class="transition transform hover:-translate-y-1"
+                                color="tertiary"
+                                @click="toggle(tabs.exploring)"
+                                ref="exploringTab"
+                                >EXPLORING</ion-button
+                            >
+
+                            <span class=""></span>
+                            <ion-button
+                                class="transition transform hover:-translate-y-1"
+                                color="light"
+                                @click="toggle(tabs.sharing)"
+                                ref="sharingTab"
+                                >SHARING</ion-button
+                            >
+                            <span class=""></span>
+                            <ion-button
+                                class="transition transform hover:-translate-y-1"
+                                color="light"
+                                @click="toggle(tabs.journaling)"
+                                ref="journalingTab"
+                                >JOURNALING</ion-button
+                            >
+                        </div>
                     </div>
                 </div>
             </div>
             <swiper
-                class="image-carrousel"
+                class="h-full w-full"
                 :modules="modules"
                 :autoplay="{
-                    delay: 2500,
-                    disableOnInteraction: true
+                    delay: 10000
                 }">
                 <span class="overlay"></span>
                 <swiper-slide>
@@ -41,68 +65,34 @@
                     <ion-img src="assets/images/banner/mountains2.jpg" class="banner-img" />
                 </swiper-slide>
             </swiper>
-        </ion-header>
-        <ion-content class="main-body">
-            <div class="center w1000">
-                <div
-                    v-if="currentTab == tabs.exploring"
-                    class="body"
+        </div>
+        <ion-content>
+            <!-- <div class="h-full">
+                <WebFeature
+                    v-for="featureTab in featureTabs"
+                    v-bind:key="featureTab.tabTitle"
                     v-motion
                     :initial="{
                         opacity: 0
                     }"
                     :enter="{
                         opacity: 1
-                    }">
-                    <p class="w400">
-                        Plan places you want to visit be it local, cantonal or national, plan as you go and visualize
-                        your trip. Choose from many of our Points Of Interest, shared by other members Save your journey
-                        and come back to it anytime to edit your story Inspire Others by sharing your experiences within
-                        the community
-                    </p>
-                    <span class="w400">
-                        <ion-img src="assets/images/features/featureImg1.png" />
-                    </span>
-                </div>
-                <div
-                    v-else-if="currentTab == tabs.sharing"
-                    class="body"
-                    v-motion
-                    :initial="{
-                        opacity: 0
                     }"
-                    :enter="{
-                        opacity: 1
-                    }">
-                    <p class="w400">
-                        Have you been to a place that no one else has seen ? Share them on our site and show the world
-                        your experiences. Create an account to add your new points of interest Look for the place you
-                        want to add on our interactive map Upload your pictures, and write your experience
-                    </p>
-                    <span class="w400">
-                        <ion-img src="assets/images/features/featureImg2.png" />
-                    </span>
-                </div>
-                <div
-                    v-if="currentTab == tabs.journaling"
-                    class="body"
-                    v-motion
-                    :initial="{
-                        opacity: 0
-                    }"
-                    :enter="{
-                        opacity: 1
-                    }">
-                    <p class="w400">
-                        Complete your dashboard with various adventures, save your memories to keep them forever. Thanks
-                        to our user friendly dashboard you will be able to edit your cards on the go or after you have
-                        completed your trip.
-                    </p>
-                    <span class="w400">
-                        <ion-img src="assets/images/features/featureImg3.png" />
-                    </span>
-                </div>
+                    :features="featureTab.features"
+                    class="h-full"
+                    :mobile="false"
+                    ref="featureComponents" />
+            </div> -->
+            <div class="relative h-full bg-blue-600">
+                <p>Exploring</p>
+                <div class="absolute w-4 h-2/3 left-4 top-8 bg-green-600"></div>
+                <ion-img class="h-2/3" src="assets/images/features/featureImg1.png"></ion-img>
             </div>
+            <div class="h-full bg-red-600">
+                <p>some random shit</p>
+                <ion-img class="h-2/3" src="assets/images/features/featureImg1.png"></ion-img>
+            </div>
+            <div class="h-full bg-green-600"></div>
         </ion-content>
     </ion-page>
 </template>
@@ -111,10 +101,10 @@
 import { IonText, IonContent, IonPage, IonImg, IonButton, IonHeader } from "@ionic/vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Autoplay } from "swiper";
-
+import { useElementVisibility } from "@vueuse/core";
 import "swiper/less";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 const enum tabs {
     exploring = "exploring",
@@ -123,11 +113,68 @@ const enum tabs {
 }
 
 const currentTab = ref<tabs>(tabs.exploring);
-const exploring = ref();
-const sharing = ref();
-const journaling = ref();
+const exploringTab = ref();
+const sharingTab = ref();
+const journalingTab = ref();
 
 const modules = ref([Autoplay]);
+type JourneysFeature = {
+    title: string;
+    description: string;
+    image: string;
+};
+
+const exploringFeatures: JourneysFeature[] = [
+    {
+        title: "Start your research",
+        description: `Even if a journey is not always about a destination there will always at some point be a moment where you'll have to finish. Begin by entering your start location and desired destination`,
+        image: `assets/images/features/featureImg1.png`
+    },
+    {
+        title: "Find your desired activities",
+        description: `Choose one from many activities that are shown to you, read about what user  say for that activity or be the first to leave an impression`,
+        image: `assets/images/features/featureImg1.png`
+    }
+];
+
+const sharingFeatures: JourneysFeature[] = [
+    {
+        title: "1",
+        description: `Have you been to a place that no one else has seen ? Share them on our site and show the world
+                        your experiences. Create an account to add your new points of interest Look for the place you
+                        want to add on our interactive map Upload your pictures, and write your experience`,
+        image: "assets/images/features/featureImg2.png"
+    }
+];
+
+const journalingFeatures: JourneysFeature[] = [
+    {
+        title: "1",
+        description: `Complete your dashboard with various adventures, save your memories to keep them forever. Thanks
+                        to our user friendly dashboard you will be able to edit your cards on the go or after you have
+                        completed your trip.`,
+        image: "assets/images/features/featureImg3.png"
+    }
+];
+
+const featureTabs = [
+    {
+        tabTitle: "exploring",
+        features: exploringFeatures
+    },
+    {
+        tabTitle: "sharing",
+        features: sharingFeatures
+    },
+    {
+        tabTitle: "journaling",
+        features: journalingFeatures
+    }
+];
+
+const featureComponents = ref();
+
+let exploringVisible = ref<Boolean>(false);
 
 function setActive(element: any) {
     (element.$el.classList as DOMTokenList).add("ion-color-tertiary");
@@ -142,22 +189,22 @@ watch(
     (newValue, oldValue) => {
         switch (newValue) {
             case tabs.exploring:
-                setActive(exploring.value);
+                setActive(exploringTab.value);
 
-                if (oldValue == tabs.sharing) setInactive(sharing.value);
-                if (oldValue == tabs.journaling) setInactive(journaling.value);
+                if (oldValue == tabs.sharing) setInactive(sharingTab.value);
+                if (oldValue == tabs.journaling) setInactive(journalingTab.value);
                 break;
             case tabs.sharing:
-                setActive(sharing.value);
+                setActive(sharingTab.value);
 
-                if (oldValue == tabs.exploring) setInactive(exploring.value);
-                if (oldValue == tabs.journaling) setInactive(journaling.value);
+                if (oldValue == tabs.exploring) setInactive(exploringTab.value);
+                if (oldValue == tabs.journaling) setInactive(journalingTab.value);
                 break;
             case tabs.journaling:
-                setActive(journaling.value);
+                setActive(journalingTab.value);
 
-                if (oldValue == tabs.exploring) setInactive(exploring.value);
-                if (oldValue == tabs.sharing) setInactive(sharing.value);
+                if (oldValue == tabs.exploring) setInactive(exploringTab.value);
+                if (oldValue == tabs.sharing) setInactive(sharingTab.value);
                 break;
         }
     }
@@ -176,18 +223,14 @@ async function toggle(tab: tabs) {
             break;
     }
 }
+
+onMounted(() => {
+    exploringVisible.value = useElementVisibility(featureComponents.value[0]).value;
+    console.log(exploringVisible.value);
+});
 </script>
 
 <style scoped lang="less">
-ion-content {
-    --padding-top: 64px;
-}
-.white {
-    color: white;
-}
-.toolbar {
-    //position: absolute;
-}
 .banner-img {
     width: 100%;
     height: 100%;
@@ -203,87 +246,5 @@ ion-content {
     background-color: black;
     opacity: 30%;
     z-index: 9999;
-}
-.active {
-    background-color: red;
-}
-.rectangle {
-    height: 2px;
-    width: 120px;
-    background-color: white;
-}
-
-.body {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    height: 100%;
-}
-ion-header {
-    height: 540;
-}
-.title {
-    font-size: 5em;
-}
-.w1000 {
-    width: 1000px;
-}
-.w800 {
-    width: 800px;
-}
-.w300 {
-    width: 300px;
-}
-.w400 {
-    width: 400px;
-}
-.w500 {
-    width: 500px;
-}
-.center {
-    position: absolute;
-
-    left: 0px;
-    right: 0px;
-
-    margin-left: auto;
-    margin-right: auto;
-}
-.banner-content {
-    width: 600px;
-    height: 100%;
-
-    z-index: 2;
-
-    #info {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        height: 80%;
-
-        span {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-around;
-        }
-    }
-
-    .tabs {
-        bottom: 40px;
-        #tab-buttons {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-        }
-    }
-}
-.image-carrousel {
-    z-index: 1;
-    //position: absolute;
-    width: 100%;
-    height: 540px;
 }
 </style>

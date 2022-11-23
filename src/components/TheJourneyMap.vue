@@ -20,7 +20,6 @@ import { usePoiStore } from "stores/usePoiStore";
 import { useUserStore } from "stores/useUserStore";
 import { getMidPoint } from "utils/utils";
 import { alertController } from "@ionic/core";
-import { Geolocation } from "@capacitor/geolocation";
 import axios from "axios";
 
 const mapLayer = {
