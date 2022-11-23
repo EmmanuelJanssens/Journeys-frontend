@@ -71,9 +71,9 @@
                 <p class="text-2xl p-4 sm:text-5xl text-center">Journaling</p>
                 <div class="p-4 sm:flex sm:flex-col sm:items-center">
                     <p class="p-4 max-w-4xl">
-                        Have you been to a place that no one else has seen ? Share them on our site and show the world
-                        your experiences. Create an account to add your new points of interest Look for the place you
-                        want to add on our interactive map Upload your pictures, and write your experience
+                        Complete your dashboard with various adventures, save your memories to keep them forever. Thanks
+                        to our user friendly dashboard you will be able to edit your cards on the go or after you have
+                        completed your trip.
                     </p>
                     <div class="max-w-4xl transition transform hover:scale-150">
                         <ion-img class="object-contain" src="assets/images/features/featureImg3_2.png" />
