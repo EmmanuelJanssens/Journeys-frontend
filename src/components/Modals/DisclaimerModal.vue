@@ -18,8 +18,9 @@
                 with a different stack for learning purpose and further improvements.
             </p>
             <p>
-                This app is still in active developpement, therefore a weekly database wipe is done. You can still see
-                what this app has to offer and follow it's devellopement. That is also in it's way some kind of Journey.
+                This app is still in active developpement, therefore any data created will not be permanent. You can
+                still see what this app has to offer and follow it's devellopement. That is also in it's way some kind
+                of Journey.
             </p>
             <p>
                 Any feedback, bug reports, and suggestions can at the time beeing be sent to my
