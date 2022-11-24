@@ -37,6 +37,7 @@
         "cordova-plugin-filechooser": "^1.2.0",
         "core-js": "^3.26.0",
         "firebase": "^9.13.0",
+        "firebaseui": "^6.0.2",
         "ionicons": "^6.0.4",
         "journeys-capacitor-mapbox": "file:journeys-capacitor-mapbox",
         "less": "^4.1.3",

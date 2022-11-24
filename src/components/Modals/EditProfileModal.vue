@@ -32,10 +32,6 @@
                                 <ion-input type="text" v-model="state.username" />
                             </ion-item>
                             <ion-item class="ion-margin">
-                                <ion-label>E-mail</ion-label>
-                                <ion-input type="text" v-model="state.email" />
-                            </ion-item>
-                            <ion-item class="ion-margin">
                                 <ion-label>Citation</ion-label>
                                 <ion-input type="text" v-model="state.citation" />
                             </ion-item>
@@ -109,7 +105,7 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto, JourneyDto, PoiDto } from "types/dtos";
 import { computed, onMounted, ref } from "vue";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
-import { storageRef } from "google/storage";
+import { authApp, storageRef } from "google/firebase";
 import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
 import { showToast } from "utils/utils";
 import { addOutline, closeOutline } from "ionicons/icons";
@@ -123,25 +119,18 @@ const state = ref({
     username: "",
     firstName: "",
     lastName: "",
-    email: "",
     citation: "",
     banner: [""]
 });
+
 const rules = {
     username: { required, minLength: minLength(4) },
     firstName: { required },
-    lastName: { required },
-    email: { required, email }
+    lastName: { required }
 };
 
 const v$ = useVuelidate(rules, state);
-
-const description = ref();
-const title = ref();
-const journeyStore = useJourneyStore();
-
 const files = ref<Array<any>>([]);
-const uploading = ref(false);
 
 let images = ref<
     {
@@ -150,19 +139,12 @@ let images = ref<
     }[]
 >([]);
 
-onMounted(() => {
-    state.value.username = userStore.userRef.username!;
-    state.value.firstName = userStore.userRef.firstName!;
-    state.value.lastName = userStore.userRef.lastName!;
-    state.value.email = userStore.userRef.email!;
-    state.value.citation = userStore.userRef.citation!;
-    state.value.banner = userStore.userRef.banner!;
-});
+onMounted(() => {});
 
 async function submitForm() {
     v$.value.$validate();
     if (!v$.value.$error) {
-        if (state.value.username != userStore.userRef.username) {
+        if (state.value.username != authApp.currentUser?.displayName) {
             const validUsername = await userStore.checkUserName(state.value.username);
             if (validUsername) {
                 modalController.dismiss(state.value);
@@ -191,92 +173,5 @@ async function selectImage() {
         });
     });
 }
-
-function removeImage(image: string) {
-    const img = images.value?.find((img) => image == img.url);
-    if (img) {
-        images.value = images.value?.filter((img) => image != img.url)!;
-    }
-}
-
-const taskList = Array<UploadTask>();
-async function save() {
-    const deleted = userStore.userRef.banner?.filter((img) => !images.value.find((search) => img == search.url));
-    uploading.value = true;
-    await deleted?.forEach(async (img) => {
-        const imgRef = fref(storageRef.storage, img);
-        await deleteObject(imgRef);
-    });
-    if (files.value.length > 0) {
-        await files.value.forEach(async (f) => {
-            const id = (f.url as string).slice((f.url as string).lastIndexOf("/") + 1);
-            const imageRef = fref(storageRef, userStore.userRef.username + "/" + id);
-            const metadata = {
-                contentType: f.file.mimeType
-            };
-            taskList.push(uploadBytesResumable(imageRef, f.file.blob, metadata));
-        });
-    }
-    var error = false;
-    const uploaded: string[] = [];
-    for (const task of taskList) {
-        const res = await task;
-        const url = await getDownloadURL(task.snapshot.ref);
-        uploaded.push(url);
-        if (res.state == "error") {
-            error = true;
-        }
-    }
-    if (error) {
-        uploaded.forEach((img) => {
-            const imgRef = fref(storageRef.storage, img);
-            deleteObject(imgRef);
-        });
-        modalController.dismiss({ status: "error" });
-        uploading.value = false;
-        showToast("An error occured while uploading your image try again", "danger");
-    } else {
-        modalController.dismiss({ status: "success" });
-        showToast("Your modifications were successfuly saved", "success");
-        uploading.value = false;
-    }
-}
 </script>
-<style scoped lang="less">
-ion-thumbnail {
-    min-width: 80px;
-    min-height: 80px;
-}
-.image-item {
-    position: relative;
-    padding: 8px;
-    margin: 5px;
-    border-radius: 10%;
-    border: solid;
-    border-color: var(--ion-color-primary);
-    border-width: 1px;
-    & ion-icon {
-        border-radius: 50%;
-        background-color: var(--ion-color-danger);
-        position: absolute;
-        top: 2px;
-        right: 2px;
-        cursor: pointer;
-    }
-    & ion-img {
-        border-radius: 10%;
-    }
-}
-
-.images {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    width: 100%;
-}
-
-.add-image {
-    min-width: 90px;
-    min-height: 90px;
-}
-</style>
+<style scoped lang="less"></style>

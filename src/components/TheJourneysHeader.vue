@@ -5,9 +5,9 @@
             <ion-button router-link="/home"> HOME </ion-button>
             <!-- <ion-button router-link="/about"> ABOUT </ion-button> -->
             <ion-button router-link="/logbook"> LOGBOOK </ion-button>
-            <ion-button @click="openModal(LoginModal)" v-if="userStore.IsLoggedIn() == false">Login</ion-button>
-            <ion-button @click="openModal(RegisterModal)" v-if="userStore.IsLoggedIn() == false">Register</ion-button>
-            <ion-button v-if="userStore.IsLoggedIn() == true" @click="onPopOver">
+            <ion-button @click="openModal(LoginModal)" v-if="userStore.isLoggedIn == false">Login</ion-button>
+            <ion-button @click="openModal(RegisterModal)" v-if="userStore.isLoggedIn == false">Register</ion-button>
+            <ion-button v-if="userStore.isLoggedIn == true" @click="onPopOver">
                 PROFILE <ion-icon slot="end" :src="caretDownOutline"> </ion-icon
             ></ion-button>
         </ion-buttons>
@@ -50,7 +50,7 @@ async function onPopOver(e: Event) {
 
     const data = await popover.onDidDismiss();
     if (data.data == "logout") {
-        userStore.logout();
+        await userStore.logout();
         router.push("home");
         showToast("goodbye", "success");
     }

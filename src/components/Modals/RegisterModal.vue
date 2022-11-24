@@ -62,7 +62,6 @@
                                 v-model="state.username"
                                 @ion-input="async () => await v$.username.$validate()"
                                 @ion-change="ifZero($event, () => v$.username.$reset())" />
-
                             <ion-note v-if="v$.username.$error" slot="error">{{
                                 v$.username.$errors[0].$message
                             }}</ion-note>
@@ -165,6 +164,7 @@ import { computed, ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
 import { closeOutline } from "ionicons/icons";
 import { showToast } from "utils/utils";
+import { authApp } from "google/firebase";
 
 const state = ref({
     username: "",
@@ -177,9 +177,13 @@ const state = ref({
 const passwordRef = computed(() => state.value.password);
 
 const rules = {
-    username: { required, minLength: minLength(5) },
-    firstName: { required },
-    lastName: { required },
+    username: {
+        required,
+        minLenght: minLength(5),
+        unique: helpers.withMessage("Not available", (value: string) => true)
+    },
+    firstName: {},
+    lastName: {},
     email: { required, email },
     password: {
         required,
@@ -205,17 +209,20 @@ async function submitForm() {
     v$.value.$validate();
     if (!v$.value.$error) {
         isLoading.value = true;
+
+        const validUsername = await userStore.checkUserName(state.value.username);
+        if (!validUsername) {
+            showToast("Authentication error", "danger");
+            isLoading.value = false;
+            return;
+        }
         const response = await userStore.register(state.value);
         if (response == true) {
             dismissRegisterModal();
-            showToast("Welcome " + userStore.userRef.username, "success");
-            isLoading.value = false;
-        } else {
-            showToast("Authentication error", "danger");
-            isLoading.value = false;
-        }
+            showToast("Welcome " + authApp.currentUser?.displayName, "success");
+        } else showToast("Authentication error", "danger");
+        isLoading.value = false;
     }
-    v$.value.firstName;
 }
 
 function clearModal() {

@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
 import { AddressDto, ExperienceDto, JourneyDto, PoiDto, UpdateJourneyDto } from "types/dtos";
+import { authApp } from "google/firebase";
 
 export const useJourneyStore = defineStore("journey", () => {
     const editJourney = ref<UpdateJourneyDto>({});
@@ -14,7 +15,7 @@ export const useJourneyStore = defineStore("journey", () => {
 
     async function removeExperience(expDto: ExperienceDto): Promise<JourneyDto | undefined> {
         try {
-            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const token = await authApp.currentUser?.getIdToken(false);
             const delExp = {
                 poi: {
                     id: expDto.node.id
@@ -36,7 +37,7 @@ export const useJourneyStore = defineStore("journey", () => {
 
     async function updateExperience(experience: ExperienceDto): Promise<JourneyDto | undefined> {
         try {
-            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const token = await authApp.currentUser?.getIdToken(false);
             const response = await axios.put("api/journey/experience", experience, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -50,7 +51,7 @@ export const useJourneyStore = defineStore("journey", () => {
 
     async function updateJourney(mode: string): Promise<JourneyDto | undefined> {
         try {
-            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const token = await authApp.currentUser?.getIdToken(false);
             if (mode == "deep") {
                 editJourney.value!.connected = [];
                 editJourney.value!.deleted = { poi_ids: [] };
@@ -83,7 +84,7 @@ export const useJourneyStore = defineStore("journey", () => {
 
     async function saveJourney(name: string): Promise<JourneyDto | undefined> {
         try {
-            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const token = await authApp.currentUser?.getIdToken(false);
             editJourney.value!.journey!.title = name;
 
             const dto: JourneyDto = editJourney.value!.journey!;
@@ -100,7 +101,7 @@ export const useJourneyStore = defineStore("journey", () => {
 
     async function removeJourney(id: string): Promise<Boolean> {
         try {
-            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const token = await authApp.currentUser?.getIdToken(false);
             const result = await axios.delete("api/journey/" + id, {
                 headers: {
                     Authorization: `Bearer ${token}`

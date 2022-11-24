@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from "@ionic/vue-router";
 import type { RouteRecordRaw } from "vue-router";
 // import HomePage from "views/HomePage.vue";
 // import LogBookPage from "views/LogBookPage.vue";
-const HomePage = () => import("views/HomePage.vue");
-const LogBookPage = () => import("views/LogBookPage.vue");
-const ProfilePage = () => import("views/ProfilePage.vue");
+const HomePage = async () => await import("views/HomePage.vue");
+const LogBookPage = async () => await import("views/LogBookPage.vue");
+const ProfilePage = async () => await import("views/ProfilePage.vue");
 const routes: RouteRecordRaw[] = [
     {
         path: "/",

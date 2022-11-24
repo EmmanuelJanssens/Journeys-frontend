@@ -14,11 +14,11 @@
         </ion-header>
         <section>
             <ion-item class="ion-margin">
-                <ion-label position="floating">Username</ion-label>
-                <ion-input type="text" v-model="state.username" />
+                <ion-label position="floating">Email</ion-label>
+                <ion-input type="text" v-model="state.email" />
             </ion-item>
-            <ion-text class="ion-margin" color="danger" v-if="v$.username.$error">{{
-                v$.username.$errors[0].$message
+            <ion-text class="ion-margin" color="danger" v-if="v$.email.$error">{{
+                v$.email.$errors[0].$message
             }}</ion-text>
             <span class="separator"></span>
             <ion-item class="ion-margin">
@@ -63,13 +63,13 @@ import { ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
 import { showToast } from "utils/utils";
 import { closeOutline } from "ionicons/icons";
-
+import { authApp } from "google/firebase";
 const state = ref({
-    username: "",
+    email: "",
     password: ""
 });
 const rules = {
-    username: { required },
+    email: { required },
     password: { required }
 };
 
@@ -81,10 +81,10 @@ async function submitForm() {
     v$.value.$validate();
     if (!v$.value.$error) {
         isLoading.value = true;
-        const response = await userStore.login(state.value.username, state.value.password);
+        const response = await userStore.login(state.value.email, state.value.password);
         if (response == true) {
             dismissLoginModal(true);
-            showToast("Welcome " + userStore.userRef.username, "success");
+            showToast("Welcome " + authApp.currentUser?.displayName, "success");
         } else {
             showToast("Authentication error", "danger");
         }
@@ -93,7 +93,7 @@ async function submitForm() {
 }
 
 function clearModal() {
-    state.value.username = "";
+    state.value.email = "";
     state.value.password = "";
     v$.value.$reset();
 }

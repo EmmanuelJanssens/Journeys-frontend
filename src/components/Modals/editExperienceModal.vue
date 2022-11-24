@@ -117,7 +117,7 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto, JourneyDto, PoiDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
-import { storageRef } from "google/storage";
+import { storageRef } from "google/firebase";
 import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
 import { showToast } from "utils/utils";
 import { addOutline, closeOutline } from "ionicons/icons";

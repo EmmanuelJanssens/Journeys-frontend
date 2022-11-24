@@ -18,8 +18,7 @@ import { useUserStore } from "stores/useUserStore";
 const userStore = useUserStore();
 
 async function logout() {
-    userStore.logout();
-    menuController.toggle("right-side-menu");
+    await userStore.logout();
 }
 </script>
 <style scoped></style>

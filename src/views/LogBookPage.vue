@@ -113,14 +113,7 @@ import {
     alertController
 } from "@ionic/vue";
 
-import {
-    addOutline,
-    gridOutline,
-    pencilOutline,
-    trashBinOutline,
-    returnUpBackOutline,
-    saveOutline
-} from "ionicons/icons";
+import { addOutline, gridOutline, pencilOutline, returnUpBackOutline, saveOutline } from "ionicons/icons";
 // Import Swiper and modules
 // Import Swiper styles
 import "swiper/css";
@@ -153,7 +146,7 @@ import TheJourneysSlider from "components/TheJourneysSlider.vue";
 import TheJourneyExperienceList from "components/TheJourneyExperienceList.vue";
 import ThePoiSearchbar from "components/ThePoiSearchbar.vue";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
-import { dismiss } from "@ionic/core/dist/types/utils/overlays";
+import { authApp } from "google/firebase";
 
 const modes = {
     logbook: "logbook",
@@ -174,19 +167,14 @@ const mode = ref(modes.logbook);
 const slidesPerView = ref(3);
 const slides = ref();
 
-watch(
-    () => userStore.loggedIn,
-    (newValue, oldValue) => {
-        if (newValue && !oldValue) {
-            if (mode.value == modes.logbook) fetchJourneys();
-        } else {
-            //
-        }
+authApp.onAuthStateChanged((user) => {
+    if (user) {
+        if (mode.value == modes.logbook) fetchJourneys();
     }
-);
+});
 
 onIonViewDidEnter(() => {
-    if (!userStore.IsLoggedIn()) {
+    if (!userStore.isLoggedIn) {
         openJourneyCreationModal();
     }
 });
@@ -209,7 +197,7 @@ function setLoading(loading: boolean) {
 async function fetchJourneys() {
     setLoading(true);
     mode.value = modes.logbook;
-    if (userStore.IsLoggedIn()) {
+    if (userStore.isLoggedIn) {
         await userStore.fetchMyJourneys();
     } else {
         journeyStore.clear();
@@ -361,7 +349,7 @@ async function openAddPoiAlert() {
     }
 }
 async function openJourneySaveModal() {
-    if (!userStore.IsLoggedIn()) {
+    if (!userStore.isLoggedIn) {
         const alert = await alertController.create({
             message: "To Continue with this action pleas login with your account or register a new Account",
             header: "Connect with your account",
