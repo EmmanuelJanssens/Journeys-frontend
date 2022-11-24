@@ -20,35 +20,6 @@
                             >
                         </div>
                     </div>
-
-                    <!-- <div class="absolute bottom-0 invisible sm:visible w-full">
-                        <div class="flex flex-row justify-center space-x-2">
-                            <ion-button
-                                class="transition transform hover:-translate-y-1"
-                                color="tertiary"
-                                @click="toggle(tabs.exploring)"
-                                ref="exploringTab"
-                                >EXPLORING</ion-button
-                            >
-
-                            <span class=""></span>
-                            <ion-button
-                                class="transition transform hover:-translate-y-1"
-                                color="light"
-                                @click="toggle(tabs.sharing)"
-                                ref="sharingTab"
-                                >SHARING</ion-button
-                            >
-                            <span class=""></span>
-                            <ion-button
-                                class="transition transform hover:-translate-y-1"
-                                color="light"
-                                @click="toggle(tabs.journaling)"
-                                ref="journalingTab"
-                                >JOURNALING</ion-button
-                            >
-                        </div>
-                    </div> -->
                 </div>
             </div>
             <swiper
@@ -66,123 +37,47 @@
                 </swiper-slide>
             </swiper>
         </div>
-        <div class="overflow-auto">
-            <div class="relative min-h-[400]" ref="journalingElement">
-                <p class="text-2xl p-4 sm:text-5xl text-center">Journaling</p>
-                <div class="p-4 sm:flex sm:flex-col sm:items-center">
-                    <p class="p-4 max-w-4xl">
-                        Complete your dashboard with various adventures, save your memories to keep them forever. Thanks
-                        to our user friendly dashboard you will be able to edit your cards on the go or after you have
-                        completed your trip.
-                    </p>
-                    <div class="max-w-4xl">
-                        <ion-img class="object-contain" src="assets/images/features/featureImg3_2.png" />
-                    </div>
-                </div>
-            </div>
+        <div class="overflow-auto sm:snap-y sm:snap-mandatory">
+            <MainFeature
+                class="sm:container snap-center mx-auto"
+                title="Journaling"
+                description=" Complete your dashboard with various adventures, save your memories to keep them forever. Thanks to our
+                user friendly dashboard you will be able to edit your cards on the go or after you have completed your
+                trip."
+                image="assets/images/features/featureImg3_2.png" />
 
-            <div class="relative min-h-[540]" ref="sharingElement">
-                <p class="text-2xl p-4 sm:text-5xl text-center transform opac">Exploring</p>
-                <div class="p-4 sm:flex sm:flex-col sm:items-center">
-                    <p class="p-4 max-w-4xl">
-                        Plan places you want to visit be it local, cantonal or national, plan as you go and visualize
+            <MainFeature
+                class="container snap-center mx-auto"
+                title="Exploring"
+                description="Plan places you want to visit be it local, cantonal or national, plan as you go and visualize
                         your trip. Choose from many of our Points Of Interest, shared by other members Save your journey
                         and come back to it anytime to edit your story Inspire Others by sharing your experiences within
-                        the community
-                    </p>
-                    <div class="max-w-4xl">
-                        <ion-img class="object-contain" src="assets/images/features/featureImg3_6.png" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="relativemin-h-[540]" ref="exploringElement">
-                <div class="h-full">
-                    <p class="text-2xl p-4 sm:text-5xl text-center">Sharing</p>
-                    <div class="p-4 sm:flex sm:flex-col sm:items-center">
-                        <p class="p-4 max-w-4xl">
-                            Have you been to a place that no one else has seen ? Share them on our site and show the
+                        the community"
+                image="assets/images/features/featureImg3_6.png" />
+            <MainFeature
+                class="container snap-center mx-auto"
+                title="Sharing"
+                description="Have you been to a place that no one else has seen ? Share them on our site and show the
                             world your experiences. Create an account to add your new points of interest Look for the
-                            place you want to add on our interactive map Upload your pictures, and write your experience
-                        </p>
-                        <div class="max-w-4xl">
-                            <ion-img class="object-contain" src="assets/images/features/featureImg3_5.png" />
-                        </div>
-                    </div>
-                </div>
-            </div>
+                            place you want to add on our interactive map Upload your pictures, and write your experience"
+                image="assets/images/features/featureImg3_5.png" />
         </div>
     </ion-page>
 </template>
 
 <script lang="ts" setup>
-import { IonText, IonPage, IonImg, IonButton, IonHeader, onIonViewWillLeave, onIonViewWillEnter } from "@ionic/vue";
+import { IonText, IonPage, IonImg, IonButton, IonHeader } from "@ionic/vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Autoplay } from "swiper";
 import "swiper/less";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
 
-import { onMounted, ref, watch } from "vue";
-import { useIntersectionObserver, UseIntersectionObserverReturn } from "@vueuse/core";
+import { ref } from "vue";
 
-import { animationEnterLeft } from "animation/types";
 import "animation/basics.less";
-
-const journalingElement = ref();
-const sharingElement = ref();
-const exploringElement = ref();
-
-const enum tabs {
-    exploring = "exploring",
-    sharing = "sharing",
-    journaling = "journaling"
-}
-
-const currentTab = ref<tabs>(tabs.exploring);
-const exploringTab = ref();
-const sharingTab = ref();
-const journalingTab = ref();
+import MainFeature from "components/HomePage/MainFeature.vue";
 
 const modules = ref([Autoplay]);
-
-const animationObservers: UseIntersectionObserverReturn[] = [];
-
-type JourneysFeature = {
-    title: string;
-    description: string;
-    image: string;
-};
-
-function setAnimationClassList(observe: HTMLElement, intersecting: boolean) {
-    if (intersecting) {
-        observe.classList.add(animationEnterLeft);
-        return;
-    }
-    observe.classList.remove(animationEnterLeft);
-}
-
-onIonViewWillEnter(() => {
-    animationObservers.push(
-        useIntersectionObserver(journalingElement, ([{ isIntersecting }]: any) =>
-            setAnimationClassList(journalingElement.value, isIntersecting)
-        )
-    );
-    animationObservers.push(
-        useIntersectionObserver(sharingElement, ([{ isIntersecting }]: any) =>
-            setAnimationClassList(sharingElement.value, isIntersecting)
-        )
-    );
-    animationObservers.push(
-        useIntersectionObserver(exploringElement, ([{ isIntersecting }]: any) =>
-            setAnimationClassList(exploringElement.value, isIntersecting)
-        )
-    );
-});
-
-onIonViewWillLeave(() => {
-    animationObservers.forEach((element) => element.stop());
-});
-onMounted(() => {});
 </script>
 
 <style scoped lang="less">
