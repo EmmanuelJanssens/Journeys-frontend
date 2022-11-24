@@ -29,7 +29,7 @@ async function readFromStorage() {
             loggedIn: true
         });
         if (await userStore.refreshToken()) {
-            userStore.refreshInterval = setInterval(userStore.startRefreshInterval, 24000);
+            userStore.refreshInterval = setInterval(userStore.startRefreshInterval, 240000);
         }
     }
 }
