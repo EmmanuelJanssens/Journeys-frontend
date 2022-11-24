@@ -1,5 +1,13 @@
 import axios from "axios";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+    AuthProvider,
+    GoogleAuthProvider,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    User,
+    UserCredential,
+    UserInfo
+} from "firebase/auth";
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
 import { ExperienceDto, JourneyDto, UserDto } from "types/dtos";
@@ -26,16 +34,31 @@ export const useUserStore = defineStore("user", () => {
         }
     }
 
-    async function register(user: UserDto): Promise<boolean> {
+    async function registerWith(provider?: string): Promise<UserCredential | undefined> {
         try {
-            const response = await axios.post("/api/authentication/register", user);
-            await signInWithEmailAndPassword(authApp, user.email!, user.password!);
-            return true;
+            if (provider == "google") {
+                const googleAuthProvider = new GoogleAuthProvider();
+                const credentials = await signInWithPopup(authApp, googleAuthProvider);
+                const newUser: UserDto = {
+                    username: credentials.user.displayName ? credentials.user.displayName : credentials.user.email!,
+                    email: credentials.user.email!
+                };
+                const response = await axios.post("/api/authentication/provider", credentials.user);
+                return credentials;
+            }
         } catch (e) {
-            return false;
+            return undefined;
         }
     }
-
+    async function register(user: UserDto): Promise<UserCredential | undefined> {
+        try {
+            await axios.post("/api/authentication/register", user);
+            const signin = await signInWithEmailAndPassword(authApp, user.email!, user.password!);
+            return signin;
+        } catch (e) {
+            return undefined;
+        }
+    }
     async function logout() {
         authApp.signOut();
     }
@@ -120,6 +143,7 @@ export const useUserStore = defineStore("user", () => {
         isLoggedIn,
         login,
         logout,
+        registerWith,
         register,
         removeJourney,
         fetchMyJourneys,

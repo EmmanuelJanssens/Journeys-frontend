@@ -13,21 +13,38 @@
             </ion-toolbar>
         </ion-header>
         <section>
-            <ion-item class="ion-margin">
-                <ion-label position="floating">Email</ion-label>
-                <ion-input type="text" v-model="state.email" />
-            </ion-item>
-            <ion-text class="ion-margin" color="danger" v-if="v$.email.$error">{{
-                v$.email.$errors[0].$message
-            }}</ion-text>
-            <span class="separator"></span>
-            <ion-item class="ion-margin">
-                <ion-label position="floating">Password</ion-label>
-                <ion-input type="password" v-model="state.password" />
-            </ion-item>
-            <ion-text class="ion-margin" color="danger" v-if="v$.password.$error">{{
-                v$.password.$errors[0].$message
-            }}</ion-text>
+            <div class="flex flex-col items-center">
+                <div class="w-full">
+                    <ion-item class="ion-margin">
+                        <ion-label position="floating">Email</ion-label>
+                        <ion-input type="text" v-model="state.email" />
+                    </ion-item>
+                </div>
+                <div>
+                    <ion-text class="ion-margin" color="danger" v-if="v$.email.$error">{{
+                        v$.email.$errors[0].$message
+                    }}</ion-text>
+                    <ion-text class="ion-margin" color="danger" v-if="v$.email.$error">{{
+                        v$.email.$errors[0].$message
+                    }}</ion-text>
+                </div>
+
+                <div class="w-full">
+                    <ion-item class="ion-margin">
+                        <ion-label position="floating">Password</ion-label>
+                        <ion-input type="password" v-model="state.password" />
+                    </ion-item>
+                    <ion-text class="ion-margin" color="danger" v-if="v$.password.$error">{{
+                        v$.password.$errors[0].$message
+                    }}</ion-text>
+                </div>
+
+                <div>
+                    <ion-button @click="openProviderSignin"
+                        ><ion-icon slot="start" :icon="logoGoogle" />Sign in With google</ion-button
+                    >
+                </div>
+            </div>
         </section>
         <ion-footer>
             <ion-toolbar>
@@ -62,8 +79,9 @@ import { required } from "@vuelidate/validators";
 import { ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
 import { showToast } from "utils/utils";
-import { closeOutline } from "ionicons/icons";
+import { closeOutline, logoGoogle } from "ionicons/icons";
 import { authApp } from "google/firebase";
+import { GoogleAuthProvider, signInWithPopup } from "@firebase/auth";
 const state = ref({
     email: "",
     password: ""
@@ -77,6 +95,16 @@ const userStore = useUserStore();
 const isLoading = ref(false);
 const v$ = useVuelidate(rules, state);
 
+async function openProviderSignin() {
+    const credentials = await userStore.registerWith("google");
+    if (credentials) {
+        console.log(credentials);
+        dismissLoginModal(true);
+        showToast("Welcome " + authApp.currentUser?.displayName, "success");
+    } else {
+        showToast("Authentication error", "danger");
+    }
+}
 async function submitForm() {
     v$.value.$validate();
     if (!v$.value.$error) {

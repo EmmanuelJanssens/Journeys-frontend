@@ -70,6 +70,7 @@ export type JourneyDto = {
 };
 
 export type UserDto = {
+    uid?: string;
     username?: string;
     firstName?: string;
     lastName?: string;

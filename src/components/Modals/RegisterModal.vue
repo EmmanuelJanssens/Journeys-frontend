@@ -217,7 +217,7 @@ async function submitForm() {
             return;
         }
         const response = await userStore.register(state.value);
-        if (response == true) {
+        if (response) {
             dismissRegisterModal();
             showToast("Welcome " + authApp.currentUser?.displayName, "success");
         } else showToast("Authentication error", "danger");
