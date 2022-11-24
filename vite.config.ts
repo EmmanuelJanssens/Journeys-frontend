@@ -15,7 +15,8 @@ export default defineConfig({
             router: path.resolve(__dirname, "./src/router"),
             assets: path.resolve(__dirname, "./src/assets"),
             google: path.resolve(__dirname, "./src/google"),
-            map: path.resolve(__dirname, "./src/,map"),
+            map: path.resolve(__dirname, "./src/map"),
+            animation: path.resolve(__dirname, "./src/animation"),
             "@": path.resolve(__dirname, "./src")
         }
     },

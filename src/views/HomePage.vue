@@ -67,7 +67,7 @@
             </swiper>
         </div>
         <div class="overflow-auto">
-            <div class="relative min-h-[400]">
+            <div class="relative min-h-[400]" ref="journalingElement">
                 <p class="text-2xl p-4 sm:text-5xl text-center">Journaling</p>
                 <div class="p-4 sm:flex sm:flex-col sm:items-center">
                     <p class="p-4 max-w-4xl">
@@ -75,14 +75,14 @@
                         to our user friendly dashboard you will be able to edit your cards on the go or after you have
                         completed your trip.
                     </p>
-                    <div class="max-w-4xl transition transform hover:scale-150">
+                    <div class="max-w-4xl">
                         <ion-img class="object-contain" src="assets/images/features/featureImg3_2.png" />
                     </div>
                 </div>
             </div>
 
-            <div class="relative min-h-[540]">
-                <p class="text-2xl p-4 sm:text-5xl text-center">Exploring</p>
+            <div class="relative min-h-[540]" ref="sharingElement">
+                <p class="text-2xl p-4 sm:text-5xl text-center transform opac">Exploring</p>
                 <div class="p-4 sm:flex sm:flex-col sm:items-center">
                     <p class="p-4 max-w-4xl">
                         Plan places you want to visit be it local, cantonal or national, plan as you go and visualize
@@ -90,13 +90,13 @@
                         and come back to it anytime to edit your story Inspire Others by sharing your experiences within
                         the community
                     </p>
-                    <div class="max-w-4xl transition transform hover:scale-150">
+                    <div class="max-w-4xl">
                         <ion-img class="object-contain" src="assets/images/features/featureImg3_6.png" />
                     </div>
                 </div>
             </div>
 
-            <div class="relativemin-h-[540]">
+            <div class="relativemin-h-[540]" ref="exploringElement">
                 <div class="h-full">
                     <p class="text-2xl p-4 sm:text-5xl text-center">Sharing</p>
                     <div class="p-4 sm:flex sm:flex-col sm:items-center">
@@ -105,7 +105,7 @@
                             world your experiences. Create an account to add your new points of interest Look for the
                             place you want to add on our interactive map Upload your pictures, and write your experience
                         </p>
-                        <div class="max-w-4xl transition transform hover:scale-150">
+                        <div class="max-w-4xl">
                             <ion-img class="object-contain" src="assets/images/features/featureImg3_5.png" />
                         </div>
                     </div>
@@ -116,12 +116,17 @@
 </template>
 
 <script lang="ts" setup>
-import { IonText, IonContent, IonPage, IonImg, IonButton, IonHeader, onIonViewDidEnter } from "@ionic/vue";
+import { IonText, IonPage, IonImg, IonButton, IonHeader, onIonViewWillLeave, onIonViewWillEnter } from "@ionic/vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Autoplay } from "swiper";
 import "swiper/less";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
+
 import { onMounted, ref, watch } from "vue";
+import { useIntersectionObserver, UseIntersectionObserverReturn } from "@vueuse/core";
+
+import { animationEnterLeft } from "animation/types";
+import "animation/basics.less";
 
 const journalingElement = ref();
 const sharingElement = ref();
@@ -140,61 +145,43 @@ const journalingTab = ref();
 
 const modules = ref([Autoplay]);
 
+const animationObservers: UseIntersectionObserverReturn[] = [];
+
 type JourneysFeature = {
     title: string;
     description: string;
     image: string;
 };
 
-function setActive(element: any) {
-    (element.$el.classList as DOMTokenList).add("ion-color-tertiary");
-    (element.$el.classList as DOMTokenList).remove("ion-color-light");
-}
-function setInactive(element: any) {
-    (element.$el.classList as DOMTokenList).remove("ion-color-tertiary");
-    (element.$el.classList as DOMTokenList).add("ion-color-light");
-}
-watch(
-    () => currentTab.value,
-    (newValue, oldValue) => {
-        switch (newValue) {
-            case tabs.exploring:
-                setActive(exploringTab.value);
-
-                if (oldValue == tabs.sharing) setInactive(sharingTab.value);
-                if (oldValue == tabs.journaling) setInactive(journalingTab.value);
-                break;
-            case tabs.sharing:
-                setActive(sharingTab.value);
-
-                if (oldValue == tabs.exploring) setInactive(exploringTab.value);
-                if (oldValue == tabs.journaling) setInactive(journalingTab.value);
-                break;
-            case tabs.journaling:
-                setActive(journalingTab.value);
-
-                if (oldValue == tabs.exploring) setInactive(exploringTab.value);
-                if (oldValue == tabs.sharing) setInactive(sharingTab.value);
-                break;
-        }
+function setAnimationClassList(observe: HTMLElement, intersecting: boolean) {
+    if (intersecting) {
+        observe.classList.add(animationEnterLeft);
+        return;
     }
-);
-
-async function toggle(tab: tabs) {
-    switch (tab) {
-        case tabs.exploring:
-            currentTab.value = tabs.exploring;
-            break;
-        case tabs.sharing:
-            currentTab.value = tabs.sharing;
-            break;
-        case tabs.journaling:
-            currentTab.value = tabs.journaling;
-            break;
-    }
+    observe.classList.remove(animationEnterLeft);
 }
 
-onIonViewDidEnter(() => {});
+onIonViewWillEnter(() => {
+    animationObservers.push(
+        useIntersectionObserver(journalingElement, ([{ isIntersecting }]: any) =>
+            setAnimationClassList(journalingElement.value, isIntersecting)
+        )
+    );
+    animationObservers.push(
+        useIntersectionObserver(sharingElement, ([{ isIntersecting }]: any) =>
+            setAnimationClassList(sharingElement.value, isIntersecting)
+        )
+    );
+    animationObservers.push(
+        useIntersectionObserver(exploringElement, ([{ isIntersecting }]: any) =>
+            setAnimationClassList(exploringElement.value, isIntersecting)
+        )
+    );
+});
+
+onIonViewWillLeave(() => {
+    animationObservers.forEach((element) => element.stop());
+});
 onMounted(() => {});
 </script>
 
