@@ -37,9 +37,9 @@
                 </swiper-slide>
             </swiper>
         </div>
-        <div class="overflow-auto sm:snap-y sm:snap-mandatory">
+        <div class="overflow-auto">
             <MainFeature
-                class="sm:container snap-center mx-auto"
+                class="container mx-auto"
                 title="Journaling"
                 description=" Complete your dashboard with various adventures, save your memories to keep them forever. Thanks to our
                 user friendly dashboard you will be able to edit your cards on the go or after you have completed your
@@ -47,7 +47,7 @@
                 image="assets/images/features/featureImg3_2.png" />
 
             <MainFeature
-                class="container snap-center mx-auto"
+                class="container mx-auto"
                 title="Exploring"
                 description="Plan places you want to visit be it local, cantonal or national, plan as you go and visualize
                         your trip. Choose from many of our Points Of Interest, shared by other members Save your journey
@@ -55,11 +55,12 @@
                         the community"
                 image="assets/images/features/featureImg3_6.png" />
             <MainFeature
-                class="container snap-center mx-auto"
+                class="container mx-auto"
                 title="Sharing"
-                description="Have you been to a place that no one else has seen ? Share them on our site and show the
-                            world your experiences. Create an account to add your new points of interest Look for the
-                            place you want to add on our interactive map Upload your pictures, and write your experience"
+                description="Have you been to a place that no one else has seen ?
+            Share them on our site and show the world your experiences. Create an account to add your new points of
+            interest Look for the place you want to add on our interactive map Upload your pictures, and write your
+            experience"
                 image="assets/images/features/featureImg3_5.png" />
         </div>
     </ion-page>

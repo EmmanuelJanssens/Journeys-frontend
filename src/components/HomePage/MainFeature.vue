@@ -1,9 +1,9 @@
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <div class="relative min-h-[400] sm:min-h-full">
+    <div class="relative min-h-full">
         <p class="text-2xl p-4 sm:text-5xl text-center" ref="title">{{ props.title }}</p>
         <div class="p-4 sm:flex sm:flex-col-reverse sm:items-center">
-            <div class="max-w-4xl" ref="image">
+            <div class="max-w-4xl shadow-lg" ref="image">
                 <ion-img class="object-contain" :src="props.image" />
             </div>
             <p class="p-4 max-w-4xl" ref="description">
