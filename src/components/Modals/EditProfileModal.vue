@@ -51,7 +51,7 @@
                 <ion-item
                     :class="{
                         'ion-margin': true,
-                        'ion-invalid': pwd$.$error
+                        'ion-invalid': pwd$.password.$error
                     }">
                     <ion-label>New password</ion-label>
                     <ion-input
@@ -66,7 +66,7 @@
                 <ion-item
                     :class="{
                         'ion-margin': true,
-                        'ion-invalid': pwd$.$error
+                        'ion-invalid': pwd$.confirmPwd.$error
                     }">
                     <ion-label>confirm password</ion-label>
                     <ion-input
@@ -74,9 +74,9 @@
                         placeholder="..."
                         @ion-input="pwd$.confirmPwd.$validate()"
                         type="password"></ion-input>
-                    <ion-note slot="error" v-if="pwd$.confirmPwd.$error"
-                        >{{ pwd$.confirmPwd.$errors[0] }}{{ pwd$.confirmPwd.$errors[0].$message }}</ion-note
-                    >
+                    <ion-note slot="error" v-if="pwd$.confirmPwd.$error">{{
+                        pwd$.confirmPwd.$errors[0].$message
+                    }}</ion-note>
                 </ion-item>
             </ion-list>
 
