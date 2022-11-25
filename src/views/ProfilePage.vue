@@ -6,7 +6,7 @@
         <div class="relative min-h-[200px] max-h-[250px] sm:min-h-[300px] sm:max-h-[400px]">
             <div class="absolute z-50 h-full w-full">
                 <div class="h-full w-full p-2">
-                    <div class="flex flex-col text-center m-0 text-white h-full justify-between">
+                    <div class="flex flex-col text-center m-0 text-white h-full justify-between items-center">
                         <div class="flex flex-col justify-items-center">
                             <ion-text
                                 ><h1 class="text-4xl md:text-8xl">
@@ -19,8 +19,20 @@
                                 </p></ion-text
                             >
                         </div>
-                        <div>
-                            <ion-button @click="openEditModal" color="tertiary">Edit your profile</ion-button>
+
+                        <div class="flex flex-col items-center">
+                            <ion-button
+                                @click="verifyEmail"
+                                color="primary"
+                                button
+                                v-if="authApp.currentUser?.emailVerified"
+                                ><ion-icon slot="start" :icon="mailUnreadOutline"></ion-icon>
+                                <ion-label class="">Verify email</ion-label>
+                                <ion-spinner name="dots" v-if="mailSending"></ion-spinner
+                            ></ion-button>
+                            <ion-button @click="openEditModal" color="tertiary" button
+                                ><ion-icon slot="start" :icon="pencilOutline"></ion-icon>Edit your profile</ion-button
+                            >
                         </div>
                     </div>
                 </div>
@@ -42,8 +54,9 @@
         </div>
 
         <div class="overflow-auto h-full">
-            <div class=" ">
-                <ion-col v-if="currentContent == 'statitsics'">
+            <h1>A quick overview</h1>
+            <div class="">
+                <div class="w-full p-4">
                     <ion-card>
                         <ion-card-header>
                             <ion-card-title>Here are your statistics</ion-card-title>
@@ -53,14 +66,17 @@
                             <p>Total number of experiences {{ nExperiences }}</p>
                         </ion-card-content>
                     </ion-card>
-                </ion-col>
+                </div>
+                <div></div>
             </div>
+            <TheJourneysSlider />
         </div>
     </ion-page>
 </template>
 
 <script lang="ts" setup>
 import {
+    IonSpinner,
     IonNote,
     IonInput,
     IonToggle,
@@ -96,16 +112,18 @@ import "swiper/less";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
 import { ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
-import { chevronForwardOutline } from "ionicons/icons";
+import { chevronForwardOutline, mailUnreadOutline, pencilOutline } from "ionicons/icons";
 import { authApp } from "google/firebase";
 import EditProfileModal from "components/Modals/EditProfileModal.vue";
-
+import TheJourneysSlider from "components/TheJourneysSlider.vue";
+import { onAuthStateChanged, sendEmailVerification } from "@firebase/auth";
+import { showToast } from "utils/utils";
 const modules = ref([Autoplay]);
 const userStore = useUserStore();
 const nJourneys = ref(0);
 const nExperiences = ref(0);
+const mailSending = ref(false);
 const currentContent = ref("statitsics");
-
 const state = ref({
     oldPassword: "",
     newPassword: "",
@@ -113,9 +131,25 @@ const state = ref({
 });
 
 onIonViewDidEnter(async () => {
-    await userStore.fetchMyProfile();
+    onAuthStateChanged(authApp, async (user) => {
+        if (user) {
+            await userStore.fetchMyProfile();
+            console.log(user);
+        }
+    });
 });
 
+async function verifyEmail() {
+    mailSending.value = true;
+    const user = authApp.currentUser;
+    try {
+        await sendEmailVerification(user!);
+        showToast("An email has been sent check your inbox", "success");
+    } catch (e) {
+        showToast("Failed to send an email", "danger");
+    }
+    mailSending.value = false;
+}
 async function openEditModal() {
     console.log("wowo");
     const modal = await modalController.create({

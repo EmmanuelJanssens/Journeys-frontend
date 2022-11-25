@@ -44,6 +44,14 @@
                         <ion-text class="ion-margin" color="danger" v-if="v$.lastName.$error">{{
                             v$.lastName.$errors[0].$message
                         }}</ion-text>
+                        <div class="ion-margin flex justify-between">
+                            <ion-button class="w-1/2"
+                                ><ion-icon slot="start" :icon="lockClosedOutline"></ion-icon>Change password</ion-button
+                            >
+                            <ion-button class="w-1/2"
+                                ><ion-icon slot="start" :icon="mailOpenOutline"></ion-icon>Change email</ion-button
+                            >
+                        </div>
                     </ion-col>
                 </ion-row>
             </ion-grid>
@@ -91,7 +99,7 @@ import { FilePicker } from "@capawesome/capacitor-file-picker";
 import { authApp, storageRef } from "google/firebase";
 import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
 import { showToast } from "utils/utils";
-import { addOutline, closeOutline } from "ionicons/icons";
+import { addOutline, closeOutline, lockClosedOutline, mailOpenOutline } from "ionicons/icons";
 import { email, minLength, required, sameAs } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import { popoverController } from "@ionic/core";
@@ -105,9 +113,9 @@ const state = ref({
     banner: [""]
 });
 const rules = {
-    username: { required, minLength: minLength(4) },
-    firstName: { required },
-    lastName: { required }
+    username: { minLength: minLength(4) },
+    firstName: {},
+    lastName: {}
 };
 const v$ = useVuelidate(rules, state);
 
@@ -120,21 +128,30 @@ let images = ref<
     }[]
 >([]);
 
-onMounted(() => {});
+onMounted(() => {
+    state.value.username = userStore.currentUser?.additional?.username!;
+    state.value.citation = userStore.currentUser?.additional?.citation!;
+    state.value.banner = userStore.currentUser?.additional?.banner!;
+    state.value.firstName = userStore.currentUser?.additional?.firstName!;
+    state.value.lastName = userStore.currentUser?.additional?.lastName!;
+});
 
 async function submitForm() {
     v$.value.$validate();
     if (!v$.value.$error) {
-        if (state.value.username != authApp.currentUser?.displayName) {
-            const validUsername = await userStore.checkUserName(state.value.username);
-            if (validUsername) {
-                modalController.dismiss(state.value);
-            } else {
-                showToast("Username not available", "danger");
-            }
-        } else {
-            modalController.dismiss(state.value);
+        const userUdpated = state.value.username != userStore.currentUser?.additional?.username;
+        let validUsername = true;
+        if (userUdpated) {
+            validUsername = await userStore.checkUserName(state.value.username);
         }
+        if (validUsername) {
+            await userStore.saveUser(state.value);
+            modalController.dismiss();
+            showToast("Modification successfull", "success");
+        } else {
+            showToast("Username not available", "danger");
+        }
+        modalController.dismiss(state.value);
     }
 }
 </script>

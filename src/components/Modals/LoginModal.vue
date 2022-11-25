@@ -95,16 +95,18 @@ const isLoading = ref(false);
 const v$ = useVuelidate(rules, state);
 
 async function openProviderSignin() {
+    isLoading.value = true;
     const credentials = await userStore.registerWith("google");
     if (credentials) {
-        console.log(credentials);
         dismissLoginModal(true);
         showToast("Welcome " + authApp.currentUser?.displayName, "success");
     } else {
         await userStore.logout();
         showToast("Authentication error", "danger");
     }
+    isLoading.value = false;
 }
+
 async function submitForm() {
     v$.value.$validate();
     if (!v$.value.$error) {

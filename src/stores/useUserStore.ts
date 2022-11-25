@@ -1,7 +1,9 @@
 import axios from "axios";
 import {
     AuthProvider,
+    browserLocalPersistence,
     GoogleAuthProvider,
+    setPersistence,
     signInWithEmailAndPassword,
     signInWithPopup,
     User,
@@ -23,7 +25,7 @@ export const useUserStore = defineStore("user", () => {
             completed: boolean;
             firstName?: string;
             lastName?: string;
-            banner?: string;
+            banner?: string[];
             citation?: string;
         };
     }>();
@@ -94,18 +96,15 @@ export const useUserStore = defineStore("user", () => {
     async function logout() {
         await authApp.signOut();
     }
-    async function saveUser(user: UserDto, oldUsername: string): Promise<UserDto | undefined> {
+    async function saveUser(user: UserDto): Promise<UserDto | undefined> {
         try {
-            const token = await authApp.currentUser?.getIdToken(false);
-            const update = {
-                user: user,
-                oldUsername: oldUsername
-            };
-            const response = await axios.put("/api/user", update, {
+            const token = await authApp.currentUser?.getIdToken(true);
+            const response = await axios.put("/api/user", user, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
+            currentUser.value!.additional! = response.data;
             return response.data as UserDto;
         } catch (e) {
             return undefined;
@@ -114,7 +113,7 @@ export const useUserStore = defineStore("user", () => {
 
     async function fetchMyJourneys(): Promise<boolean> {
         try {
-            const token = await authApp.currentUser?.getIdToken(false);
+            const token = await authApp.currentUser?.getIdToken(true);
             const response = await axios.get("/api/user/journeys", {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -129,6 +128,7 @@ export const useUserStore = defineStore("user", () => {
 
     async function fetchMyProfile(): Promise<boolean> {
         try {
+            console.log(await authApp.currentUser);
             const token = await authApp.currentUser?.getIdToken(false);
             const response = await axios.get("/api/user/profile", {
                 headers: {

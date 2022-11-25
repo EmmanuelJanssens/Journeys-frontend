@@ -65,7 +65,10 @@
                                 @ready="setLoading(false)" />
                         </ion-content>
 
-                        <TheJourneysSlider v-if="mode == modes.logbook" @header-clicked="showExperiences" />
+                        <TheJourneysSlider
+                            class="journeys-slides"
+                            v-if="mode == modes.logbook"
+                            @header-clicked="showExperiences" />
                     </ion-col>
                     <ion-col
                         v-if="mode == modes.viewJourney || mode == modes.edition || mode == modes.editJourney"
@@ -456,7 +459,17 @@ async function openJourneySaveModal() {
     }
 }
 </script>
-<style lang="less">
+<style lang="less" scoped>
+.journeys-slides {
+    position: absolute;
+    width: 80%;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    bottom: 20px;
+    z-index: 999;
+}
 .side {
     min-width: 200px;
     max-width: 400px;

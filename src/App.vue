@@ -9,10 +9,12 @@
 <script lang="ts" setup>
 import { IonApp, IonRouterOutlet, IonContent, modalController } from "@ionic/vue";
 import DisclaimerModal from "components/Modals/DisclaimerModal.vue";
+import { authApp } from "google/firebase";
 import { onMounted } from "vue";
 
 onMounted(async () => {
     const disclaimer = localStorage.getItem("disclaimer");
+
     if (disclaimer != null && disclaimer == "true") {
         return;
     } else {
@@ -23,7 +25,6 @@ onMounted(async () => {
         await modal.present();
 
         const { data, role } = await modal.onDidDismiss();
-        console.log(data.doNotShowagain);
         if (data?.doNotShowagain) {
             localStorage.setItem("disclaimer", data?.doNotShowagain);
         }

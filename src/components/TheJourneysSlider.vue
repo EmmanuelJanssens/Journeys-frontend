@@ -1,5 +1,5 @@
 <template>
-    <section v-if="userStore.myJourneys" class="journeys-slides">
+    <section v-if="userStore.myJourneys">
         <swiper
             :slides-per-view="slidesPerView"
             :center-insufficient-slides="true"
@@ -66,17 +66,6 @@ function updateView() {
 }
 </script>
 <style lang="less" scoped>
-.journeys-slides {
-    position: absolute;
-    width: 80%;
-    left: 0;
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    bottom: 20px;
-    z-index: 999;
-}
-
 .journey-card {
     max-width: 350px;
     max-height: 450px;

@@ -1,9 +1,14 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getStorage, ref } from "firebase/storage";
-import { browserLocalPersistence, getAuth, setPersistence, signInWithCustomToken } from "firebase/auth";
+import {
+    browserLocalPersistence,
+    browserSessionPersistence,
+    getAuth,
+    initializeAuth,
+    setPersistence
+} from "firebase/auth";
 
-import os from "os";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -21,8 +26,9 @@ const firebaseConfig = {
 
 const fbapp = initializeApp(firebaseConfig);
 const storage = getStorage(fbapp, import.meta.env.VITE_FIREBASE_BUCKET);
-const auth = getAuth();
+
+const auth = getAuth(fbapp);
+
 export const storageRef = ref(storage, "images/");
 export const authApp = auth;
-
 export const firebaseApp = fbapp;
