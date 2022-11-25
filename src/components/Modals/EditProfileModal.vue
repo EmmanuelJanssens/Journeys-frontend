@@ -55,7 +55,7 @@
                     }">
                     <ion-label>New password</ion-label>
                     <ion-input
-                        v-model="passwordState.password"
+                        v-model="pwdState.password"
                         placeholder="..."
                         @ion-input="pwd$.password.$validate()"
                         type="password"></ion-input>
@@ -70,7 +70,7 @@
                     }">
                     <ion-label>confirm password</ion-label>
                     <ion-input
-                        v-model="passwordState.confirmPwd"
+                        v-model="pwdState.confirmPwd"
                         placeholder="..."
                         @ion-input="pwd$.confirmPwd.$validate()"
                         type="password"></ion-input>
@@ -148,19 +148,16 @@ const state = ref({
     citation: "",
     banner: [""]
 });
-
-const passwordState = ref({
-    password: "",
-    confirmPwd: ""
-});
-const emailState = ref({
-    email: ""
-});
-const pawsswordRef = computed(() => passwordState.value.password);
-
 const rules = {
     username: { minLength: minLength(4) }
 };
+const v$ = useVuelidate(rules, state);
+
+const pwdState = ref({
+    password: "",
+    confirmPwd: ""
+});
+const pwdRef = computed(() => pwdState.value.password);
 const pwdRules = {
     password: {
         required,
@@ -171,17 +168,28 @@ const pwdRules = {
     },
     confirmPwd: {
         required,
-        sameAs: sameAs(pawsswordRef)
+        sameAs: sameAs(pwdRef)
     }
 };
+const pwd$ = useVuelidate(pwdRules, pwdState);
+
+const emailState = ref({
+    email: ""
+});
 const emailRules = {
     email: { required, email }
 };
-const v$ = useVuelidate(rules, state);
-const pwd$ = useVuelidate(pwdRules, passwordState);
 const email$ = useVuelidate(emailState, emailRules);
 
 const userStore = useUserStore();
+
+onMounted(() => {
+    state.value.username = userStore.currentUser?.additional?.username!;
+    state.value.citation = userStore.currentUser?.additional?.citation!;
+    state.value.banner = userStore.currentUser?.additional?.banner!;
+    state.value.firstName = userStore.currentUser?.additional?.firstName!;
+    state.value.lastName = userStore.currentUser?.additional?.lastName!;
+});
 
 async function changeValues() {
     const user = authApp.currentUser;
@@ -189,7 +197,7 @@ async function changeValues() {
         if (changePassword.value) {
             pwd$.value.$validate();
             if (!pwd$.value.error) {
-                updatePassword(user!, passwordState.value.password);
+                updatePassword(user!, pwdState.value.password);
                 changePassword.value = false;
                 showToast("Modification saved", "success");
             }
@@ -205,14 +213,6 @@ async function changeValues() {
         showToast("Failed to save modifications", "danger");
     }
 }
-
-onMounted(() => {
-    state.value.username = userStore.currentUser?.additional?.username!;
-    state.value.citation = userStore.currentUser?.additional?.citation!;
-    state.value.banner = userStore.currentUser?.additional?.banner!;
-    state.value.firstName = userStore.currentUser?.additional?.firstName!;
-    state.value.lastName = userStore.currentUser?.additional?.lastName!;
-});
 
 async function submitForm() {
     v$.value.$validate();

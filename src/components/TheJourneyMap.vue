@@ -65,7 +65,8 @@ onMounted(async () => {
     await JourneyMapCapacitor.loadMap(
         "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg",
         "Map",
-        center
+        center,
+        "mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx"
     );
     map = await JourneyMapCapacitor.getMap()!;
     map.on("load", () => {
@@ -89,7 +90,9 @@ onMounted(async () => {
             emit("poiClicked", e.features![0].properties as PoiDto, e);
         }
     );
-
+    map.on("click", mapLayer.poi_list + "_cluster", (e) => {
+        onClusterClick(e);
+    });
     map.on("contextmenu", async (e: MapMouseEvent) => {
         if (props.mode == "editJourney" || props.mode == "edition") {
             const alert = await alertController.create({
@@ -137,7 +140,23 @@ onMounted(async () => {
         }
     });
 });
+function onClusterClick(e: MapMouseEvent) {
+    const features = map.queryRenderedFeatures(e.point, {
+        layers: [mapLayer.poi_list + "_cluster"]
+    });
 
+    const clusterId = features![0].properties!.cluster_id;
+    const source: maplibregl.GeoJSONSource = map.getSource(mapLayer.poi_list) as maplibregl.GeoJSONSource;
+    source.getClusterExpansionZoom(clusterId, (err: any, zoom: any) => {
+        if (err) return;
+        if (features![0].geometry.type === "Point") {
+            map.easeTo({
+                center: [features![0].geometry.coordinates[0], features![0].geometry.coordinates[1]],
+                zoom: zoom
+            });
+        }
+    });
+}
 watch(
     () => journeyStore.viewJourney,
     async (newVal) => {

@@ -21,7 +21,7 @@
                         </div>
 
                         <div class="flex flex-col items-center">
-                            <ion-button @click="verifyEmail" color="primary" button v-if="notVerified"
+                            <ion-button @click="verifyEmail" color="primary" button v-if="!verified"
                                 ><ion-icon slot="start" :icon="mailUnreadOutline"></ion-icon>
                                 <ion-label class="">Verify email</ion-label>
                                 <ion-spinner name="dots" v-if="mailSending"></ion-spinner
@@ -73,32 +73,18 @@
 <script lang="ts" setup>
 import {
     IonSpinner,
-    IonNote,
-    IonInput,
-    IonToggle,
     IonIcon,
     IonText,
-    IonContent,
     IonPage,
     IonImg,
     IonButton,
     IonHeader,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonItem,
     IonLabel,
-    IonList,
     onIonViewDidEnter,
     IonCard,
     IonCardContent,
     IonCardHeader,
-    alertController,
-    IonCardSubtitle,
     IonCardTitle,
-    IonButtons,
-    ToggleCustomEvent,
-    InputCustomEvent,
     modalController
 } from "@ionic/vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
@@ -119,18 +105,12 @@ const userStore = useUserStore();
 const nJourneys = ref(0);
 const nExperiences = ref(0);
 const mailSending = ref(false);
-const notVerified = ref(true);
-const currentContent = ref("statitsics");
-const state = ref({
-    oldPassword: "",
-    newPassword: "",
-    confirmPassword: ""
-});
+const verified = ref(true);
 
 onIonViewDidEnter(async () => {
     onAuthStateChanged(authApp, async (user) => {
         if (user) {
-            notVerified.value = false;
+            verified.value = user.emailVerified;
             await userStore.fetchMyProfile();
             console.log(user);
         }
@@ -149,7 +129,6 @@ async function verifyEmail() {
     mailSending.value = false;
 }
 async function openEditModal() {
-    console.log("wowo");
     const modal = await modalController.create({
         component: EditProfileModal
     });
