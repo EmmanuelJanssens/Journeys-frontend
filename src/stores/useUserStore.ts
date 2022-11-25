@@ -11,18 +11,48 @@ import {
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
 import { ExperienceDto, JourneyDto, UserDto } from "types/dtos";
-
+import { uniqueNamesGenerator, adjectives, colors, animals, Config } from "unique-names-generator";
 import { ref } from "vue";
 
 export const useUserStore = defineStore("user", () => {
-    const fbUser = ref();
+    const currentUser = ref<{
+        fb?: User;
+        additional?: {
+            username: string;
+            visibility: string;
+            completed: boolean;
+            firstName?: string;
+            lastName?: string;
+            banner?: string;
+            citation?: string;
+        };
+    }>();
+
     const isLoggedIn = ref(false);
     const myJourneys = ref<JourneyDto[]>();
     const myExperiences = ref<ExperienceDto[]>([]);
 
-    authApp.onAuthStateChanged((user) => {
-        fbUser.value = user;
-        isLoggedIn.value = fbUser.value != undefined;
+    const namesConfig: Config = {
+        dictionaries: [adjectives, colors, animals],
+        separator: "-",
+        length: 3
+    };
+    authApp.onAuthStateChanged(async (fbuser) => {
+        isLoggedIn.value = fbuser != undefined;
+        if (fbuser) {
+            const token = await authApp.currentUser?.getIdToken(true);
+
+            const response = await axios.get("api/user/", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const user = response.data;
+            currentUser.value = {
+                fb: user,
+                additional: user
+            };
+        }
     });
 
     async function login(email: string, password: string): Promise<boolean> {
@@ -39,11 +69,13 @@ export const useUserStore = defineStore("user", () => {
             if (provider == "google") {
                 const googleAuthProvider = new GoogleAuthProvider();
                 const credentials = await signInWithPopup(authApp, googleAuthProvider);
+                const name = uniqueNamesGenerator(namesConfig);
                 const newUser: UserDto = {
-                    username: credentials.user.displayName ? credentials.user.displayName : credentials.user.email!,
-                    email: credentials.user.email!
+                    username: name,
+                    email: credentials.user.email!,
+                    uid: credentials.user.uid
                 };
-                const response = await axios.post("/api/authentication/provider", credentials.user);
+                const response = await axios.post("/api/authentication/provider", newUser);
                 return credentials;
             }
         } catch (e) {
@@ -60,7 +92,7 @@ export const useUserStore = defineStore("user", () => {
         }
     }
     async function logout() {
-        authApp.signOut();
+        await authApp.signOut();
     }
     async function saveUser(user: UserDto, oldUsername: string): Promise<UserDto | undefined> {
         try {
@@ -98,11 +130,12 @@ export const useUserStore = defineStore("user", () => {
     async function fetchMyProfile(): Promise<boolean> {
         try {
             const token = await authApp.currentUser?.getIdToken(false);
-            const response = await axios.get("/api/user/", {
+            const response = await axios.get("/api/user/profile", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
+
             return true;
         } catch (e) {
             return false;
@@ -111,17 +144,10 @@ export const useUserStore = defineStore("user", () => {
 
     async function checkUserName(username: string): Promise<boolean> {
         try {
-            const token = JSON.parse(localStorage.getItem("user")!).token;
             const user = {
-                user: {
-                    username: username
-                }
+                username: username
             };
-            const response = await axios.post("/api/user/username", user, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            const response = await axios.post("/api/user/username", user);
             if (response.data) return true;
             else return false;
         } catch (e) {
@@ -150,6 +176,7 @@ export const useUserStore = defineStore("user", () => {
         fetchMyProfile,
         saveUser,
         checkUserName,
-        updatePassword
+        updatePassword,
+        currentUser
     };
 });

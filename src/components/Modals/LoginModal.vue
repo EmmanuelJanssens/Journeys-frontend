@@ -81,7 +81,6 @@ import { useUserStore } from "stores/useUserStore";
 import { showToast } from "utils/utils";
 import { closeOutline, logoGoogle } from "ionicons/icons";
 import { authApp } from "google/firebase";
-import { GoogleAuthProvider, signInWithPopup } from "@firebase/auth";
 const state = ref({
     email: "",
     password: ""
@@ -102,6 +101,7 @@ async function openProviderSignin() {
         dismissLoginModal(true);
         showToast("Welcome " + authApp.currentUser?.displayName, "success");
     } else {
+        await userStore.logout();
         showToast("Authentication error", "danger");
     }
 }

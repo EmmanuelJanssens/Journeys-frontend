@@ -1,9 +1,9 @@
 <template>
     <ion-page>
         <ion-header class="ion-no-border">
-            <TheJourneysHeader class="" />
+            <TheJourneysHeader />
         </ion-header>
-        <div class="relative min-h-[200px] max-h-[250px] sm:min-h-[300px] sm:max-h-[400px]" id="banner">
+        <div class="relative min-h-[200px] max-h-[250px] sm:min-h-[300px] sm:max-h-[400px]">
             <div class="absolute z-50 h-full w-full">
                 <div class="h-full w-full p-2">
                     <div class="flex flex-col text-center m-0 text-white h-full justify-between">
@@ -37,7 +37,7 @@
                 </swiper-slide>
             </swiper>
         </div>
-        <div class="overflow-auto">
+        <div class="overflow-auto h-full">
             <MainFeature
                 class="container mx-auto"
                 title="Journaling"

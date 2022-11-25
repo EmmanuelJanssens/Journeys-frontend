@@ -15,55 +15,37 @@
             <ion-grid>
                 <ion-row>
                     <ion-col>
-                        <ion-list>
-                            <ion-item class="ion-margin">
-                                <ion-label>First Name</ion-label>
-                                <ion-input type="text" v-model="state.firstName" />
-                            </ion-item>
-                            <ion-text class="ion-margin" color="danger" v-if="v$.firstName.$error">{{
-                                v$.firstName.$errors[0].$message
-                            }}</ion-text>
-                            <ion-item class="ion-margin">
-                                <ion-label>lastName</ion-label>
-                                <ion-input type="text" v-model="state.lastName" />
-                            </ion-item>
-                            <ion-item class="ion-margin">
-                                <ion-label>Username</ion-label>
-                                <ion-input type="text" v-model="state.username" />
-                            </ion-item>
-                            <ion-item class="ion-margin">
-                                <ion-label>Citation</ion-label>
-                                <ion-input type="text" v-model="state.citation" />
-                            </ion-item>
-                        </ion-list>
+                        <ion-item
+                            :class="{
+                                'ion-margin': true,
+                                'ion-invalid': v$.username.$error
+                            }">
+                            <ion-label>Username</ion-label>
+                            <ion-input type="text" v-model="state.username" />
+                            <ion-note v-if="v$.username.$error" slot="error">{{ v$.username.$errors[0] }}</ion-note>
+                        </ion-item>
+                        <ion-item class="ion-margin">
+                            <ion-label>First Name</ion-label>
+                            <ion-input type="text" v-model="state.firstName" />
+                        </ion-item>
+                        <ion-text class="ion-margin" color="danger" v-if="v$.firstName.$error">{{
+                            v$.firstName.$errors[0].$message
+                        }}</ion-text>
+                        <ion-item class="ion-margin">
+                            <ion-label>lastName</ion-label>
+                            <ion-input type="text" v-model="state.lastName" />
+                        </ion-item>
+
+                        <ion-item class="ion-margin">
+                            <ion-label>Citation</ion-label>
+                            <ion-input type="text" v-model="state.citation" />
+                        </ion-item>
 
                         <ion-text class="ion-margin" color="danger" v-if="v$.lastName.$error">{{
                             v$.lastName.$errors[0].$message
                         }}</ion-text>
                     </ion-col>
                 </ion-row>
-                <!--
-                <ion-row>
-                    <ion-col>
-                        <ion-item>
-                            <ion-label position="fixed">Your pictures</ion-label>
-                            <div class="images">
-                                <div class="image-item" v-for="image in images" v-bind:key="image.url">
-                                    <ion-thumbnail>
-                                        <ion-img :src="image.url" />
-                                    </ion-thumbnail>
-                                    <ion-icon
-                                        slot="icon-only"
-                                        :icon="closeOutline"
-                                        @click="removeImage(image.url)"></ion-icon>
-                                </div>
-
-                                <ion-button class="add-image" @click="selectImage" slot="icon-only">
-                                    <ion-icon size="large" :icon="addOutline"> </ion-icon>
-                                </ion-button>
-                            </div> </ion-item
-                    ></ion-col>
-                </ion-row> -->
             </ion-grid>
         </ion-content>
         <ion-footer>
@@ -95,6 +77,7 @@ import {
     IonToolbar,
     IonItem,
     IonLabel,
+    IonNote,
     IonImg,
     IonThumbnail,
     IonTextarea,
@@ -114,7 +97,6 @@ import { useVuelidate } from "@vuelidate/core";
 import { popoverController } from "@ionic/core";
 import { useUserStore } from "stores/useUserStore";
 
-const userStore = useUserStore();
 const state = ref({
     username: "",
     firstName: "",
@@ -122,15 +104,14 @@ const state = ref({
     citation: "",
     banner: [""]
 });
-
 const rules = {
     username: { required, minLength: minLength(4) },
     firstName: { required },
     lastName: { required }
 };
-
 const v$ = useVuelidate(rules, state);
-const files = ref<Array<any>>([]);
+
+const userStore = useUserStore();
 
 let images = ref<
     {
@@ -155,23 +136,6 @@ async function submitForm() {
             modalController.dismiss(state.value);
         }
     }
-}
-
-async function selectImage() {
-    const result = await FilePicker.pickFiles({
-        multiple: true
-    });
-    result.files.forEach((file) => {
-        const url = URL.createObjectURL(file.blob!);
-        files.value.push({
-            file: file,
-            url: url
-        });
-        images.value?.push({
-            url: url,
-            isFs: false
-        });
-    });
 }
 </script>
 <style scoped lang="less"></style>
