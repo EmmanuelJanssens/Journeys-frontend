@@ -21,11 +21,7 @@
                         </div>
 
                         <div class="flex flex-col items-center">
-                            <ion-button
-                                @click="verifyEmail"
-                                color="primary"
-                                button
-                                v-if="authApp.currentUser?.emailVerified"
+                            <ion-button @click="verifyEmail" color="primary" button v-if="notVerified"
                                 ><ion-icon slot="start" :icon="mailUnreadOutline"></ion-icon>
                                 <ion-label class="">Verify email</ion-label>
                                 <ion-spinner name="dots" v-if="mailSending"></ion-spinner
@@ -123,6 +119,7 @@ const userStore = useUserStore();
 const nJourneys = ref(0);
 const nExperiences = ref(0);
 const mailSending = ref(false);
+const notVerified = ref(true);
 const currentContent = ref("statitsics");
 const state = ref({
     oldPassword: "",
@@ -133,6 +130,7 @@ const state = ref({
 onIonViewDidEnter(async () => {
     onAuthStateChanged(authApp, async (user) => {
         if (user) {
+            notVerified.value = false;
             await userStore.fetchMyProfile();
             console.log(user);
         }
