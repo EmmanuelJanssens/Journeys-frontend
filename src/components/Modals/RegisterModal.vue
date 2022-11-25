@@ -62,6 +62,7 @@
                                 v-model="state.username"
                                 @ion-input="async () => await v$.username.$validate()"
                                 @ion-change="ifZero($event, () => v$.username.$reset())" />
+                            <ion-note slot="helper">*required</ion-note>
                             <ion-note v-if="v$.username.$error" slot="error">{{
                                 v$.username.$errors[0].$message
                             }}</ion-note>
@@ -81,6 +82,7 @@
                                 v-model="state.email"
                                 @ion-input="() => v$.email.$validate()"
                                 @ion-change="ifZero($event, () => v$.email.$reset())" />
+                            <ion-note slot="helper">*required</ion-note>
                             <ion-note v-if="v$.email.$error" slot="error">{{ v$.email.$errors[0].$message }}</ion-note>
                         </ion-item>
                     </ion-col>
@@ -98,6 +100,7 @@
                                 v-model="state.password"
                                 @ion-input="() => v$.password.$validate()"
                                 @ion-change="ifZero($event, () => v$.password.$reset())" />
+                            <ion-note slot="helper">*required</ion-note>
                             <ion-note v-if="v$.password.$error" slot="error">{{
                                 v$.password.$errors[0].$message
                             }}</ion-note>
@@ -180,6 +183,9 @@ const rules = {
     username: {
         required,
         minLenght: minLength(5),
+        noSpecial: helpers.withMessage("Can only contains letters/numbers and -,_", (value: string) =>
+            /^[a-zA-Z0-9-_]+$/.test(value)
+        ),
         unique: helpers.withMessage("Not available", (value: string) => true)
     },
     firstName: {},
