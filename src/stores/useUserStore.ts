@@ -128,7 +128,6 @@ export const useUserStore = defineStore("user", () => {
 
     async function fetchMyProfile(): Promise<boolean> {
         try {
-            console.log(await authApp.currentUser);
             const token = await authApp.currentUser?.getIdToken(false);
             const response = await axios.get("/api/user/profile", {
                 headers: {

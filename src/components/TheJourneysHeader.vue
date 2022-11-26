@@ -2,12 +2,16 @@
 <template>
     <ion-toolbar>
         <ion-buttons slot="end">
-            <ion-button router-link="/home"> HOME </ion-button>
+            <ion-button router-link="/home" color="primary"> HOME </ion-button>
             <!-- <ion-button router-link="/about"> ABOUT </ion-button> -->
-            <ion-button router-link="/logbook"> LOGBOOK </ion-button>
-            <ion-button @click="openModal(LoginModal)" v-if="userStore.isLoggedIn == false">Login</ion-button>
-            <ion-button @click="openModal(RegisterModal)" v-if="userStore.isLoggedIn == false">Register</ion-button>
-            <ion-button v-if="userStore.isLoggedIn == true" @click="onPopOver">
+            <ion-button router-link="/logbook" color="light"> LOGBOOK </ion-button>
+            <ion-button @click="openModal(LoginModal)" v-if="userStore.isLoggedIn == false" color="light"
+                >LOGIN</ion-button
+            >
+            <ion-button @click="openModal(RegisterModal)" v-if="userStore.isLoggedIn == false" color="light"
+                >REGISTER</ion-button
+            >
+            <ion-button v-if="userStore.isLoggedIn == true" @click="onPopOver" color="light">
                 PROFILE <ion-icon slot="end" :src="caretDownOutline"> </ion-icon
             ></ion-button>
         </ion-buttons>
@@ -66,4 +70,8 @@ async function openModal(component: any) {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+ion-toolbar {
+    --background: transparent;
+}
+</style>

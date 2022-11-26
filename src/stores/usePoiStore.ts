@@ -1,5 +1,6 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
+import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
 import { PoiDto } from "types/dtos";
 import { ref } from "vue";
@@ -34,7 +35,7 @@ export const usePoiStore = defineStore("poi", () => {
 
     async function addPoi(poi: PoiDto) {
         try {
-            const token = JSON.parse(localStorage.getItem("user")!).token;
+            const token = await authApp.currentUser?.getIdToken(true);
             const result = await axios.post("api/poi/", poi, {
                 headers: {
                     Authorization: `Bearer ${token}`

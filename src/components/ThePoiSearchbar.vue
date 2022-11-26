@@ -20,6 +20,7 @@
     </div>
 </template>
 <script lang="ts" setup>
+import { isSpecifierDefault } from "@babel/types";
 import { async } from "@firebase/util";
 import { alertController, modalController } from "@ionic/core";
 import { IonSearchbar, IonList, IonLabel, IonItem, SearchbarCustomEvent, IonIcon, IonText } from "@ionic/vue";
@@ -38,13 +39,10 @@ const emit = defineEmits<{
 }>();
 
 function filterPois(event: SearchbarCustomEvent) {
-    if (event.detail.value?.length! > 3) {
-        filtered.value = poiStore.poisBetween?.filter((el) =>
-            el.name!.toLocaleLowerCase().includes(event.detail.value!.toLocaleLowerCase())
-        );
-    } else {
-        filtered.value = [];
-    }
+    filtered.value = poiStore.poisBetween?.filter((el) =>
+        el.name!.toLocaleLowerCase().includes(event.detail.value!.toLocaleLowerCase())
+    );
+    if (event.detail.value?.length == 0) filtered.value = [];
 }
 
 function emitClick(poi: PoiDto) {

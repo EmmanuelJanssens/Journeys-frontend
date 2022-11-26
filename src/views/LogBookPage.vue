@@ -113,7 +113,8 @@ import {
     onIonViewDidEnter,
     modalController,
     IonHeader,
-    alertController
+    alertController,
+    AlertButton
 } from "@ionic/vue";
 
 import { addOutline, gridOutline, pencilOutline, returnUpBackOutline, saveOutline } from "ionicons/icons";
@@ -136,20 +137,22 @@ import { useJourneyStore } from "stores/useJourneyStore";
 
 import { AddressDto, getAddressCoordinates, PoiDto } from "types/dtos";
 
-import JourneyMap from "components/TheJourneyMap.vue";
-import mapboxgl, { MapMouseEvent } from "mapbox-gl";
 import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
+import { authApp } from "google/firebase";
 
-import MapJourneySidebar from "components/TheJourneyEditSidebar.vue";
-import LoginModal from "components/Modals/LoginModal.vue";
-import RegisterModal from "components/Modals/RegisterModal.vue";
+import mapboxgl, { MapMouseEvent } from "mapbox-gl";
 import { getMidPoint, openModal, getRadius } from "utils/utils";
+
+import JourneyMap from "components/TheJourneyMap.vue";
+import MapJourneySidebar from "components/TheJourneyEditSidebar.vue";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
 import TheJourneysSlider from "components/TheJourneysSlider.vue";
 import TheJourneyExperienceList from "components/TheJourneyExperienceList.vue";
 import ThePoiSearchbar from "components/ThePoiSearchbar.vue";
+
+import LoginModal from "components/Modals/LoginModal.vue";
+import RegisterModal from "components/Modals/RegisterModal.vue";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
-import { authApp } from "google/firebase";
 
 const modes = {
     logbook: "logbook",
@@ -166,9 +169,6 @@ const journeyStore = useJourneyStore();
 const poiStore = usePoiStore();
 
 const mode = ref(modes.logbook);
-
-const slidesPerView = ref(3);
-const slides = ref();
 
 authApp.onAuthStateChanged((user) => {
     if (user) {
@@ -207,7 +207,6 @@ async function fetchJourneys() {
         poiStore.clear();
         setLoading(false);
     }
-    updateView();
 }
 
 const filteredPois = ref<PoiDto[]>();
@@ -297,25 +296,6 @@ async function showExperiences(id: string) {
     await journeyStore.getJourney(id);
 }
 
-function updateView() {
-    if (slides.value != null) {
-        const width = slides.value.$el.clientWidth;
-        if (width < 800) {
-            slidesPerView.value = 1;
-        } else if (width < 1100) {
-            slidesPerView.value = 2;
-        } else if (width < 1500) {
-            slidesPerView.value = 3;
-        } else {
-            if (userStore.myJourneys?.length! < 4) {
-                slidesPerView.value = userStore.myJourneys?.length!;
-            } else {
-                slidesPerView.value = Math.floor(width / 300);
-            }
-        }
-    }
-}
-
 async function openJourneyCreationModal() {
     const modal = await modalController.create({
         component: CreateJourneyModal
@@ -351,31 +331,96 @@ async function openAddPoiAlert() {
         SwitchMode(modes.editJourney);
     }
 }
+
+async function showAlertIfNotLoggedin() {
+    const alert = await alertController.create({
+        message: "To Continue with this action pleas login with your account or register a new Account",
+        header: "Connect with your account",
+        buttons: [
+            {
+                text: "Login",
+                role: "Login",
+                handler: () => {
+                    alertController.dismiss();
+                    openModal(LoginModal);
+                }
+            },
+            {
+                text: "Register",
+                role: "Register",
+                handler: () => {
+                    alertController.dismiss();
+                    openModal(RegisterModal);
+                }
+            }
+        ]
+    });
+    await alert.present();
+}
+
+async function showAlert(message: string, buttons?: (AlertButton | string)[]) {
+    let alert = await alertController.create({
+        header: "Error",
+        message: message,
+        buttons: buttons
+    });
+    alert.present();
+}
+
+async function saveJourney(data: { journeyTitle: string }) {
+    const title = data.journeyTitle as string;
+    if (
+        journeyStore.editJourney.journey?.start?.address!.length! <= 0 ||
+        journeyStore.editJourney.journey?.end?.address!.length! <= 0 ||
+        title.length <= 0
+    ) {
+        showAlert("Your journey is not valid, Some values may be missing", ["Dismiss"]);
+    } else {
+        var journeyId: string;
+        if (mode.value == "editJourney") {
+            journeyStore.editJourney.journey!.title = title;
+            journeyId = (await journeyStore.updateJourney("deep"))?.id!;
+        } else {
+            journeyId = (await journeyStore.saveJourney(title))?.id!;
+        }
+        if (journeyId) {
+            const alert = await alertController.create({
+                header: "Notification",
+                message: "Your journey was saved successfuly",
+                backdropDismiss: false,
+                buttons: [
+                    {
+                        text: "View",
+                        role: "view",
+                        handler: () => {
+                            showExperiences(journeyId);
+                        }
+                    },
+                    {
+                        text: "Stay",
+                        role: "stay",
+                        handler: () => {
+                            popoverController.dismiss(null, "stay");
+                        }
+                    }
+                ]
+            });
+            alert.present();
+        } else {
+            const alert = await alertController.create({
+                header: "Notification",
+                message: "An error occured while saving your journey",
+                backdropDismiss: false,
+                buttons: ["ok"]
+            });
+            alert.present();
+        }
+    }
+}
+
 async function openJourneySaveModal() {
     if (!userStore.isLoggedIn) {
-        const alert = await alertController.create({
-            message: "To Continue with this action pleas login with your account or register a new Account",
-            header: "Connect with your account",
-            buttons: [
-                {
-                    text: "Login",
-                    role: "Login",
-                    handler: () => {
-                        alertController.dismiss();
-                        openModal(LoginModal);
-                    }
-                },
-                {
-                    text: "Register",
-                    role: "Register",
-                    handler: () => {
-                        alertController.dismiss();
-                        openModal(RegisterModal);
-                    }
-                }
-            ]
-        });
-        (await alert).present();
+        showAlertIfNotLoggedin();
     } else {
         const mainAlert = await alertController.create({
             header: "Give your journey a name",
@@ -391,61 +436,7 @@ async function openJourneySaveModal() {
             buttons: [
                 {
                     text: "Save",
-                    handler: async (data) => {
-                        const title = data.journeyTitle as string;
-                        if (
-                            journeyStore.editJourney.journey?.start?.address!.length! <= 0 ||
-                            journeyStore.editJourney.journey?.end?.address!.length! <= 0 ||
-                            title.length <= 0
-                        ) {
-                            let alert = await alertController.create({
-                                header: "Error",
-                                message: "Your journey is not valid, Some values may be missing",
-                                buttons: ["Dismiss"]
-                            });
-                            alert.present();
-                        } else {
-                            var journeyId: string;
-                            if (mode.value == "editJourney") {
-                                journeyStore.editJourney.journey!.title = title;
-                                journeyId = (await journeyStore.updateJourney("deep"))?.id!;
-                            } else {
-                                journeyId = (await journeyStore.saveJourney(title))?.id!;
-                            }
-                            if (journeyId) {
-                                const alert = await alertController.create({
-                                    header: "Notification",
-                                    message: "Your journey was saved successfuly",
-                                    backdropDismiss: false,
-                                    buttons: [
-                                        {
-                                            text: "View",
-                                            role: "view",
-                                            handler: () => {
-                                                showExperiences(journeyId);
-                                            }
-                                        },
-                                        {
-                                            text: "Stay",
-                                            role: "stay",
-                                            handler: () => {
-                                                popoverController.dismiss(null, "stay");
-                                            }
-                                        }
-                                    ]
-                                });
-                                alert.present();
-                            } else {
-                                const alert = await alertController.create({
-                                    header: "Notification",
-                                    message: "An error occured while saving your journey",
-                                    backdropDismiss: false,
-                                    buttons: ["ok"]
-                                });
-                                alert.present();
-                            }
-                        }
-                    }
+                    handler: async (data) => saveJourney(data)
                 },
                 {
                     text: "Cancel",

@@ -275,7 +275,6 @@ function buildPoiGeoData(pois: PoiDto[]) {
     ]);
     journeyStore.editJourney.journey?.experiencesConnection?.edges?.forEach((exp) => {
         const n = exp.node as PoiDto;
-        console.log(n);
         coords.push([n.location!.longitude, n.location!.latitude]);
     });
     coords.push([journeyStore.editJourney.journey?.end?.longitude!, journeyStore.editJourney.journey?.end?.latitude!]);
@@ -333,7 +332,6 @@ watch(
         ]);
         newVal?.forEach((exp) => {
             const n = exp.node as PoiDto;
-            console.log();
             array.push([n.location!.longitude, n.location!.latitude]);
         });
         array.push([

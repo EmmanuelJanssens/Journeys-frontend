@@ -19,8 +19,8 @@
                         'ion-invalid': v$.username.$error
                     }">
                     <ion-label>Username</ion-label>
-                    <ion-input type="text" v-model="state.username" />
-                    <ion-note v-if="v$.username.$error" slot="error">{{ v$.username.$errors[0] }}</ion-note>
+                    <ion-input type="text" v-model="state.username" @ion-input="v$.username.$validate()" />
+                    <ion-note v-if="v$.username.$error" slot="error">{{ v$.username.$errors[0].$message }}</ion-note>
                 </ion-item>
                 <ion-item class="ion-margin">
                     <ion-label>First Name</ion-label>
@@ -42,9 +42,9 @@
                 <ion-button class="w-1/2" @click="changePassword = true"
                     ><ion-icon slot="start" :icon="lockClosedOutline"></ion-icon>Change Password
                 </ion-button>
-                <ion-button class="w-1/2" @click="changeEmail = true"
+                <!-- <ion-button class="w-1/2" @click="changeEmail = true"
                     ><ion-icon slot="start" :icon="mailOpenOutline"></ion-icon>Change email</ion-button
-                >
+                > -->
             </div>
 
             <ion-list v-if="changePassword">
@@ -149,7 +149,12 @@ const state = ref({
     banner: [""]
 });
 const rules = {
-    username: { minLength: minLength(4) }
+    username: {
+        minLength: minLength(4),
+        noSpecial: helpers.withMessage("Can only contains letters/numbers and -,_", (value: string) =>
+            /^[a-zA-Z0-9-_]+$/.test(value)
+        )
+    }
 };
 const v$ = useVuelidate(rules, state);
 

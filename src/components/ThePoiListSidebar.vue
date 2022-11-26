@@ -10,6 +10,7 @@
                                     <ion-img :src="item.thumbnail"> </ion-img>
                                 </ion-thumbnail>
                                 <ion-label>{{ item.name }}</ion-label>
+                                <ion-icon slot="end" :icon="arrowForward"></ion-icon>
                             </ion-item>
                         </DynamicScrollerItem>
                     </template>
@@ -20,7 +21,8 @@
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonRow, IonCol, IonItem, IonThumbnail, IonImg, IonLabel } from "@ionic/vue";
+import { IonContent, IonRow, IonCol, IonItem, IonThumbnail, IonImg, IonLabel, IonIcon } from "@ionic/vue";
+import { arrowForward } from "ionicons/icons";
 import { PoiDto } from "types/dtos";
 
 const props = defineProps<{

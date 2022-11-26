@@ -1,7 +1,6 @@
 <template>
     <section v-if="userStore.myJourneys">
         <swiper
-            :slides-per-view="slidesPerView"
             :center-insufficient-slides="true"
             :initial-slide="userStore.myJourneys?.length"
             :pagination="{ clickable: true }"
@@ -9,7 +8,14 @@
             lazy
             :modules="modules"
             class="journeys"
-            ref="slides">
+            :breakpoints="{
+                576: {
+                    slidesPerView: 1
+                },
+                600: { slidesPerView: 2 },
+                1200: { slidesPerView: 3 },
+                1536: { slidesPerView: 4 }
+            }">
             <swiper-slide v-for="item in userStore.myJourneys" v-bind:key="item.id">
                 <JourneyCard
                     :journey="item"
@@ -27,43 +33,15 @@ import JourneyCard from "components/Cards/JourneyCard.vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy } from "swiper";
 
-import { onMounted, onUnmounted, ref } from "vue";
+import { ref } from "vue";
 
 const modules = ref([Pagination, Navigation, Lazy]);
-const slidesPerView = ref(3);
 
 const userStore = useUserStore();
-const slides = ref();
 
 const emit = defineEmits<{
     (e: "headerClicked", journeyId: string): void;
 }>();
-
-onMounted(() => {
-    window.addEventListener("resize", updateView);
-    updateView();
-});
-onUnmounted(() => {
-    window.removeEventListener("resize", updateView);
-});
-function updateView() {
-    if (slides.value != null) {
-        const width = slides.value.$el.clientWidth;
-        if (width < 400) {
-            slidesPerView.value = 1;
-        } else if (width < 950) {
-            slidesPerView.value = 2;
-        } else if (width < 1200) {
-            slidesPerView.value = 3;
-        } else {
-            if (userStore.myJourneys?.length! < 4) {
-                slidesPerView.value = userStore.myJourneys?.length!;
-            } else {
-                slidesPerView.value = Math.floor(width / 310);
-            }
-        }
-    }
-}
 </script>
 <style lang="less" scoped>
 .journey-card {

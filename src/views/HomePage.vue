@@ -1,41 +1,45 @@
 <template>
     <ion-page>
-        <ion-header class="ion-no-border">
+        <ion-header class="absolute ion-no-border z-50">
             <TheJourneysHeader />
         </ion-header>
         <div class="relative min-h-[200px] max-h-[250px] sm:min-h-[300px] sm:max-h-[400px]">
-            <div class="absolute z-50 h-full w-full">
-                <div class="h-full w-full p-2">
-                    <div class="flex flex-col text-center m-0 text-white h-full justify-between">
-                        <div class="flex flex-col justify-items-center">
-                            <ion-text><h1 class="text-4xl md:text-8xl">JOURNEYS</h1></ion-text>
-                            <ion-text><p class="text-sm sm:text-lg">IT'S NOT ALWAYS ABOUT THE DESTINATION</p></ion-text>
-                        </div>
-                        <div>
-                            <ion-button
-                                class="transition transform hover:scale-110"
-                                color="tertiary"
-                                router-link="/logbook"
-                                >START YOUR ADVENTURE</ion-button
-                            >
+            <div class="h-full w-full">
+                <div class="absolute z-30 h-full w-full">
+                    <div class="h-full w-full p-6">
+                        <div class="flex flex-col text-center m-0 text-white h-full justify-between">
+                            <div class="flex flex-col justify-items-center">
+                                <ion-text><h1 class="text-4xl md:text-8xl">JOURNEYS</h1></ion-text>
+                                <ion-text
+                                    ><p class="text-sm sm:text-lg">IT'S NOT ALWAYS ABOUT THE DESTINATION</p></ion-text
+                                >
+                            </div>
+                            <div>
+                                <ion-button
+                                    class="transition transform hover:scale-110"
+                                    color="tertiary"
+                                    router-link="/logbook"
+                                    >START YOUR ADVENTURE</ion-button
+                                >
+                            </div>
                         </div>
                     </div>
                 </div>
+                <swiper
+                    class="h-full w-full absolute"
+                    :modules="modules"
+                    :autoplay="{
+                        delay: 10000
+                    }">
+                    <span class="overlay"></span>
+                    <swiper-slide>
+                        <ion-img src="assets/images/banner/mountains.jpg" class="banner-img" />
+                    </swiper-slide>
+                    <swiper-slide>
+                        <ion-img src="assets/images/banner/mountains2.jpg" class="banner-img" />
+                    </swiper-slide>
+                </swiper>
             </div>
-            <swiper
-                class="h-full w-full"
-                :modules="modules"
-                :autoplay="{
-                    delay: 10000
-                }">
-                <span class="overlay"></span>
-                <swiper-slide>
-                    <ion-img src="assets/images/banner/mountains.jpg" class="banner-img" />
-                </swiper-slide>
-                <swiper-slide>
-                    <ion-img src="assets/images/banner/mountains2.jpg" class="banner-img" />
-                </swiper-slide>
-            </swiper>
         </div>
         <div class="overflow-auto h-full">
             <MainFeature
@@ -96,6 +100,6 @@ const modules = ref([Autoplay]);
     bottom: 0;
     background-color: black;
     opacity: 30%;
-    z-index: 9999;
+    z-index: 20;
 }
 </style>

@@ -76,7 +76,6 @@ onMounted(async () => {
 });
 function addToJourney() {
     if (poiDetail.value?.thumbnail != undefined) delete poiDetail.value.thumbnail;
-    console.log(poiDetail.value);
     const experience: ExperienceDto = {
         title: "",
         date: new Date().toISOString(),
