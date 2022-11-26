@@ -1,6 +1,6 @@
 import { defineConfig, preview } from "vite";
 import vue from "@vitejs/plugin-vue";
-import path from "path";
+import path, { dirname } from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,6 +17,7 @@ export default defineConfig({
             google: path.resolve(__dirname, "./src/google"),
             map: path.resolve(__dirname, "./src/map"),
             animation: path.resolve(__dirname, "./src/animation"),
+            fontawsome: path.resolve(__dirname, "./src/fontawsome"),
             "@": path.resolve(__dirname, "./src")
         }
     },

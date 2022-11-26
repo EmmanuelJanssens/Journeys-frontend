@@ -1,8 +1,6 @@
 <template>
     <ion-page>
-        <ion-header class="absolute ion-no-border z-50">
-            <TheJourneysHeader />
-        </ion-header>
+        <TheJourneysHeader class="absolute z-50 w-full" />
         <div class="relative min-h-[200px] max-h-[250px] sm:min-h-[300px] sm:max-h-[400px]">
             <div class="h-full w-full">
                 <div class="absolute z-30 h-full w-full">
