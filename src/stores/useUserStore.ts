@@ -1,15 +1,5 @@
 import axios from "axios";
-import {
-    AuthProvider,
-    browserLocalPersistence,
-    GoogleAuthProvider,
-    setPersistence,
-    signInWithEmailAndPassword,
-    signInWithPopup,
-    User,
-    UserCredential,
-    UserInfo
-} from "firebase/auth";
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, User, UserCredential } from "firebase/auth";
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
 import { ExperienceDto, JourneyDto, UserDto } from "types/dtos";

@@ -127,9 +127,7 @@ import "swiper/css/scrollbar";
 
 import PoiCard from "components/Cards/PoiCard.vue";
 import CreateJourneyModal from "components/Modals/CreateJourneyModal.vue";
-import { JourneyMapCapacitor } from "journeys-capacitor-mapbox";
-
-import { ref, watch } from "vue";
+import { ref } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
 import { usePoiStore } from "stores/usePoiStore";
@@ -153,7 +151,7 @@ import ThePoiSearchbar from "components/ThePoiSearchbar.vue";
 import LoginModal from "components/Modals/LoginModal.vue";
 import RegisterModal from "components/Modals/RegisterModal.vue";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
-
+import { mapInstance } from "map/JourneysMap";
 const modes = {
     logbook: "logbook",
     exploration: "exploration",
@@ -186,8 +184,7 @@ function SwitchMode(newMode: string) {
     mode.value = newMode;
 }
 async function panTo(poi: PoiDto) {
-    const map = await JourneyMapCapacitor.getMap();
-    map?.flyTo({
+    mapInstance.getMap()?.flyTo({
         center: [poi.location!.longitude, poi.location!.latitude],
         zoom: 20
     });
@@ -262,18 +259,8 @@ async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
         }
     }
     await fetchPois({
-        start: {
-            placeId: journeyStore.editJourney.journey?.start?.placeId!,
-            address: journeyStore.editJourney.journey?.start?.address!,
-            longitude: journeyStore.editJourney.journey?.start?.longitude!,
-            latitude: journeyStore.editJourney.journey?.start?.latitude!
-        },
-        end: {
-            placeId: journeyStore.editJourney.journey?.end?.placeId!,
-            address: journeyStore.editJourney.journey?.end?.address!,
-            longitude: journeyStore.editJourney.journey?.end?.longitude!,
-            latitude: journeyStore.editJourney.journey?.end?.latitude!
-        }
+        start: journeyStore.editJourney.journey?.start!,
+        end: journeyStore.editJourney.journey?.end!
     });
 }
 

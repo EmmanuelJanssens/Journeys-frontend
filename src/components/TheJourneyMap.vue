@@ -12,7 +12,6 @@
 <script lang="ts" setup>
 import { onMounted, watch } from "vue";
 import mapboxgl, { LngLat, MapMouseEvent } from "mapbox-gl";
-import { JourneyMapCapacitor } from "journeys-capacitor-mapbox";
 import GeoJSON from "geojson";
 import { ExperienceDto, PoiDto } from "types/dtos";
 import { useJourneyStore } from "stores/useJourneyStore";
@@ -21,22 +20,12 @@ import { useUserStore } from "stores/useUserStore";
 import { getMidPoint } from "utils/utils";
 import { alertController } from "@ionic/core";
 import axios from "axios";
-
-const mapLayer = {
-    journey_route: "journey_route",
-    journey_list: "journey_list",
-    journey_list_route: "journey_list_route",
-    journey_experiences: "journey_experiences",
-    journey_cluster: "journey_clusters",
-    poi_list: "poi_list",
-    poi_cluster: "poi_cluster"
-};
+import { mapInstance, mapLayers } from "map/JourneysMap";
 
 const props = defineProps<{
     mode: string;
 }>();
 
-//const emit = defineEmits(["loaded", "createNew", "markerDragged", "poiClicked"]);
 const emit = defineEmits<{
     (e: "loaded"): void;
     (e: "ready"): void;
@@ -62,13 +51,13 @@ async function getCountryLoc() {
 }
 onMounted(async () => {
     const center = await getCountryLoc();
-    await JourneyMapCapacitor.loadMap(
+    mapInstance.loadMap(
         "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg",
         "Map",
         center,
         "mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx"
     );
-    map = await JourneyMapCapacitor.getMap()!;
+    map = mapInstance.getMap()!;
     map.on("load", () => {
         emit("loaded");
         emit("ready");
@@ -81,7 +70,7 @@ onMounted(async () => {
 
     map.on(
         "click",
-        mapLayer.poi_list + "_unclustered",
+        mapLayers.poi_list + "_unclustered",
         (
             e: mapboxgl.MapMouseEvent & {
                 features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
@@ -90,7 +79,7 @@ onMounted(async () => {
             emit("poiClicked", e.features![0].properties as PoiDto, e);
         }
     );
-    map.on("click", mapLayer.poi_list + "_cluster", (e) => {
+    map.on("click", mapLayers.poi_list + "_cluster", (e) => {
         onClusterClick(e);
     });
     map.on("contextmenu", async (e: MapMouseEvent) => {
@@ -142,11 +131,11 @@ onMounted(async () => {
 });
 function onClusterClick(e: MapMouseEvent) {
     const features = map.queryRenderedFeatures(e.point, {
-        layers: [mapLayer.poi_list + "_cluster"]
+        layers: [mapLayers.poi_list + "_cluster"]
     });
 
     const clusterId = features![0].properties!.cluster_id;
-    const source: maplibregl.GeoJSONSource = map.getSource(mapLayer.poi_list) as maplibregl.GeoJSONSource;
+    const source: maplibregl.GeoJSONSource = map.getSource(mapLayers.poi_list) as maplibregl.GeoJSONSource;
     source.getClusterExpansionZoom(clusterId, (err: any, zoom: any) => {
         if (err) return;
         if (features![0].geometry.type === "Point") {
@@ -206,7 +195,7 @@ watch(
                 },
                 id: journeyStore.viewJourney.id
             });
-            await JourneyMapCapacitor.addJourneysExperiencesLayer(featureCollection);
+            await mapInstance.addJourneysExperiencesLayer(featureCollection);
 
             emit("ready");
         }
@@ -240,9 +229,9 @@ watch(
                     id: journey.id
                 });
             });
-            await JourneyMapCapacitor.addJourneyListLayer(geoJSONJourney);
+            await mapInstance.addJourneyListLayer(geoJSONJourney);
         } else {
-            await JourneyMapCapacitor.clearMap(false);
+            await mapInstance.clearMap();
         }
 
         emit("ready");
@@ -300,14 +289,14 @@ watch(
         if (newVal?.length! > 0) {
             const data = buildPoiGeoData(newVal!);
             if (data?.features.length! > 0) {
-                await JourneyMapCapacitor.addPoiListLayer(data!);
-                const start = await JourneyMapCapacitor.getmarkerbyId("journey_start")!;
+                await mapInstance.addPoiListLayer(data!);
+                const start = await mapInstance.getmarkerbyId("journey_start")!;
                 if (props.mode != "editJourney") {
                     start.setDraggable(true);
                     start.on("dragend", () => {
                         emit("markerDragged", start.getLngLat(), "journey_start");
                     });
-                    const end = await JourneyMapCapacitor.getmarkerbyId("journey_end")!;
+                    const end = await mapInstance.getmarkerbyId("journey_end")!;
                     end.setDraggable(true);
                     end.on("dragend", () => {
                         emit("markerDragged", end.getLngLat(), "journey_end");
@@ -315,7 +304,7 @@ watch(
                 }
             }
         } else {
-            JourneyMapCapacitor.clearMap(false);
+            mapInstance.clearMap();
         }
         emit("ready");
     },
@@ -347,7 +336,7 @@ watch(
             },
             properties: {}
         };
-        JourneyMapCapacitor.addStopPoint(feature);
+        mapInstance.addStopPoint(feature);
     },
     { deep: true }
 );
@@ -355,7 +344,7 @@ watch(
 watch(
     () => props.mode,
     async () => {
-        const m = await JourneyMapCapacitor.getMap();
+        const m = await mapInstance.getMap();
         m?.resize();
     }
 );
