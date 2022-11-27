@@ -1,6 +1,7 @@
 <template>
     <div>
         <input
+            @focusin="focusIn"
             :value="input"
             @keydown="autocomplete"
             class="rounded-lg h-12 p-4 sm:w-full focus:border-none bg-secondary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg"
@@ -18,10 +19,10 @@
     </div>
 </template>
 <script setup lang="ts">
-import { val } from "dom7";
 import { ref } from "vue";
 
 const props = defineProps<{
+    focusIn?: (payload: FocusEvent) => void;
     input: string;
     placeholder?: string;
     debounce: number;
@@ -38,17 +39,18 @@ const text = ref();
 const emits = defineEmits<{
     (e: "complete", value: string): void;
     (e: "selected", value: string): void;
+    (e: "empty"): void;
 }>();
 
 let timeout: any;
 function autocomplete() {
     clearTimeout(timeout);
     timeout = setTimeout(() => {
-        if (text.value.value.length > 3) emits("complete", text.value.value);
+        emits("complete", text.value.value);
     }, props.debounce);
 }
 
 function select(value: string) {
-    if (text.value.value.length > 3) emits("selected", value);
+    emits("selected", value);
 }
 </script>

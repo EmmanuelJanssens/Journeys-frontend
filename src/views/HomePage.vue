@@ -47,61 +47,11 @@
                         <p>No mather where you go there will always be a beginning and an end</p>
 
                         <div class="flex flex-col sm:flex-row items-center sm:m-16 justify-around">
-                            <div class="relative">
-                                <!-- <input
-                                    v-model="startPoint"
-                                    @keydown="autoComplete"
-                                    class="rounded-lg h-12 p-4 sm:w-full focus:border-none bg-secondary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg"
-                                    placeholder="Start" />
-                                <div class="absolute flex flex-col w-full bg-primary-main z-50 max-h-80 overflow-auto">
-                                    <div
-                                        v-for="prediction in predictions"
-                                        v-bind:key="prediction.place_id"
-                                        @click="setStart(prediction.description)"
-                                        class="bg-primary-main p-2 hover:bg-primary-dark hover:cursor-pointer">
-                                        <p class="">{{ prediction.description }}</p>
-                                    </div>
-                                </div> -->
-                                <auto-complete-list
-                                    v-if="!startValid"
-                                    :input="startPoint!"
-                                    placeholder="Start"
-                                    :debounce="500"
-                                    :predictions="predictions"
-                                    @complete="autoCompleteStart"
-                                    @selected="setStart" />
-                                <div
-                                    class="bg-secondary-main p-4 rounded-xl shadow-lg"
-                                    @click="startValid = false"
-                                    v-else>
-                                    <p>
-                                        {{ startPoint }}
-                                    </p>
-                                </div>
-                            </div>
-
+                            <google-auto-complete placeholder="Start" />
                             <span class="w-8 h-3 bg-black rounded-full hidden sm:block"></span>
                             <span class="w-1/2 h-1 bg-black hidden sm:block"></span>
                             <span class="w-8 h-3 bg-black rounded-full hidden sm:block"></span>
-
-                            <div class="relative">
-                                <auto-complete-list
-                                    v-if="!endValid"
-                                    :input="endPoint!"
-                                    placeholder="end"
-                                    :debounce="500"
-                                    :predictions="predictions"
-                                    @complete="autoCompleteEnd"
-                                    @selected="setEnd" />
-                                <div
-                                    class="bg-secondary-main p-4 rounded-xl shadow-lg"
-                                    @click="endValid = false"
-                                    v-else>
-                                    <p>
-                                        {{ endPoint }}
-                                    </p>
-                                </div>
-                            </div>
+                            <google-auto-complete placeholder="End" />
                         </div>
                         <div class="sm:absolute sm:left-0 sm:w-1/2">
                             <div
@@ -220,7 +170,7 @@ import { isPlatform, popoverController, IonPage } from "@ionic/vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { EffectCards } from "swiper";
 import CardPreview from "./CardPreview.vue";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCaretDown, faBookAtlas } from "@fortawesome/free-solid-svg-icons";
 import { faGitlab } from "@fortawesome/free-brands-svg-icons";
@@ -233,9 +183,8 @@ import RegisterModal from "components/Modals/RegisterModal.vue";
 import ProfilePopover from "components/ProfilePopover.vue";
 import { useUserStore } from "stores/useUserStore";
 import router from "router/router";
-import googleLoader from "google/googleLoader";
-import AutoCompleteList from "components/AutoCompleteList.vue";
-import { val } from "dom7";
+import GoogleAutoComplete from "components/GoogleAutoComplete.vue";
+
 const modules = ref([EffectCards]);
 
 const userStore = useUserStore();
@@ -255,62 +204,6 @@ async function onPopOver(e: Event) {
         router.push("home");
         showToast("goodbye", "success");
     }
-}
-
-const startPoint = ref<string>("");
-const startValid = ref<boolean>();
-
-const endPoint = ref<string>("");
-const endValid = ref<boolean>();
-let timeoutId: any;
-let service: google.maps.places.AutocompleteService;
-const predictions = ref<
-    {
-        value: string;
-        key: string | number | any;
-    }[]
->([]);
-
-onMounted(() => {
-    googleLoader.load().then((google) => {
-        service = new google.maps.places.AutocompleteService();
-    });
-});
-
-function autocomplete(value: string) {
-    const request: google.maps.places.AutocompletionRequest = {
-        input: value,
-        types: ["locality"],
-        componentRestrictions: { country: "ch" }
-    };
-    service.getPlacePredictions(request).then((response) => {
-        response.predictions.forEach((prediction) => {
-            predictions.value.push({
-                value: prediction.description,
-                key: prediction.place_id
-            });
-        });
-    });
-}
-
-function autoCompleteStart(value: string) {
-    autocomplete(value);
-    startPoint.value = value;
-}
-function autoCompleteEnd(value: string) {
-    autocomplete(value);
-    endPoint.value = value;
-}
-
-function setStart(value: string) {
-    startPoint.value = value;
-    startValid.value = true;
-    predictions.value = [];
-}
-function setEnd(value: string) {
-    endPoint.value = value;
-    endValid.value = true;
-    predictions.value = [];
 }
 </script>
 <style scoped lang="less">
