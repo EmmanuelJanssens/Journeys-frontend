@@ -2,7 +2,7 @@
 <template>
     <ion-page>
         <ion-header>
-            <TheJourneysHeader color="dark" />
+            <TheJourneysHeader color="secondary" />
         </ion-header>
         <ion-loading v-if="isLoading" />
         <ion-content>

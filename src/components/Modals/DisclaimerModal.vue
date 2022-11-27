@@ -18,19 +18,11 @@
                 with a different stack for learning purpose and further improvements.
             </p>
             <p>
-                This app is still in active developpement, therefore any data created will not be permanent. You can
-                still see what this app has to offer and follow it's devellopement. That is also in it's way some kind
-                of Journey.
-            </p>
-            <p>
-                Any feedback, bug reports, and suggestions can at the time beeing be sent to my
+                This app is still in active developpement, therefore some unexpected behaviour can be seen. Any
+                feedback, bug reports, and suggestions can at the time beeing be sent to my
                 <a :href="`mailto:${mail}`">email</a>.
             </p>
 
-            <p>
-                <ion-icon :icon="warningOutline" /> your profile is private by default go to your profile page to change
-                this setting
-            </p>
             <ion-list>
                 <ion-item>
                     <ion-label
@@ -57,7 +49,7 @@
     <ion-footer>
         <ion-toolbar>
             <ion-buttons slot="end">
-                <ion-button @click="onAgree">I Understand</ion-button>
+                <ion-button @click="onAgree">Ok</ion-button>
             </ion-buttons>
         </ion-toolbar>
     </ion-footer>

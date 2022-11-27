@@ -39,7 +39,7 @@ import { caretDownOutline } from "ionicons/icons";
 import ProfilePopover from "./ProfilePopover.vue";
 import { showToast } from "utils/utils";
 import router from "router/router";
-
+import { openModal } from "utils/utils";
 const userStore = useUserStore();
 
 async function onPopOver(e: Event) {
@@ -58,15 +58,6 @@ async function onPopOver(e: Event) {
         router.push("home");
         showToast("goodbye", "success");
     }
-}
-
-async function openModal(component: any) {
-    let modal = await modalController.create({
-        component: component,
-        keyboardClose: false,
-        backdropDismiss: false
-    });
-    await modal.present();
 }
 </script>
 

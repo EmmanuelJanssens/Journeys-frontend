@@ -1,56 +1,45 @@
 <template>
-    <ion-card>
-        <ion-card-header>
-            <ion-toolbar color="none">
-                <ion-card-title>{{ props.journey.title }}</ion-card-title>
-                <ion-buttons slot="end">
-                    <ion-button @click="goToJourney(props.journey.id!)">
-                        <ion-icon :icon="eyeOutline" slot="icon-only"></ion-icon>
-                    </ion-button>
-                    <ion-button @click="onEdit">
-                        <ion-icon :icon="pencilOutline" slot="icon-only"></ion-icon>
-                    </ion-button>
-                    <ion-button @click="onDelete">
-                        <ion-icon :icon="trashBinOutline" slot="icon-only"></ion-icon>
-                    </ion-button>
-                </ion-buttons>
-            </ion-toolbar>
-        </ion-card-header>
-        <ion-img v-if="props.journey.thumbnail" class="thumbnail" :src="props.journey.thumbnail"></ion-img>
-        <ion-img
-            v-else
-            class="thumbnail"
-            src="https://firebasestorage.googleapis.com/v0/b/journeys-v2/o/images%2Fplaceholder.png?alt=media"></ion-img>
-        <section class="content ion-margin">
-            <ion-text>
-                {{ props.journey.description }}
-            </ion-text>
-        </section>
-    </ion-card>
+    <div class="relative w-80 h-96 bg-white rounded-xl drop-shadow-xl">
+        <div class="absolute h-full w-full">
+            <img class="rounded-xl object-cover h-full w-full" v-if="journey.thumbnail" :src="journey.thumbnail" />
+            <img class="rounded-xl object-cover h-full w-full" v-else src="/assets/placeholder.png" />
+        </div>
+        <div class="absolute top-0 p-3 bg-black w-full rounded-t-xl opacity-50">
+            <div class="flex space-x-4 justify-between">
+                <p class="text-center text-white">{{ journey.title }}</p>
+                <div class="flex space-x-4">
+                    <button class="text-white transform hover:scale-110" @click="onEdit">
+                        <font-awesome-icon :icon="faPencil" class="text-white" />
+                    </button>
+
+                    <button class="text-white transform hover:scale-110" @click="goToJourney(props.journey.id!)">
+                        <font-awesome-icon :icon="faEye" class="text-white" />
+                    </button>
+                    <button class="text-white transform hover:scale-110" @click="onDelete">
+                        <font-awesome-icon :icon="faTrash" class="text-white" />
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div
+            v-if="journey.description && journey.description.length > 0"
+            class="absolute bottom-0 p-4 bg-black w-full rounded-xl opacity-70 max-h-36 overflow-auto">
+            <p class="text-center text-white">{{ journey.description }}</p>
+        </div>
+        <div></div>
+    </div>
 </template>
 
 <script lang="ts" setup>
-import {
-    IonCard,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonToolbar,
-    IonButtons,
-    IonButton,
-    IonImg,
-    IonIcon,
-    IonText,
-    popoverController,
-    modalController,
-    alertController
-} from "@ionic/vue";
+import { popoverController, modalController, alertController } from "@ionic/vue";
 import EditJourneyModal from "components/Modals/EditJourneyModal.vue";
-import { eyeOutline, pencilOutline, trashBinOutline } from "ionicons/icons";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
 import { JourneyDto } from "types/dtos";
 import { showToast } from "utils/utils";
+
+import { faPencil, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 const props = defineProps<{
     journey: JourneyDto;
@@ -113,5 +102,21 @@ ion-card {
 }
 .content {
     overflow: auto;
+}
+::-webkit-scrollbar {
+    height: 12px;
+    width: 12px;
+    background: #000;
+    border-radius: 100%;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #393812;
+    -webkit-border-radius: 1ex;
+    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+}
+
+::-webkit-scrollbar-corner {
+    background: #000;
 }
 </style>
