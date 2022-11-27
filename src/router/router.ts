@@ -1,5 +1,4 @@
-import { createRouter, createWebHistory } from "@ionic/vue-router";
-import type { RouteRecordRaw } from "vue-router";
+import { RouteRecordRaw, createRouter, createWebHistory } from "vue-router";
 // import HomePage from "views/HomePage.vue";
 // import LogBookPage from "views/LogBookPage.vue";
 const HomePage = async () => await import("views/HomePage.vue");
@@ -28,7 +27,7 @@ const routes: RouteRecordRaw[] = [
 ];
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHistory(),
     routes
 });
 

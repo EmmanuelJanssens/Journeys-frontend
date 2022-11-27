@@ -1,5 +1,6 @@
 <template>
     <DynamicScroller
+        class="p-4 bg-primary-dark h-full"
         v-if="journeyStore.viewJourney?.experiencesAggregate?.count! > 0"
         :items="journeyStore.viewJourney.experiencesConnection?.edges"
         :min-item-size="54"

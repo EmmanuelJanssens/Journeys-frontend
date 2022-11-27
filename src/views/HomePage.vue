@@ -1,5 +1,5 @@
 <template>
-    <ion-page class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner">
+    <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner page">
         <div class="relative">
             <img src="/assets/images/banner/mountains.jpg" class="object-cover h-full w-full absolute z-10" />
 
@@ -74,7 +74,7 @@
                             </div>
                         </div>
                     </section>
-                    <section v-if="isPlatform('desktop')" class="relative sm:py-8">
+                    <section class="relative sm:py-8">
                         <h1 class="sm:text-5xl my-6">Journal your outings</h1>
                         <p class="sm:w-2/5 mb-4">
                             You may have done some things in between that you found interesting and want to keep them
@@ -98,7 +98,7 @@
                                 image="https://images.unsplash.com/photo-1596178196494-c9a3d1b1c151?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1065&q=80" />
                         </div>
                     </section>
-                    <section v-else class="p-4 sm:py-8">
+                    <!-- <section v-else class="p-4 sm:py-8">
                         <swiper class="h-full container w-80" :modules="modules" :effect="'cards'" :loop="true">
                             <swiper-slide>
                                 <card-preview
@@ -131,7 +131,7 @@
                                     image="https://images.unsplash.com/photo-1596178196494-c9a3d1b1c151?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1065&q=80" />
                             </swiper-slide>
                         </swiper>
-                    </section>
+                    </section> -->
                     <section class="relative sm:py-8">
                         <h1 class="sm:text-5xl my-6">Get started now</h1>
                         <div class="flex flex-wrap justify-center">
@@ -139,13 +139,13 @@
                                 <p class="w-48">
                                     open your personal logbook and see A list of journeys you have saved.
                                 </p>
-                                <img class="w-2/3 rounded-xl drop-shadow-lg" src="assets/placeholder.png" />
+                                <img class="w-2/3 rounded-xl drop-shadow-lg" src="/assets/placeholder.png" />
                             </div>
                             <div class="flex space-x-4 max-w-xl p-2">
                                 <p class="w-48">
                                     Add various activities to your journey, and save them to edit later on
                                 </p>
-                                <img class="w-2/3 r rounded-xl drop-shadow-lg" src="assets/placeholder.png" />
+                                <img class="w-2/3 r rounded-xl drop-shadow-lg" src="/assets/placeholder.png" />
                             </div>
                         </div>
                     </section>
@@ -158,7 +158,7 @@
                             <div>
                                 <img
                                     class="object-cover w-[900px] h-[600px] rounded-3xl"
-                                    src="assets/placeholder.png" />
+                                    src="/assets/placeholder.png" />
                             </div>
                         </div>
                     </section>
@@ -174,11 +174,11 @@
                 </div>
             </div>
         </div>
-    </ion-page>
+    </div>
 </template>
 
 <script lang="ts" setup>
-import { isPlatform, popoverController, IonPage } from "@ionic/vue";
+// import { isPlatform, popoverController } from "@ionic/vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { EffectCards } from "swiper";
 import CardPreview from "./CardPreview.vue";
@@ -252,21 +252,20 @@ function setEnd(value: string) {
     validJourney.value.end.valid = true;
 }
 async function onPopOver(e: Event) {
-    const popover = await popoverController.create({
-        component: ProfilePopover,
-        alignment: "start",
-        event: e,
-        reference: "trigger",
-        size: "auto"
-    });
-    await popover.present();
-
-    const data = await popover.onDidDismiss();
-    if (data.data == "logout") {
-        await userStore.logout();
-        router.push("home");
-        showToast("goodbye", "success");
-    }
+    // const popover = await popoverController.create({
+    //     component: ProfilePopover,
+    //     alignment: "start",
+    //     event: e,
+    //     reference: "trigger",
+    //     size: "auto"
+    // });
+    // await popover.present();
+    // const data = await popover.onDidDismiss();
+    // if (data.data == "logout") {
+    //     await userStore.logout();
+    //     router.push("home");
+    //     showToast("goodbye", "success");
+    // }
 }
 
 onMounted(() => {

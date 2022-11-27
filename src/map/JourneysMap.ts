@@ -1,4 +1,4 @@
-import mapboxgl, { LngLat } from "mapbox-gl";
+import mapboxgl from "mapbox-gl";
 
 class JourneysMap {
     constructor() {}
@@ -23,7 +23,7 @@ class JourneysMap {
     getMap(): mapboxgl.Map | undefined {
         return this.map;
     }
-    loadMap(accessToken: string, container: string, center: LngLat, style: string) {
+    loadMap(accessToken: string, container: string, center: mapboxgl.LngLat, style: string) {
         mapboxgl.accessToken = accessToken;
         if (this.map) {
             this.map.remove();

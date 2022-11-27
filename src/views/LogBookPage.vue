@@ -1,24 +1,21 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template>
-    <ion-page>
-        <ion-header>
-            <TheJourneysHeader color="secondary" />
-        </ion-header>
-        <ion-loading v-if="isLoading" />
-        <ion-content>
-            <ion-grid class="full-page ion-no-padding">
-                <ion-row class="full-page">
-                    <ion-col
-                        v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney"
-                        class="side ion-hide-md-down">
-                        <ThePoiListSidebar :poi-list="filteredPois" @poi-item-clicked="panTo" />
-                    </ion-col>
-                    <ion-col ref="mapCol">
-                        <ThePoiSearchbar
-                            @poi-item-clicked="panTo"
-                            v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney" />
-                        <ion-content>
-                            <ion-fab v-if="mode == modes.logbook" slot="fixed" vertical="top" horizontal="end">
+    <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner page">
+        <TheJourneysHeader color="secondary" />
+        <!-- <ion-loading v-if="isLoading" /> -->
+        <div class="h-full">
+            <!-- <ThePoiListSidebar
+                v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney"
+                :poi-list="filteredPois"
+                @poi-item-clicked="panTo" /> -->
+            <!-- <ThePoiSearchbar
+                    @poi-item-clicked="panTo"
+                    v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney" /> -->
+            <div class="absolute z-50">
+                <button class="absolute bg-orange-400 z-50 rounded-full w-12 h-12">HELLo</button>
+            </div>
+
+            <!-- <ion-fab v-if="mode == modes.logbook" slot="fixed" vertical="top" horizontal="end">
                                 <ion-fab-button @click="openJourneyCreationModal">
                                     <ion-icon size="large" :icon="addOutline"></ion-icon>
                                 </ion-fab-button>
@@ -55,69 +52,53 @@
                                         <ion-icon size="default" :icon="returnUpBackOutline"></ion-icon>
                                     </ion-fab-button>
                                 </ion-fab-list>
-                            </ion-fab>
+                            </ion-fab> -->
 
-                            <JourneyMap
-                                :mode="mode"
-                                @loaded="fetchJourneys"
-                                @marker-dragged="onMarkerDragend"
-                                @poi-clicked="onPoiClicked"
-                                @ready="setLoading(false)" />
-                        </ion-content>
+            <JourneyMap
+                class="-z-20"
+                :mode="mode"
+                @loaded="fetchJourneys"
+                @marker-dragged="onMarkerDragend"
+                @poi-clicked="onPoiClicked"
+                @ready="setLoading(false)" />
 
-                        <TheJourneysSlider
-                            class="journeys-slides"
-                            v-if="mode == modes.logbook"
-                            @header-clicked="showExperiences" />
-                    </ion-col>
-                    <ion-col
-                        v-if="mode == modes.viewJourney || mode == modes.edition || mode == modes.editJourney"
-                        class="side ion-hide-sm-down"
-                        ref="experiencesCol">
-                        <ion-content>
-                            <ion-row class="experience-list">
-                                <ion-col>
-                                    <TheJourneyExperienceList
-                                        v-if="
+            <TheJourneysSlider class="journeys-slides" v-if="mode == modes.logbook" @header-clicked="showExperiences" />
+            <!-- <div v-if="mode == modes.viewJourney || mode == modes.edition || mode == modes.editJourney">
+                <TheJourneyExperienceList
+                    v-if="
                                         mode == modes.viewJourney &&
                                         journeyStore.viewJourney?.experiencesConnection?.edges?.length! > 0
                                     "
-                                        @updated="showExperiences" />
-                                    <MapJourneySidebar
-                                        v-else-if="mode === modes.edition || mode == modes.editJourney"
-                                        :start="journeyStore.editJourney.journey?.start!"
-                                        :end="journeyStore.editJourney.journey?.end!"
-                                        mode="edit"
-                                /></ion-col>
-                            </ion-row>
-                        </ion-content>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
-        </ion-content>
-    </ion-page>
+                    @updated="showExperiences" />
+                <MapJourneySidebar
+                    v-else-if="mode === modes.edition || mode == modes.editJourney"
+                    :start="journeyStore.editJourney.journey?.start!"
+                    :end="journeyStore.editJourney.journey?.end!"
+                    mode="edit" />
+            </div> -->
+        </div>
+    </div>
 </template>
 <script lang="ts" setup>
-import {
-    IonLoading,
-    IonIcon,
-    IonPage,
-    IonContent,
-    IonGrid,
-    IonCol,
-    IonRow,
-    IonFab,
-    IonFabList,
-    IonFabButton,
-    popoverController,
-    onIonViewDidEnter,
-    modalController,
-    IonHeader,
-    alertController,
-    AlertButton
-} from "@ionic/vue";
+// import {
+//     IonLoading,
+//     IonIcon,
+//     IonPage,
+//     IonContent,
+//     IonGrid,
+//     IonCol,
+//     IonRow,
+//     IonFab,
+//     IonFabList,
+//     IonFabButton,
+//     popoverController,
+//     onIonViewDidEnter,
+//     modalController,
+//     IonHeader,
+//     alertController,
+//     AlertButton
+// } from "@ionic/vue";
 
-import { addOutline, gridOutline, pencilOutline, returnUpBackOutline, saveOutline } from "ionicons/icons";
 // Import Swiper and modules
 // Import Swiper styles
 import "swiper/css";
@@ -138,7 +119,7 @@ import { AddressDto, getAddressCoordinates, PoiDto } from "types/dtos";
 import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
 import { authApp } from "google/firebase";
 
-import mapboxgl, { MapMouseEvent } from "mapbox-gl";
+import { MapMouseEvent, LngLat } from "mapbox-gl";
 import { getMidPoint, openModal, getRadius } from "utils/utils";
 
 import JourneyMap from "components/TheJourneyMap.vue";
@@ -152,6 +133,9 @@ import LoginModal from "components/Modals/LoginModal.vue";
 import RegisterModal from "components/Modals/RegisterModal.vue";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
 import { mapInstance } from "map/JourneysMap";
+
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+
 const modes = {
     logbook: "logbook",
     exploration: "exploration",
@@ -174,11 +158,11 @@ authApp.onAuthStateChanged((user) => {
     }
 });
 
-onIonViewDidEnter(() => {
-    if (!userStore.isLoggedIn) {
-        openJourneyCreationModal();
-    }
-});
+// onIonViewDidEnter(() => {
+//     if (!userStore.isLoggedIn) {
+//         openJourneyCreationModal();
+//     }
+// });
 
 function SwitchMode(newMode: string) {
     mode.value = newMode;
@@ -237,7 +221,7 @@ async function fetchPois(data: { start: AddressDto; end: AddressDto }) {
     filteredPois.value = poiStore.poisBetween;
 }
 
-async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
+async function onMarkerDragend(pos: LngLat, marker: string) {
     setLoading(true);
     const response = await reverseGeocode(pos.lat, pos.lng);
     const result = getLocalityAndCountry(response!);
@@ -265,16 +249,16 @@ async function onMarkerDragend(pos: mapboxgl.LngLat, marker: string) {
 }
 
 async function onPoiClicked(poi: PoiDto, e: MapMouseEvent) {
-    const popover = await popoverController.create({
-        component: PoiCard,
-        componentProps: { poi: poi },
-        event: e.originalEvent,
-        size: "auto",
-        reference: "event",
-        side: "top",
-        alignment: "center"
-    });
-    await popover.present();
+    // const popover = await popoverController.create({
+    //     component: PoiCard,
+    //     componentProps: { poi: poi },
+    //     event: e.originalEvent,
+    //     size: "auto",
+    //     reference: "event",
+    //     side: "top",
+    //     alignment: "center"
+    // });
+    // await popover.present();
 }
 
 async function showExperiences(id: string) {
@@ -284,157 +268,154 @@ async function showExperiences(id: string) {
 }
 
 async function openJourneyCreationModal() {
-    const modal = await modalController.create({
-        component: CreateJourneyModal
-    });
-    modal.present();
-
-    const result = await modal.onDidDismiss();
-
-    if (result.role == "create") {
-        mode.value = modes.edition;
-        journeyStore.editJourney.journey = {};
-        journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
-
-        fetchPois(result.data);
-    }
+    // const modal = await modalController.create({
+    //     component: CreateJourneyModal
+    // });
+    // modal.present();
+    // const result = await modal.onDidDismiss();
+    // if (result.role == "create") {
+    //     mode.value = modes.edition;
+    //     journeyStore.editJourney.journey = {};
+    //     journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
+    //     fetchPois(result.data);
+    // }
 }
 async function openAddPoiAlert() {
-    const alert = await alertController.create({
-        header: "Right click on the map to add a Poi",
-        buttons: [
-            "cancel",
-            {
-                text: "Ok",
-                handler: async () => {
-                    alertController.dismiss(null, "ok");
-                }
-            }
-        ]
-    });
-    await alert.present();
-    const { role } = await alert.onDidDismiss();
-    if (role != "ok") {
-        SwitchMode(modes.editJourney);
-    }
+    // const alert = await alertController.create({
+    //     header: "Right click on the map to add a Poi",
+    //     buttons: [
+    //         "cancel",
+    //         {
+    //             text: "Ok",
+    //             handler: async () => {
+    //                 alertController.dismiss(null, "ok");
+    //             }
+    //         }
+    //     ]
+    // });
+    // await alert.present();
+    // const { role } = await alert.onDidDismiss();
+    // if (role != "ok") {
+    //     SwitchMode(modes.editJourney);
+    // }
 }
 
 async function showAlertIfNotLoggedin() {
-    const alert = await alertController.create({
-        message: "To Continue with this action pleas login with your account or register a new Account",
-        header: "Connect with your account",
-        buttons: [
-            {
-                text: "Login",
-                role: "Login",
-                handler: () => {
-                    alertController.dismiss();
-                    openModal(LoginModal);
-                }
-            },
-            {
-                text: "Register",
-                role: "Register",
-                handler: () => {
-                    alertController.dismiss();
-                    openModal(RegisterModal);
-                }
-            }
-        ]
-    });
-    await alert.present();
+    // const alert = await alertController.create({
+    //     message: "To Continue with this action pleas login with your account or register a new Account",
+    //     header: "Connect with your account",
+    //     buttons: [
+    //         {
+    //             text: "Login",
+    //             role: "Login",
+    //             handler: () => {
+    //                 alertController.dismiss();
+    //                 openModal(LoginModal);
+    //             }
+    //         },
+    //         {
+    //             text: "Register",
+    //             role: "Register",
+    //             handler: () => {
+    //                 alertController.dismiss();
+    //                 openModal(RegisterModal);
+    //             }
+    //         }
+    //     ]
+    // });
+    // await alert.present();
 }
 
-async function showAlert(message: string, buttons?: (AlertButton | string)[]) {
-    let alert = await alertController.create({
-        header: "Error",
-        message: message,
-        buttons: buttons
-    });
-    alert.present();
-}
+// async function showAlert(message: string, buttons?: (AlertButton | string)[]) {
+//     // let alert = await alertController.create({
+//     //     header: "Error",
+//     //     message: message,
+//     //     buttons: buttons
+//     // });
+//     // alert.present();
+// }
 
 async function saveJourney(data: { journeyTitle: string }) {
-    const title = data.journeyTitle as string;
-    if (
-        journeyStore.editJourney.journey?.start?.address!.length! <= 0 ||
-        journeyStore.editJourney.journey?.end?.address!.length! <= 0 ||
-        title.length <= 0
-    ) {
-        showAlert("Your journey is not valid, Some values may be missing", ["Dismiss"]);
-    } else {
-        var journeyId: string;
-        if (mode.value == "editJourney") {
-            journeyStore.editJourney.journey!.title = title;
-            journeyId = (await journeyStore.updateJourney("deep"))?.id!;
-        } else {
-            journeyId = (await journeyStore.saveJourney(title))?.id!;
-        }
-        if (journeyId) {
-            const alert = await alertController.create({
-                header: "Notification",
-                message: "Your journey was saved successfuly",
-                backdropDismiss: false,
-                buttons: [
-                    {
-                        text: "View",
-                        role: "view",
-                        handler: () => {
-                            showExperiences(journeyId);
-                        }
-                    },
-                    {
-                        text: "Stay",
-                        role: "stay",
-                        handler: () => {
-                            popoverController.dismiss(null, "stay");
-                        }
-                    }
-                ]
-            });
-            alert.present();
-        } else {
-            const alert = await alertController.create({
-                header: "Notification",
-                message: "An error occured while saving your journey",
-                backdropDismiss: false,
-                buttons: ["ok"]
-            });
-            alert.present();
-        }
-    }
+    // const title = data.journeyTitle as string;
+    // if (
+    //     journeyStore.editJourney.journey?.start?.address!.length! <= 0 ||
+    //     journeyStore.editJourney.journey?.end?.address!.length! <= 0 ||
+    //     title.length <= 0
+    // ) {
+    //     showAlert("Your journey is not valid, Some values may be missing", ["Dismiss"]);
+    // } else {
+    //     var journeyId: string;
+    //     if (mode.value == "editJourney") {
+    //         journeyStore.editJourney.journey!.title = title;
+    //         journeyId = (await journeyStore.updateJourney("deep"))?.id!;
+    //     } else {
+    //         journeyId = (await journeyStore.saveJourney(title))?.id!;
+    //     }
+    //     if (journeyId) {
+    //         const alert = await alertController.create({
+    //             header: "Notification",
+    //             message: "Your journey was saved successfuly",
+    //             backdropDismiss: false,
+    //             buttons: [
+    //                 {
+    //                     text: "View",
+    //                     role: "view",
+    //                     handler: () => {
+    //                         showExperiences(journeyId);
+    //                     }
+    //                 },
+    //                 {
+    //                     text: "Stay",
+    //                     role: "stay",
+    //                     handler: () => {
+    //                         popoverController.dismiss(null, "stay");
+    //                     }
+    //                 }
+    //             ]
+    //         });
+    //         alert.present();
+    //     } else {
+    //         const alert = await alertController.create({
+    //             header: "Notification",
+    //             message: "An error occured while saving your journey",
+    //             backdropDismiss: false,
+    //             buttons: ["ok"]
+    //         });
+    //         alert.present();
+    //     }
+    // }
 }
 
 async function openJourneySaveModal() {
-    if (!userStore.isLoggedIn) {
-        showAlertIfNotLoggedin();
-    } else {
-        const mainAlert = await alertController.create({
-            header: "Give your journey a name",
-            inputs: [
-                {
-                    label: "Title",
-                    name: "journeyTitle",
-                    id: "journeyTitle",
-                    value: journeyStore.editJourney.journey?.title ? journeyStore.editJourney.journey.title : "",
-                    placeholder: "title"
-                }
-            ],
-            buttons: [
-                {
-                    text: "Save",
-                    handler: async (data) => saveJourney(data)
-                },
-                {
-                    text: "Cancel",
-                    handler: () => {
-                        popoverController.dismiss();
-                    }
-                }
-            ]
-        });
-        await mainAlert.present();
-    }
+    //     if (!userStore.isLoggedIn) {
+    //         showAlertIfNotLoggedin();
+    //     } else {
+    //         const mainAlert = await alertController.create({
+    //             header: "Give your journey a name",
+    //             inputs: [
+    //                 {
+    //                     label: "Title",
+    //                     name: "journeyTitle",
+    //                     id: "journeyTitle",
+    //                     value: journeyStore.editJourney.journey?.title ? journeyStore.editJourney.journey.title : "",
+    //                     placeholder: "title"
+    //                 }
+    //             ],
+    //             buttons: [
+    //                 {
+    //                     text: "Save",
+    //                     handler: async (data) => saveJourney(data)
+    //                 },
+    //                 {
+    //                     text: "Cancel",
+    //                     handler: () => {
+    //                         popoverController.dismiss();
+    //                     }
+    //                 }
+    //             ]
+    //         });
+    //         await mainAlert.present();
+    //     }
 }
 </script>
 <style lang="less" scoped>
@@ -447,25 +428,5 @@ async function openJourneySaveModal() {
     margin-right: auto;
     bottom: 20px;
     z-index: 999;
-}
-.side {
-    min-width: 200px;
-    max-width: 400px;
-}
-.full-page {
-    height: 100%;
-    width: 100%;
-}
-
-.map-section {
-    height: 95%;
-}
-.mid-page {
-    height: 45%;
-    overflow-y: auto;
-}
-
-.experience-list {
-    overflow-y: auto;
 }
 </style>

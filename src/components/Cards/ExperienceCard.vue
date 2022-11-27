@@ -1,6 +1,6 @@
 <template>
-    <ion-card>
-        <ion-card-header>
+    <!-- <ion-card> -->
+    <!-- <ion-card-header>
             <ion-toolbar color="none">
                 <ion-card-title>{{ (props.experience.node as PoiDto).name }}</ion-card-title>
                 <ion-card-subtitle>{{ props.experience.title }}</ion-card-subtitle>
@@ -14,29 +14,54 @@
                 </ion-buttons>
             </ion-toolbar>
             <ion-card-subtitle>{{ new Date(props.experience.date).toDateString() }}</ion-card-subtitle>
-        </ion-card-header>
-        <swiper
-            :slides-per-view="1"
-            :initial-slide="0"
-            lazy
-            :pagination="{
-                clickable: true
-            }"
-            :autoplay="{
-                delay: 3000,
-                pauseOnMouseEnter: true
-            }"
-            :loop="true"
-            :modules="modules">
-            <swiper-slide v-for="image in props.experience.images" v-bind:key="image">
-                <ion-img :src="image"></ion-img>
-            </swiper-slide>
-        </swiper>
+        </ion-card-header> -->
+    <div class="relative w-full bg-primary-main rounded-xl p-2 mb-4">
+        <div>
+            <div class="flex flex-row items-center justify-between">
+                <div>
+                    <h1 class="first-letter:uppercase">{{ (props.experience.node as PoiDto).name }}</h1>
+                </div>
+                <div class="flex space-x-4 px-16">
+                    <button @click="onEdit"><font-awesome-icon :icon="faPencil" /></button>
+                    <button @click="onDelete"><font-awesome-icon :icon="faTrash" /></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-opacity-80 text-gray-600">
+            <p>{{ props.experience.title }}</p>
+        </div>
+        <div class="text-opacity-80 text-gray-600">
+            <p>{{ new Date(props.experience.date).toDateString() }}</p>
+        </div>
+        <div>
+            <swiper
+                :slides-per-view="1"
+                :initial-slide="0"
+                lazy
+                :pagination="{
+                    clickable: true
+                }"
+                :autoplay="{
+                    delay: 3000,
+                    pauseOnMouseEnter: true
+                }"
+                :loop="true"
+                :modules="modules">
+                <swiper-slide v-for="image in props.experience.images" v-bind:key="image">
+                    <div>
+                        <img class="h-60" :src="image" />
+                    </div>
+                </swiper-slide>
+            </swiper>
+        </div>
 
         <section class="content ion-margin">
             {{ props.experience.description }}
         </section>
-    </ion-card>
+    </div>
+
+    <!-- </ion-card> -->
 </template>
 
 <script lang="ts" setup>
@@ -53,6 +78,9 @@ import {
     alertController,
     modalController
 } from "@ionic/vue";
+
+import { faPencil, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Navigation, Lazy, Pagination, Autoplay } from "swiper";

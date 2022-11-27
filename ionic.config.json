@@ -1,7 +1,0 @@
-{
-    "name": "journeys-frontend",
-    "integrations": {
-        "capacitor": {}
-    },
-    "type": "vue"
-}
