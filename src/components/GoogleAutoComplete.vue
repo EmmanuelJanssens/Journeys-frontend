@@ -5,7 +5,8 @@
         :debounce="500"
         :predictions="predictions!"
         @complete="onAutoComplete"
-        @selected="onSelected" />
+        @selected="onSelected"
+        @focus-out="predictions = []" />
 </template>
 <script lang="ts" setup>
 import googleLoader from "google/googleLoader";
@@ -20,12 +21,14 @@ const predictions = ref<
     }[]
 >([]);
 
-defineProps<{
+const props = defineProps<{
+    text: string;
     placeholder: string;
 }>();
 
 const emits = defineEmits<{
     (e: "selected", value: string): void;
+    (e: "dirty"): void;
 }>();
 let service: google.maps.places.AutocompleteService;
 
@@ -36,6 +39,8 @@ onMounted(() => {
 });
 
 function onAutoComplete(value: string) {
+    input.value = value;
+    emits("dirty");
     if (value.length > 3) {
         const request: google.maps.places.AutocompletionRequest = {
             input: value,
@@ -44,7 +49,6 @@ function onAutoComplete(value: string) {
         };
         service.getPlacePredictions(request).then((response) => {
             response.predictions.forEach((prediction) => {
-                input.value = value;
                 predictions.value.push({
                     value: prediction.description,
                     key: prediction.place_id

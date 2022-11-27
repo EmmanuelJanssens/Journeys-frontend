@@ -46,19 +46,29 @@
 
                         <p>No mather where you go there will always be a beginning and an end</p>
 
-                        <div class="flex flex-col sm:flex-row items-center sm:m-16 justify-around">
-                            <google-auto-complete placeholder="Start" />
-                            <span class="w-8 h-3 bg-black rounded-full hidden sm:block"></span>
-                            <span class="w-1/2 h-1 bg-black hidden sm:block"></span>
-                            <span class="w-8 h-3 bg-black rounded-full hidden sm:block"></span>
-                            <google-auto-complete placeholder="End" />
+                        <div class="flex flex-col sm:flex-row items-center sm:m-16 justify-center">
+                            <div class="relative grow">
+                                <google-auto-complete
+                                    :text="validJourney.start.text"
+                                    placeholder="Start"
+                                    @selected="setStart"
+                                    @dirty="validJourney.start.valid = false" />
+                            </div>
+                            <span class="w-1/3 h-1 bg-black hidden sm:block"></span>
+                            <div class="relative grow">
+                                <google-auto-complete
+                                    :text="validJourney.end.text"
+                                    placeholder="End"
+                                    @selected="setEnd"
+                                    @dirty="validJourney.end.valid = false" />
+                            </div>
                         </div>
-                        <div class="sm:absolute sm:left-0 sm:w-1/2">
+                        <div class="sm:absolute sm:left-0 sm:w-1/2 border-l-" ref="poiCountEl">
                             <div
-                                class="flex flex-col items-center justify-center space-x-4 rounded-md p-2 drop-shadow-lg bg-secondary-light sm:flex-row sm:justify-end sm:relative">
-                                <p>33 pois found!</p>
+                                class="flex flex-col items-center justify-center space-x-4 rounded-r-md p-2 drop-shadow-lg bg-secondary-light dark:bg-secondary-dark sm:flex-row sm:justify-end sm:relative">
+                                <p>{{ poiCount }} pois found!</p>
                                 <button
-                                    class="bg-primary-main p-4 rounded-lg text-secondary-btn-contrast-text shadow-inner hover:bg-btn-dark transform hover:scale-110">
+                                    class="bg-primary-main dark:bg-primary-dark p-4 rounded-lg text-secondary-btn-contrast-text shadow-inner hover:bg-btn-dark dark:hover:bg-btn-darker transition-all ease-in transform hover:scale-110">
                                     Start now!
                                 </button>
                             </div>
@@ -73,18 +83,18 @@
                         <div class="columns-1 md:columns-2 lg:columns-3 -scroll-my-16 space-y-4 gap-x-4">
                             <card-preview
                                 image="https://images.unsplash.com/photo-1501555088652-021faa106b9b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1173&q=80"
-                                description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas odio sodales lorem suscipit blandit. Nulla faucibus metus vel nisi consequat, non varius ipsum finibus." />
+                                description="I went for a little hike in the mountains not far from where I am, beutifull landscape as always" />
                             <card-preview
-                                description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas odio sodales lorem suscipit blandit. Nulla faucibus metus vel nisi consequat, non varius ipsum finibus."
+                                description="A fancy new bar opened in town I had to check it out! I was not deceived"
                                 image="https://images.unsplash.com/photo-1543007630-9710e4a00a20?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1335&q=80" />
                             <card-preview
-                                description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas odio sodales lorem suscipit blandit. Nulla faucibus metus vel nisi consequat, non varius ipsum finibus."
+                                description="I was hungry and I wanted to discover a new restaurant, good food and friendly people"
                                 image="https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1335&q=80" />
                             <card-preview
-                                description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas odio sodales lorem suscipit blandit. Nulla faucibus metus vel nisi consequat, non varius ipsum finibus."
+                                description="Never been to an art museum but I must say the paintings where Awesome"
                                 image="https://images.unsplash.com/photo-1554907984-15263bfd63bd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" />
                             <card-preview
-                                description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas odio sodales lorem suscipit blandit. Nulla faucibus metus vel nisi consequat, non varius ipsum finibus."
+                                description="Traditional housings are the best"
                                 image="https://images.unsplash.com/photo-1596178196494-c9a3d1b1c151?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1065&q=80" />
                         </div>
                     </section>
@@ -146,7 +156,9 @@
                                 last resort you can even add your own activities to the vast dataset
                             </p>
                             <div>
-                                <img class="object-cover w-[900px] h-[600px]" src="assets/placeholder.png" />
+                                <img
+                                    class="object-cover w-[900px] h-[600px] rounded-3xl"
+                                    src="assets/placeholder.png" />
                             </div>
                         </div>
                     </section>
@@ -170,24 +182,75 @@ import { isPlatform, popoverController, IonPage } from "@ionic/vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { EffectCards } from "swiper";
 import CardPreview from "./CardPreview.vue";
-import { ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCaretDown, faBookAtlas } from "@fortawesome/free-solid-svg-icons";
 import { faGitlab } from "@fortawesome/free-brands-svg-icons";
 import "swiper/css";
 import "swiper/css/effect-cards";
 
-import { openModal, showToast } from "utils/utils";
+import { getMidPoint, getRadius, openModal, showToast } from "utils/utils";
 import LoginModal from "components/Modals/LoginModal.vue";
 import RegisterModal from "components/Modals/RegisterModal.vue";
 import ProfilePopover from "components/ProfilePopover.vue";
 import { useUserStore } from "stores/useUserStore";
 import router from "router/router";
 import GoogleAutoComplete from "components/GoogleAutoComplete.vue";
+import { usePoiStore } from "stores/usePoiStore";
+import { getGeocodedData } from "google/googleGeocoder";
+import { LngLat } from "mapbox-gl";
+import { useMotion } from "@vueuse/motion";
 
 const modules = ref([EffectCards]);
 
 const userStore = useUserStore();
+const poiStore = usePoiStore();
+const poiCount = ref(0);
+const poiCountEl = ref();
+
+const validJourney = ref({
+    start: {
+        text: "",
+        valid: false
+    },
+    end: {
+        text: "",
+        valid: false
+    }
+});
+
+watch(
+    () => validJourney,
+    async (valid) => {
+        if (valid.value.start.text.length > 0 && valid.value.end.text.length > 0) {
+            const start = await getGeocodedData(valid.value.start.text);
+            const end = await getGeocodedData(valid.value.end.text);
+            const mid = getMidPoint(
+                new LngLat(start.longitude, start.latitude),
+                new LngLat(end.longitude, end.latitude)
+            );
+            const radius = getRadius(
+                new LngLat(start.longitude, start.latitude),
+                new LngLat(end.longitude, end.latitude)
+            );
+            poiCount.value = await poiStore.poiCountBetween(mid.lat, mid.lng, radius);
+        } else {
+            //
+        }
+    },
+    {
+        deep: true
+    }
+);
+
+function setStart(value: string) {
+    validJourney.value.start.text = value;
+    validJourney.value.start.valid = true;
+}
+function setEnd(value: string) {
+    validJourney.value.end.text = value;
+    validJourney.value.end.valid = true;
+}
 async function onPopOver(e: Event) {
     const popover = await popoverController.create({
         component: ProfilePopover,
@@ -205,6 +268,10 @@ async function onPopOver(e: Event) {
         showToast("goodbye", "success");
     }
 }
+
+onMounted(() => {
+    console.log();
+});
 </script>
 <style scoped lang="less">
 swiper {
@@ -226,6 +293,19 @@ swiper {
     background-color: black;
     opacity: 30%;
     z-index: 20;
+}
+
+@keyframes appear {
+    0% {
+        transform: translate();
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-100%);
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
 }
 
 .bg {

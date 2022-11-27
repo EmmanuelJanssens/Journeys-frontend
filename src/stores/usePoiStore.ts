@@ -13,6 +13,15 @@ export const usePoiStore = defineStore("poi", () => {
             return r;
         });
     }
+
+    async function poiCountBetween(lat: number, lng: number, radius: number): Promise<number> {
+        try {
+            const res = await axios.get(`api/poi/count?lat=${lat}&lng=${lng}&radius=${radius}`);
+            return res.data;
+        } catch (e) {
+            return 0;
+        }
+    }
     async function searchBetween(lat: number, lng: number, radius: number): Promise<boolean> {
         return await axios
             .get(`api/poi?lat=${lat}&lng=${lng}&radius=${radius}`)
@@ -51,5 +60,5 @@ export const usePoiStore = defineStore("poi", () => {
     function clear() {
         poisBetween.value = [];
     }
-    return { searchBetween, getThumbnail, clear, poisBetween, getPoiExperiences, addPoi };
+    return { poiCountBetween, searchBetween, getThumbnail, clear, poisBetween, getPoiExperiences, addPoi };
 });
