@@ -1,86 +1,50 @@
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <ion-page>
-        <ion-header>
-            <ion-toolbar>
-                <ion-title>Login</ion-title>
-                <ion-buttons slot="end">
-                    <ion-button @click="dismissLoginModal(false)">
-                        <ion-icon size="large" :icon="closeOutline" />
-                    </ion-button>
-                </ion-buttons>
-                <ion-progress-bar v-if="isLoading" type="indeterminate"></ion-progress-bar>
-            </ion-toolbar>
-        </ion-header>
-        <section>
-            <div class="flex flex-col items-center">
-                <div class="w-full">
-                    <ion-item class="ion-margin">
-                        <ion-label position="floating">Email</ion-label>
-                        <ion-input type="text" v-model="state.email" />
-                    </ion-item>
-                </div>
-                <div>
-                    <ion-text class="ion-margin" color="danger" v-if="v$.email.$error">{{
-                        v$.email.$errors[0].$message
-                    }}</ion-text>
-                    <ion-text class="ion-margin" color="danger" v-if="v$.email.$error">{{
-                        v$.email.$errors[0].$message
-                    }}</ion-text>
-                </div>
+    <journey-modal header="Hello" name="login">
+        <template v-slot:loading>
+            <div v-if="isLoading" class="bg-high-contrast-text h-3">
+                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
+            </div>
+        </template>
+        <template v-slot:body>
+            <div class="bg-secondary-light dark:bg-secondary-dark p-4">
+                <div class="flex flex-col space-y-4">
+                    <JourneyInput placeholder="Email" v-model="state.email" />
+                    <JourneyInput placeholder="Password" v-model="state.password" type="password" />
 
-                <div class="w-full">
-                    <ion-item class="ion-margin">
-                        <ion-label position="floating">Password</ion-label>
-                        <ion-input type="password" v-model="state.password" />
-                    </ion-item>
-                    <ion-text class="ion-margin" color="danger" v-if="v$.password.$error">{{
-                        v$.password.$errors[0].$message
-                    }}</ion-text>
-                </div>
-
-                <div>
-                    <ion-button @click="openProviderSignin"
-                        ><ion-icon slot="start" :icon="logoGoogle" />Sign in With google</ion-button
-                    >
+                    <button
+                        @click="openProviderSignin"
+                        class="bg-primary-main dark:bg-primary-dark p-4 rounded-lg text-secondary-btn-contrast-text shadow-inner hover:bg-btn-dark dark:hover:bg-btn-darker transition-all ease-in transform hover:scale-110">
+                        <font-awesome-icon :icon="faGoogle" />Login with google
+                    </button>
                 </div>
             </div>
-        </section>
-        <ion-footer>
-            <ion-toolbar>
-                <ion-buttons slot="end">
-                    <ion-button @click="modalController.dismiss()" color="secondary">cancel</ion-button>
-                    <ion-button @click="submitForm()">login</ion-button>
-                </ion-buttons>
-            </ion-toolbar>
-        </ion-footer>
-    </ion-page>
+        </template>
+        <template v-slot:footer>
+            <div class="flex justify-end">
+                <button @click="submitForm">Login</button>
+            </div>
+        </template>
+    </journey-modal>
 </template>
 
 <script lang="ts" setup>
-import { modalController } from "@ionic/core";
-import {
-    IonProgressBar,
-    IonIcon,
-    IonPage,
-    IonInput,
-    IonButton,
-    IonItem,
-    IonLabel,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonText,
-    IonButtons,
-    IonFooter
-} from "@ionic/vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
 import { showToast } from "utils/utils";
-import { closeOutline, logoGoogle } from "ionicons/icons";
 import { authApp } from "google/firebase";
+import { journeyModalController } from "components/Modal/JourneyModalController";
+import JourneyModal from "components/Modal/JourneyModal.vue";
+import JourneyInput from "components/Input/JourneyInput.vue";
+import { POSITION, useToast } from "vue-toastification";
+
+const toast = useToast();
+
 const state = ref({
     email: "",
     password: ""
@@ -99,24 +63,35 @@ async function openProviderSignin() {
     const credentials = await userStore.registerWith("google");
     if (credentials) {
         dismissLoginModal(true);
-        showToast("Welcome " + authApp.currentUser?.displayName, "success");
+        journeyModalController.close("login");
+        toast.success("Welcome " + authApp.currentUser?.displayName, {
+            position: POSITION.TOP_CENTER
+        });
     } else {
         await userStore.logout();
-        showToast("Authentication error", "danger");
+
+        toast.error("Error login in", {
+            position: POSITION.TOP_CENTER
+        });
     }
     isLoading.value = false;
 }
 
 async function submitForm() {
     v$.value.$validate();
+    console.log(state.value);
     if (!v$.value.$error) {
         isLoading.value = true;
         const response = await userStore.login(state.value.email, state.value.password);
         if (response == true) {
             dismissLoginModal(true);
-            showToast("Welcome " + authApp.currentUser?.displayName, "success");
+            toast.success("Welcome " + authApp.currentUser?.displayName, {
+                position: POSITION.TOP_CENTER
+            });
         } else {
-            showToast("Authentication error", "danger");
+            toast.error("Error login in", {
+                position: POSITION.TOP_CENTER
+            });
         }
         isLoading.value = false;
     }
@@ -129,7 +104,7 @@ function clearModal() {
 }
 
 function dismissLoginModal(success: boolean) {
-    modalController.dismiss(success);
+    journeyModalController.close("login");
     clearModal();
 }
 </script>

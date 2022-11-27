@@ -1,173 +1,114 @@
 <template>
-    <ion-page>
-        <ion-header>
-            <ion-toolbar>
-                <ion-title>Register</ion-title>
-                <ion-buttons slot="end">
-                    <ion-button @click="dismissRegisterModal()">
-                        <ion-icon size="large" :icon="closeOutline" />
-                    </ion-button>
-                </ion-buttons>
-                <ion-progress-bar v-if="isLoading" :type="'indeterminate'"></ion-progress-bar>
-            </ion-toolbar>
-        </ion-header>
-        <ion-content>
-            <ion-grid>
-                <ion-row>
-                    <ion-col>
-                        <ion-item
-                            :class="{
-                                'ion-margin': true,
-                                'ion-invalid': v$.firstName.$error
-                            }">
-                            <ion-label position="floating">First Name</ion-label>
-                            <ion-input
-                                type="text"
-                                v-model="state.firstName"
-                                @ion-input="async () => await v$.firstName.$validate()"
-                                @ion-change="ifZero($event, () => v$.firstName.$reset())" />
-                            <ion-note v-if="v$.firstName.$error" slot="error">{{
-                                v$.firstName.$errors[0].$message
-                            }}</ion-note>
-                        </ion-item>
-                    </ion-col>
-                    <ion-col>
-                        <ion-item
-                            :class="{
-                                'ion-margin': true,
-                                'ion-invalid': v$.lastName.$error
-                            }">
-                            <ion-label position="floating">lastName</ion-label>
-                            <ion-input
-                                type="text"
-                                v-model="state.lastName"
-                                @ion-input="async () => await v$.lastName.$validate()"
-                                @ion-change="ifZero($event, () => v$.lastName.$reset())" />
-                            <ion-note v-if="v$.lastName.$error" slot="error">{{
-                                v$.lastName.$errors[0].$message
-                            }}</ion-note>
-                        </ion-item>
-                    </ion-col>
-                </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <ion-item
-                            :class="{
-                                'ion-margin': true,
-                                'ion-invalid': v$.username.$error
-                            }">
-                            <ion-label position="floating">Username</ion-label>
-                            <ion-input
-                                type="text"
-                                v-model="state.username"
-                                @ion-input="async () => await v$.username.$validate()"
-                                @ion-change="ifZero($event, () => v$.username.$reset())" />
-                            <ion-note slot="helper">*required</ion-note>
-                            <ion-note v-if="v$.username.$error" slot="error">{{
-                                v$.username.$errors[0].$message
-                            }}</ion-note>
-                        </ion-item>
-                    </ion-col>
-                </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <ion-item
-                            :class="{
-                                'ion-margin': true,
-                                'ion-invalid': v$.email.$error
-                            }">
-                            <ion-label position="floating">E-mail</ion-label>
-                            <ion-input
-                                type="text"
-                                v-model="state.email"
-                                @ion-input="() => v$.email.$validate()"
-                                @ion-change="ifZero($event, () => v$.email.$reset())" />
-                            <ion-note slot="helper">*required</ion-note>
-                            <ion-note v-if="v$.email.$error" slot="error">{{ v$.email.$errors[0].$message }}</ion-note>
-                        </ion-item>
-                    </ion-col>
-                </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <ion-item
-                            :class="{
-                                'ion-margin': true,
-                                'ion-invalid': v$.password.$error
-                            }">
-                            <ion-label position="floating">Password</ion-label>
-                            <ion-input
-                                type="password"
-                                v-model="state.password"
-                                @ion-input="() => v$.password.$validate()"
-                                @ion-change="ifZero($event, () => v$.password.$reset())" />
-                            <ion-note slot="helper">*required</ion-note>
-                            <ion-note v-if="v$.password.$error" slot="error">{{
-                                v$.password.$errors[0].$message
-                            }}</ion-note>
-                        </ion-item>
-                    </ion-col>
-                    <ion-col>
-                        <ion-item
-                            :class="{
-                                'ion-margin': true,
-                                'ion-invalid': v$.confirmPassword.$error
-                            }">
-                            <ion-label position="floating">Confirm password</ion-label>
-                            <ion-input
-                                type="password"
-                                v-model="state.confirmPassword"
-                                @ion-input="() => v$.confirmPassword.$validate()"
-                                @ion-change="ifZero($event, () => v$.confirmPassword.$reset())" />
-                            <ion-note v-if="v$.confirmPassword.$error" slot="error">{{
-                                v$.confirmPassword.$errors[0].$message
-                            }}</ion-note>
-                        </ion-item>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
-        </ion-content>
-        <ion-footer>
-            <ion-toolbar>
-                <ion-buttons slot="end">
-                    <ion-button @click="modalController.dismiss()" color="secondary">cancel</ion-button>
-                    <ion-button @click="submitForm()" slot="end">Register</ion-button>
-                </ion-buttons>
-            </ion-toolbar>
-        </ion-footer>
-    </ion-page>
+    <journey-modal
+        header="Hello"
+        name="register"
+        :on-outside-clicked="dismissRegisterModal"
+        :on-close="dismissRegisterModal">
+        <template v-slot:loading>
+            <div v-if="isLoading" class="bg-high-contrast-text h-3">
+                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
+            </div>
+        </template>
+        <template v-slot:body>
+            <div class="bg-secondary-light dark:bg-secondary-dark p-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <JourneyInput
+                        placeholder="First Name"
+                        v-model="state.firstName"
+                        :error="v$.firstName.$error ? v$.firstName.$errors[0].$message as string : ''"
+                        @keydown="
+                            ifZero(
+                                $event,
+                                () => v$.firstName.$reset(),
+                                () => v$.firstName.$validate()
+                            )
+                        " />
+                    <JourneyInput
+                        placeholder="Last Name"
+                        v-model="state.lastName"
+                        :error="v$.lastName.$error ? v$.lastName.$errors[0].$message as string : ''"
+                        @keydown="
+                            ifZero(
+                                $event,
+                                () => v$.lastName.$reset(),
+                                () => v$.lastName.$validate()
+                            )
+                        " />
+                    <JourneyInput
+                        class="col-span-2"
+                        placeholder="username"
+                        v-model="state.username"
+                        helper="required"
+                        :error="v$.username.$error ? v$.username.$errors[0].$message as string : ''"
+                        @keydown="
+                            ifZero(
+                                $event,
+                                () => v$.username.$reset(),
+                                () => v$.username.$validate()
+                            )
+                        " />
+                    <JourneyInput
+                        class="col-span-2"
+                        placeholder="Email"
+                        v-model="state.email"
+                        helper="required"
+                        :error="v$.email.$error ? v$.email.$errors[0].$message as string : ''"
+                        @keydown="
+                            ifZero(
+                                $event,
+                                () => v$.email.$reset(),
+                                () => v$.email.$validate()
+                            )
+                        " />
+                    <JourneyInput
+                        class="col-span-2"
+                        placeholder="Password"
+                        v-model="state.password"
+                        :error="v$.password.$error ? v$.password.$errors[0].$message as string : ''"
+                        @keydown="
+                            ifZero(
+                                $event,
+                                () => v$.password.$reset(),
+                                () => v$.password.$validate()
+                            )
+                        "
+                        type="password" />
+                    <JourneyInput
+                        class="col-span-2"
+                        placeholder="Confirm password"
+                        v-model="state.confirmPassword"
+                        :error="v$.confirmPassword.$error ? v$.confirmPassword.$errors[0].$message as string : ''"
+                        @keydown="
+                            ifZero(
+                                $event,
+                                () => v$.confirmPassword.$reset(),
+                                () => v$.confirmPassword.$validate()
+                            )
+                        "
+                        type="password" />
+                </div>
+            </div>
+        </template>
+        <template v-slot:footer>
+            <div class="flex justify-end">
+                <button @click="submitForm">Register</button>
+            </div>
+        </template>
+    </journey-modal>
 </template>
 
 <script lang="ts" setup>
-import { InputCustomEvent, modalController } from "@ionic/core";
-import {
-    IonProgressBar,
-    IonIcon,
-    IonNote,
-    IonPage,
-    IonGrid,
-    IonCol,
-    IonRow,
-    IonInput,
-    IonButton,
-    IonItem,
-    IonLabel,
-    IonHeader,
-    IonToolbar,
-    IonContent,
-    IonTitle,
-    toastController,
-    IonText,
-    IonButtons,
-    IonFooter
-} from "@ionic/vue";
 import { useVuelidate } from "@vuelidate/core";
+import { POSITION, useToast } from "vue-toastification";
+
 import { required, minLength, email, sameAs, helpers } from "@vuelidate/validators";
 import { computed, ref } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
-import { closeOutline } from "ionicons/icons";
-import { showToast } from "utils/utils";
 import { authApp } from "google/firebase";
+import JourneyInput from "components/Input/JourneyInput.vue";
+import JourneyModal from "components/Modal/JourneyModal.vue";
+import { journeyModalController } from "components/Modal/JourneyModalController";
 
 const state = ref({
     username: "",
@@ -179,6 +120,10 @@ const state = ref({
 });
 const passwordRef = computed(() => state.value.password);
 
+const toast = useToast();
+const toastOptions = {
+    position: POSITION.TOP_CENTER
+};
 const rules = {
     username: {
         required,
@@ -205,9 +150,11 @@ const userStore = useUserStore();
 const isLoading = ref(false);
 const v$ = useVuelidate(rules, state);
 
-function ifZero(event: InputCustomEvent, reset: Function) {
-    if (event.detail.value?.length == 0) {
+function ifZero(event: InputEvent, reset: Function, validate: Function) {
+    if ((event.target as HTMLTextAreaElement).value?.length == 0) {
         reset();
+    } else {
+        validate();
     }
 }
 
@@ -218,15 +165,15 @@ async function submitForm() {
 
         const validUsername = await userStore.checkUserName(state.value.username);
         if (!validUsername) {
-            showToast("Authentication error", "danger");
+            toast.error("User name not available", toastOptions);
             isLoading.value = false;
             return;
         }
         const response = await userStore.register(state.value);
         if (response) {
             dismissRegisterModal();
-            showToast("Welcome " + authApp.currentUser?.displayName, "success");
-        } else showToast("Authentication error", "danger");
+            toast.success("Welcome " + authApp.currentUser?.displayName, toastOptions);
+        } else toast.error("Could not register pleae try again later", toastOptions);
         isLoading.value = false;
     }
 }
@@ -234,11 +181,15 @@ async function submitForm() {
 function clearModal() {
     state.value.username = "";
     state.value.password = "";
+    state.value.confirmPassword = "";
+    state.value.email = "";
+    state.value.firstName = "";
+    state.value.lastName = "";
     v$.value.$reset();
 }
 
 function dismissRegisterModal() {
-    modalController.dismiss();
+    journeyModalController.close("register");
     clearModal();
 }
 </script>

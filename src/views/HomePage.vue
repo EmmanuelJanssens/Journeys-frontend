@@ -9,13 +9,13 @@
                         <button
                             v-if="!userStore.isLoggedIn"
                             class="text-secondary-light"
-                            @click="journeyModalController.open()">
+                            @click="journeyModalController.open('register')">
                             CREATE AN ACCOUNT
                         </button>
                         <button
                             v-if="!userStore.isLoggedIn"
                             class="text-high-contrast-text"
-                            @click="journeyModalController.open()">
+                            @click="journeyModalController.open('login')">
                             LOGIN
                         </button>
                         <button
@@ -24,7 +24,7 @@
                             @click="router.push('logbook')">
                             LOGBOOk <font-awesome-icon :icon="faBookAtlas" />
                         </button>
-                        <button v-if="userStore.isLoggedIn" class="text-high-contrast-text">
+                        <button @click="authApp.signOut" v-if="userStore.isLoggedIn" class="text-high-contrast-text">
                             PROFILE <font-awesome-icon :icon="faCaretDown" />
                         </button>
                     </div>
@@ -174,41 +174,6 @@
                 </div>
             </div>
         </div>
-
-        <journey-modal header="Hello">
-            <template v-slot:body>
-                <div class="bg-secondary-light dark:bg-secondary-dark p-4">
-                    <div class="flex flex-col space-y-4">
-                        <input
-                            :class="{
-                                'transition ease-in-out scale-100 outline-none': true,
-                                'transition ease-in-out scale-105 ': true,
-                                'h-12 p-4 sm:w-full focus:border-none bg-secondary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg outline-none focus:outline-primary-main': true
-                            }"
-                            placeholder="Email"
-                            ref="text" />
-                        <input
-                            :class="{
-                                'transition ease-in-out scale-100 outline-none': true,
-                                'transition ease-in-out scale-105 ': true,
-                                'h-12 p-4 sm:w-full focus:border-none bg-secondary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg outline-none focus:outline-primary-main': true
-                            }"
-                            placeholder="Password"
-                            type="password"
-                            ref="text" />
-                        <button
-                            class="bg-primary-main dark:bg-primary-dark p-4 rounded-lg text-secondary-btn-contrast-text shadow-inner hover:bg-btn-dark dark:hover:bg-btn-darker transition-all ease-in transform hover:scale-110">
-                            <font-awesome-icon :icon="faGoogle" />Login with google
-                        </button>
-                    </div>
-                </div>
-            </template>
-            <template v-slot:footer>
-                <div class="flex justify-end">
-                    <button>OK</button>
-                </div>
-            </template>
-        </journey-modal>
     </div>
 </template>
 
@@ -240,6 +205,7 @@ import EditJourneyModal from "components/Modals/EditJourneyModal.vue";
 import JourneyModal from "components/Modal/JourneyModal.vue";
 import { journeyModalController } from "components/Modal/JourneyModalController";
 import { authApp } from "google/firebase";
+import JourneyInput from "components/Input/JourneyInput.vue";
 const modules = ref([EffectCards]);
 
 const userStore = useUserStore();
@@ -308,6 +274,8 @@ async function onPopOver(e: Event) {
 }
 
 onMounted(() => {
+    journeyModalController.create("login");
+    journeyModalController.create("register");
     console.log();
 });
 </script>

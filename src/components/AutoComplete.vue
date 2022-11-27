@@ -1,5 +1,12 @@
 <template>
     <div>
+        <!-- <JourneyInput
+            @focus-in="setFocus"
+            @focus-out="focusOut"
+            @key-down="autocomplete"
+            :value="input"
+            :placeholder="placeholder"
+            ref="text" /> -->
         <input
             @focusin="setFocus"
             :value="input"
@@ -10,7 +17,7 @@
                 'rounded-t-lg': predictions.length > 0,
                 'transition ease-in-out scale-100 outline-none': !focus,
                 'transition ease-in-out scale-105 ': focus,
-                'h-12 p-4 sm:w-full focus:border-none bg-secondary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg outline-none focus:outline-primary-main': true
+                'h-12 p-4 sm:w-full focus:border-none bg-secondary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg outline-none focus:outline-primary-darker': true
             }"
             :placeholder="placeholder"
             ref="text" />
@@ -33,6 +40,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
+import JourneyInput from "./Input/JourneyInput.vue";
 
 const focus = ref(false);
 const props = defineProps<{

@@ -1,19 +1,23 @@
 <template>
-    <router-view v-slot="{ Component }">
-        <Transition name="fade" mode="out-in">
-            <component :is="Component" />
-        </Transition>
-    </router-view>
+    <section>
+        <router-view v-slot="{ Component }">
+            <Transition name="fade" mode="out-in">
+                <component :is="Component" />
+            </Transition>
+        </router-view>
+        <login-modal />
+        <register-modal />
+    </section>
 </template>
 
 <script lang="ts" setup>
 // import { IonApp, IonRouterOutlet, IonContent, modalController } from "@ionic/vue";
 import DisclaimerModal from "components/Modals/DisclaimerModal.vue";
-import LogBookPage from "views/LogBookPage.vue";
-import HomePage from "views/HomePage.vue";
+import LoginModal from "components/Modals/LoginModal.vue";
+import RegisterModal from "components/Modals/RegisterModal.vue";
 import { RouterView } from "vue-router";
 import { authApp } from "google/firebase";
-import { onMounted, Suspense } from "vue";
+import { onMounted } from "vue";
 
 onMounted(async () => {
     //     const disclaimer = localStorage.getItem("disclaimer");
@@ -40,6 +44,6 @@ onMounted(async () => {
 
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.5s ease-out;
+    transition: opacity 0.2s ease-out;
 }
 </style>

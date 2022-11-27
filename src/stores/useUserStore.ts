@@ -49,6 +49,7 @@ export const useUserStore = defineStore("user", () => {
 
     async function login(email: string, password: string): Promise<boolean> {
         try {
+            console.log(email);
             const creds = await signInWithEmailAndPassword(authApp, email, password);
             return creds.user != undefined;
         } catch (e) {

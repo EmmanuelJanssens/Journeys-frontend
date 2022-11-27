@@ -3,19 +3,29 @@ import { ref } from "vue";
 class JourneyModalController {
     private _open = ref();
 
-    open(): void {
-        this._open.value = true;
+    private _modals = ref<Map<string, boolean>>();
+
+    constructor() {
+        this._modals.value = new Map();
     }
 
-    close(): void {
-        this._open.value = false;
+    create(modal: string) {
+        this._modals.value?.set(modal, false);
+    }
+    open(modal: string): void {
+        if (this._modals.value?.get(modal) != undefined) this._modals.value?.set(modal, true);
+        console.log(this._modals);
+    }
+
+    close(modal: string): void {
+        this._modals.value?.set(modal, false);
     }
     async closeAsync(callback: () => Promise<void>): Promise<void> {
         await callback();
         this._open.value = false;
     }
-    isOpen(): boolean {
-        return this._open.value;
+    isOpen(modal: string): boolean | undefined {
+        return this._modals.value?.get(modal);
     }
 }
 
