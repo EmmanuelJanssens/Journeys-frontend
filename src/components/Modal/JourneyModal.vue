@@ -4,7 +4,7 @@
             <div
                 class="fixed flex justify-center items-center left-0 top-0 w-screen h-screen z-[9000] bg-dim"
                 v-if="journeyModalController.isOpen(name)">
-                <div class="w-full">
+                <div class="">
                     <div class="z-[9999] animate-appear" ref="modal">
                         <div
                             class="flex flex-col bg-primary-main dark:bg-primary-dark mx-auto justify-between max-w-3xl rounded-xl">

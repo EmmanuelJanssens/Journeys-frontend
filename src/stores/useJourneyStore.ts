@@ -170,6 +170,8 @@ export const useJourneyStore = defineStore("journey", () => {
     }
 
     function setJourneyStartEnd(start: AddressDto, end: AddressDto) {
+        console.log(start);
+        console.log(end);
         editJourney.value!.journey!.start = {
             placeId: start.placeId,
             address: start.address,

@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
     <div class="relative">
         <section
             id="Map"
@@ -52,81 +52,81 @@ async function getCountryLoc() {
     return new LngLat(loc.data.location.longitude, loc.data.location.latitude);
 }
 onMounted(async () => {
-    // const center = await getCountryLoc();
-    // mapInstance.loadMap(
-    //     "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg",
-    //     "Map",
-    //     center,
-    //     "mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx"
-    // );
-    // map = mapInstance.getMap()!;
-    // map.on("load", () => {
-    //     emit("loaded");
-    //     emit("ready");
-    // });
-    // map.on("style.load", () => {
-    //     map.setFog({});
-    //     map.resize();
-    // });
-    // map.on(
-    //     "click",
-    //     mapLayers.poi_list + "_unclustered",
-    //     (
-    //         e: mapboxgl.MapMouseEvent & {
-    //             features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
-    //         } & mapboxgl.EventData
-    //     ) => {
-    //         emit("poiClicked", e.features![0].properties as PoiDto, e);
-    //     }
-    // );
-    // map.on("click", mapLayers.poi_list + "_cluster", (e) => {
-    //     onClusterClick(e);
-    // });
-    // map.on("contextmenu", async (e: MapMouseEvent) => {
-    //     if (props.mode == "editJourney" || props.mode == "edition") {
-    //         const alert = await alertController.create({
-    //             header: "Confirm poi details",
-    //             inputs: [
-    //                 {
-    //                     label: "Poi Name",
-    //                     name: "poiName",
-    //                     placeholder: "Enter name"
-    //                 }
-    //             ],
-    //             buttons: [
-    //                 "Cancel",
-    //                 {
-    //                     text: "OK",
-    //                     handler: (data) => {
-    //                         alertController.dismiss(data.poiName, "ok");
-    //                     }
-    //                 }
-    //             ]
-    //         });
-    //         await alert.present();
-    //         const { data, role } = await alert.onDidDismiss();
-    //         if (role == "ok" && data?.length! > 0) {
-    //             const poi: PoiDto = {
-    //                 name: data,
-    //                 location: {
-    //                     latitude: e.lngLat.lat,
-    //                     longitude: e.lngLat.lng
-    //                 }
-    //             };
-    //             if (poi.thumbnail != undefined) delete poi.thumbnail;
-    //             const added = await poiStore.addPoi(poi);
-    //             const experience: ExperienceDto = {
-    //                 title: "",
-    //                 date: new Date().toISOString(),
-    //                 description: "",
-    //                 images: [],
-    //                 order: journeyStore.editJourney.journey!.experiencesConnection?.edges?.length!,
-    //                 node: added!
-    //             };
-    //             journeyStore.addToJourney(experience);
-    //         }
-    //     }
-    // });
+    const center = await getCountryLoc();
+    mapInstance.loadMap(
+        "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg",
+        "Map",
+        center,
+        "mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx"
+    );
+    map = mapInstance.getMap()!;
+    map.on("load", () => {
+        emit("loaded");
+        emit("ready");
+    });
+    map.on("style.load", () => {
+        map.setFog({});
+        map.resize();
+    });
+    map.on(
+        "click",
+        mapLayers.poi_list + "_unclustered",
+        (
+            e: mapboxgl.MapMouseEvent & {
+                features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
+            } & mapboxgl.EventData
+        ) => {
+            emit("poiClicked", e.features![0].properties as PoiDto, e);
+        }
+    );
+    map.on("click", mapLayers.poi_list + "_cluster", (e) => {
+        onClusterClick(e);
+    });
+    map.on("contextmenu", async (e: MapMouseEvent) => {
+        if (props.mode == "editJourney" || props.mode == "edition") {
+            const alert = await alertController.create({
+                header: "Confirm poi details",
+                inputs: [
+                    {
+                        label: "Poi Name",
+                        name: "poiName",
+                        placeholder: "Enter name"
+                    }
+                ],
+                buttons: [
+                    "Cancel",
+                    {
+                        text: "OK",
+                        handler: (data) => {
+                            alertController.dismiss(data.poiName, "ok");
+                        }
+                    }
+                ]
+            });
+            await alert.present();
+            const { data, role } = await alert.onDidDismiss();
+            if (role == "ok" && data?.length! > 0) {
+                const poi: PoiDto = {
+                    name: data,
+                    location: {
+                        latitude: e.lngLat.lat,
+                        longitude: e.lngLat.lng
+                    }
+                };
+                if (poi.thumbnail != undefined) delete poi.thumbnail;
+                const added = await poiStore.addPoi(poi);
+                const experience: ExperienceDto = {
+                    title: "",
+                    date: new Date().toISOString(),
+                    description: "",
+                    images: [],
+                    order: journeyStore.editJourney.journey!.experiencesConnection?.edges?.length!,
+                    node: added!
+                };
+                journeyStore.addToJourney(experience);
+            }
+        }
+    });
 });
 function onClusterClick(e: MapMouseEvent) {
     const features = map.queryRenderedFeatures(e.point, {
@@ -134,7 +134,7 @@ function onClusterClick(e: MapMouseEvent) {
     });
 
     const clusterId = features![0].properties!.cluster_id;
-    const source: maplibregl.GeoJSONSource = map.getSource(mapLayers.poi_list) as maplibregl.GeoJSONSource;
+    const source: mapboxgl.GeoJSONSource = map.getSource(mapLayers.poi_list) as mapboxgl.GeoJSONSource;
     source.getClusterExpansionZoom(clusterId, (err: any, zoom: any) => {
         if (err) return;
         if (features![0].geometry.type === "Point") {
@@ -348,4 +348,4 @@ watch(
     }
 );
 </script>
-<style></style>
+<style></style> -->

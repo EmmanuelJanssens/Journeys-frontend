@@ -1,5 +1,5 @@
 <template>
-    <auto-complete
+    <AutoComplete
         :input="input!"
         :placeholder="placeholder"
         :debounce="500"

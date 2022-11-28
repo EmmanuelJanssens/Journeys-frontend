@@ -1,29 +1,27 @@
 <template>
-    <ion-content>
-        <ion-row class="experience-list">
-            <ion-col v-if="props.poiList">
-                <DynamicScroller :items="props.poiList" :min-item-size="54" style="height: 100%">
-                    <template v-slot="{ item, index, active }">
-                        <DynamicScrollerItem :item="item" :active="active" :data-index="index">
-                            <ion-item button style="width: 100%" @click="emit('poiItemClicked', item)">
-                                <ion-thumbnail slot="start">
-                                    <ion-img :src="item.thumbnail"> </ion-img>
-                                </ion-thumbnail>
-                                <ion-label>{{ item.name }}</ion-label>
-                                <ion-icon slot="end" :icon="arrowForward"></ion-icon>
-                            </ion-item>
-                        </DynamicScrollerItem>
-                    </template>
-                </DynamicScroller>
-            </ion-col>
-        </ion-row>
-    </ion-content>
+    <div v-if="props.poiList" class="overflow bg-primary-light h-screen group">
+        <DynamicScroller :items="props.poiList" :min-item-size="54" style="height: 100%">
+            <template v-slot="{ item, index, active }">
+                <DynamicScrollerItem :item="item" :active="active" :data-index="index">
+                    <div
+                        class="flex space-x-0 p-2 items-center justify-between hover:cursor-pointer hover:bg-primary-darker hover:bg-opacity-30"
+                        @click="emit('poiItemClicked', item)">
+                        <div class="flex space-x-2">
+                            <img class="object-cover w-16 h-16 rounded-lg" :src="item.thumbnail" />
+                            <p class="p-2 truncate">{{ item.name }}</p>
+                        </div>
+                        <FontAwesomeIcon :icon="faEye" />
+                    </div>
+                </DynamicScrollerItem>
+            </template>
+        </DynamicScroller>
+    </div>
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonRow, IonCol, IonItem, IonThumbnail, IonImg, IonLabel, IonIcon } from "@ionic/vue";
-import { arrowForward } from "ionicons/icons";
 import { PoiDto } from "types/dtos";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faEye } from "@fortawesome/free-solid-svg-icons";
 
 const props = defineProps<{
     poiList?: PoiDto[];
@@ -34,4 +32,22 @@ const emit = defineEmits<{
 }>();
 </script>
 
-<style></style>
+<style>
+::-webkit-scrollbar {
+    height: 12px;
+    width: 12px;
+    background: #6c9d89;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #687a6e;
+    -webkit-border-radius: 1ex;
+    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+    border-radius: 5%;
+    box-shadow: none;
+}
+
+::-webkit-scrollbar-corner {
+    background: #000;
+}
+</style>

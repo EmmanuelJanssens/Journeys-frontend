@@ -1,12 +1,5 @@
 <template>
-    <div>
-        <!-- <JourneyInput
-            @focus-in="setFocus"
-            @focus-out="focusOut"
-            @key-down="autocomplete"
-            :value="input"
-            :placeholder="placeholder"
-            ref="text" /> -->
+    <div class="relative">
         <input
             @focusin="setFocus"
             :value="input"

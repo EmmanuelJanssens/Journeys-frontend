@@ -48,7 +48,7 @@
 
                         <div class="flex flex-col sm:flex-row items-center sm:m-16 justify-center">
                             <div class="relative grow">
-                                <google-auto-complete
+                                <GoogleAutoComplete
                                     :text="validJourney.start.text"
                                     placeholder="Start"
                                     @selected="setStart"
@@ -56,7 +56,7 @@
                             </div>
                             <span class="w-1/3 h-1 bg-black hidden sm:block"></span>
                             <div class="relative grow">
-                                <google-auto-complete
+                                <GoogleAutoComplete
                                     :text="validJourney.end.text"
                                     placeholder="End"
                                     @selected="setEnd"
@@ -182,6 +182,14 @@ const validJourney = ref({
         valid: false
     }
 });
+function setStart(value: string) {
+    validJourney.value.start.text = value;
+    validJourney.value.start.valid = true;
+}
+function setEnd(value: string) {
+    validJourney.value.end.text = value;
+    validJourney.value.end.valid = true;
+}
 
 watch(
     () => validJourney,
@@ -206,73 +214,8 @@ watch(
         deep: true
     }
 );
-
-function setStart(value: string) {
-    validJourney.value.start.text = value;
-    validJourney.value.start.valid = true;
-}
-function setEnd(value: string) {
-    validJourney.value.end.text = value;
-    validJourney.value.end.valid = true;
-}
-async function onPopOver(e: Event) {
-    // const popover = await popoverController.create({
-    //     component: ProfilePopover,
-    //     alignment: "start",
-    //     event: e,
-    //     reference: "trigger",
-    //     size: "auto"
-    // });
-    // await popover.present();
-    // const data = await popover.onDidDismiss();
-    // if (data.data == "logout") {
-    //     await userStore.logout();
-    //     router.push("home");
-    //     showToast("goodbye", "success");
-    // }
-}
-
-onMounted(() => {});
 </script>
 <style scoped lang="less">
-swiper {
-    width: 100%;
-}
-
-.banner-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.overlay {
-    pointer-events: none;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background-color: black;
-    opacity: 30%;
-    z-index: 20;
-}
-
-@keyframes appear {
-    0% {
-        transform: translate();
-        opacity: 1;
-    }
-    100% {
-        transform: translate(-100%);
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-}
-
-.bg {
-    background-image: url("../assets/blurry-gradient-haikei.svg");
-}
-
 ::-webkit-scrollbar {
     height: 12px;
     width: 12px;

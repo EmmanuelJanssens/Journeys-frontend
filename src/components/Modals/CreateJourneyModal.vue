@@ -1,106 +1,69 @@
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <ion-header>
-        <ion-toolbar>
-            <ion-title>Create new journey</ion-title>
-            <ion-buttons slot="end">
-                <ion-button @click="modalController.dismiss()">
-                    <ion-icon size="large" :icon="closeOutline"></ion-icon>
-                </ion-button>
-            </ion-buttons>
-        </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-text-center">
-        <ion-grid>
-            <ion-row>
-                <ion-col>
-                    <GautoCompletePredictionList
-                        placeholder="Start"
-                        :input="startData.locationText"
-                        @prediction-chosen="setStartPredictionText($event)" />
-                </ion-col>
-            </ion-row>
-            <ion-row>
-                <ion-col>
-                    <GautoCompletePredictionList
-                        placeholder="End"
-                        :input="endData.locationText"
-                        @prediction-chosen="setEndPredictionText($event)"
-                /></ion-col>
-            </ion-row>
-            <ion-row>
-                <ion-col> </ion-col>
-                <ion-col> </ion-col>
-            </ion-row>
-        </ion-grid>
-    </ion-content>
-    <ion-footer>
-        <ion-toolbar>
-            <ion-buttons slot="end">
-                <ion-button @click="modalController.dismiss()" color="secondary"> Cancel </ion-button>
-                <ion-button @click="gotoJourneyMap"> Create </ion-button>
-            </ion-buttons>
-        </ion-toolbar>
-    </ion-footer>
+    <JourneyModal header="Create a new Journey" name="createJourney">
+        <template v-slot:body>
+            <div class="flex flex-row space-x-4 p-4">
+                <GoogleAutoComplete
+                    :text="validJourney.start.text"
+                    placeholder="Start"
+                    @selected="setStart"
+                    @dirty="validJourney.start.valid = false" />
+                <GoogleAutoComplete
+                    :text="validJourney.start.text"
+                    placeholder="End"
+                    @selected="setEnd"
+                    @dirty="validJourney.end.valid = false" />
+            </div>
+        </template>
+
+        <template v-slot:footer>
+            <div class="flex justify-end p-2" @click="gotoJourneyMap">
+                <button>CREATE</button>
+            </div>
+        </template>
+    </JourneyModal>
 </template>
 
 <script lang="ts" setup>
-import {
-    IonContent,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonButtons,
-    IonButton,
-    IonIcon,
-    IonGrid,
-    IonCol,
-    IonRow,
-    IonFooter
-} from "@ionic/vue";
-
 import { ref } from "vue";
-import { LngLat } from "maplibre-gl";
-
-import GautoCompletePredictionList from "components/GautoCompletePredictionList.vue";
+import JourneyModal from "components/Modal/JourneyModal.vue";
+import GoogleAutoComplete from "components/GoogleAutoComplete.vue";
 import { getGeocodedData } from "google/googleGeocoder";
 import { modalController } from "@ionic/core";
-import { closeOutline } from "ionicons/icons";
+import { journeyModalController } from "components/Modal/JourneyModalController";
+import { LngLat } from "mapbox-gl";
 
-const startData = ref({
-    locationText: "",
-    coordinates: new LngLat(-1, -1),
-    isOk: false
+const validJourney = ref({
+    start: {
+        text: "",
+        valid: false
+    },
+    end: {
+        text: "",
+        valid: false
+    }
 });
-
-const endData = ref({
-    locationText: "",
-    coordinates: new LngLat(-1, -1),
-    isOk: false
-});
-
-function setStartPredictionText(prediction: string) {
-    startData.value.locationText = prediction;
-    startData.value.isOk = true;
+function setStart(value: string) {
+    validJourney.value.start.text = value;
+    validJourney.value.start.valid = true;
 }
-function setEndPredictionText(prediction: string) {
-    endData.value.locationText = prediction;
-    endData.value.isOk = true;
+function setEnd(value: string) {
+    validJourney.value.end.text = value;
+    validJourney.value.end.valid = true;
 }
 
 async function gotoJourneyMap() {
-    if (startData.value.isOk && endData.value.isOk) {
-        const geocodedStart = await getGeocodedData(startData.value.locationText);
-        const geocodedEnd = await getGeocodedData(endData.value.locationText);
+    if (validJourney.value.start.valid && validJourney.value.end.valid) {
+        const geocodedStart = await getGeocodedData(validJourney.value.start.text);
+        const geocodedEnd = await getGeocodedData(validJourney.value.end.text);
 
         if (geocodedStart.error === undefined && geocodedEnd.error === undefined) {
-            modalController.dismiss(
-                {
+            journeyModalController.close("createJourney", {
+                data: {
                     start: geocodedStart,
                     end: geocodedEnd
-                },
-                "create"
-            );
+                }
+            });
         }
     }
 }

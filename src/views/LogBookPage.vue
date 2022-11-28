@@ -1,8 +1,14 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template>
-    <div class="absolute flex flex-col top-0 right-0 bottom-0 left-0">
+    <div class="absolute top-0 right-0 left-0 w-screen h-screen">
         <!-- <TheJourneysHeader class="z-50" /> -->
         <div class="flex h-full w-full">
+            <ThePoiListSidebar
+                v-if="poiStore.poisBetween && poiStore.poisBetween.length > 0"
+                @poi-item-clicked="panTo"
+                :poiList="poiStore.poisBetween"
+                class="w-[400px] h-full" />
+
             <div class="w-full h-full">
                 <JourneyMap
                     class="bg-secondary-light w-full h-full"
@@ -11,46 +17,14 @@
                     @marker-dragged="onMarkerDragend"
                     @poi-clicked="onPoiClicked"
                     @ready="setLoading(false)">
-                    <!-- <template v-slot:fab>
-                        <div class="absolute flex flex-col space-y-2 top-5 right-5">
-                            <button
-                                @click="toggleFab()"
-                                class="bg-primary-main z-50 rounded-full w-14 h-14 transition-all ease-in-out hover:scale-110 active:scale-125">
-                                <FontAwesomeIcon :icon="faAdd" />
-                            </button>
-                            <div class="invisible flex-col" ref="fabList">
-                                <div v-for="b in 4" v-bind:key="b">
-                                    <button
-                                        class="bg-secondary-main z-50 rounded-full w-14 h-14 transition:all ease-in-out scale-75 hover:scale-90 active:scale-110">
-                                        <FontAwesomeIcon :icon="faAdd" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </template> -->
                 </JourneyMap>
             </div>
             <LogbookMenu :buttons="menuButtons" />
+            <TheJourneysSlider
+                class="absolute w-full bottom-10 p-4"
+                v-if="mode == modes.logbook"
+                @header-clicked="showExperiences" />
         </div>
-
-        <TheJourneysSlider
-            class="absolute w-full bottom-10 p-4"
-            v-if="mode == modes.logbook"
-            @header-clicked="showExperiences" />
-
-        <!-- <div v-if="mode == modes.viewJourney || mode == modes.edition || mode == modes.editJourney">
-                <TheJourneyExperienceList
-                    v-if="
-                                        mode == modes.viewJourney &&
-                                        journeyStore.viewJourney?.experiencesConnection?.edges?.length! > 0
-                                    "
-                    @updated="showExperiences" />
-                <MapJourneySidebar
-                    v-else-if="mode === modes.edition || mode == modes.editJourney"
-                    :start="journeyStore.editJourney.journey?.start!"
-                    :end="journeyStore.editJourney.journey?.end!"
-                    mode="edit" />
-            </div> -->
     </div>
 </template>
 <script lang="ts">
@@ -67,8 +41,7 @@ import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 
 import PoiCard from "components/Cards/PoiCard.vue";
-import CreateJourneyModal from "components/Modals/CreateJourneyModal.vue";
-import { defineAsyncComponent, onActivated, onDeactivated, onMounted, ref } from "vue";
+import { defineAsyncComponent, onMounted, ref } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
 import { usePoiStore } from "stores/usePoiStore";
@@ -80,7 +53,7 @@ import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
 import { authApp } from "google/firebase";
 
 import { MapMouseEvent, LngLat } from "mapbox-gl";
-import { getMidPoint, openModal, getRadius } from "utils/utils";
+import { getMidPoint, getRadius } from "utils/utils";
 
 import JourneyMap from "components/TheJourneyMap.vue";
 
@@ -91,42 +64,74 @@ import TheJourneysSlider from "components/TheJourneysSlider.vue";
 import TheJourneyExperienceList from "components/TheJourneyExperienceList.vue";
 import ThePoiSearchbar from "components/ThePoiSearchbar.vue";
 
-import TheJourneysHeader from "components/TheJourneysHeader.vue";
 import { mapInstance } from "map/JourneysMap";
 
 import { journeyModalController } from "components/Modal/JourneyModalController";
-import { faAdd, faBookAtlas, faCircleUser, faEarth } from "@fortawesome/free-solid-svg-icons";
+import {
+    faAdd,
+    faBookAtlas,
+    faCircleUser,
+    faEarth,
+    faLocationDot,
+    faHome,
+    faPencil,
+    IconDefinition
+} from "@fortawesome/free-solid-svg-icons";
+import router from "router/router";
 
-const menuButtons = [
+const menuButtons = ref([
     {
         text: "View my Profile",
-        icon: faCircleUser,
+        icon: faCircleUser as IconDefinition,
         handler: () => {
             console.log("View my Profile");
         }
     },
     {
         text: "Create a Journey",
-        icon: faBookAtlas,
-        handler: () => {
-            console.log("Create a journey");
+        icon: faBookAtlas as IconDefinition,
+        handler: async () => {
+            journeyModalController.open("createJourney");
+
+            const result = await journeyModalController.didClose("createJourney");
+
+            if (result) {
+                mode.value = modes.edition;
+                journeyStore.editJourney.journey = {};
+                journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
+                fetchPois(result.data);
+            }
         }
     },
     {
         text: "Add an Experience",
-        icon: faAdd,
+        icon: faAdd as IconDefinition,
         handler: () => {
             console.log("Add an Experience");
         }
     },
     {
+        text: "Add a Point of interest",
+        icon: faLocationDot as IconDefinition,
+        handler: () => {
+            console.log("Add a Point of interest");
+        }
+    },
+    {
         text: "Explore arround Me",
-        icon: faEarth,
+        icon: faEarth as IconDefinition,
         handler: () => {
             console.log("Explore arround Me");
         }
+    },
+    {
+        text: "Home",
+        icon: faHome as IconDefinition,
+        handler: () => {
+            router.push("home");
+        }
     }
-];
+]);
 const modes = {
     logbook: "logbook",
     exploration: "exploration",
@@ -166,11 +171,20 @@ authApp.onAuthStateChanged((user) => {
 //     }
 // });
 
-onMounted(() => {
+onMounted(async () => {
+    if (userStore.isLoggedIn) await fetchJourneys();
+
     journeyModalController.create(
         "editJourney",
         defineAsyncComponent({
             loader: () => import("components/Modals/EditJourneyModal.vue")
+        })
+    );
+
+    journeyModalController.create(
+        "createJourney",
+        defineAsyncComponent({
+            loader: () => import("components/Modals/CreateJourneyModal.vue")
         })
     );
 });
@@ -184,10 +198,6 @@ async function panTo(poi: PoiDto) {
         zoom: 20
     });
 }
-
-onActivated(async () => {
-    if (userStore.isLoggedIn) await fetchJourneys();
-});
 
 function setLoading(loading: boolean) {
     isLoading.value = loading;
@@ -229,6 +239,7 @@ async function editJourney() {
 
 async function fetchPois(data: { start: AddressDto; end: AddressDto }) {
     setLoading(true);
+    console.log(data);
     const radius = getRadius(getAddressCoordinates(data.start), getAddressCoordinates(data.end));
     const mid = getMidPoint(getAddressCoordinates(data.start), getAddressCoordinates(data.end));
     journeyStore.setJourneyStartEnd(data.start, data.end);

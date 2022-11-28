@@ -4,6 +4,8 @@ class JourneyModalController {
     private _modals = ref<Map<string, { component: Component; open: boolean }>>();
 
     private _props = ref();
+
+    private _close = ref();
     constructor() {
         this._modals.value = new Map();
     }
@@ -20,8 +22,9 @@ class JourneyModalController {
         if (this._modals.value?.get(modal) != undefined) this._modals.value.get(modal)!.open = true;
     }
 
-    close(modal: string): void {
+    async close(modal: string, data?: { data: any }) {
         if (this._modals.value?.get(modal) != undefined) this._modals.value.get(modal)!.open = false;
+        this._close.value = data;
     }
     async closeAsync(callback: () => Promise<void>): Promise<void> {
         await callback();
@@ -34,6 +37,23 @@ class JourneyModalController {
     }
     getProps() {
         return this._props;
+    }
+
+    checkClose(param: { component: Component; open: boolean }, resolve: (data: any) => void) {
+        if (param.open) {
+            setTimeout(() => {
+                this.checkClose(param, resolve);
+            }, 1000);
+        } else {
+            resolve(this._close.value);
+        }
+    }
+    async didClose(modal: string) {
+        const promise = new Promise<any>((resolve, reject) => {
+            this.checkClose(this._modals.value?.get(modal)!, resolve);
+        });
+
+        return promise;
     }
     getOpen() {
         let openComp;

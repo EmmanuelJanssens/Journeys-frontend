@@ -41,12 +41,10 @@
 </template>
 <script setup lang="ts">
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faBars, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faXmark, IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { ref } from "vue";
 
-const props = defineProps<{
-    buttons: { text: string; icon: any; handler?: () => {} }[];
-}>();
+const props = defineProps(["buttons"]);
 const menu = ref();
 const isOpen = ref(false);
 
