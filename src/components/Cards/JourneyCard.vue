@@ -1,10 +1,6 @@
 <template>
     <div class="relative w-80 h-96 bg-white rounded-xl drop-shadow-xl">
-        <div class="absolute h-full w-full">
-            <img class="rounded-xl object-cover h-full w-full" v-if="journey.thumbnail" :src="journey.thumbnail" />
-            <img class="rounded-xl object-cover h-full w-full" v-else src="/assets/placeholder.png" />
-        </div>
-        <div class="absolute top-0 p-3 bg-black w-full rounded-t-xl opacity-50">
+        <div class="top-0 p-3 bg-primary-main dark:primar w-full rounded-t-xl opacity-50">
             <div class="flex space-x-4 justify-between">
                 <p class="text-center text-white">{{ journey.title }}</p>
                 <div class="flex space-x-4">
@@ -21,6 +17,11 @@
                 </div>
             </div>
         </div>
+        <div class="h-full w-full p-4">
+            <img class="rounded-xl object-cover h-1/3 w-full" v-if="journey.thumbnail" :src="journey.thumbnail" />
+            <img class="rounded-xl object-cover h-1/3 w-full" v-else src="/assets/placeholder.png" />
+        </div>
+
         <div
             v-if="journey.description && journey.description.length > 0"
             class="absolute bottom-0 p-4 bg-black w-full rounded-xl opacity-70 max-h-36 overflow-auto">
@@ -49,7 +50,11 @@ const emit = defineEmits(["headerClicked", "upated"]);
 const useJourney = useJourneyStore();
 const useUser = useUserStore();
 async function onEdit() {
-    journeyModalController.open("journey");
+    journeyModalController.open("editJourney", {
+        props: {
+            journey: props.journey
+        }
+    });
     // const modal = await modalController.create({
     //     component: EditJourneyModal,
     //     componentProps: props,

@@ -98,40 +98,6 @@
                                 image="https://images.unsplash.com/photo-1596178196494-c9a3d1b1c151?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1065&q=80" />
                         </div>
                     </section>
-                    <!-- <section v-else class="p-4 sm:py-8">
-                        <swiper class="h-full container w-80" :modules="modules" :effect="'cards'" :loop="true">
-                            <swiper-slide>
-                                <card-preview
-                                    class="h-full"
-                                    image="https://images.unsplash.com/photo-1501555088652-021faa106b9b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1173&q=80"
-                                    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas odio sodales lorem suscipit blandit. Nulla faucibus metus vel nisi consequat, non varius ipsum finibus." />
-                            </swiper-slide>
-                            <swiper-slide>
-                                <card-preview
-                                    class="h-full"
-                                    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas odio sodales lorem suscipit blandit. Nulla faucibus metus vel nisi consequat, non varius ipsum finibus."
-                                    image="https://images.unsplash.com/photo-1543007630-9710e4a00a20?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1335&q=80" />
-                            </swiper-slide>
-                            <swiper-slide>
-                                <card-preview
-                                    class="h-full"
-                                    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas odio sodales lorem suscipit blandit. Nulla faucibus metus vel nisi consequat, non varius ipsum finibus."
-                                    image="https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1335&q=80" />
-                            </swiper-slide>
-                            <swiper-slide>
-                                <card-preview
-                                    class="h-full"
-                                    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas odio sodales lorem suscipit blandit. Nulla faucibus metus vel nisi consequat, non varius ipsum finibus."
-                                    image="https://images.unsplash.com/photo-1554907984-15263bfd63bd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" />
-                            </swiper-slide>
-                            <swiper-slide>
-                                <card-preview
-                                    class="h-full"
-                                    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam egestas odio sodales lorem suscipit blandit. Nulla faucibus metus vel nisi consequat, non varius ipsum finibus."
-                                    image="https://images.unsplash.com/photo-1596178196494-c9a3d1b1c151?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1065&q=80" />
-                            </swiper-slide>
-                        </swiper>
-                    </section> -->
                     <section class="relative sm:py-8">
                         <h1 class="sm:text-5xl my-6">Get started now</h1>
                         <div class="flex flex-wrap justify-center">
@@ -178,33 +144,28 @@
 </template>
 
 <script lang="ts" setup>
-// import { isPlatform, popoverController } from "@ionic/vue";
-import { Swiper, SwiperSlide } from "swiper/vue";
-import { EffectCards } from "swiper";
-import CardPreview from "./CardPreview.vue";
-import { defineAsyncComponent, defineComponent, onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
+
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCaretDown, faBookAtlas } from "@fortawesome/free-solid-svg-icons";
-import { faGitlab, faGoogle } from "@fortawesome/free-brands-svg-icons";
-import "swiper/css";
-import "swiper/css/effect-cards";
+import { faGitlab } from "@fortawesome/free-brands-svg-icons";
 
-import { getMidPoint, getRadius, openModal, showToast } from "utils/utils";
-import ProfilePopover from "components/ProfilePopover.vue";
 import { useUserStore } from "stores/useUserStore";
-import router from "router/router";
-import GoogleAutoComplete from "components/GoogleAutoComplete.vue";
 import { usePoiStore } from "stores/usePoiStore";
-import { getGeocodedData } from "google/googleGeocoder";
-import { LngLat } from "mapbox-gl";
-import { useMotion } from "@vueuse/motion";
-import EditJourneyModal from "components/Modals/EditJourneyModal.vue";
+import { getMidPoint, getRadius } from "utils/utils";
 
-import JourneyModal from "components/Modal/JourneyModal.vue";
-import { journeyModalController } from "components/Modal/JourneyModalController";
+import GoogleAutoComplete from "components/GoogleAutoComplete.vue";
+import CardPreview from "./CardPreview.vue";
+import ProfilePopover from "components/ProfilePopover.vue";
+
+import { getGeocodedData } from "google/googleGeocoder";
 import { authApp } from "google/firebase";
-import JourneyInput from "components/Input/JourneyInput.vue";
-const modules = ref([EffectCards]);
+
+import router from "router/router";
+
+import { LngLat } from "mapbox-gl";
+
+import { journeyModalController } from "components/Modal/JourneyModalController";
 
 const userStore = useUserStore();
 const poiStore = usePoiStore();

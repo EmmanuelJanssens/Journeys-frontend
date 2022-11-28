@@ -55,13 +55,13 @@
                                 </ion-fab-list>
                             </ion-fab> -->
 
-                <JourneyMap
+                <!-- <JourneyMap
                     class="-z-20"
                     :mode="mode"
                     @loaded="fetchJourneys"
                     @marker-dragged="onMarkerDragend"
                     @poi-clicked="onPoiClicked"
-                    @ready="setLoading(false)" />
+                    @ready="setLoading(false)" /> -->
 
                 <TheJourneysSlider
                     class="journeys-slides"
@@ -82,9 +82,13 @@
             </div> -->
             </div>
         </div>
-        <edit-journey-modal />
     </div>
 </template>
+<script lang="ts">
+export default {
+    name: "LogbookPage"
+};
+</script>
 <script lang="ts" setup>
 // import {
 //     IonLoading,
@@ -114,7 +118,7 @@ import "swiper/css/scrollbar";
 
 import PoiCard from "components/Cards/PoiCard.vue";
 import CreateJourneyModal from "components/Modals/CreateJourneyModal.vue";
-import { ref } from "vue";
+import { defineAsyncComponent, onActivated, onDeactivated, onMounted, ref } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
 import { usePoiStore } from "stores/usePoiStore";
@@ -128,7 +132,6 @@ import { authApp } from "google/firebase";
 import { MapMouseEvent, LngLat } from "mapbox-gl";
 import { getMidPoint, openModal, getRadius } from "utils/utils";
 
-import EditJourneyModal from "components/Modals/EditJourneyModal.vue";
 import JourneyMap from "components/TheJourneyMap.vue";
 import MapJourneySidebar from "components/TheJourneyEditSidebar.vue";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
@@ -140,7 +143,9 @@ import TheJourneysHeader from "components/TheJourneysHeader.vue";
 import { mapInstance } from "map/JourneysMap";
 
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { journeyModalController } from "components/Modal/JourneyModalController";
 
+const modal = ref();
 const modes = {
     logbook: "logbook",
     exploration: "exploration",
@@ -156,7 +161,7 @@ const journeyStore = useJourneyStore();
 const poiStore = usePoiStore();
 
 const mode = ref(modes.logbook);
-
+const test = ref;
 authApp.onAuthStateChanged((user) => {
     if (user) {
         if (mode.value == modes.logbook) fetchJourneys();
@@ -169,6 +174,15 @@ authApp.onAuthStateChanged((user) => {
 //     }
 // });
 
+onMounted(() => {
+    journeyModalController.create(
+        "editJourney",
+        defineAsyncComponent({
+            loader: () => import("components/Modals/EditJourneyModal.vue")
+        })
+    );
+});
+
 function SwitchMode(newMode: string) {
     mode.value = newMode;
 }
@@ -178,6 +192,10 @@ async function panTo(poi: PoiDto) {
         zoom: 20
     });
 }
+
+onActivated(async () => {
+    if (userStore.isLoggedIn) await fetchJourneys();
+});
 
 function setLoading(loading: boolean) {
     isLoading.value = loading;

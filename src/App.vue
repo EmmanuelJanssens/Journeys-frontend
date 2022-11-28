@@ -2,11 +2,13 @@
     <section>
         <router-view v-slot="{ Component }">
             <Transition name="fade" mode="out-in">
-                <component :is="Component" />
+                <keep-alive include="LogbookPage">
+                    <component :is="Component" />
+                </keep-alive>
             </Transition>
         </router-view>
 
-        <component :is="journeyModalController.getOpen()" />
+        <component :is="journeyModalController.getOpen()" v-bind="journeyModalController.getProps()" />
     </section>
 </template>
 
@@ -14,7 +16,7 @@
 // import { IonApp, IonRouterOutlet, IonContent, modalController } from "@ionic/vue";
 import DisclaimerModal from "components/Modals/DisclaimerModal.vue";
 import { RouterView } from "vue-router";
-import { defineAsyncComponent, onMounted } from "vue";
+import { defineAsyncComponent, onMounted, ref } from "vue";
 import { journeyModalController } from "components/Modal/JourneyModalController";
 
 onMounted(async () => {
@@ -27,6 +29,7 @@ onMounted(async () => {
         "register",
         defineAsyncComponent(() => import("components/Modals/RegisterModal.vue"))
     );
+
     //     const disclaimer = localStorage.getItem("disclaimer");
     //     if (disclaimer != null && disclaimer == "true") {
     //         return;

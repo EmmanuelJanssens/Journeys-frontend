@@ -1,8 +1,9 @@
 <template>
     <div class="relative">
         <textarea
+            :rows="rows"
             :value="modelValue"
-            class="w-full h-12 p-4 focus:border-none bg-secondary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg outline-none focus:outline-primary-main transform transition-all focus:scale-105 rounded-lg"
+            class="w-full p-4 focus:border-none bg-secondary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg outline-none focus:outline-primary-main transform transition-all focus:scale-105 rounded-lg"
             @input="emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
             :placeholder="placeholder"
             :type="type" />
@@ -11,12 +12,15 @@
     </div>
 </template>
 <script setup lang="ts">
+import { TextareaHTMLAttributes } from "vue";
+
 defineProps<{
     placeholder?: string;
     modelValue?: string;
     helper?: string;
     error?: string;
     type?: string;
+    rows?: number;
 }>();
 const emit = defineEmits(["update:modelValue", "focus-in", "focus-out", "key-down"]);
 </script>

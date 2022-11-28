@@ -1,68 +1,30 @@
 <template>
-    <!-- <ion-page>
-        <ion-header>
-            <ion-toolbar>
-                <ion-title>Edit journey</ion-title>
-            </ion-toolbar>
-        </ion-header>
-        <ion-content>
-            <ion-grid>
-                <ion-row>
-                    <ion-col>
-                        <ion-item>
-                            <ion-label position="fixed">Thumbnail</ion-label>
-                            <div class="images">
-                                <div class="image-item" v-for="image in images" v-bind:key="image.url">
-                                    <ion-thumbnail>
-                                        <ion-img :src="image.url" />
-                                    </ion-thumbnail>
-                                    <ion-icon
-                                        :class="image.active"
-                                        slot="icon-only"
-                                        :icon="checkmarkOutline"
-                                        @click="setThumbnail(image.url, $event)"></ion-icon>
-                                </div>
-                            </div> </ion-item
-                    ></ion-col>
-                </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <ion-item>
-                            <ion-label position="stacked"> JourneyTitle </ion-label>
-                            <ion-input type="text" :value="props.journey?.title" v-model="title" /> </ion-item
-                    ></ion-col>
-                </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <ion-item>
-                            <ion-label position="stacked">Description</ion-label>
-                            <ion-textarea :value="props.journey?.description" v-model="description" :auto-grow="true">
-                            </ion-textarea>
-                        </ion-item>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
-        </ion-content>
-        <ion-footer>
-            <ion-toolbar>
-                <ion-buttons slot="end">
-                    <ion-button slot="end" color="secondary" @click="modalController.dismiss()"> cancel </ion-button>
-                    <ion-button slot="end" @click="save"> Save </ion-button>
-                </ion-buttons>
-            </ion-toolbar>
-        </ion-footer>
-    </ion-page> -->
-
-    <journey-modal header="Edit your journey" name="journey">
+    <journey-modal :header="'Edit ' + props.journey?.title" name="editJourney">
         <template v-slot:loading>
+            <div v-if="isLoading" class="bg-high-contrast-text h-3">
+                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
+            </div>
             <div v-if="isLoading" class="bg-high-contrast-text h-3">
                 <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
             </div>
         </template>
         <template v-slot:body>
-            <div class="bg-secondary-light p-4 flex flex-col">
-                <journey-input placeholder="Title" />
-                <journey-textarea placeholder="description" :value="props.journey?.description" />
+            <div class="bg-secondary-light p-4 flex flex-col h-full">
+                <div class="flex space-x-2">
+                    <div v-for="img in images" v-bind:key="img.url">
+                        <button class="relative" @click="setThumbnail(img.url)">
+                            <img class="object-cover w-24 h-24 rounded-lg border-2 p-1" :src="img.url" />
+                            <font-awesome-icon
+                                v-if="img.active == 'checked'"
+                                class="absolute top-0 right-0 text-green-400"
+                                :icon="faCheckCircle" />
+                        </button>
+                    </div>
+                </div>
+                <div class="flex flex-col space-y-4 h-full">
+                    <journey-input placeholder="Title" v-model="state.title" />
+                    <journey-textarea :rows="6" placeholder="description" v-model="state.description" />
+                </div>
             </div>
         </template>
         <template v-slot:footer>
@@ -81,6 +43,8 @@ import JourneyModal from "components/Modal/JourneyModal.vue";
 import JourneyInput from "components/Input/JourneyInput.vue";
 import JourneyTextarea from "components/Input/JourneyTextarea.vue";
 import { journeyModalController } from "components/Modal/JourneyModalController";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 
 const userStore = useUserStore();
 const journeyStore = useJourneyStore();
@@ -89,8 +53,12 @@ const props = defineProps<{
     journey?: JourneyDto;
 }>();
 
-const title = ref();
-const description = ref();
+const state = ref({
+    title: "",
+    description: "",
+    selectedThumbnail: ""
+});
+
 const images = ref<
     {
         url: string;
@@ -110,48 +78,51 @@ function setActive(img: string) {
 }
 
 onMounted(async () => {
-    // await journeyStore.getJourney(props.journey.id!);
-    // journeyModalController.create("journey");
-    // journeyStore.editJourney.journey = journeyStore.viewJourney;
-    // selectedThumbnail.value = props.journey.thumbnail;
-    // images.value = [];
-    // journeyStore.editJourney.journey.experiencesConnection?.edges?.forEach((exp) => {
-    //     exp.images.forEach((image) => {
-    //         if (image == journeyStore.editJourney.journey?.thumbnail) {
-    //             images.value?.push({
-    //                 url: image,
-    //                 active: "checked"
-    //             });
-    //         } else {
-    //             images.value?.push({
-    //                 url: image,
-    //                 active: "unchecked"
-    //             });
-    //         }
-    //     });
-    // });
+    await journeyStore.getJourney(props.journey?.id!);
+    journeyStore.editJourney.journey = journeyStore.viewJourney;
+    selectedThumbnail.value = props.journey?.thumbnail;
+    images.value = [];
+    journeyStore.editJourney.journey.experiencesConnection?.edges?.forEach((exp) => {
+        exp.images.forEach((image) => {
+            if (image == journeyStore.editJourney.journey?.thumbnail) {
+                images.value?.push({
+                    url: image,
+                    active: "checked"
+                });
+            } else {
+                images.value?.push({
+                    url: image,
+                    active: "unchecked"
+                });
+            }
+        });
+    });
+    state.value = {
+        title: journeyStore.editJourney.journey.title!,
+        description: journeyStore.editJourney.journey.description!,
+        selectedThumbnail: journeyStore.editJourney.journey.thumbnail!
+    };
 });
 
-async function setThumbnail(url: string, el: any) {
+async function setThumbnail(url: string) {
     selectedThumbnail.value = url;
     setActive(url);
 }
 async function save() {
-    // journeyStore.editJourney.journey!.title = title.value ? title.value : journeyStore.editJourney.journey!.title;
-    // journeyStore.editJourney.journey!.description = description.value
-    //     ? description.value
-    //     : journeyStore.editJourney.journey!.description;
-    // journeyStore.editJourney.journey!.id = props.journey.id;
-    // journeyStore.editJourney.journey!.thumbnail = selectedThumbnail.value;
-    // await journeyStore.updateJourney("");
-    // modalController.dismiss({ status: "success" });
-    // const edited = userStore.myJourneys?.find((journey) => journey.id == props.journey.id);
-    // if (edited) {
-    //     edited.title = journeyStore.editJourney.journey!.title;
-    //     edited.description = journeyStore.editJourney.journey!.description;
-    //     edited.thumbnail = journeyStore.editJourney.journey?.thumbnail;
-    // }
-    // await showToast("Your journey  was successfully updated", "success");
+    isLoading.value = true;
+    journeyStore.editJourney.journey!.title = state.value.title;
+    journeyStore.editJourney.journey!.description = state.value.description;
+    journeyStore.editJourney.journey!.id = props.journey?.id;
+    journeyStore.editJourney.journey!.thumbnail = selectedThumbnail.value;
+    await journeyStore.updateJourney("");
+    const edited = userStore.myJourneys?.find((journey) => journey.id == props.journey?.id);
+    if (edited) {
+        edited.title = journeyStore.editJourney.journey!.title;
+        edited.description = journeyStore.editJourney.journey!.description;
+        edited.thumbnail = journeyStore.editJourney.journey?.thumbnail;
+        journeyModalController.close("editJourney");
+    }
+    isLoading.value = false;
 }
 </script>
 <style scoped lang="less">
