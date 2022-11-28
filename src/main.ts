@@ -1,6 +1,6 @@
 // import { IonicVue } from "@ionic/vue";
 import { createPinia } from "pinia";
-import { createApp } from "vue";
+import { createApp, defineAsyncComponent } from "vue";
 import { RecycleScroller, DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import { MotionPlugin } from "@vueuse/motion";
 
@@ -25,6 +25,7 @@ app.use(VueAxios, axios);
 app.component("RecycleScroller", RecycleScroller);
 app.component("DynamicScroller", DynamicScroller);
 app.component("DynamicScrollerItem", DynamicScrollerItem);
+
 app.use(MotionPlugin);
 app.use(Toast);
 router.isReady().then(() => {

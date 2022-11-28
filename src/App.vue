@@ -13,14 +13,20 @@
 <script lang="ts" setup>
 // import { IonApp, IonRouterOutlet, IonContent, modalController } from "@ionic/vue";
 import DisclaimerModal from "components/Modals/DisclaimerModal.vue";
-import LoginModal from "components/Modals/LoginModal.vue";
-import RegisterModal from "components/Modals/RegisterModal.vue";
 import { RouterView } from "vue-router";
-import { authApp } from "google/firebase";
-import { onMounted } from "vue";
+import { defineAsyncComponent, onMounted } from "vue";
 import { journeyModalController } from "components/Modal/JourneyModalController";
 
 onMounted(async () => {
+    journeyModalController.create(
+        "login",
+        defineAsyncComponent(() => import("components/Modals/LoginModal.vue"))
+    );
+
+    journeyModalController.create(
+        "register",
+        defineAsyncComponent(() => import("components/Modals/RegisterModal.vue"))
+    );
     //     const disclaimer = localStorage.getItem("disclaimer");
     //     if (disclaimer != null && disclaimer == "true") {
     //         return;

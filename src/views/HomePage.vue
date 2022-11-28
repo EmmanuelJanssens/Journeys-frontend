@@ -182,7 +182,7 @@
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { EffectCards } from "swiper";
 import CardPreview from "./CardPreview.vue";
-import { onMounted, ref, watch } from "vue";
+import { defineAsyncComponent, defineComponent, onMounted, ref, watch } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCaretDown, faBookAtlas } from "@fortawesome/free-solid-svg-icons";
 import { faGitlab, faGoogle } from "@fortawesome/free-brands-svg-icons";
@@ -190,8 +190,6 @@ import "swiper/css";
 import "swiper/css/effect-cards";
 
 import { getMidPoint, getRadius, openModal, showToast } from "utils/utils";
-import LoginModal from "components/Modals/LoginModal.vue";
-import RegisterModal from "components/Modals/RegisterModal.vue";
 import ProfilePopover from "components/ProfilePopover.vue";
 import { useUserStore } from "stores/useUserStore";
 import router from "router/router";
@@ -273,11 +271,7 @@ async function onPopOver(e: Event) {
     // }
 }
 
-onMounted(() => {
-    journeyModalController.create("login", LoginModal);
-    //journeyModalController.create("register");
-    console.log();
-});
+onMounted(() => {});
 </script>
 <style scoped lang="less">
 swiper {

@@ -136,8 +136,6 @@ import TheJourneysSlider from "components/TheJourneysSlider.vue";
 import TheJourneyExperienceList from "components/TheJourneyExperienceList.vue";
 import ThePoiSearchbar from "components/ThePoiSearchbar.vue";
 
-import LoginModal from "components/Modals/LoginModal.vue";
-import RegisterModal from "components/Modals/RegisterModal.vue";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
 import { mapInstance } from "map/JourneysMap";
 

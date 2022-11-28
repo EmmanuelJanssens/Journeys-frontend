@@ -9,8 +9,6 @@
 
 <script lang="ts" setup>
 import { useUserStore } from "stores/useUserStore";
-import LoginModal from "components/Modals/LoginModal.vue";
-import RegisterModal from "components/Modals/RegisterModal.vue";
 import ProfilePopover from "./ProfilePopover.vue";
 import { showToast } from "utils/utils";
 import router from "router/router";
