@@ -41,7 +41,7 @@ import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 
 import PoiCard from "components/Cards/PoiCard.vue";
-import { defineAsyncComponent, onMounted, ref } from "vue";
+import { defineAsyncComponent, onActivated, onMounted, ref } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
 import { usePoiStore } from "stores/usePoiStore";
@@ -49,7 +49,7 @@ import { useJourneyStore } from "stores/useJourneyStore";
 
 import { AddressDto, getAddressCoordinates, PoiDto } from "types/dtos";
 
-import { reverseGeocode, getLocalityAndCountry } from "google/googleGeocoder";
+import { reverseGeocode, getLocalityAndCountry, getGeocodedData } from "google/googleGeocoder";
 import { authApp } from "google/firebase";
 
 import { MapMouseEvent, LngLat } from "mapbox-gl";
@@ -188,7 +188,32 @@ onMounted(async () => {
         })
     );
 });
+async function geocode(start: string, end: string) {
+    const geocodedStart = await getGeocodedData(start);
+    const geocodedEnd = await getGeocodedData(end);
 
+    if (geocodedStart.error === undefined && geocodedEnd.error === undefined) {
+        return {
+            start: geocodedStart,
+            end: geocodedEnd
+        };
+    } else {
+        return undefined;
+    }
+}
+
+onActivated(async () => {
+    const data = journeyStore.getInitial();
+    if (data) {
+        const addresses = await geocode(data.start, data.end);
+        if (addresses) {
+            mode.value = modes.edition;
+            journeyStore.editJourney.journey = {};
+            journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
+            fetchPois(addresses);
+        }
+    }
+});
 function SwitchMode(newMode: string) {
     mode.value = newMode;
 }

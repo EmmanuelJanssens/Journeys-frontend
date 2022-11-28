@@ -7,7 +7,25 @@ import { authApp } from "google/firebase";
 export const useJourneyStore = defineStore("journey", () => {
     const editJourney = ref<UpdateJourneyDto>({});
     const viewJourney = ref<JourneyDto>({});
+    const initial = ref<{
+        start: string;
+        end: string;
+    }>();
 
+    function getInitial():
+        | {
+              start: string;
+              end: string;
+          }
+        | undefined {
+        return initial.value;
+    }
+    function setInitial(start: string, end: string) {
+        initial.value = {
+            start: start,
+            end: end
+        };
+    }
     async function getJourney(id: string): Promise<boolean> {
         viewJourney.value = await (await axios.get("api/journey/" + id)).data;
         return true;
@@ -228,6 +246,8 @@ export const useJourneyStore = defineStore("journey", () => {
         alreadyExists: alreadyInJourney,
         setJourneyStartEnd,
         getJourney,
-        clear
+        clear,
+        setInitial,
+        getInitial
     };
 });

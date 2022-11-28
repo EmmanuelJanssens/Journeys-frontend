@@ -68,6 +68,7 @@
                                 class="flex flex-col items-center justify-center space-x-4 rounded-r-md p-2 drop-shadow-lg bg-secondary-light dark:bg-secondary-dark sm:flex-row sm:justify-end sm:relative">
                                 <p>{{ poiCount }} pois found!</p>
                                 <button
+                                    @click="pushLogbook"
                                     class="bg-primary-main dark:bg-primary-dark p-4 rounded-lg text-secondary-btn-contrast-text shadow-inner hover:bg-btn-dark dark:hover:bg-btn-darker transition-all ease-in transform hover:scale-110">
                                     Start now!
                                 </button>
@@ -166,12 +167,19 @@ import router from "router/router";
 import { LngLat } from "mapbox-gl";
 
 import { journeyModalController } from "components/Modal/JourneyModalController";
+import { useJourneyStore } from "stores/useJourneyStore";
 
 const userStore = useUserStore();
 const poiStore = usePoiStore();
+const journeyStore = useJourneyStore();
 const poiCount = ref(0);
 const poiCountEl = ref();
 
+function pushLogbook() {
+    journeyStore.setInitial(validJourney.value.start.text, validJourney.value.end.text);
+
+    router.push("logbook");
+}
 const validJourney = ref({
     start: {
         text: "",
