@@ -39,6 +39,7 @@ import { showToast } from "utils/utils";
 
 import { faPencil, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { journeyModalController } from "components/Modal/JourneyModalController";
 
 const props = defineProps<{
     journey: JourneyDto;
@@ -48,6 +49,7 @@ const emit = defineEmits(["headerClicked", "upated"]);
 const useJourney = useJourneyStore();
 const useUser = useUserStore();
 async function onEdit() {
+    journeyModalController.open("journey");
     // const modal = await modalController.create({
     //     component: EditJourneyModal,
     //     componentProps: props,

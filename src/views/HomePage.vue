@@ -274,8 +274,8 @@ async function onPopOver(e: Event) {
 }
 
 onMounted(() => {
-    journeyModalController.create("login");
-    journeyModalController.create("register");
+    journeyModalController.create("login", LoginModal);
+    //journeyModalController.create("register");
     console.log();
 });
 </script>

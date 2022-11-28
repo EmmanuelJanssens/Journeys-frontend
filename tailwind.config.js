@@ -41,14 +41,15 @@ module.exports = {
             },
             keyframes: {
                 appear: {
-                    "0%": { transform: "translate(-100%)", opacity: 0 },
+                    "0%": { transform: "translate(-100%)", opacity: 0, visibility: "hidden" },
                     "30%": { transform: "translate(0)", opacity: 0.4 },
                     "70%": { transform: "translate(20px)", opacity: 0.8 },
-                    "100%": { transform: "translate(0)", opacity: 1 }
+                    "100%": { transform: "translate(0)", opacity: 1, visibility: "visible" }
                 },
                 disappear: {
-                    "0%": { transform: "translate(0)", opacity: 1 },
-                    "100%": { transform: "translate(-100%)", opacity: 0 }
+                    "0%": { transform: "translate(0)", opacity: 1, visibility: "visible" },
+                    "70%": { transform: "translate(20px)", opacity: 0.4 },
+                    "100%": { transform: "translate(-100%)", opacity: 0, visibility: "hidden" }
                 }
             },
             animation: {

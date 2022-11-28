@@ -53,24 +53,34 @@
         </ion-footer>
     </ion-page> -->
 
-    <div>
-        <div class="container bg-primary-main max-w-3xl">
-            <header>
-                <slot name="header"> Default header </slot>
-            </header>
-            <section>
-                <slot name="body">Default body</slot>
-            </section>
-            <footer><slot name="footer">Default footer</slot></footer>
-        </div>
-    </div>
+    <journey-modal header="Edit your journey" name="journey">
+        <template v-slot:loading>
+            <div v-if="isLoading" class="bg-high-contrast-text h-3">
+                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
+            </div>
+        </template>
+        <template v-slot:body>
+            <div class="bg-secondary-light p-4 flex flex-col">
+                <journey-input placeholder="Title" />
+                <journey-textarea placeholder="description" :value="props.journey?.description" />
+            </div>
+        </template>
+        <template v-slot:footer>
+            <div class="flex justify-end">
+                <button @click="save">Save</button>
+            </div>
+        </template>
+    </journey-modal>
 </template>
 <script lang="ts" setup>
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
 import { JourneyDto } from "types/dtos";
-import { showToast } from "utils/utils";
 import { onMounted, ref } from "vue";
+import JourneyModal from "components/Modal/JourneyModal.vue";
+import JourneyInput from "components/Input/JourneyInput.vue";
+import JourneyTextarea from "components/Input/JourneyTextarea.vue";
+import { journeyModalController } from "components/Modal/JourneyModalController";
 
 const userStore = useUserStore();
 const journeyStore = useJourneyStore();
@@ -87,8 +97,8 @@ const images = ref<
         active: string;
     }[]
 >();
+const isLoading = ref(false);
 const selectedThumbnail = ref();
-
 function setActive(img: string) {
     images.value?.forEach((image) => {
         if (image.url == img) {
@@ -101,6 +111,7 @@ function setActive(img: string) {
 
 onMounted(async () => {
     // await journeyStore.getJourney(props.journey.id!);
+    // journeyModalController.create("journey");
     // journeyStore.editJourney.journey = journeyStore.viewJourney;
     // selectedThumbnail.value = props.journey.thumbnail;
     // images.value = [];

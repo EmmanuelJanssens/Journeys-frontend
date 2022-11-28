@@ -5,8 +5,8 @@
                 <component :is="Component" />
             </Transition>
         </router-view>
-        <login-modal />
-        <register-modal />
+
+        <component :is="journeyModalController.getOpen()" />
     </section>
 </template>
 
@@ -18,6 +18,7 @@ import RegisterModal from "components/Modals/RegisterModal.vue";
 import { RouterView } from "vue-router";
 import { authApp } from "google/firebase";
 import { onMounted } from "vue";
+import { journeyModalController } from "components/Modal/JourneyModalController";
 
 onMounted(async () => {
     //     const disclaimer = localStorage.getItem("disclaimer");

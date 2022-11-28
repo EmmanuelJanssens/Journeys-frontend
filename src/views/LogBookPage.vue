@@ -1,21 +1,22 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template>
-    <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner page">
-        <TheJourneysHeader color="secondary" />
-        <!-- <ion-loading v-if="isLoading" /> -->
-        <div class="h-full">
-            <!-- <ThePoiListSidebar
+    <div>
+        <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner page">
+            <TheJourneysHeader color="secondary" />
+            <!-- <ion-loading v-if="isLoading" /> -->
+            <div class="h-full">
+                <!-- <ThePoiListSidebar
                 v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney"
                 :poi-list="filteredPois"
                 @poi-item-clicked="panTo" /> -->
-            <!-- <ThePoiSearchbar
+                <!-- <ThePoiSearchbar
                     @poi-item-clicked="panTo"
                     v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney" /> -->
-            <div class="absolute z-50">
-                <button class="absolute bg-orange-400 z-50 rounded-full w-12 h-12">HELLo</button>
-            </div>
+                <div class="absolute z-50">
+                    <button class="absolute bg-orange-400 z-50 rounded-full w-12 h-12">HELLo</button>
+                </div>
 
-            <!-- <ion-fab v-if="mode == modes.logbook" slot="fixed" vertical="top" horizontal="end">
+                <!-- <ion-fab v-if="mode == modes.logbook" slot="fixed" vertical="top" horizontal="end">
                                 <ion-fab-button @click="openJourneyCreationModal">
                                     <ion-icon size="large" :icon="addOutline"></ion-icon>
                                 </ion-fab-button>
@@ -54,16 +55,19 @@
                                 </ion-fab-list>
                             </ion-fab> -->
 
-            <JourneyMap
-                class="-z-20"
-                :mode="mode"
-                @loaded="fetchJourneys"
-                @marker-dragged="onMarkerDragend"
-                @poi-clicked="onPoiClicked"
-                @ready="setLoading(false)" />
+                <JourneyMap
+                    class="-z-20"
+                    :mode="mode"
+                    @loaded="fetchJourneys"
+                    @marker-dragged="onMarkerDragend"
+                    @poi-clicked="onPoiClicked"
+                    @ready="setLoading(false)" />
 
-            <TheJourneysSlider class="journeys-slides" v-if="mode == modes.logbook" @header-clicked="showExperiences" />
-            <!-- <div v-if="mode == modes.viewJourney || mode == modes.edition || mode == modes.editJourney">
+                <TheJourneysSlider
+                    class="journeys-slides"
+                    v-if="mode == modes.logbook"
+                    @header-clicked="showExperiences" />
+                <!-- <div v-if="mode == modes.viewJourney || mode == modes.edition || mode == modes.editJourney">
                 <TheJourneyExperienceList
                     v-if="
                                         mode == modes.viewJourney &&
@@ -76,7 +80,9 @@
                     :end="journeyStore.editJourney.journey?.end!"
                     mode="edit" />
             </div> -->
+            </div>
         </div>
+        <edit-journey-modal />
     </div>
 </template>
 <script lang="ts" setup>
@@ -122,6 +128,7 @@ import { authApp } from "google/firebase";
 import { MapMouseEvent, LngLat } from "mapbox-gl";
 import { getMidPoint, openModal, getRadius } from "utils/utils";
 
+import EditJourneyModal from "components/Modals/EditJourneyModal.vue";
 import JourneyMap from "components/TheJourneyMap.vue";
 import MapJourneySidebar from "components/TheJourneyEditSidebar.vue";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";

@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <journey-modal header="Hello" name="login">
+    <journey-modal header="Login" name="login">
         <template v-slot:loading>
             <div v-if="isLoading" class="bg-high-contrast-text h-3">
                 <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
@@ -34,7 +34,7 @@ import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
 import { showToast } from "utils/utils";
 import { authApp } from "google/firebase";
@@ -107,6 +107,10 @@ function dismissLoginModal(success: boolean) {
     journeyModalController.close("login");
     clearModal();
 }
+
+onMounted(() => {
+    console.log("safsfsdf");
+});
 </script>
 
 <style></style>
