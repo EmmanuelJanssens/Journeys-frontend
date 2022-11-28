@@ -27,6 +27,7 @@
                     :class="{
                         ' group hover:bg-btn-dark hover:bg-opacity-30 hover:cursor-pointer  ': true,
                         ' border-b-2 border-b-primary-main flex items-center space-x-8 p-4': isOpen,
+                        hidden: !button.visible,
                         ' py-2 text-center': !isOpen
                     }">
                     <FontAwesomeIcon

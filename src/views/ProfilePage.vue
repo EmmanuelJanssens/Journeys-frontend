@@ -87,7 +87,7 @@ import { useUserStore } from "stores/useUserStore";
 import { chevronForwardOutline, mailUnreadOutline, pencilOutline } from "ionicons/icons";
 import { authApp } from "google/firebase";
 import EditProfileModal from "components/Modals/EditProfileModal.vue";
-import TheJourneysSlider from "components/TheJourneysSlider.vue";
+import TheJourneysSlider from "components/Sliders/TheJourneysSlider.vue";
 import { onAuthStateChanged, sendEmailVerification } from "@firebase/auth";
 import { showToast } from "utils/utils";
 const modules = ref([Autoplay]);

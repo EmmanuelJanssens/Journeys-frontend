@@ -1,39 +1,28 @@
 <template>
-    <!-- <ion-card> -->
-    <!-- <ion-card-header>
-            <ion-toolbar color="none">
-                <ion-card-title>{{ (props.experience.node as PoiDto).name }}</ion-card-title>
-                <ion-card-subtitle>{{ props.experience.title }}</ion-card-subtitle>
-                <ion-buttons slot="end">
-                    <ion-button @click="onEdit">
-                        <ion-icon :icon="pencilOutline" slot="icon-only"></ion-icon>
-                    </ion-button>
-                    <ion-button @click="onDelete">
-                        <ion-icon :icon="trashBinOutline" slot="icon-only"></ion-icon>
-                    </ion-button>
-                </ion-buttons>
-            </ion-toolbar>
-            <ion-card-subtitle>{{ new Date(props.experience.date).toDateString() }}</ion-card-subtitle>
-        </ion-card-header> -->
-    <div class="relative w-full bg-primary-main rounded-xl p-2 mb-4">
-        <div>
-            <div class="flex flex-row items-center justify-between">
-                <div>
-                    <h1 class="first-letter:uppercase">{{ (props.experience.node as PoiDto).name }}</h1>
-                </div>
-                <div class="flex space-x-4 px-16">
-                    <button @click="onEdit"><font-awesome-icon :icon="faPencil" /></button>
-                    <button @click="onDelete"><font-awesome-icon :icon="faTrash" /></button>
+    <div class="flex flex-col space-y-4 bg-secondary-light dark:bg-secondary-dark rounded-xl drop-shadow-xl">
+        <div class="top-0 p-3 bg-primary-main dark:primar w-full rounded-t-xl">
+            <div class="flex space-x-4 justify-between">
+                <p class="text-center text-white">
+                    {{ (props.experience.node as PoiDto).name }}: {{ props.experience.title }}
+                </p>
+                <div class="flex space-x-4">
+                    <button class="text-white transform hover:scale-110" @click="onEdit">
+                        <font-awesome-icon :icon="faPencil" class="text-white" />
+                    </button>
+
+                    <button class="text-white transform hover:scale-110" @click="onDelete">
+                        <font-awesome-icon :icon="faTrash" class="text-white" />
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div class="text-opacity-80 text-gray-600">
-            <p>{{ props.experience.title }}</p>
+        <div class="px-4">
+            <div class="text-opacity-80 text-gray-600">
+                <p>{{ new Date(props.experience.date).toDateString() }}</p>
+            </div>
         </div>
-        <div class="text-opacity-80 text-gray-600">
-            <p>{{ new Date(props.experience.date).toDateString() }}</p>
-        </div>
+
         <div>
             <swiper
                 :slides-per-view="1"
@@ -49,36 +38,21 @@
                 :loop="true"
                 :modules="modules">
                 <swiper-slide v-for="image in props.experience.images" v-bind:key="image">
-                    <div>
-                        <img class="h-60" :src="image" />
+                    <div class="p-4">
+                        <img class="object-cover h-52 w-full rounded-xl" :src="image" />
                     </div>
                 </swiper-slide>
             </swiper>
         </div>
-
-        <section class="content ion-margin">
-            {{ props.experience.description }}
-        </section>
+        <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto">
+            <p class="text-center text-primary-darker">{{ props.experience.description }}</p>
+        </div>
     </div>
 
     <!-- </ion-card> -->
 </template>
 
 <script lang="ts" setup>
-import {
-    IonCard,
-    IonToolbar,
-    IonCardTitle,
-    IonCardHeader,
-    IonButton,
-    IonButtons,
-    IonImg,
-    IonCardSubtitle,
-    IonIcon,
-    alertController,
-    modalController
-} from "@ionic/vue";
-
 import { faPencil, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
@@ -95,7 +69,6 @@ import EditExperienceModal from "components/Modals/EditExperienceModal.vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto, PoiDto } from "types/dtos";
 import { showToast } from "utils/utils";
-import { pencilOutline, trashBinOutline } from "ionicons/icons";
 
 const props = defineProps<{
     experience: ExperienceDto;
@@ -112,45 +85,45 @@ const useJourney = useJourneyStore();
 async function onEdit() {
     const experience = props.experience as ExperienceDto;
 
-    const modal = await modalController.create({
-        component: EditExperienceModal,
-        componentProps: {
-            experience
-        },
-        keyboardClose: false
-    });
+    // const modal = await modalController.create({
+    //     component: EditExperienceModal,
+    //     componentProps: {
+    //         experience
+    //     },
+    //     keyboardClose: false
+    // });
 
-    await modal.present();
+    // await modal.present();
 
-    const { data } = await modal.onDidDismiss();
-    if (data && data.status === "success") {
-        emit("updated");
-    }
+    // const { data } = await modal.onDidDismiss();
+    // if (data && data.status === "success") {
+    //     emit("updated");
+    // }
 }
 
 async function onDelete() {
     const exp = props.experience as ExperienceDto;
 
-    const alert = await alertController.create({
-        header: "Warning",
-        subHeader: "You are about to delete this experience, this action is action is irreversible",
-        message: "Do you wish to proceed?",
-        buttons: [
-            {
-                text: "Yes",
-                role: "proceed",
-                handler: async () => {
-                    await useJourney.removeExperience(exp);
-                    useJourney.viewJourney.experiencesConnection!.edges =
-                        useJourney.viewJourney.experiencesConnection?.edges?.filter((el) => el.node.id != exp.node.id);
-                    showToast("Experience deleted", "success");
-                    emit("updated");
-                }
-            },
-            "No"
-        ]
-    });
-    await alert.present();
+    // const alert = await alertController.create({
+    //     header: "Warning",
+    //     subHeader: "You are about to delete this experience, this action is action is irreversible",
+    //     message: "Do you wish to proceed?",
+    //     buttons: [
+    //         {
+    //             text: "Yes",
+    //             role: "proceed",
+    //             handler: async () => {
+    //                 await useJourney.removeExperience(exp);
+    //                 useJourney.viewJourney.experiencesConnection!.edges =
+    //                     useJourney.viewJourney.experiencesConnection?.edges?.filter((el) => el.node.id != exp.node.id);
+    //                 showToast("Experience deleted", "success");
+    //                 emit("updated");
+    //             }
+    //         },
+    //         "No"
+    //     ]
+    // });
+    // await alert.present();
 }
 </script>
 

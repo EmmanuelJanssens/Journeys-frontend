@@ -2,7 +2,6 @@
     <section v-if="userStore.myJourneys">
         <swiper
             :center-insufficient-slides="true"
-            :initial-slide="userStore.myJourneys?.length"
             :pagination="{ clickable: true }"
             :space-between="10"
             lazy
@@ -19,8 +18,8 @@
             <swiper-slide v-for="item in userStore.myJourneys" v-bind:key="item.id">
                 <JourneyCard
                     :journey="item"
-                    class="journey-card ion-margin"
-                    @header-clicked="emit('headerClicked', item.id!), item.id!" />
+                    class="journey-card"
+                    @header-clicked="emit('header-clicked', item.id!), item.id!" />
             </swiper-slide>
         </swiper>
     </section>
@@ -40,7 +39,7 @@ const modules = ref([Pagination, Navigation, Lazy]);
 const userStore = useUserStore();
 
 const emit = defineEmits<{
-    (e: "headerClicked", journeyId: string): void;
+    (e: "header-clicked", journeyId: string): void;
 }>();
 </script>
 <style lang="less" scoped>

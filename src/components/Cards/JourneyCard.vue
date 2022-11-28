@@ -1,6 +1,5 @@
 <template>
-    <div
-        class="flex flex-col space-y-4 justify-between bg-secondary-light dark:bg-secondary-dark rounded-xl drop-shadow-xl">
+    <div class="flex flex-col space-y-4 bg-secondary-light dark:bg-secondary-dark rounded-xl drop-shadow-xl">
         <div class="top-0 p-3 bg-primary-main dark:primar w-full rounded-t-xl">
             <div class="flex space-x-4 justify-between">
                 <p class="text-center text-white">{{ journey.title }}</p>

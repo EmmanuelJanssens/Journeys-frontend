@@ -2,12 +2,8 @@
 <template>
     <div class="absolute top-0 right-0 left-0 w-screen h-screen">
         <!-- <TheJourneysHeader class="z-50" /> -->
-        <div class="flex h-full w-full">
-            <ThePoiListSidebar
-                v-if="poiStore.poisBetween && poiStore.poisBetween.length > 0"
-                @poi-item-clicked="panTo"
-                :poiList="poiStore.poisBetween"
-                class="w-[400px] h-full" />
+        <div class="flex flex-row-reverse h-full w-full">
+            <LogbookMenu :buttons="menuButtons" />
 
             <div class="w-full h-full">
                 <JourneyMap
@@ -19,11 +15,14 @@
                     @ready="setLoading(false)">
                 </JourneyMap>
             </div>
-            <LogbookMenu :buttons="menuButtons" />
-            <TheJourneysSlider
-                class="absolute w-full bottom-10 p-4"
-                v-if="mode == modes.logbook"
-                @header-clicked="showExperiences" />
+
+            <ThePoiListSidebar
+                v-if="poiStore.poisBetween && poiStore.poisBetween.length > 0"
+                @poi-item-clicked="panTo"
+                :poiList="poiStore.poisBetween"
+                class="w-[400px] h-full" />
+
+            <Component @header-clicked="showExperiences" class="absolute w-full bottom-10 p-4" :is="slider" />
         </div>
     </div>
 </template>
@@ -41,7 +40,7 @@ import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 
 import PoiCard from "components/Cards/PoiCard.vue";
-import { defineAsyncComponent, onActivated, onMounted, ref } from "vue";
+import { defineAsyncComponent, onActivated, onMounted, ref, markRaw } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
 import { usePoiStore } from "stores/usePoiStore";
@@ -60,7 +59,7 @@ import JourneyMap from "components/TheJourneyMap.vue";
 import LogbookMenu from "components/LogbookMenu.vue";
 import MapJourneySidebar from "components/TheJourneyEditSidebar.vue";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
-import TheJourneysSlider from "components/TheJourneysSlider.vue";
+import TheJourneysSlider from "components/Sliders/TheJourneysSlider.vue";
 import TheJourneyExperienceList from "components/TheJourneyExperienceList.vue";
 import ThePoiSearchbar from "components/ThePoiSearchbar.vue";
 
@@ -74,15 +73,21 @@ import {
     faEarth,
     faLocationDot,
     faHome,
-    faPencil,
     IconDefinition
 } from "@fortawesome/free-solid-svg-icons";
 import router from "router/router";
+import TheJourneyExpSlider from "components/Sliders/TheJourneyExpSlider.vue";
+const userStore = useUserStore();
+const journeyStore = useJourneyStore();
+const poiStore = usePoiStore();
+
+const slider = ref();
 
 const menuButtons = ref([
     {
         text: "View my Profile",
         icon: faCircleUser as IconDefinition,
+        visible: false,
         handler: () => {
             console.log("View my Profile");
         }
@@ -90,6 +95,7 @@ const menuButtons = ref([
     {
         text: "Create a Journey",
         icon: faBookAtlas as IconDefinition,
+        visible: true,
         handler: async () => {
             journeyModalController.open("createJourney");
 
@@ -106,6 +112,7 @@ const menuButtons = ref([
     {
         text: "Add an Experience",
         icon: faAdd as IconDefinition,
+        visible: true,
         handler: () => {
             console.log("Add an Experience");
         }
@@ -113,6 +120,7 @@ const menuButtons = ref([
     {
         text: "Add a Point of interest",
         icon: faLocationDot as IconDefinition,
+        visible: true,
         handler: () => {
             console.log("Add a Point of interest");
         }
@@ -120,6 +128,7 @@ const menuButtons = ref([
     {
         text: "Explore arround Me",
         icon: faEarth as IconDefinition,
+        visible: true,
         handler: () => {
             console.log("Explore arround Me");
         }
@@ -127,6 +136,7 @@ const menuButtons = ref([
     {
         text: "Home",
         icon: faHome as IconDefinition,
+        visible: true,
         handler: () => {
             router.push("home");
         }
@@ -142,34 +152,14 @@ const modes = {
 
 const isLoading = ref(true);
 
-const userStore = useUserStore();
-const journeyStore = useJourneyStore();
-const poiStore = usePoiStore();
-
 const mode = ref(modes.logbook);
 
-const fabList = ref();
-function toggleFab() {
-    const el = fabList.value as HTMLElement;
-    if (el.classList.contains("invisible")) {
-        el.classList.remove("invisible");
-        el.classList.add("visible");
-    } else if (el.classList.contains("visible")) {
-        el.classList.remove("visible");
-        el.classList.add("invisible");
-    }
-}
 authApp.onAuthStateChanged((user) => {
     if (user) {
         if (mode.value == modes.logbook) fetchJourneys();
+        menuButtons.value[0].visible = userStore.isLoggedIn;
     }
 });
-
-// onIonViewDidEnter(() => {
-//     if (!userStore.isLoggedIn) {
-//         openJourneyCreationModal();
-//     }
-// });
 
 onMounted(async () => {
     if (userStore.isLoggedIn) await fetchJourneys();
@@ -233,6 +223,7 @@ async function fetchJourneys() {
     mode.value = modes.logbook;
     if (userStore.isLoggedIn) {
         await userStore.fetchMyJourneys();
+        slider.value = markRaw(TheJourneysSlider);
     } else {
         journeyStore.clear();
         poiStore.clear();
@@ -316,6 +307,7 @@ async function showExperiences(id: string) {
     setLoading(true);
     mode.value = modes.viewJourney;
     await journeyStore.getJourney(id);
+    slider.value = markRaw(TheJourneyExpSlider);
 }
 
 async function openJourneyCreationModal() {
