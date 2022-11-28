@@ -9,7 +9,6 @@ class JourneyModalController {
     }
 
     create(modal: string, component: any) {
-        console.log(component);
         this._modals.value?.set(modal, {
             component: markRaw(component),
             open: false

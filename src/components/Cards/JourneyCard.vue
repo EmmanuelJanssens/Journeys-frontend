@@ -1,6 +1,7 @@
 <template>
-    <div class="relative w-80 h-96 bg-white rounded-xl drop-shadow-xl">
-        <div class="top-0 p-3 bg-primary-main dark:primar w-full rounded-t-xl opacity-50">
+    <div
+        class="flex flex-col space-y-4 justify-between bg-secondary-light dark:bg-secondary-dark rounded-xl drop-shadow-xl">
+        <div class="top-0 p-3 bg-primary-main dark:primar w-full rounded-t-xl">
             <div class="flex space-x-4 justify-between">
                 <p class="text-center text-white">{{ journey.title }}</p>
                 <div class="flex space-x-4">
@@ -17,15 +18,14 @@
                 </div>
             </div>
         </div>
-        <div class="h-full w-full p-4">
-            <img class="rounded-xl object-cover h-1/3 w-full" v-if="journey.thumbnail" :src="journey.thumbnail" />
-            <img class="rounded-xl object-cover h-1/3 w-full" v-else src="/assets/placeholder.png" />
+        <div class="p-4">
+            <img class="rounded-xl object-cover h-52 w-full" v-if="journey.thumbnail" :src="journey.thumbnail" />
+            <img class="rounded-xl object-cover h-52 w-full" v-else src="/assets/placeholder.png" />
         </div>
-
         <div
             v-if="journey.description && journey.description.length > 0"
-            class="absolute bottom-0 p-4 bg-black w-full rounded-xl opacity-70 max-h-36 overflow-auto">
-            <p class="text-center text-white">{{ journey.description }}</p>
+            class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto">
+            <p class="text-center text-primary-darker">{{ journey.description }}</p>
         </div>
         <div></div>
     </div>
@@ -41,6 +41,9 @@ import { showToast } from "utils/utils";
 import { faPencil, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { journeyModalController } from "components/Modal/JourneyModalController";
+import { POSITION, useToast } from "vue-toastification";
+
+const toast = useToast();
 
 const props = defineProps<{
     journey: JourneyDto;
@@ -55,17 +58,34 @@ async function onEdit() {
             journey: props.journey
         }
     });
-    // const modal = await modalController.create({
-    //     component: EditJourneyModal,
-    //     componentProps: props,
-    //     keyboardClose: false
-    // });
-    // await modal.present();
-    // const { data } = await modal.onDidDismiss();
-    // if (data && data.status === "success") emit("upated");
 }
 
 async function onDelete() {
+    journeyModalController.open("alert", {
+        props: {
+            title: "Warning",
+            message: "This action is irreversible",
+            buttons: [
+                {
+                    text: "OK",
+                    handler: async () => {
+                        await useJourney.removeJourney(props.journey.id!);
+                        useUser.removeJourney(props.journey.id!);
+                        journeyModalController.close("alert");
+                        toast.success("Journey deleted", {
+                            position: POSITION.TOP_CENTER
+                        });
+                    }
+                },
+                {
+                    text: "CANCEL",
+                    handler: async () => {
+                        journeyModalController.close("alert");
+                    }
+                }
+            ]
+        }
+    });
     // popoverController.dismiss();
     // const alert = await alertController.create({
     //     header: "Warning",
@@ -110,14 +130,15 @@ ion-card {
 ::-webkit-scrollbar {
     height: 12px;
     width: 12px;
-    background: #000;
-    border-radius: 100%;
+    background: #6c9d89;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #393812;
+    background: #687a6e;
     -webkit-border-radius: 1ex;
     -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+    border-radius: 5%;
+    box-shadow: none;
 }
 
 ::-webkit-scrollbar-corner {

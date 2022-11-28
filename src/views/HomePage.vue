@@ -1,5 +1,5 @@
 <template>
-    <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner page">
+    <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner">
         <div class="relative">
             <img src="/assets/images/banner/mountains.jpg" class="object-cover h-full w-full absolute z-10" />
 

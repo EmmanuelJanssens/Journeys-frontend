@@ -1,73 +1,44 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template>
-    <div>
-        <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner page">
-            <TheJourneysHeader color="secondary" />
-            <!-- <ion-loading v-if="isLoading" /> -->
-            <div class="h-full">
-                <!-- <ThePoiListSidebar
-                v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney"
-                :poi-list="filteredPois"
-                @poi-item-clicked="panTo" /> -->
-                <!-- <ThePoiSearchbar
-                    @poi-item-clicked="panTo"
-                    v-if="mode == modes.edition || mode == modes.exploration || mode == modes.editJourney" /> -->
-                <div class="absolute z-50">
-                    <button class="absolute bg-orange-400 z-50 rounded-full w-12 h-12">HELLo</button>
-                </div>
-
-                <!-- <ion-fab v-if="mode == modes.logbook" slot="fixed" vertical="top" horizontal="end">
-                                <ion-fab-button @click="openJourneyCreationModal">
-                                    <ion-icon size="large" :icon="addOutline"></ion-icon>
-                                </ion-fab-button>
-                            </ion-fab>
-                            <ion-fab v-else-if="mode == modes.viewJourney" slot="fixed" vertical="top" horizontal="end">
-                                <ion-fab-button>
-                                    <ion-icon size="large" :icon="gridOutline"></ion-icon>
-                                </ion-fab-button>
-                                <ion-fab-list>
-                                    <ion-fab-button @click="editJourney">
-                                        <ion-icon size="default" :icon="pencilOutline"></ion-icon>
-                                    </ion-fab-button>
-                                    <ion-fab-button @click="fetchJourneys">
-                                        <ion-icon size="default" :icon="returnUpBackOutline"></ion-icon>
-                                    </ion-fab-button>
-                                </ion-fab-list>
-                            </ion-fab>
-                            <ion-fab
-                                v-else-if="mode == modes.edition || mode == modes.editJourney"
-                                slot="fixed"
-                                vertical="top"
-                                horizontal="end">
-                                <ion-fab-button>
-                                    <ion-icon size="large" :icon="gridOutline"></ion-icon>
-                                </ion-fab-button>
-                                <ion-fab-list>
-                                    <ion-fab-button @click="openAddPoiAlert">
-                                        <ion-icon size="default" :icon="addOutline"></ion-icon>
-                                    </ion-fab-button>
-                                    <ion-fab-button @click="openJourneySaveModal">
-                                        <ion-icon size="default" :icon="saveOutline"></ion-icon>
-                                    </ion-fab-button>
-                                    <ion-fab-button @click="fetchJourneys">
-                                        <ion-icon size="default" :icon="returnUpBackOutline"></ion-icon>
-                                    </ion-fab-button>
-                                </ion-fab-list>
-                            </ion-fab> -->
-
-                <!-- <JourneyMap
-                    class="-z-20"
+    <div class="absolute flex flex-col top-0 right-0 bottom-0 left-0">
+        <!-- <TheJourneysHeader class="z-50" /> -->
+        <div class="flex h-full w-full">
+            <div class="w-full h-full">
+                <JourneyMap
+                    class="bg-secondary-light w-full h-full"
                     :mode="mode"
                     @loaded="fetchJourneys"
                     @marker-dragged="onMarkerDragend"
                     @poi-clicked="onPoiClicked"
-                    @ready="setLoading(false)" /> -->
+                    @ready="setLoading(false)">
+                    <!-- <template v-slot:fab>
+                        <div class="absolute flex flex-col space-y-2 top-5 right-5">
+                            <button
+                                @click="toggleFab()"
+                                class="bg-primary-main z-50 rounded-full w-14 h-14 transition-all ease-in-out hover:scale-110 active:scale-125">
+                                <FontAwesomeIcon :icon="faAdd" />
+                            </button>
+                            <div class="invisible flex-col" ref="fabList">
+                                <div v-for="b in 4" v-bind:key="b">
+                                    <button
+                                        class="bg-secondary-main z-50 rounded-full w-14 h-14 transition:all ease-in-out scale-75 hover:scale-90 active:scale-110">
+                                        <FontAwesomeIcon :icon="faAdd" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template> -->
+                </JourneyMap>
+            </div>
+            <LogbookMenu :buttons="menuButtons" />
+        </div>
 
-                <TheJourneysSlider
-                    class="journeys-slides"
-                    v-if="mode == modes.logbook"
-                    @header-clicked="showExperiences" />
-                <!-- <div v-if="mode == modes.viewJourney || mode == modes.edition || mode == modes.editJourney">
+        <TheJourneysSlider
+            class="absolute w-full bottom-10 p-4"
+            v-if="mode == modes.logbook"
+            @header-clicked="showExperiences" />
+
+        <!-- <div v-if="mode == modes.viewJourney || mode == modes.edition || mode == modes.editJourney">
                 <TheJourneyExperienceList
                     v-if="
                                         mode == modes.viewJourney &&
@@ -80,8 +51,6 @@
                     :end="journeyStore.editJourney.journey?.end!"
                     mode="edit" />
             </div> -->
-            </div>
-        </div>
     </div>
 </template>
 <script lang="ts">
@@ -90,25 +59,6 @@ export default {
 };
 </script>
 <script lang="ts" setup>
-// import {
-//     IonLoading,
-//     IonIcon,
-//     IonPage,
-//     IonContent,
-//     IonGrid,
-//     IonCol,
-//     IonRow,
-//     IonFab,
-//     IonFabList,
-//     IonFabButton,
-//     popoverController,
-//     onIonViewDidEnter,
-//     modalController,
-//     IonHeader,
-//     alertController,
-//     AlertButton
-// } from "@ionic/vue";
-
 // Import Swiper and modules
 // Import Swiper styles
 import "swiper/css";
@@ -133,6 +83,8 @@ import { MapMouseEvent, LngLat } from "mapbox-gl";
 import { getMidPoint, openModal, getRadius } from "utils/utils";
 
 import JourneyMap from "components/TheJourneyMap.vue";
+
+import LogbookMenu from "components/LogbookMenu.vue";
 import MapJourneySidebar from "components/TheJourneyEditSidebar.vue";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
 import TheJourneysSlider from "components/TheJourneysSlider.vue";
@@ -142,10 +94,39 @@ import ThePoiSearchbar from "components/ThePoiSearchbar.vue";
 import TheJourneysHeader from "components/TheJourneysHeader.vue";
 import { mapInstance } from "map/JourneysMap";
 
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { journeyModalController } from "components/Modal/JourneyModalController";
+import { faAdd, faBookAtlas, faCircleUser, faEarth } from "@fortawesome/free-solid-svg-icons";
 
-const modal = ref();
+const menuButtons = [
+    {
+        text: "View my Profile",
+        icon: faCircleUser,
+        handler: () => {
+            console.log("View my Profile");
+        }
+    },
+    {
+        text: "Create a Journey",
+        icon: faBookAtlas,
+        handler: () => {
+            console.log("Create a journey");
+        }
+    },
+    {
+        text: "Add an Experience",
+        icon: faAdd,
+        handler: () => {
+            console.log("Add an Experience");
+        }
+    },
+    {
+        text: "Explore arround Me",
+        icon: faEarth,
+        handler: () => {
+            console.log("Explore arround Me");
+        }
+    }
+];
 const modes = {
     logbook: "logbook",
     exploration: "exploration",
@@ -161,7 +142,18 @@ const journeyStore = useJourneyStore();
 const poiStore = usePoiStore();
 
 const mode = ref(modes.logbook);
-const test = ref;
+
+const fabList = ref();
+function toggleFab() {
+    const el = fabList.value as HTMLElement;
+    if (el.classList.contains("invisible")) {
+        el.classList.remove("invisible");
+        el.classList.add("visible");
+    } else if (el.classList.contains("visible")) {
+        el.classList.remove("visible");
+        el.classList.add("invisible");
+    }
+}
 authApp.onAuthStateChanged((user) => {
     if (user) {
         if (mode.value == modes.logbook) fetchJourneys();
@@ -441,15 +433,4 @@ async function openJourneySaveModal() {
     //     }
 }
 </script>
-<style lang="less" scoped>
-.journeys-slides {
-    position: absolute;
-    width: 80%;
-    left: 0;
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    bottom: 20px;
-    z-index: 999;
-}
-</style>
+<style lang="less" scoped></style>

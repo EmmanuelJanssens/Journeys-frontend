@@ -13,7 +13,9 @@
                 <div class="flex space-x-2">
                     <div v-for="img in images" v-bind:key="img.url">
                         <button class="relative" @click="setThumbnail(img.url)">
-                            <img class="object-cover w-24 h-24 rounded-lg border-2 p-1" :src="img.url" />
+                            <img
+                                class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1"
+                                :src="img.url" />
                             <font-awesome-icon
                                 v-if="img.active == 'checked'"
                                 class="absolute top-0 right-0 text-green-400"
@@ -45,10 +47,11 @@ import JourneyTextarea from "components/Input/JourneyTextarea.vue";
 import { journeyModalController } from "components/Modal/JourneyModalController";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import { POSITION, useToast } from "vue-toastification";
 
 const userStore = useUserStore();
 const journeyStore = useJourneyStore();
-
+const toast = useToast();
 const props = defineProps<{
     journey?: JourneyDto;
 }>();
@@ -114,14 +117,25 @@ async function save() {
     journeyStore.editJourney.journey!.description = state.value.description;
     journeyStore.editJourney.journey!.id = props.journey?.id;
     journeyStore.editJourney.journey!.thumbnail = selectedThumbnail.value;
-    await journeyStore.updateJourney("");
+
+    const res = await journeyStore.updateJourney("");
+    if (!res) {
+        toast.error("Could not save your modifications", {
+            position: POSITION.TOP_CENTER
+        });
+        return;
+    }
     const edited = userStore.myJourneys?.find((journey) => journey.id == props.journey?.id);
     if (edited) {
         edited.title = journeyStore.editJourney.journey!.title;
         edited.description = journeyStore.editJourney.journey!.description;
         edited.thumbnail = journeyStore.editJourney.journey?.thumbnail;
         journeyModalController.close("editJourney");
+        toast.success("Saved your modifications!", {
+            position: POSITION.TOP_CENTER
+        });
     }
+
     isLoading.value = false;
 }
 </script>

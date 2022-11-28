@@ -29,7 +29,10 @@ onMounted(async () => {
         "register",
         defineAsyncComponent(() => import("components/Modals/RegisterModal.vue"))
     );
-
+    journeyModalController.create(
+        "alert",
+        defineAsyncComponent(() => import("components/Modals/AlertModal.vue"))
+    );
     //     const disclaimer = localStorage.getItem("disclaimer");
     //     if (disclaimer != null && disclaimer == "true") {
     //         return;

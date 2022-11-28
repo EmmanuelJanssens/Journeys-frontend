@@ -25,7 +25,6 @@ app.use(VueAxios, axios);
 app.component("RecycleScroller", RecycleScroller);
 app.component("DynamicScroller", DynamicScroller);
 app.component("DynamicScrollerItem", DynamicScrollerItem);
-
 app.use(MotionPlugin);
 app.use(Toast);
 router.isReady().then(() => {

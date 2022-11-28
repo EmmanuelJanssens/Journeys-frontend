@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <div class="flex justify-end p-4 space-x-4 bg-secondary-main dark:bg-secondary-dark">
+    <div class="flex justify-end p-4 space-x-4 bg-secondary-light dark:bg-secondary-dark">
         <router-link to="home">HOME</router-link>
         <router-link to="logbook">LOGBOOK</router-link>
         <router-link to="profile">PROFILE</router-link>

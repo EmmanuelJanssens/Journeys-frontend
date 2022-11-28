@@ -26,7 +26,10 @@
                             <section class="grow">
                                 <slot name="body">Default body</slot>
                             </section>
-                            <footer>
+                            <section>
+                                <slot name="buttons"></slot>
+                            </section>
+                            <footer class="">
                                 <div class="p-2 mx-2">
                                     <slot name="footer"><button>OK</button></slot>
                                 </div>
