@@ -36,11 +36,10 @@ import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { onMounted, ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
-import { showToast } from "utils/utils";
 import { authApp } from "google/firebase";
-import { journeyModalController } from "components/Modal/JourneyModalController";
-import JourneyModal from "components/Modal/JourneyModal.vue";
-import JourneyInput from "components/Input/JourneyInput.vue";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
+import JourneyModal from "components/UI/Modal/JourneyModal.vue";
+import JourneyInput from "components/UI/Input/JourneyInput.vue";
 import { POSITION, useToast } from "vue-toastification";
 
 const toast = useToast();

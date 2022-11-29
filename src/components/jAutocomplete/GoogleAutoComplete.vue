@@ -21,7 +21,7 @@ const predictions = ref<
     }[]
 >([]);
 
-const props = defineProps<{
+defineProps<{
     text: string;
     placeholder: string;
 }>();

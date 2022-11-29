@@ -106,9 +106,9 @@ import { computed, ref } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
 import { authApp } from "google/firebase";
-import JourneyInput from "components/Input/JourneyInput.vue";
-import JourneyModal from "components/Modal/JourneyModal.vue";
-import { journeyModalController } from "components/Modal/JourneyModalController";
+import JourneyInput from "components/UI/Input/JourneyInput.vue";
+import JourneyModal from "components/UI/Modal/JourneyModal.vue";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 
 const state = ref({
     username: "",

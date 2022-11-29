@@ -33,7 +33,6 @@
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
-import JourneyInput from "./Input/JourneyInput.vue";
 
 const focus = ref(false);
 const props = defineProps<{
@@ -73,7 +72,7 @@ function setFocus(evt: FocusEvent) {
     focus.value = true;
 }
 
-function focusOut(evt: FocusEvent) {
+function focusOut() {
     focus.value = false;
 }
 </script>

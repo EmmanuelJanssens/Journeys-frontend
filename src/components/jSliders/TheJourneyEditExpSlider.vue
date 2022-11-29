@@ -36,7 +36,7 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy } from "swiper";
 
 import { onMounted, ref } from "vue";
-import ExperienceCard from "components/Cards/ExperienceCard.vue";
+import ExperienceCard from "components/jCards/ExperienceCard.vue";
 import router from "router/router";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { usePoiStore } from "stores/usePoiStore";
@@ -57,6 +57,7 @@ const emit = defineEmits<{
 onBeforeRouteLeave(() => {
     poiStore.clear();
 });
+
 onMounted(async () => {
     const query = router.currentRoute.value.query;
     try {

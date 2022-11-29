@@ -149,10 +149,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import { ref, watch } from "vue";
 
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faCaretDown, faBookAtlas } from "@fortawesome/free-solid-svg-icons";
 import { faGitlab } from "@fortawesome/free-brands-svg-icons";
 
 import { useUserStore } from "stores/useUserStore";
@@ -161,19 +160,16 @@ import { getMidPoint, getRadius } from "utils/utils";
 
 import GoogleAutoComplete from "components/GoogleAutoComplete.vue";
 import CardPreview from "./CardPreview.vue";
-import ProfilePopover from "components/ProfilePopover.vue";
 
 import { getGeocodedData } from "google/googleGeocoder";
-import { authApp } from "google/firebase";
 
 import router from "router/router";
 
 import { LngLat } from "mapbox-gl";
 import { AddressDto } from "types/dtos";
-import { journeyModalController } from "components/Modal/JourneyModalController";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { useJourneyStore } from "stores/useJourneyStore";
-import JourneyButton from "components/Button/JourneyButton.vue";
-import { boolean } from "yargs";
+import JourneyButton from "components/UI/Button/JourneyButton.vue";
 
 const userStore = useUserStore();
 const poiStore = usePoiStore();

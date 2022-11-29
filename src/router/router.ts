@@ -1,14 +1,4 @@
-import TheJourneyEditSidebarVue from "components/TheJourneyEditSidebar.vue";
-import { defineAsyncComponent } from "vue";
 import { RouteRecordRaw, createRouter, createWebHistory } from "vue-router";
-// import HomePage from "views/HomePage.vue";
-// import LogBookPage from "views/LogBookPage.vue";
-const HomePage = async () => await import("views/HomePage.vue");
-const LogBookPage = async () => await import("views/LogBookPage.vue");
-const ProfilePage = async () => await import("views/ProfilePage.vue");
-const TheJourneysSlider = async () => await import("components/Sliders/TheJourneysSlider.vue");
-const TheJourneyExpSlider = async () => await import("components/Sliders/TheJourneyExpSlider.vue");
-const TheJourneyEditExpSlider = async () => await import("components/Sliders/TheJourneyEditExpSlider.vue");
 
 const routes: RouteRecordRaw[] = [
     {
@@ -18,31 +8,26 @@ const routes: RouteRecordRaw[] = [
     {
         path: "/home",
         name: "home",
-        component: HomePage
+        component: () => import("views/HomePage.vue")
     },
     {
         path: "/logbook",
         name: "logbook",
-        component: LogBookPage,
+        component: () => import("views/LogBookPage.vue"),
         children: [
-            { path: "", name: "main", component: () => import("components/Sliders/TheJourneysSlider.vue") },
+            { path: "", name: "main", component: () => import("components/JSliders/TheJourneysSlider.vue") },
             {
                 path: "journey/:id",
                 name: "view",
-                component: () => import("components/Sliders/TheJourneyExpSlider.vue")
+                component: () => import("components/JSliders/TheJourneyExpSlider.vue")
             },
             {
                 path: "/edit",
                 name: "edit",
-                component: () => import("components/Sliders/TheJourneyEditExpSlider.vue"),
+                component: () => import("components/JSliders/TheJourneyEditExpSlider.vue"),
                 props: (route) => ({ query: route.query })
             }
         ]
-    },
-    {
-        path: "/profile",
-        name: "profile",
-        component: ProfilePage
     },
     {
         path: "/template",

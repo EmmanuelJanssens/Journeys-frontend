@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { faPencil, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faPencil, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 import { Swiper, SwiperSlide } from "swiper/vue";
@@ -65,11 +65,8 @@ import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 
 import { ref } from "vue";
-import EditExperienceModal from "components/Modals/EditExperienceModal.vue";
-import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto, PoiDto } from "types/dtos";
-import { showToast } from "utils/utils";
-import { journeyModalController } from "components/Modal/JourneyModalController";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 
 const props = defineProps<{
     experience: ExperienceDto;
@@ -81,10 +78,8 @@ const emit = defineEmits<{
 }>();
 
 const modules = ref([Navigation, Lazy, Pagination, Autoplay]);
-const useJourney = useJourneyStore();
 
 async function onEdit() {
-    const experience = props.experience as ExperienceDto;
     journeyModalController.open("editExperience", {
         props: {
             experience: props.experience
@@ -96,46 +91,9 @@ async function onEdit() {
     if (res) {
         emit("updated");
     }
-    // const modal = await modalController.create({
-    //     component: EditExperienceModal,
-    //     componentProps: {
-    //         experience
-    //     },
-    //     keyboardClose: false
-    // });
-
-    // await modal.present();
-
-    // const { data } = await modal.onDidDismiss();
-    // if (data && data.status === "success") {
-    //     emit("updated");
-    // }
 }
 
-async function onDelete() {
-    const exp = props.experience as ExperienceDto;
-
-    // const alert = await alertController.create({
-    //     header: "Warning",
-    //     subHeader: "You are about to delete this experience, this action is action is irreversible",
-    //     message: "Do you wish to proceed?",
-    //     buttons: [
-    //         {
-    //             text: "Yes",
-    //             role: "proceed",
-    //             handler: async () => {
-    //                 await useJourney.removeExperience(exp);
-    //                 useJourney.viewJourney.experiencesConnection!.edges =
-    //                     useJourney.viewJourney.experiencesConnection?.edges?.filter((el) => el.node.id != exp.node.id);
-    //                 showToast("Experience deleted", "success");
-    //                 emit("updated");
-    //             }
-    //         },
-    //         "No"
-    //     ]
-    // });
-    // await alert.present();
-}
+async function onDelete() {}
 </script>
 
 <style scoped>

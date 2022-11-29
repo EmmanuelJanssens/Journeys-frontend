@@ -51,10 +51,10 @@ import { storageRef } from "google/firebase";
 import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faClose, faAdd } from "@fortawesome/free-solid-svg-icons";
-import { journeyModalController } from "components/Modal/JourneyModalController";
-import JourneyModal from "components/Modal/JourneyModal.vue";
-import JourneyInput from "components/Input/JourneyInput.vue";
-import JourneyTextarea from "components/Input/JourneyTextarea.vue";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
+import JourneyModal from "components/UI/Modal/JourneyModal.vue";
+import JourneyInput from "components/UI/Input/JourneyInput.vue";
+import JourneyTextarea from "components/UI/Input/JourneyTextarea.vue";
 import { POSITION, useToast } from "vue-toastification";
 const state = ref({
     description: "",

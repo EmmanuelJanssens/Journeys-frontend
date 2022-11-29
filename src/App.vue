@@ -17,21 +17,21 @@
 import DisclaimerModal from "components/Modals/DisclaimerModal.vue";
 import { RouterView } from "vue-router";
 import { defineAsyncComponent, onMounted, ref } from "vue";
-import { journeyModalController } from "components/Modal/JourneyModalController";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 
 onMounted(async () => {
     journeyModalController.create(
         "login",
-        defineAsyncComponent(() => import("components/Modals/LoginModal.vue"))
+        defineAsyncComponent(() => import("components/jModals/LoginModal.vue"))
     );
 
     journeyModalController.create(
         "register",
-        defineAsyncComponent(() => import("components/Modals/RegisterModal.vue"))
+        defineAsyncComponent(() => import("components/jModals/RegisterModal.vue"))
     );
     journeyModalController.create(
         "alert",
-        defineAsyncComponent(() => import("components/Modals/AlertModal.vue"))
+        defineAsyncComponent(() => import("components/jModals/AlertModal.vue"))
     );
     //     const disclaimer = localStorage.getItem("disclaimer");
     //     if (disclaimer != null && disclaimer == "true") {

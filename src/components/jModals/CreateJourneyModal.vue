@@ -26,10 +26,10 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import JourneyModal from "components/Modal/JourneyModal.vue";
+import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import GoogleAutoComplete from "components/GoogleAutoComplete.vue";
 import { getGeocodedData } from "google/googleGeocoder";
-import { journeyModalController } from "components/Modal/JourneyModalController";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 
 const validJourney = ref({
     start: {

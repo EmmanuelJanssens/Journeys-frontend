@@ -17,7 +17,6 @@
 
             <ThePoiListSidebar
                 v-if="poiStore.poisBetween && poiStore.poisBetween.length > 0"
-                @poi-item-clicked="panTo"
                 :poiList="poiStore.poisBetween"
                 class="w-[400px] h-full" />
         </div>
@@ -42,23 +41,18 @@ import { useUserStore } from "stores/useUserStore";
 import { usePoiStore } from "stores/usePoiStore";
 import { useJourneyStore } from "stores/useJourneyStore";
 
-import { AddressDto, getAddressCoordinates, PoiDto } from "types/dtos";
+import { PoiDto } from "types/dtos";
 
-import { getGeocodedData } from "google/googleGeocoder";
 import { authApp } from "google/firebase";
 
-import mapboxgl, { MapMouseEvent } from "mapbox-gl";
-import { getMidPoint, getRadius } from "utils/utils";
+import { MapMouseEvent } from "mapbox-gl";
 
 import JourneyMap from "components/TheJourneyMap.vue";
 
 import LogbookMenu from "components/LogbookMenu.vue";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
-import TheJourneysSlider from "components/Sliders/TheJourneysSlider.vue";
 
-import { mapInstance } from "map/JourneysMap";
-
-import { journeyModalController } from "components/Modal/JourneyModalController";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import {
     faAdd,
     faBookAtlas,
@@ -66,13 +60,11 @@ import {
     faEarth,
     faLocationDot,
     faHome,
-    faBackward,
     faSignOut,
     IconDefinition,
     faPencil
 } from "@fortawesome/free-solid-svg-icons";
 import router from "router/router";
-import { drawMyJourneys } from "map/drawOnMap";
 
 const history = ref<
     {
@@ -179,112 +171,33 @@ const modes = {
     createJourney: "createJourney"
 };
 
-const isLoading = ref(true);
-
 const mode = ref(modes.logbook);
-let map: mapboxgl.Map;
 
 onActivated(async () => {});
 onMounted(async () => {
     journeyModalController.create(
         "editJourney",
         defineAsyncComponent({
-            loader: () => import("components/Modals/EditJourneyModal.vue")
+            loader: () => import("components/jModals/EditJourneyModal.vue")
         })
     );
 
     journeyModalController.create(
         "createJourney",
         defineAsyncComponent({
-            loader: () => import("components/Modals/CreateJourneyModal.vue")
+            loader: () => import("components/jModals/CreateJourneyModal.vue")
         })
     );
 
     journeyModalController.create(
         "editExperience",
         defineAsyncComponent({
-            loader: () => import("components/Modals/EditExperienceModal.vue")
+            loader: () => import("components/jModals/EditExperienceModal.vue")
         })
     );
 });
-async function geocode(start: string, end: string) {
-    const geocodedStart = await getGeocodedData(start);
-    const geocodedEnd = await getGeocodedData(end);
 
-    if (geocodedStart.error === undefined && geocodedEnd.error === undefined) {
-        return {
-            start: geocodedStart,
-            end: geocodedEnd
-        };
-    } else {
-        return undefined;
-    }
-}
-
-function SwitchMode(newMode: string) {
-    mode.value = newMode;
-}
-
-async function panTo(poi: PoiDto) {
-    map.flyTo({
-        center: [poi.location!.longitude, poi.location!.latitude],
-        zoom: 20
-    });
-}
-
-function setLoading(loading: boolean) {
-    isLoading.value = loading;
-}
-
-async function fetchJourneys() {
-    setLoading(true);
-    mode.value = modes.logbook;
-
-    console.log(history.value);
-    if (userStore.isLoggedIn) {
-        await userStore.fetchMyJourneys();
-        // slider.value = markRaw(TheJourneysSlider);
-    } else {
-        journeyStore.clear();
-        poiStore.clear();
-        setLoading(false);
-    }
-}
-
-const filteredPois = ref<PoiDto[]>();
-
-async function editJourney() {
-    mode.value = modes.editJourney;
-    //TODO check if alright
-    journeyStore.editJourney.journey! = JSON.parse(JSON.stringify(journeyStore.viewJourney));
-    await fetchPois({
-        start: {
-            placeId: journeyStore.editJourney.journey?.start?.placeId!,
-            address: journeyStore.editJourney.journey?.start?.address!,
-            longitude: journeyStore.editJourney.journey?.start?.longitude!,
-            latitude: journeyStore.editJourney.journey?.start?.latitude!
-        },
-        end: {
-            placeId: journeyStore.editJourney.journey?.end?.placeId!,
-            address: journeyStore.editJourney.journey?.end?.address!,
-            longitude: journeyStore.editJourney.journey?.end?.longitude!,
-            latitude: journeyStore.editJourney.journey?.end?.latitude!
-        }
-    });
-}
-
-async function fetchPois(data: { start: AddressDto; end: AddressDto }) {
-    setLoading(true);
-    const radius = getRadius(getAddressCoordinates(data.start), getAddressCoordinates(data.end));
-    const mid = getMidPoint(getAddressCoordinates(data.start), getAddressCoordinates(data.end));
-    journeyStore.setJourneyStartEnd(data.start, data.end);
-    await poiStore.searchBetween(mid.lat, mid.lng, radius);
-    filteredPois.value = poiStore.poisBetween;
-
-    slider.value = undefined;
-}
-
-async function onPoiClicked(poi: PoiDto, e: MapMouseEvent) {
+function onPoiClicked(poi: PoiDto, e: MapMouseEvent) {
     // const popover = await popoverController.create({
     //     component: PoiCard,
     //     componentProps: { poi: poi },

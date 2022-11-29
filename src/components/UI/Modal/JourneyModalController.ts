@@ -49,7 +49,7 @@ class JourneyModalController {
         }
     }
     async didClose(modal: string) {
-        const promise = new Promise<any>((resolve, reject) => {
+        const promise = new Promise<any>((resolve) => {
             this.checkClose(this._modals.value?.get(modal)!, resolve);
         });
 
@@ -62,7 +62,6 @@ class JourneyModalController {
         });
         return openComp;
     }
-    onOpened(callback: () => {}) {}
 }
 
 export const journeyModalController = new JourneyModalController();

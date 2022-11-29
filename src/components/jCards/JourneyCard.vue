@@ -31,18 +31,15 @@
 </template>
 
 <script lang="ts" setup>
-import EditJourneyModal from "components/Modals/EditJourneyModal.vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
 import { JourneyDto } from "types/dtos";
-import { showToast } from "utils/utils";
 
 import { faPencil, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { journeyModalController } from "components/Modal/JourneyModalController";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { POSITION, useToast } from "vue-toastification";
 import router from "router/router";
-import { onMounted } from "vue";
 
 const toast = useToast();
 
@@ -50,7 +47,6 @@ const props = defineProps<{
     journey: JourneyDto;
 }>();
 
-const emit = defineEmits(["headerClicked", "upated"]);
 const journeyStore = useJourneyStore();
 const userStore = useUserStore();
 
@@ -90,6 +86,7 @@ async function onDelete() {
     });
 }
 async function goToJourney(id: string) {
+    console.log(id);
     await journeyStore.getJourney(id);
     router.push("logbook/journey/" + id);
 }
