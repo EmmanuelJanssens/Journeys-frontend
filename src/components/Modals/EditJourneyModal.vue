@@ -10,12 +10,12 @@
         </template>
         <template v-slot:body>
             <div class="bg-secondary-light p-4 flex flex-col h-full">
-                <div class="flex space-x-2">
+                <div class="flex space-x-2 flex-wrap max-w-3xl">
                     <div v-for="img in images" v-bind:key="img.url">
                         <button class="relative" @click="setThumbnail(img.url)">
                             <img
                                 class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1"
-                                :src="img.url" />
+                                v-lazy="{ src: img.url, loading: '/assets/placeholder.png' }" />
                             <font-awesome-icon
                                 v-if="img.active == 'checked'"
                                 class="absolute top-0 right-0 text-green-400"
@@ -40,7 +40,7 @@
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
 import { JourneyDto } from "types/dtos";
-import { onMounted, ref } from "vue";
+import { onActivated, onMounted, ref } from "vue";
 import JourneyModal from "components/Modal/JourneyModal.vue";
 import JourneyInput from "components/Input/JourneyInput.vue";
 import JourneyTextarea from "components/Input/JourneyTextarea.vue";

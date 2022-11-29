@@ -1,163 +1,103 @@
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <ion-page>
-        <ion-header>
-            <ion-toolbar>
-                <ion-title
-                    >Edit Experience at
-                    <ion-text color="secondary">{{
-                        (currentData?.experience?.node as PoiDto)?.name
-                    }}</ion-text></ion-title
-                >
-                <ion-progress-bar v-if="uploading" type="indeterminate"></ion-progress-bar>
-            </ion-toolbar>
-        </ion-header>
-        <ion-content>
-            <ion-grid>
-                <ion-row>
-                    <ion-col>
-                        <ion-item>
-                            <ion-label position="fixed">Title</ion-label>
-                            <ion-input
-                                v-model="title"
-                                @ionInput="title = $event.target.value"
-                                :value="title"></ion-input>
-                        </ion-item>
-                    </ion-col>
-                </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <ion-item>
-                            <ion-label>When</ion-label><ion-datetime-button datetime="datetime"></ion-datetime-button>
-                        </ion-item>
-                    </ion-col>
-                </ion-row>
-
-                <ion-row>
-                    <ion-col>
-                        <ion-item>
-                            <ion-label position="fixed">Description</ion-label>
-                            <ion-textarea
-                                :value="currentData?.experience?.description"
-                                v-model="description"
-                                wrap="soft"
-                                :rows="10">
-                            </ion-textarea>
-                        </ion-item>
-                    </ion-col>
-                </ion-row>
-
-                <ion-row>
-                    <ion-col>
-                        <ion-item>
-                            <ion-label position="fixed">Your pictures</ion-label>
-                            <div class="images">
-                                <div class="image-item" v-for="image in images" v-bind:key="image.url">
-                                    <ion-thumbnail>
-                                        <ion-img :src="image.url" />
-                                    </ion-thumbnail>
-                                    <ion-icon
-                                        slot="icon-only"
-                                        :icon="closeOutline"
-                                        @click="removeImage(image.url)"></ion-icon>
-                                </div>
-
-                                <ion-button class="add-image" @click="selectImage" slot="icon-only">
-                                    <ion-icon size="large" :icon="addOutline"> </ion-icon>
-                                </ion-button>
-                            </div> </ion-item
-                    ></ion-col>
-                </ion-row>
-                <ion-row> </ion-row>
-            </ion-grid>
-        </ion-content>
-        <ion-footer>
-            <ion-toolbar>
-                <ion-buttons slot="end">
-                    <ion-button slot="end" color="secondary" @click="() => modalController.dismiss()">
-                        cancel
-                    </ion-button>
-                    <ion-button slot="end" @click="save"> Save </ion-button>
-                </ion-buttons>
-            </ion-toolbar>
-        </ion-footer>
-    </ion-page>
-    <ion-modal :keep-contents-mounted="true">
-        <ion-datetime id="datetime" @ion-change="selectDate($event)"></ion-datetime>
-    </ion-modal>
+    <journey-modal :header="'Edit '" name="editExperience">
+        <template v-slot:loading>
+            <div v-if="isLoading" class="bg-high-contrast-text h-3">
+                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
+            </div>
+            <div v-if="isLoading" class="bg-high-contrast-text h-3">
+                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
+            </div>
+        </template>
+        <template v-slot:body>
+            <div class="bg-secondary-light p-4 flex flex-col h-full">
+                <div class="flex flex-col space-y-4 h-full">
+                    <journey-input placeholder="Title" v-model="state.title" />
+                    <!-- <journey-input placeholder="Date" v-model="state.selectedDate" /> -->
+                    <DatePicker v-model="state.selectedDate" />
+                    <journey-textarea :rows="6" placeholder="description" v-model="state.description" />
+                </div>
+                <div class="flex space-x-2 flex-wrap max-w-3xl">
+                    <div v-for="img in images" v-bind:key="img.url">
+                        <button class="relative">
+                            <img
+                                class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1"
+                                :src="img.url" />
+                            <font-awesome-icon
+                                class="absolute top-0 right-0 text-green-400"
+                                :icon="faClose"
+                                @click="removeImage(img.url)" />
+                        </button>
+                    </div>
+                    <button class="relative w-24 h-24 rounded-lg bg-green-200" @click="selectImage">
+                        <font-awesome-icon class="" :icon="faAdd" size="4x" />
+                    </button>
+                </div>
+            </div>
+        </template>
+        <template v-slot:footer>
+            <div class="flex justify-end">
+                <button @click="save">Save</button>
+            </div>
+        </template>
+    </journey-modal>
 </template>
 <script lang="ts" setup>
-import {
-    IonButtons,
-    IonInput,
-    IonDatetime,
-    IonIcon,
-    IonDatetimeButton,
-    IonModal,
-    IonProgressBar,
-    IonButton,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonTitle,
-    IonPage,
-    IonContent,
-    IonHeader,
-    IonFooter,
-    IonToolbar,
-    IonItem,
-    IonLabel,
-    IonImg,
-    IonThumbnail,
-    IonTextarea,
-    IonText,
-    modalController
-} from "@ionic/vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto, JourneyDto, PoiDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
 import { storageRef } from "google/firebase";
 import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
-import { showToast } from "utils/utils";
-import { addOutline, closeOutline } from "ionicons/icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faClose, faAdd } from "@fortawesome/free-solid-svg-icons";
+import { journeyModalController } from "components/Modal/JourneyModalController";
+import JourneyModal from "components/Modal/JourneyModal.vue";
+import JourneyInput from "components/Input/JourneyInput.vue";
+import JourneyTextarea from "components/Input/JourneyTextarea.vue";
+import { POSITION, useToast } from "vue-toastification";
+const state = ref({
+    description: "",
+    title: "",
+    files: [],
+    selectedDate: ""
+});
 
-const description = ref();
-const title = ref();
 const journeyStore = useJourneyStore();
 const props = defineProps<{
     experience: ExperienceDto;
 }>();
 const files = ref<Array<any>>([]);
-const uploading = ref(false);
+const isLoading = ref(false);
 let currentData = ref<{
-    experience?: ExperienceDto;
-    journey?: JourneyDto;
-}>({});
+    experience: ExperienceDto;
+    journey: JourneyDto;
+}>();
 let images = ref<
     {
         url: string;
         isFs: boolean;
     }[]
 >([]);
-let selectedDate = ref<string>();
+
+const toast = useToast();
 onMounted(() => {
+    currentData.value = {
+        experience: props.experience as ExperienceDto,
+        journey: journeyStore.viewJourney
+    };
     currentData.value!.experience = props.experience as ExperienceDto;
-    title.value = currentData.value?.experience.title;
+
+    state.value.title = currentData.value?.experience.title;
     currentData.value?.experience.images.forEach((image) => {
         images.value?.push({
             url: image,
             isFs: true
         });
     });
-    currentData.value!.journey = { id: journeyStore.viewJourney.id };
-
-    selectedDate.value = currentData.value?.experience.date;
+    state.value.selectedDate = currentData.value?.experience.date;
 });
 
-function selectDate(e: any) {
-    selectedDate.value = e.detail.value;
-}
 async function selectImage() {
     const result = await FilePicker.pickFiles({
         multiple: true
@@ -187,7 +127,7 @@ async function save() {
     const deleted = currentData.value?.experience?.images.filter(
         (img) => !images.value.find((search) => img == search.url)
     );
-    uploading.value = true;
+    isLoading.value = true;
     await deleted?.forEach(async (img) => {
         const imgRef = fref(storageRef.storage, img);
         await deleteObject(imgRef);
@@ -220,60 +160,26 @@ async function save() {
             const imgRef = fref(storageRef.storage, img);
             deleteObject(imgRef);
         });
-        modalController.dismiss({ status: "error" });
-        uploading.value = false;
-        showToast("An error occured while uploading your image try again", "danger");
+        isLoading.value = false;
+        toast.error("An error occured while uploading your image try again", {
+            position: POSITION.TOP_CENTER
+        });
     } else {
         currentData.value!.experience!.images = currentData.value!.experience!.images.filter((img) =>
             images.value.find((search) => img == search.url)
         );
         currentData.value!.experience!.images = currentData.value!.experience!.images.concat(...uploaded);
-        currentData.value!.experience!.title = title.value;
-        currentData.value!.experience!.date = selectedDate.value!;
-        currentData.value!.experience!.description = description.value;
-        currentData.value.experience!.journey = { id: journeyStore.viewJourney.id };
+        currentData.value!.experience!.title = state.value.title;
+        currentData.value!.experience!.date = state.value.selectedDate;
+        currentData.value!.experience!.description = state.value.description;
+        currentData.value!.experience!.journey = { id: journeyStore.viewJourney.id };
         await journeyStore.updateExperience(currentData.value!.experience!);
-        modalController.dismiss({ status: "success" });
-        showToast("Your modifications were successfuly saved", "success");
-        uploading.value = false;
+        journeyModalController.close("editExperience");
+        toast.success("Your modifications were successfuly saved", {
+            position: POSITION.TOP_CENTER
+        });
+        isLoading.value = false;
     }
 }
 </script>
-<style scoped lang="less">
-ion-thumbnail {
-    min-width: 80px;
-    min-height: 80px;
-}
-.image-item {
-    position: relative;
-    padding: 8px;
-    margin: 5px;
-    border-radius: 10%;
-    border: solid;
-    border-color: var(--ion-color-primary);
-    border-width: 1px;
-    & ion-icon {
-        border-radius: 50%;
-        background-color: var(--ion-color-danger);
-        position: absolute;
-        top: 2px;
-        right: 2px;
-        cursor: pointer;
-    }
-    & ion-img {
-        border-radius: 10%;
-    }
-}
-
-.images {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    width: 100%;
-}
-
-.add-image {
-    min-width: 90px;
-    min-height: 90px;
-}
-</style>
+<style scoped lang="less"></style>

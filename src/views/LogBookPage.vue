@@ -177,6 +177,13 @@ onMounted(async () => {
             loader: () => import("components/Modals/CreateJourneyModal.vue")
         })
     );
+
+    journeyModalController.create(
+        "editExperience",
+        defineAsyncComponent({
+            loader: () => import("components/Modals/EditExperienceModal.vue")
+        })
+    );
 });
 async function geocode(start: string, end: string) {
     const geocodedStart = await getGeocodedData(start);

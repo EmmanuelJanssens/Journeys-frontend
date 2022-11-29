@@ -6,27 +6,35 @@
             <div class="container mx-auto">
                 <div class="absolute z-50 w-full container">
                     <div class="flex justify-end p-4 space-x-4">
-                        <button
+                        <JourneyButton
                             v-if="!userStore.isLoggedIn"
-                            class="text-secondary-light"
-                            @click="journeyModalController.open('register')">
-                            CREATE AN ACCOUNT
-                        </button>
-                        <button
+                            type="secondary"
+                            fill="none"
+                            @click="journeyModalController.open('register')"
+                            >CREATE AN ACCOUNT</JourneyButton
+                        >
+                        <JourneyButton
                             v-if="!userStore.isLoggedIn"
-                            class="text-high-contrast-text"
-                            @click="journeyModalController.open('login')">
-                            LOGIN
-                        </button>
-                        <button
+                            type="secondary"
+                            @click="journeyModalController.open('login')"
+                            fill="contrast"
+                            >LOGIN</JourneyButton
+                        >
+
+                        <JourneyButton
                             v-if="userStore.isLoggedIn"
-                            class="text-high-contrast-text"
-                            @click="router.push('logbook')">
-                            LOGBOOk <font-awesome-icon :icon="faBookAtlas" />
-                        </button>
-                        <button @click="authApp.signOut" v-if="userStore.isLoggedIn" class="text-high-contrast-text">
-                            PROFILE <font-awesome-icon :icon="faCaretDown" />
-                        </button>
+                            type="secondary"
+                            fill="fill"
+                            @click="router.push('logbook')"
+                            >LOGBOOK</JourneyButton
+                        >
+                        <JourneyButton
+                            v-if="userStore.isLoggedIn"
+                            type="secondary"
+                            fill="fill"
+                            @click="userStore.logout"
+                            >LOGOUT</JourneyButton
+                        >
                     </div>
                 </div>
                 <section class="relative sm:h-96 z-20 text-high-contrast-text">
@@ -67,11 +75,7 @@
                             <div
                                 class="flex flex-col items-center justify-center space-x-4 rounded-r-md p-2 drop-shadow-lg bg-secondary-light dark:bg-secondary-dark sm:flex-row sm:justify-end sm:relative">
                                 <p>{{ poiCount }} pois found!</p>
-                                <button
-                                    @click="pushLogbook"
-                                    class="bg-primary-main dark:bg-primary-dark p-4 rounded-lg text-secondary-btn-contrast-text shadow-inner hover:bg-btn-dark dark:hover:bg-btn-darker transition-all ease-in transform hover:scale-110">
-                                    Start now!
-                                </button>
+                                <JourneyButton @click="pushLogbook">Start now!</JourneyButton>
                             </div>
                         </div>
                     </section>
@@ -168,6 +172,7 @@ import { LngLat } from "mapbox-gl";
 
 import { journeyModalController } from "components/Modal/JourneyModalController";
 import { useJourneyStore } from "stores/useJourneyStore";
+import JourneyButton from "components/Button/JourneyButton.vue";
 
 const userStore = useUserStore();
 const poiStore = usePoiStore();

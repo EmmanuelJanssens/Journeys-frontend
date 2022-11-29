@@ -4,7 +4,9 @@
             :center-insufficient-slides="true"
             :pagination="{ clickable: true }"
             :space-between="10"
-            lazy
+            :lazy="{
+                enabled: true
+            }"
             :modules="modules"
             class="experiences"
             :breakpoints="{

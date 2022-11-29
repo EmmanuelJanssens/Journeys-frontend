@@ -27,19 +27,19 @@
             <swiper
                 :slides-per-view="1"
                 :initial-slide="0"
-                lazy
+                :lazy="{
+                    enabled: true
+                }"
                 :pagination="{
                     clickable: true
-                }"
-                :autoplay="{
-                    delay: 3000,
-                    pauseOnMouseEnter: true
                 }"
                 :loop="true"
                 :modules="modules">
                 <swiper-slide v-for="image in props.experience.images" v-bind:key="image">
                     <div class="p-4">
-                        <img class="object-cover h-52 w-full rounded-xl" :src="image" />
+                        <img
+                            class="object-cover h-52 w-full rounded-xl"
+                            v-lazy="{ src: image, loading: '/assets/placeholder.png' }" />
                     </div>
                 </swiper-slide>
             </swiper>
@@ -69,6 +69,7 @@ import EditExperienceModal from "components/Modals/EditExperienceModal.vue";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { ExperienceDto, PoiDto } from "types/dtos";
 import { showToast } from "utils/utils";
+import { journeyModalController } from "components/Modal/JourneyModalController";
 
 const props = defineProps<{
     experience: ExperienceDto;
@@ -84,7 +85,17 @@ const useJourney = useJourneyStore();
 
 async function onEdit() {
     const experience = props.experience as ExperienceDto;
+    journeyModalController.open("editExperience", {
+        props: {
+            experience: props.experience
+        }
+    });
 
+    const res = await journeyModalController.didClose("editExperience");
+
+    if (res) {
+        emit("updated");
+    }
     // const modal = await modalController.create({
     //     component: EditExperienceModal,
     //     componentProps: {

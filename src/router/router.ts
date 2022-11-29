@@ -1,13 +1,15 @@
+import { defineAsyncComponent } from "vue";
 import { RouteRecordRaw, createRouter, createWebHistory } from "vue-router";
 // import HomePage from "views/HomePage.vue";
 // import LogBookPage from "views/LogBookPage.vue";
-const HomePage = async () => await import("views/HomePage.vue");
-const LogBookPage = async () => await import("views/LogBookPage.vue");
-const ProfilePage = async () => await import("views/ProfilePage.vue");
+const HomePage = () => import("views/HomePage.vue");
+const LogBookPage = () => import("views/LogBookPage.vue");
+const ProfilePage = () => import("views/ProfilePage.vue");
+
 const routes: RouteRecordRaw[] = [
     {
         path: "/",
-        redirect: "/home"
+        redirect: "/template"
     },
     {
         path: "/home",
@@ -23,6 +25,11 @@ const routes: RouteRecordRaw[] = [
         path: "/profile",
         name: "profile",
         component: ProfilePage
+    },
+    {
+        path: "/template",
+        name: "template",
+        component: defineAsyncComponent(() => import("views/TemplatePage.vue"))
     }
 ];
 
