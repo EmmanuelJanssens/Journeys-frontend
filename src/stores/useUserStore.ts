@@ -7,19 +7,6 @@ import { uniqueNamesGenerator, adjectives, colors, animals, Config } from "uniqu
 import { ref } from "vue";
 
 export const useUserStore = defineStore("user", () => {
-    const currentUser = ref<{
-        fb?: User;
-        additional?: {
-            username: string;
-            visibility: string;
-            completed: boolean;
-            firstName?: string;
-            lastName?: string;
-            banner?: string[];
-            citation?: string;
-        };
-    }>();
-
     const isLoggedIn = ref(false);
     const myJourneys = ref<JourneyDto[]>();
     const myExperiences = ref<ExperienceDto[]>([]);
@@ -40,29 +27,20 @@ export const useUserStore = defineStore("user", () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            const user = response.data;
-            currentUser.value = {
-                fb: user,
-                additional: user
-            };
         }
     });
 
     function waitForUser(time: number, resolve?: (data: any) => void, reject?: (data: any) => void) {
         if (!authApp.currentUser) {
             if (time > 4) {
-                console.log("timeout " + time);
                 if (reject) reject(false);
                 return;
             } else {
-                console.log(authApp.currentUser);
-                console.log("wait " + time);
                 setTimeout(() => {
                     waitForUser(time + 1, resolve, reject);
                 }, 500);
             }
         } else {
-            console.log("ok");
             if (resolve) resolve(true);
         }
     }
@@ -111,6 +89,8 @@ export const useUserStore = defineStore("user", () => {
         }
     }
     async function logout() {
+        myJourneys.value = [];
+
         await authApp.signOut();
     }
     async function saveUser(user: UserDto): Promise<UserDto | undefined> {
@@ -121,7 +101,6 @@ export const useUserStore = defineStore("user", () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            currentUser.value!.additional! = response.data;
             return response.data as UserDto;
         } catch (e) {
             return undefined;
@@ -179,6 +158,7 @@ export const useUserStore = defineStore("user", () => {
         myJourneys.value = myJourneys.value?.filter((j) => j.id != id);
         myExperiences.value = myExperiences.value.filter((e) => e.journey != id);
     }
+
     return {
         myJourneys,
         myExperiences,
@@ -193,7 +173,6 @@ export const useUserStore = defineStore("user", () => {
         saveUser,
         checkUserName,
         updatePassword,
-        currentUser,
         didLogin
     };
 });

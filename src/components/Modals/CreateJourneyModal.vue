@@ -29,9 +29,7 @@ import { ref } from "vue";
 import JourneyModal from "components/Modal/JourneyModal.vue";
 import GoogleAutoComplete from "components/GoogleAutoComplete.vue";
 import { getGeocodedData } from "google/googleGeocoder";
-import { modalController } from "@ionic/core";
 import { journeyModalController } from "components/Modal/JourneyModalController";
-import { LngLat } from "mapbox-gl";
 
 const validJourney = ref({
     start: {

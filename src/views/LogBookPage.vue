@@ -7,10 +7,7 @@
 
             <div class="w-full h-full">
                 <JourneyMap class="relative bg-secondary-light w-full h-full" :mode="mode" @poi-clicked="onPoiClicked">
-                    <router-view
-                        class="absolute left-0 right-0 bottom-0 p-4 h-2/5"
-                        @header-clicked="showExperiences"
-                        v-slot="{ Component, route }">
+                    <router-view class="absolute left-0 right-0 bottom-0 p-4 h-2/5" v-slot="{ Component, route }">
                         <Transition name="fade" mode="out-in">
                             <component :is="Component" :key="route.path" />
                         </Transition>
@@ -39,7 +36,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 import PoiCard from "components/Cards/PoiCard.vue";
-import { defineAsyncComponent, onActivated, onMounted, ref, markRaw } from "vue";
+import { defineAsyncComponent, onActivated, onMounted, ref } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
 import { usePoiStore } from "stores/usePoiStore";
@@ -47,10 +44,10 @@ import { useJourneyStore } from "stores/useJourneyStore";
 
 import { AddressDto, getAddressCoordinates, PoiDto } from "types/dtos";
 
-import { reverseGeocode, getLocalityAndCountry, getGeocodedData } from "google/googleGeocoder";
+import { getGeocodedData } from "google/googleGeocoder";
 import { authApp } from "google/firebase";
 
-import { MapMouseEvent, LngLat } from "mapbox-gl";
+import mapboxgl, { MapMouseEvent } from "mapbox-gl";
 import { getMidPoint, getRadius } from "utils/utils";
 
 import JourneyMap from "components/TheJourneyMap.vue";
@@ -70,10 +67,12 @@ import {
     faLocationDot,
     faHome,
     faBackward,
+    faSignOut,
     IconDefinition,
     faPencil
 } from "@fortawesome/free-solid-svg-icons";
 import router from "router/router";
+import { drawMyJourneys } from "map/drawOnMap";
 
 const history = ref<
     {
@@ -139,6 +138,8 @@ const menuButtons = ref([
         icon: faEarth,
         visible: true,
         handler: () => {
+            console.log(menuButtons.value[0]);
+
             console.log("Explore arround Me");
         }
     },
@@ -159,6 +160,14 @@ const menuButtons = ref([
                 router.push("/edit?id=" + journeyStore.viewJourney.id);
             }
         }
+    },
+    {
+        text: "Logout",
+        icon: faSignOut,
+        visible: true,
+        handler: () => {
+            authApp.signOut();
+        }
     }
 ]);
 const modes = {
@@ -173,26 +182,9 @@ const modes = {
 const isLoading = ref(true);
 
 const mode = ref(modes.logbook);
+let map: mapboxgl.Map;
 
-authApp.onAuthStateChanged((user) => {
-    if (user) {
-        // if (mode.value == modes.logbook) fetchJourneys();
-        menuButtons.value[0].visible = userStore.isLoggedIn;
-    }
-});
-
-onActivated(async () => {
-    const data = journeyStore.getInitial();
-    if (data) {
-        const addresses = await geocode(data.start, data.end);
-        if (addresses) {
-            mode.value = modes.edition;
-            journeyStore.editJourney.journey = {};
-            journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
-            fetchPois(addresses);
-        }
-    }
-});
+onActivated(async () => {});
 onMounted(async () => {
     journeyModalController.create(
         "editJourney",
@@ -232,8 +224,9 @@ async function geocode(start: string, end: string) {
 function SwitchMode(newMode: string) {
     mode.value = newMode;
 }
+
 async function panTo(poi: PoiDto) {
-    mapInstance.getMap()?.flyTo({
+    map.flyTo({
         center: [poi.location!.longitude, poi.location!.latitude],
         zoom: 20
     });
@@ -302,14 +295,6 @@ async function onPoiClicked(poi: PoiDto, e: MapMouseEvent) {
     //     alignment: "center"
     // });
     // await popover.present();
-}
-
-async function showExperiences(id: string) {
-    setLoading(true);
-    mode.value = modes.viewJourney;
-
-    await journeyStore.getJourney(id);
-    router.push("logbook/journey/" + id);
 }
 
 async function openJourneyCreationModal() {

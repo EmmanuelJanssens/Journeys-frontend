@@ -20,9 +20,9 @@ class JourneysMap {
 
     JourneysExperienceMarker: mapboxgl.Marker[] = [];
     JourneysStartEndMarker: mapboxgl.Marker[] = [];
-    getMap(): mapboxgl.Map | undefined {
-        return this.map;
-    }
+
+    isLoaded: boolean = false;
+
     loadMap(accessToken: string, container: string, center: mapboxgl.LngLat, style: string) {
         mapboxgl.accessToken = accessToken;
         if (this.map) {
@@ -38,8 +38,33 @@ class JourneysMap {
                 name: "globe"
             }
         });
+        this.map.once("load", async () => {
+            this.isLoaded = true;
+        });
     }
 
+    testMap(
+        time: number,
+        resolve: (map: mapboxgl.Map | PromiseLike<mapboxgl.Map>) => void,
+        reject: (message: string) => void
+    ) {
+        if (!this.isLoaded) {
+            if (time > 5) {
+                reject("Could not load map");
+            }
+            setTimeout(() => {
+                this.testMap(time + 1, resolve, reject);
+            }, 500);
+        } else {
+            resolve(this.map as mapboxgl.Map);
+        }
+    }
+    getMap(): Promise<mapboxgl.Map> {
+        const promise = new Promise<mapboxgl.Map>((resolve, reject) => {
+            this.testMap(0, resolve, reject);
+        });
+        return promise;
+    }
     createMarker(imageUrl: string, lng: number, lat: number, bgSize: string, size: string) {
         const marker = document.createElement("div");
         marker.className = "marker";

@@ -41,6 +41,7 @@ import router from "router/router";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { usePoiStore } from "stores/usePoiStore";
 import { onBeforeRouteLeave } from "vue-router";
+import { drawPoisBetween } from "map/drawOnMap";
 
 const modules = ref([Pagination, Navigation, Lazy]);
 
@@ -58,20 +59,25 @@ onBeforeRouteLeave(() => {
 });
 onMounted(async () => {
     const query = router.currentRoute.value.query;
-    if (userStore.isLoggedIn) {
-        if (query.id) {
-            journeyStore.editJourney.journey = journeyStore.viewJourney;
-            const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey);
-            await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
+    try {
+        if (userStore.isLoggedIn) {
+            if (query.id) {
+                journeyStore.editJourney.journey = journeyStore.viewJourney;
+                const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey);
+                await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
+            } else {
+                console.log(journeyStore.editJourney.journey);
+                const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
+                await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
+            }
         } else {
             console.log(journeyStore.editJourney.journey);
             const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
             await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
         }
-    } else {
-        console.log(journeyStore.editJourney.journey);
-        const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
-        await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
+        drawPoisBetween();
+    } catch (e) {
+        //
     }
 });
 </script>

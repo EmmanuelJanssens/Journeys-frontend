@@ -35,7 +35,8 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy } from "swiper";
 
 import { onMounted, ref } from "vue";
-import { authApp } from "google/firebase";
+import { mapInstance } from "map/JourneysMap";
+import { drawMyJourneys } from "map/drawOnMap";
 
 const modules = ref([Pagination, Navigation, Lazy]);
 
@@ -45,13 +46,16 @@ const emit = defineEmits<{
     (e: "header-clicked", journeyId: string): void;
 }>();
 
-authApp.onAuthStateChanged(async (user) => {
-    if (user) {
-        await userStore.fetchMyJourneys();
-    }
-});
 onMounted(async () => {
-    if (userStore.isLoggedIn) await userStore.fetchMyJourneys();
+    try {
+        await mapInstance.getMap();
+        await userStore.didLogin();
+        await userStore.fetchMyJourneys();
+        drawMyJourneys();
+    } catch (e) {
+        console.log("error ");
+        console.log(e);
+    }
 });
 </script>
 <style lang="less" scoped>

@@ -33,8 +33,9 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy } from "swiper";
 
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import ExperienceCard from "components/Cards/ExperienceCard.vue";
+import { drawJourney } from "map/drawOnMap";
 
 const modules = ref([Pagination, Navigation, Lazy]);
 
@@ -43,5 +44,9 @@ const journeyStore = useJourneyStore();
 const emit = defineEmits<{
     (e: "updated", journeyId: string): void;
 }>();
+
+onMounted(async () => {
+    drawJourney();
+});
 </script>
 <style lang="less" scoped></style>

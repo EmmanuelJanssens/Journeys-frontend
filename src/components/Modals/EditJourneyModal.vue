@@ -40,7 +40,7 @@
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
 import { JourneyDto } from "types/dtos";
-import { onActivated, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import JourneyModal from "components/Modal/JourneyModal.vue";
 import JourneyInput from "components/Input/JourneyInput.vue";
 import JourneyTextarea from "components/Input/JourneyTextarea.vue";

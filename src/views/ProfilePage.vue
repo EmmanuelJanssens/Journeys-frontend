@@ -9,16 +9,8 @@
                     <div class="h-full w-full p-6">
                         <div class="flex flex-col text-center m-0 text-white h-full justify-between items-center">
                             <div class="flex flex-col justify-items-center">
-                                <ion-text
-                                    ><h1 class="text-4xl md:text-8xl">
-                                        {{ userStore.currentUser?.additional?.username }}
-                                    </h1></ion-text
-                                >
-                                <ion-text
-                                    ><p class="text-sm sm:text-lg">
-                                        {{ userStore.currentUser?.additional?.citation }}
-                                    </p></ion-text
-                                >
+                                <ion-text><h1 class="text-4xl md:text-8xl">Heymanuel</h1></ion-text>
+                                <ion-text><p class="text-sm sm:text-lg">I like trains</p></ion-text>
                             </div>
 
                             <div class="flex flex-col items-center">

@@ -20,9 +20,6 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { isSpecifierDefault } from "@babel/types";
-import { async } from "@firebase/util";
-import { alertController, modalController } from "@ionic/core";
 import { IonSearchbar, IonList, IonLabel, IonItem, SearchbarCustomEvent, IonIcon, IonText } from "@ionic/vue";
 import { helpOutline } from "ionicons/icons";
 
@@ -52,21 +49,21 @@ function emitClick(poi: PoiDto) {
 }
 
 async function addPoiModal() {
-    const alert = await alertController.create({
-        header: "Right click on the map to add a Poi",
-        buttons: [
-            "cancel",
-            {
-                text: "Ok",
-                handler: async () => {
-                    search.value = "";
-                    filtered.value = [];
-                    alertController.dismiss(null, "ok");
-                }
-            }
-        ]
-    });
-    await alert.present();
+    // const alert = await alertController.create({
+    //     header: "Right click on the map to add a Poi",
+    //     buttons: [
+    //         "cancel",
+    //         {
+    //             text: "Ok",
+    //             handler: async () => {
+    //                 search.value = "";
+    //                 filtered.value = [];
+    //                 alertController.dismiss(null, "ok");
+    //             }
+    //         }
+    //     ]
+    // });
+    // await alert.present();
 }
 </script>
 <style lang="less" scoped>
