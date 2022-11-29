@@ -62,13 +62,16 @@ onMounted(async () => {
         if (query.id) {
             journeyStore.editJourney.journey = journeyStore.viewJourney;
             const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey);
-            poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
+            await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
         } else {
-            console.log("edit new");
             console.log(journeyStore.editJourney.journey);
             const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
-            poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
+            await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
         }
+    } else {
+        console.log(journeyStore.editJourney.journey);
+        const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
+        await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
     }
 });
 </script>

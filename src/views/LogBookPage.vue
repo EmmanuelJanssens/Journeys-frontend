@@ -6,11 +6,7 @@
             <LogbookMenu :buttons="menuButtons" />
 
             <div class="w-full h-full">
-                <JourneyMap
-                    class="relative bg-secondary-light w-full h-full"
-                    :mode="mode"
-                    @marker-dragged="onMarkerDragend"
-                    @poi-clicked="onPoiClicked">
+                <JourneyMap class="relative bg-secondary-light w-full h-full" :mode="mode" @poi-clicked="onPoiClicked">
                     <router-view
                         class="absolute left-0 right-0 bottom-0 p-4 h-2/5"
                         @header-clicked="showExperiences"
@@ -42,7 +38,6 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
-import "mapbox-gl/dist/mapbox-gl.css";
 import PoiCard from "components/Cards/PoiCard.vue";
 import { defineAsyncComponent, onActivated, onMounted, ref, markRaw } from "vue";
 
@@ -102,8 +97,18 @@ const menuButtons = ref([
         }
     },
     {
-        text: "Create a Journey",
+        text: "Logbook",
         icon: faBookAtlas as IconDefinition,
+        visible: true,
+        handler: async () => {
+            if (router.currentRoute.value.name != "logbook") {
+                router.push("logbook");
+            }
+        }
+    },
+    {
+        text: "Add a journey",
+        icon: faAdd,
         visible: true,
         handler: async () => {
             journeyModalController.open("createJourney");
@@ -119,14 +124,6 @@ const menuButtons = ref([
                 journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
                 router.push("/edit");
             }
-        }
-    },
-    {
-        text: "Add an Experience",
-        icon: faAdd,
-        visible: true,
-        handler: () => {
-            console.log("Add an Experience");
         }
     },
     {
@@ -292,33 +289,6 @@ async function fetchPois(data: { start: AddressDto; end: AddressDto }) {
     filteredPois.value = poiStore.poisBetween;
 
     slider.value = undefined;
-}
-
-async function onMarkerDragend(pos: LngLat, marker: string) {
-    setLoading(true);
-    const response = await reverseGeocode(pos.lat, pos.lng);
-    const result = getLocalityAndCountry(response!);
-    if (result.country != undefined && result.locality != undefined) {
-        if (marker == "journey_start") {
-            journeyStore.editJourney.journey!.start = {
-                placeId: result.placeId,
-                address: result.locality + ", " + result.country,
-                latitude: pos.lat,
-                longitude: pos.lng
-            };
-        } else if (marker == "journey_end") {
-            journeyStore.editJourney.journey!.end = {
-                placeId: result.placeId,
-                address: result.locality + ", " + result.country,
-                latitude: pos.lat,
-                longitude: pos.lng
-            };
-        }
-    }
-    await fetchPois({
-        start: journeyStore.editJourney.journey?.start!,
-        end: journeyStore.editJourney.journey?.end!
-    });
 }
 
 async function onPoiClicked(poi: PoiDto, e: MapMouseEvent) {

@@ -12,7 +12,7 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, watch } from "vue";
+import { onActivated, onMounted, watch } from "vue";
 import mapboxgl, { LngLat, MapMouseEvent } from "mapbox-gl";
 import GeoJSON from "geojson";
 import { ExperienceDto, PoiDto } from "types/dtos";
@@ -27,6 +27,9 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { onBeforeRouteUpdate } from "vue-router";
 import { onAuthStateChanged } from "@firebase/auth";
 import { authApp } from "google/firebase";
+import { POSITION, useToast } from "vue-toastification";
+import router from "router/router";
+import { getLocalityAndCountry, reverseGeocode } from "google/googleGeocoder";
 
 onBeforeRouteUpdate((from) => {
     if (from.name == "view") {
@@ -34,10 +37,17 @@ onBeforeRouteUpdate((from) => {
     } else if (from.name == "main") {
         drawMyJourneys();
     } else if (from.name == "edit") {
+        console.log(poiStore.poisBetween);
         drawPoisBetween();
         //
     }
     console.log(from.name);
+});
+
+authApp.onAuthStateChanged((user) => {
+    if (!user) {
+        mapInstance.clearMap();
+    }
 });
 const props = defineProps<{
     mode: string;
@@ -60,12 +70,27 @@ const emit = defineEmits<{
 const journeyStore = useJourneyStore();
 const poiStore = usePoiStore();
 const userStore = useUserStore();
+const toast = useToast();
 
 var map: mapboxgl.Map;
 async function getCountryLoc() {
     const loc = await axios.get(`https://api.ipregistry.co/?key=${import.meta.env.VITE_IP_REGESTRY_KEY}`);
     return new LngLat(loc.data.location.longitude, loc.data.location.latitude);
 }
+
+onActivated(async () => {
+    if (router.currentRoute.value.name == "view") {
+        drawJourney();
+    } else if (router.currentRoute.value.name == "main") {
+        drawMyJourneys();
+    } else if (router.currentRoute.value.name == "edit") {
+        console.log("ddd");
+
+        await poiStore.poiDidLoad();
+        drawPoisBetween();
+        //
+    }
+});
 onMounted(async () => {
     const center = await getCountryLoc();
     mapInstance.loadMap(
@@ -75,7 +100,16 @@ onMounted(async () => {
         "mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx"
     );
     map = mapInstance.getMap()!;
-    map.on("load", () => {});
+    map.on("load", async () => {
+        try {
+            const logged = await userStore.didLogin();
+            if (logged) drawMyJourneys();
+        } catch (e) {
+            toast.info("if you want to enjoy the full content consider creating an account", {
+                position: POSITION.BOTTOM_CENTER
+            });
+        }
+    });
     map.on("style.load", () => {
         map.setFog({});
         map.resize();
@@ -141,6 +175,32 @@ onMounted(async () => {
         }
     });
 });
+
+async function onMarkerDragend(pos: LngLat, marker: string) {
+    const response = await reverseGeocode(pos.lat, pos.lng);
+    const result = getLocalityAndCountry(response!);
+    if (result.country != undefined && result.locality != undefined) {
+        if (marker == "journey_start") {
+            journeyStore.editJourney.journey!.start = {
+                placeId: result.placeId,
+                address: result.locality + ", " + result.country,
+                latitude: pos.lat,
+                longitude: pos.lng
+            };
+        } else if (marker == "journey_end") {
+            journeyStore.editJourney.journey!.end = {
+                placeId: result.placeId,
+                address: result.locality + ", " + result.country,
+                latitude: pos.lat,
+                longitude: pos.lng
+            };
+        }
+    }
+    const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
+    await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
+    drawPoisBetween();
+}
+
 function onClusterClick(e: MapMouseEvent) {
     const features = map.queryRenderedFeatures(e.point, {
         layers: [mapLayers.poi_list + "_cluster"]
@@ -235,19 +295,20 @@ async function drawMyJourneys() {
 }
 
 async function drawPoisBetween() {
+    await poiStore.poiDidLoad();
     const data = buildPoiGeoData(poiStore.poisBetween!);
     if (data?.features.length! > 0) {
-        await mapInstance.addPoiListLayer(data!);
-        const start = await mapInstance.getmarkerbyId("journey_start")!;
-        if (props.mode != "editJourney") {
+        mapInstance.addPoiListLayer(data!);
+        if (!router.currentRoute.value.query.id) {
+            const start = mapInstance.getmarkerbyId("journey_start")!;
             start.setDraggable(true);
             start.on("dragend", () => {
-                emit("markerDragged", start.getLngLat(), "journey_start");
+                onMarkerDragend(start.getLngLat(), "journey_start");
             });
-            const end = await mapInstance.getmarkerbyId("journey_end")!;
+            const end = mapInstance.getmarkerbyId("journey_end")!;
             end.setDraggable(true);
             end.on("dragend", () => {
-                emit("markerDragged", end.getLngLat(), "journey_end");
+                onMarkerDragend(end.getLngLat(), "journey_end");
             });
         }
     }

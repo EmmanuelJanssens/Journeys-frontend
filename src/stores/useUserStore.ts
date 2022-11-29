@@ -29,6 +29,7 @@ export const useUserStore = defineStore("user", () => {
         separator: "-",
         length: 3
     };
+
     authApp.onAuthStateChanged(async (fbuser) => {
         isLoggedIn.value = fbuser != undefined;
         if (fbuser) {
@@ -47,6 +48,31 @@ export const useUserStore = defineStore("user", () => {
         }
     });
 
+    function waitForUser(time: number, resolve?: (data: any) => void, reject?: (data: any) => void) {
+        if (!authApp.currentUser) {
+            if (time > 4) {
+                console.log("timeout " + time);
+                if (reject) reject(false);
+                return;
+            } else {
+                console.log(authApp.currentUser);
+                console.log("wait " + time);
+                setTimeout(() => {
+                    waitForUser(time + 1, resolve, reject);
+                }, 500);
+            }
+        } else {
+            console.log("ok");
+            if (resolve) resolve(true);
+        }
+    }
+
+    async function didLogin() {
+        const promise = new Promise<any>((resolve, reject) => {
+            waitForUser(0, resolve, reject);
+        });
+        return promise;
+    }
     async function login(email: string, password: string): Promise<boolean> {
         try {
             console.log(email);
@@ -167,6 +193,7 @@ export const useUserStore = defineStore("user", () => {
         saveUser,
         checkUserName,
         updatePassword,
-        currentUser
+        currentUser,
+        didLogin
     };
 });
