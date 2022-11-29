@@ -22,14 +22,16 @@ import "@vuepic/vue-datepicker/dist/main.css";
 const pinia = createPinia();
 const app = createApp(App);
 // app.use(IonicVue);
-app.use(router);
-app.use(pinia);
-app.use(VueAxios, axios);
-app.use(VueLazyLoad);
+
 app.component("DatePicker", DatePicker);
 app.component("RecycleScroller", RecycleScroller);
 app.component("DynamicScroller", DynamicScroller);
 app.component("DynamicScrollerItem", DynamicScrollerItem);
+
+app.use(router);
+app.use(pinia);
+app.use(VueAxios, axios);
+app.use(VueLazyLoad);
 app.use(MotionPlugin);
 app.use(Toast);
 router.isReady().then(() => {

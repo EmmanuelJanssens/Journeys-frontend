@@ -2,17 +2,23 @@
 <template>
     <div class="absolute top-0 right-0 left-0 w-screen h-screen">
         <!-- <TheJourneysHeader class="z-50" /> -->
-        <div class="flex flex-row-reverse h-full w-full">
+        <div class="relative flex flex-row-reverse h-full w-full">
             <LogbookMenu :buttons="menuButtons" />
 
             <div class="w-full h-full">
                 <JourneyMap
-                    class="bg-secondary-light w-full h-full"
+                    class="relative bg-secondary-light w-full h-full"
                     :mode="mode"
-                    @loaded="fetchJourneys"
                     @marker-dragged="onMarkerDragend"
-                    @poi-clicked="onPoiClicked"
-                    @ready="setLoading(false)">
+                    @poi-clicked="onPoiClicked">
+                    <router-view
+                        class="absolute left-0 right-0 bottom-0 p-4 h-2/5"
+                        @header-clicked="showExperiences"
+                        v-slot="{ Component, route }">
+                        <Transition name="fade" mode="out-in">
+                            <component :is="Component" :key="route.path" />
+                        </Transition>
+                    </router-view>
                 </JourneyMap>
             </div>
 
@@ -21,8 +27,6 @@
                 @poi-item-clicked="panTo"
                 :poiList="poiStore.poisBetween"
                 class="w-[400px] h-full" />
-
-            <Component @header-clicked="showExperiences" class="absolute w-full bottom-10 p-4" :is="slider" />
         </div>
     </div>
 </template>
@@ -38,7 +42,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
-
+import "mapbox-gl/dist/mapbox-gl.css";
 import PoiCard from "components/Cards/PoiCard.vue";
 import { defineAsyncComponent, onActivated, onMounted, ref, markRaw } from "vue";
 
@@ -57,11 +61,8 @@ import { getMidPoint, getRadius } from "utils/utils";
 import JourneyMap from "components/TheJourneyMap.vue";
 
 import LogbookMenu from "components/LogbookMenu.vue";
-import MapJourneySidebar from "components/TheJourneyEditSidebar.vue";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
 import TheJourneysSlider from "components/Sliders/TheJourneysSlider.vue";
-import TheJourneyExperienceList from "components/TheJourneyExperienceList.vue";
-import ThePoiSearchbar from "components/ThePoiSearchbar.vue";
 
 import { mapInstance } from "map/JourneysMap";
 
@@ -73,10 +74,18 @@ import {
     faEarth,
     faLocationDot,
     faHome,
-    IconDefinition
+    faBackward,
+    IconDefinition,
+    faPencil
 } from "@fortawesome/free-solid-svg-icons";
 import router from "router/router";
-import TheJourneyExpSlider from "components/Sliders/TheJourneyExpSlider.vue";
+
+const history = ref<
+    {
+        name: string;
+        props?: any;
+    }[]
+>([]);
 const userStore = useUserStore();
 const journeyStore = useJourneyStore();
 const poiStore = usePoiStore();
@@ -103,15 +112,18 @@ const menuButtons = ref([
 
             if (result) {
                 mode.value = modes.edition;
-                journeyStore.editJourney.journey = {};
+                journeyStore.editJourney.journey = {
+                    start: result.data.start,
+                    end: result.data.end
+                };
                 journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
-                fetchPois(result.data);
+                router.push("/edit");
             }
         }
     },
     {
         text: "Add an Experience",
-        icon: faAdd as IconDefinition,
+        icon: faAdd,
         visible: true,
         handler: () => {
             console.log("Add an Experience");
@@ -119,7 +131,7 @@ const menuButtons = ref([
     },
     {
         text: "Add a Point of interest",
-        icon: faLocationDot as IconDefinition,
+        icon: faLocationDot,
         visible: true,
         handler: () => {
             console.log("Add a Point of interest");
@@ -127,7 +139,7 @@ const menuButtons = ref([
     },
     {
         text: "Explore arround Me",
-        icon: faEarth as IconDefinition,
+        icon: faEarth,
         visible: true,
         handler: () => {
             console.log("Explore arround Me");
@@ -135,10 +147,20 @@ const menuButtons = ref([
     },
     {
         text: "Home",
-        icon: faHome as IconDefinition,
+        icon: faHome,
         visible: true,
         handler: () => {
             router.push("home");
+        }
+    },
+    {
+        text: "Edit Journey",
+        icon: faPencil,
+        visible: true,
+        handler: () => {
+            if (router.currentRoute.value.name == "view") {
+                router.push("/edit?id=" + journeyStore.viewJourney.id);
+            }
         }
     }
 ]);
@@ -147,7 +169,8 @@ const modes = {
     exploration: "exploration",
     edition: "edition",
     viewJourney: "viewJourney",
-    editJourney: "editJourney"
+    editJourney: "editJourney",
+    createJourney: "createJourney"
 };
 
 const isLoading = ref(true);
@@ -156,14 +179,24 @@ const mode = ref(modes.logbook);
 
 authApp.onAuthStateChanged((user) => {
     if (user) {
-        if (mode.value == modes.logbook) fetchJourneys();
+        // if (mode.value == modes.logbook) fetchJourneys();
         menuButtons.value[0].visible = userStore.isLoggedIn;
     }
 });
 
+onActivated(async () => {
+    const data = journeyStore.getInitial();
+    if (data) {
+        const addresses = await geocode(data.start, data.end);
+        if (addresses) {
+            mode.value = modes.edition;
+            journeyStore.editJourney.journey = {};
+            journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
+            fetchPois(addresses);
+        }
+    }
+});
 onMounted(async () => {
-    if (userStore.isLoggedIn) await fetchJourneys();
-
     journeyModalController.create(
         "editJourney",
         defineAsyncComponent({
@@ -199,18 +232,6 @@ async function geocode(start: string, end: string) {
     }
 }
 
-onActivated(async () => {
-    const data = journeyStore.getInitial();
-    if (data) {
-        const addresses = await geocode(data.start, data.end);
-        if (addresses) {
-            mode.value = modes.edition;
-            journeyStore.editJourney.journey = {};
-            journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
-            fetchPois(addresses);
-        }
-    }
-});
 function SwitchMode(newMode: string) {
     mode.value = newMode;
 }
@@ -228,9 +249,11 @@ function setLoading(loading: boolean) {
 async function fetchJourneys() {
     setLoading(true);
     mode.value = modes.logbook;
+
+    console.log(history.value);
     if (userStore.isLoggedIn) {
         await userStore.fetchMyJourneys();
-        slider.value = markRaw(TheJourneysSlider);
+        // slider.value = markRaw(TheJourneysSlider);
     } else {
         journeyStore.clear();
         poiStore.clear();
@@ -262,12 +285,13 @@ async function editJourney() {
 
 async function fetchPois(data: { start: AddressDto; end: AddressDto }) {
     setLoading(true);
-    console.log(data);
     const radius = getRadius(getAddressCoordinates(data.start), getAddressCoordinates(data.end));
     const mid = getMidPoint(getAddressCoordinates(data.start), getAddressCoordinates(data.end));
     journeyStore.setJourneyStartEnd(data.start, data.end);
     await poiStore.searchBetween(mid.lat, mid.lng, radius);
     filteredPois.value = poiStore.poisBetween;
+
+    slider.value = undefined;
 }
 
 async function onMarkerDragend(pos: LngLat, marker: string) {
@@ -313,8 +337,9 @@ async function onPoiClicked(poi: PoiDto, e: MapMouseEvent) {
 async function showExperiences(id: string) {
     setLoading(true);
     mode.value = modes.viewJourney;
+
     await journeyStore.getJourney(id);
-    slider.value = markRaw(TheJourneyExpSlider);
+    router.push("logbook/journey/" + id);
 }
 
 async function openJourneyCreationModal() {
@@ -468,4 +493,14 @@ async function openJourneySaveModal() {
     //     }
 }
 </script>
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease-out;
+}
+</style>

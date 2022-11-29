@@ -1,14 +1,14 @@
 <template>
-    <section v-if="userStore.myJourneys">
+    <section>
         <swiper
             :center-insufficient-slides="true"
             :pagination="{ clickable: true }"
-            :space-between="10"
+            :space-between="40"
             :lazy="{
                 enabled: true
             }"
             :modules="modules"
-            class="journeys"
+            class="h-full"
             :breakpoints="{
                 576: {
                     slidesPerView: 1
@@ -20,7 +20,7 @@
             <swiper-slide v-for="item in userStore.myJourneys" v-bind:key="item.id">
                 <JourneyCard
                     :journey="item"
-                    class="journey-card"
+                    class="max-w-[400px] h-full"
                     @header-clicked="emit('header-clicked', item.id!), item.id!" />
             </swiper-slide>
         </swiper>
@@ -34,7 +34,8 @@ import JourneyCard from "components/Cards/JourneyCard.vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy } from "swiper";
 
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import { authApp } from "google/firebase";
 
 const modules = ref([Pagination, Navigation, Lazy]);
 
@@ -43,37 +44,24 @@ const userStore = useUserStore();
 const emit = defineEmits<{
     (e: "header-clicked", journeyId: string): void;
 }>();
+
+authApp.onAuthStateChanged(async (user) => {
+    if (user) {
+        await userStore.fetchMyJourneys();
+    }
+});
+onMounted(async () => {
+    if (userStore.isLoggedIn) await userStore.fetchMyJourneys();
+});
 </script>
 <style lang="less" scoped>
-.journey-card {
-    max-width: 350px;
-    max-height: 450px;
-    min-height: 450px;
-    height: 90%;
-    width: 100%;
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 
-swiper-slide {
-    text-align: left;
-    font-size: 18px;
-    /* Center slide text vertically */
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-pack: center;
-    -ms-flex-pack: center;
-    -webkit-justify-content: center;
-    justify-content: center;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    -webkit-align-items: center;
-    align-items: center;
-}
-
-.journeys {
-    min-height: 300px;
-    height: 100%;
-    width: 100%;
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease-out;
 }
 </style>

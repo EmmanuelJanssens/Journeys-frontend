@@ -169,10 +169,11 @@ import { authApp } from "google/firebase";
 import router from "router/router";
 
 import { LngLat } from "mapbox-gl";
-
+import { AddressDto } from "types/dtos";
 import { journeyModalController } from "components/Modal/JourneyModalController";
 import { useJourneyStore } from "stores/useJourneyStore";
 import JourneyButton from "components/Button/JourneyButton.vue";
+import { boolean } from "yargs";
 
 const userStore = useUserStore();
 const poiStore = usePoiStore();
@@ -181,11 +182,23 @@ const poiCount = ref(0);
 const poiCountEl = ref();
 
 function pushLogbook() {
-    journeyStore.setInitial(validJourney.value.start.text, validJourney.value.end.text);
-
-    router.push("logbook");
+    journeyStore.editJourney.journey = {
+        start: geocoded.start,
+        end: geocoded.end
+    };
+    journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
+    router.push("/edit");
 }
-const validJourney = ref({
+const validJourney = ref<{
+    start: {
+        text: string;
+        valid: boolean;
+    };
+    end: {
+        text: string;
+        valid: boolean;
+    };
+}>({
     start: {
         text: "",
         valid: false
@@ -195,6 +208,11 @@ const validJourney = ref({
         valid: false
     }
 });
+
+let geocoded: {
+    start: AddressDto;
+    end: AddressDto;
+};
 function setStart(value: string) {
     validJourney.value.start.text = value;
     validJourney.value.start.valid = true;
@@ -207,20 +225,26 @@ function setEnd(value: string) {
 watch(
     () => validJourney,
     async (valid) => {
-        if (valid.value.start.text.length > 0 && valid.value.end.text.length > 0) {
-            const start = await getGeocodedData(valid.value.start.text);
-            const end = await getGeocodedData(valid.value.end.text);
-            const mid = getMidPoint(
-                new LngLat(start.longitude, start.latitude),
-                new LngLat(end.longitude, end.latitude)
-            );
-            const radius = getRadius(
-                new LngLat(start.longitude, start.latitude),
-                new LngLat(end.longitude, end.latitude)
-            );
-            poiCount.value = await poiStore.poiCountBetween(mid.lat, mid.lng, radius);
-        } else {
-            //
+        if (valid.value.start.valid && valid.value.end.valid) {
+            if (valid.value.start.text.length > 0 && valid.value.end.text.length > 0) {
+                const start = await getGeocodedData(valid.value.start.text);
+                const end = await getGeocodedData(valid.value.end.text);
+                geocoded = {
+                    start,
+                    end
+                };
+                const mid = getMidPoint(
+                    new LngLat(start.longitude, start.latitude),
+                    new LngLat(end.longitude, end.latitude)
+                );
+                const radius = getRadius(
+                    new LngLat(start.longitude, start.latitude),
+                    new LngLat(end.longitude, end.latitude)
+                );
+                poiCount.value = await poiStore.poiCountBetween(mid.lat, mid.lng, radius);
+            } else {
+                //
+            }
         }
     },
     {

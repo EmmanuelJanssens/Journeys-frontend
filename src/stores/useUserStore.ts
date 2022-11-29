@@ -102,7 +102,7 @@ export const useUserStore = defineStore("user", () => {
         }
     }
 
-    async function fetchMyJourneys(): Promise<boolean> {
+    async function fetchMyJourneys(): Promise<JourneyDto | undefined> {
         try {
             const token = await authApp.currentUser?.getIdToken(true);
             const response = await axios.get("/api/user/journeys", {
@@ -111,9 +111,9 @@ export const useUserStore = defineStore("user", () => {
                 }
             });
             myJourneys.value = response.data as JourneyDto[];
-            return true;
+            return response.data;
         } catch (e) {
-            return false;
+            return undefined;
         }
     }
 

@@ -3,6 +3,8 @@ import { ref } from "vue";
 import axios from "axios";
 import { AddressDto, ExperienceDto, JourneyDto, PoiDto, UpdateJourneyDto } from "types/dtos";
 import { authApp } from "google/firebase";
+import { getMidPoint, getRadius } from "utils/utils";
+import { LngLat, LngLatLike } from "mapbox-gl";
 
 export const useJourneyStore = defineStore("journey", () => {
     const editJourney = ref<UpdateJourneyDto>({});
@@ -30,7 +32,17 @@ export const useJourneyStore = defineStore("journey", () => {
         viewJourney.value = await (await axios.get("api/journey/" + id)).data;
         return true;
     }
+    function getJourneyMidPoint(journey: JourneyDto): {
+        center: LngLat;
+        radius: number;
+    } {
+        const start = new LngLat(journey.start?.longitude!, journey.start?.latitude!);
+        const end = new LngLat(journey.end?.longitude!, journey.end?.latitude!);
+        const center = getMidPoint(start, end);
 
+        const radius = getRadius(start, end);
+        return { center: new LngLat(center.lng, center.lat), radius };
+    }
     async function removeExperience(expDto: ExperienceDto): Promise<JourneyDto | undefined> {
         try {
             const token = await authApp.currentUser?.getIdToken(false);
@@ -236,6 +248,7 @@ export const useJourneyStore = defineStore("journey", () => {
         editJourney,
         viewJourney,
         addToJourney,
+        getJourneyMidPoint,
         journeyToGeojson,
         updateExperience,
         removeExperience,

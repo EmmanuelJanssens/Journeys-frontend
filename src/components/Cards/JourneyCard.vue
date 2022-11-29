@@ -41,6 +41,8 @@ import { faPencil, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { journeyModalController } from "components/Modal/JourneyModalController";
 import { POSITION, useToast } from "vue-toastification";
+import router from "router/router";
+import { onMounted } from "vue";
 
 const toast = useToast();
 
@@ -49,8 +51,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["headerClicked", "upated"]);
-const useJourney = useJourneyStore();
-const useUser = useUserStore();
+const journeyStore = useJourneyStore();
+const userStore = useUserStore();
+
 async function onEdit() {
     journeyModalController.open("editJourney", {
         props: {
@@ -68,8 +71,8 @@ async function onDelete() {
                 {
                     text: "OK",
                     handler: async () => {
-                        await useJourney.removeJourney(props.journey.id!);
-                        useUser.removeJourney(props.journey.id!);
+                        await journeyStore.removeJourney(props.journey.id!);
+                        userStore.removeJourney(props.journey.id!);
                         journeyModalController.close("alert");
                         toast.success("Journey deleted", {
                             position: POSITION.TOP_CENTER
@@ -85,26 +88,6 @@ async function onDelete() {
             ]
         }
     });
-    // popoverController.dismiss();
-    // const alert = await alertController.create({
-    //     header: "Warning",
-    //     subHeader: "You are about to delete this journey, this action is action is irreversible",
-    //     message: "Do you wish to proceed?",
-    //     buttons: [
-    //         {
-    //             text: "Yes",
-    //             role: "proceed",
-    //             handler: async () => {
-    //                 await useJourney.removeJourney(props.journey.id!);
-    //                 useUser.removeJourney(props.journey.id!);
-    //                 showToast("Journey deleted", "success");
-    //                 emit("upated");
-    //             }
-    //         },
-    //         "No"
-    //     ]
-    // });
-    // await alert.present();
 }
 async function goToJourney(id: string) {
     emit("headerClicked", id);

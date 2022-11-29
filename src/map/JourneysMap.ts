@@ -30,14 +30,13 @@ class JourneysMap {
             this.map = undefined;
         }
         this.map = new mapboxgl.Map({
+            center: [center.lng, center.lat],
             container: container,
             style: style,
             zoom: 6,
             projection: {
                 name: "globe"
             }
-        }).flyTo({
-            center: [center.lng, center.lat]
         });
     }
 
