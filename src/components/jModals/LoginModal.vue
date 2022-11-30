@@ -1,22 +1,28 @@
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <journey-modal header="Login" name="login">
+    <journey-modal
+        header="Login"
+        name="login"
+        :size="{
+            w: 'w-1/4 min-w-max',
+            h: 'h-1/3'
+        }">
         <template v-slot:loading>
             <div v-if="isLoading" class="bg-high-contrast-text h-3">
                 <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
             </div>
         </template>
         <template v-slot:body>
-            <div class="bg-secondary-light dark:bg-secondary-dark p-4">
-                <div class="flex flex-col space-y-4">
+            <div class="h-full bg-secondary-light dark:bg-secondary-dark p-4 flex items-center justify-center">
+                <div class="flex flex-col space-y-4 justify-center">
                     <JourneyInput placeholder="Email" v-model="state.email" />
                     <JourneyInput placeholder="Password" v-model="state.password" type="password" />
-
-                    <button
-                        @click="openProviderSignin"
-                        class="bg-primary-main dark:bg-primary-dark p-4 rounded-lg text-secondary-btn-contrast-text shadow-inner hover:bg-btn-dark dark:hover:bg-btn-darker transition-all ease-in transform hover:scale-110">
-                        <font-awesome-icon :icon="faGoogle" />Login with google
-                    </button>
+                    <JourneyLabel color="text-primary-dark" size="text-lg">Login with</JourneyLabel>
+                    <div class="w-14 h-14">
+                        <JourneyButton type="primary" fill="fill" @click="openProviderSignin"
+                            ><font-awesome-icon :icon="faGoogle"
+                        /></JourneyButton>
+                    </div>
                 </div>
             </div>
         </template>
@@ -41,6 +47,8 @@ import { journeyModalController } from "components/UI/Modal/JourneyModalControll
 import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import JourneyInput from "components/UI/Input/JourneyInput.vue";
 import { POSITION, useToast } from "vue-toastification";
+import JourneyButton from "components/UI/Button/JourneyButton.vue";
+import JourneyLabel from "components/UI/Label/JourneyLabel.vue";
 
 const toast = useToast();
 

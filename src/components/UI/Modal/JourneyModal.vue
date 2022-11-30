@@ -5,7 +5,7 @@
                 class="absolute flex left-0 top-0 w-screen h-screen z-[9000] bg-black bg-opacity-30 items-center justify-center"
                 v-if="journeyModalController.isOpen(name)">
                 <div :class="classList" ref="modal">
-                    <header class="bg-primary-main dark:bg-primary-dark rounded-t-lg">
+                    <header class="bg-primary-main dark:bg-primary-dark rounded-t-lg text-high-contrast-text">
                         <div class="flex items-center justify-between">
                             <div class="p-2 mx-2">
                                 <slot name="header"> {{ header }} </slot>
@@ -24,7 +24,7 @@
                         <slot name="body">Default body</slot>
                     </section>
                     <footer class="bg-primary-main dark:bg-primary-dark rounded-b-lg">
-                        <div class="p-2 mx-2">
+                        <div class="p-2 mx-2 text-high-contrast-text">
                             <slot name="footer"><button>OK</button></slot>
                         </div>
                     </footer>

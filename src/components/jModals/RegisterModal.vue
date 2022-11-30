@@ -2,15 +2,21 @@
     <journey-modal
         header="Hello"
         name="register"
+        :size="{
+            w: 'max-w-4xl'
+        }"
         :on-outside-clicked="dismissRegisterModal"
         :on-close="dismissRegisterModal">
+        <template v-slot:header>
+            <h1 class="text-btn-contrast-text">Register</h1>
+        </template>
         <template v-slot:loading>
             <div v-if="isLoading" class="bg-high-contrast-text h-3">
                 <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
             </div>
         </template>
         <template v-slot:body>
-            <div class="bg-secondary-light dark:bg-secondary-dark p-4">
+            <div class="bg-secondary-light dark:bg-secondary-dark p-8 h-full">
                 <div class="grid grid-cols-2 gap-4">
                     <JourneyInput
                         placeholder="First Name"
@@ -91,7 +97,7 @@
         </template>
         <template v-slot:footer>
             <div class="flex justify-end">
-                <button @click="submitForm">Register</button>
+                <JourneyButton type="secondary" fill="contrast"> Register</JourneyButton>
             </div>
         </template>
     </journey-modal>
@@ -109,6 +115,7 @@ import { authApp } from "google/firebase";
 import JourneyInput from "components/UI/Input/JourneyInput.vue";
 import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
+import JourneyButton from "components/UI/Button/JourneyButton.vue";
 
 const state = ref({
     username: "",
