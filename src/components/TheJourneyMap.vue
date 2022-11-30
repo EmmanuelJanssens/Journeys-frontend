@@ -65,79 +65,79 @@ const poiadd = ref("");
 const posClass = ref(poiBase + poiadd.value);
 const poitest = ref();
 onMounted(async () => {
-    const center = await getCountryLoc();
-    mapInstance.loadMap(
-        "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg",
-        "Map",
-        center,
-        "mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx"
-    );
-    const map = await mapInstance.getMap()!;
-    map.on("style.load", () => {
-        map.setFog({});
-        map.resize();
-    });
-    map.on(
-        "click",
-        mapLayers.poi_list + "_unclustered",
-        (
-            e: mapboxgl.MapMouseEvent & {
-                features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
-            } & mapboxgl.EventData
-        ) => {
-            poiOpened.value = e.features![0].properties as PoiDto;
-            pos.value = {
-                x: e.point.x,
-                y: e.point.y
-            };
-        }
-    );
-    map.on("click", mapLayers.poi_list + "_cluster", (e) => {
-        onClusterClick(e);
-    });
-    map.on("contextmenu", async (e: MapMouseEvent) => {
-        const alert = await alertController.create({
-            header: "Confirm poi details",
-            inputs: [
-                {
-                    label: "Poi Name",
-                    name: "poiName",
-                    placeholder: "Enter name"
-                }
-            ],
-            buttons: [
-                "Cancel",
-                {
-                    text: "OK",
-                    handler: (data) => {
-                        alertController.dismiss(data.poiName, "ok");
-                    }
-                }
-            ]
-        });
-        await alert.present();
-        const { data, role } = await alert.onDidDismiss();
-        if (role == "ok" && data?.length! > 0) {
-            const poi: PoiDto = {
-                name: data,
-                location: {
-                    latitude: e.lngLat.lat,
-                    longitude: e.lngLat.lng
-                }
-            };
-            if (poi.thumbnail != undefined) delete poi.thumbnail;
-            const added = await poiStore.addPoi(poi);
-            const experience: ExperienceDto = {
-                title: "",
-                date: new Date().toISOString(),
-                description: "",
-                images: [],
-                order: journeyStore.editJourney.experiencesConnection?.edges?.length!,
-                node: added!
-            };
-            journeyStore.addToJourney(experience);
-        }
-    });
+    // const center = await getCountryLoc();
+    // mapInstance.loadMap(
+    //     "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg",
+    //     "Map",
+    //     center,
+    //     "mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx"
+    // );
+    // const map = await mapInstance.getMap()!;
+    // map.on("style.load", () => {
+    //     map.setFog({});
+    //     map.resize();
+    // });
+    // map.on(
+    //     "click",
+    //     mapLayers.poi_list + "_unclustered",
+    //     (
+    //         e: mapboxgl.MapMouseEvent & {
+    //             features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
+    //         } & mapboxgl.EventData
+    //     ) => {
+    //         poiOpened.value = e.features![0].properties as PoiDto;
+    //         pos.value = {
+    //             x: e.point.x,
+    //             y: e.point.y
+    //         };
+    //     }
+    // );
+    // map.on("click", mapLayers.poi_list + "_cluster", (e) => {
+    //     onClusterClick(e);
+    // });
+    // map.on("contextmenu", async (e: MapMouseEvent) => {
+    //     const alert = await alertController.create({
+    //         header: "Confirm poi details",
+    //         inputs: [
+    //             {
+    //                 label: "Poi Name",
+    //                 name: "poiName",
+    //                 placeholder: "Enter name"
+    //             }
+    //         ],
+    //         buttons: [
+    //             "Cancel",
+    //             {
+    //                 text: "OK",
+    //                 handler: (data) => {
+    //                     alertController.dismiss(data.poiName, "ok");
+    //                 }
+    //             }
+    //         ]
+    //     });
+    //     await alert.present();
+    //     const { data, role } = await alert.onDidDismiss();
+    //     if (role == "ok" && data?.length! > 0) {
+    //         const poi: PoiDto = {
+    //             name: data,
+    //             location: {
+    //                 latitude: e.lngLat.lat,
+    //                 longitude: e.lngLat.lng
+    //             }
+    //         };
+    //         if (poi.thumbnail != undefined) delete poi.thumbnail;
+    //         const added = await poiStore.addPoi(poi);
+    //         const experience: ExperienceDto = {
+    //             title: "",
+    //             date: new Date().toISOString(),
+    //             description: "",
+    //             images: [],
+    //             order: journeyStore.editJourney.experiencesConnection?.edges?.length!,
+    //             node: added!
+    //         };
+    //         journeyStore.addToJourney(experience);
+    //     }
+    // });
 });
 
 async function onClusterClick(e: MapMouseEvent) {

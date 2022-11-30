@@ -1,8 +1,14 @@
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <JourneyModal header="Create a new Journey" name="createJourney">
+    <JourneyModal
+        header="Create a new Journey"
+        name="createJourney"
+        :size="{
+            w: 'w-[400px]',
+            h: 'h-[250px]'
+        }">
         <template v-slot:body>
-            <div class="flex flex-row space-x-4 p-4 bg-secondary-light dark:bg-secondary-dark justify-around">
+            <div class="flex flex-row space-x-4 p-4 items-center bg-secondary-light dark:bg-secondary-dark h-full">
                 <GoogleAutoComplete
                     :text="validJourney.start.text"
                     placeholder="Start"
