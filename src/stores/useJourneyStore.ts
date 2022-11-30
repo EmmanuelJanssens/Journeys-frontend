@@ -28,9 +28,13 @@ export const useJourneyStore = defineStore("journey", () => {
             end: end
         };
     }
-    async function getJourney(id: string): Promise<boolean> {
-        viewJourney.value = await (await axios.get("api/journey/" + id)).data;
-        return true;
+    async function getJourney(id: string): Promise<JourneyDto | undefined> {
+        try {
+            const result = await axios.get("api/journey/" + id);
+            return result.data;
+        } catch (e) {
+            return undefined;
+        }
     }
     function getJourneyMidPoint(journey: JourneyDto): {
         center: LngLat;
@@ -93,17 +97,16 @@ export const useJourneyStore = defineStore("journey", () => {
         try {
             const token = await authApp.currentUser?.getIdToken(false);
             if (mode == "deep") {
-                editJourney.value!.connected = [];
                 editJourney.value!.deleted = { poi_ids: [] };
                 editJourney.value!.updated = [];
-                editJourney.value!.journey?.experiencesConnection?.edges?.forEach((exp) => {
-                    const node = exp.node as PoiDto;
-                    if (!findExp(node.id!, viewJourney.value!.experiencesConnection!.edges!)) {
-                        editJourney.value!.connected?.push(exp);
-                    } else {
-                        //TODO add only differences
-                        editJourney.value!.updated?.push(exp);
-                    }
+
+                editJourney.value.connected?.forEach((experience) => {
+                    experience.imagesEditing?.forEach((image) => {
+                        console.log("upload image " + image.url);
+                    });
+                    if (experience.editing) delete experience.editing;
+                    if (experience.imagesEditing) delete experience.imagesEditing;
+                    if (experience.journey) delete experience.journey;
                 });
                 editJourney.value!.deleted!.poi_ids = filterDeleted();
             } else {
@@ -127,6 +130,11 @@ export const useJourneyStore = defineStore("journey", () => {
             const token = await authApp.currentUser?.getIdToken(false);
             editJourney.value!.journey!.title = name;
 
+            editJourney.value.journey?.experiencesConnection?.edges?.forEach((exp) => {
+                delete exp.editing;
+                delete exp.imagesEditing;
+                delete exp.journey;
+            });
             const dto: JourneyDto = editJourney.value!.journey!;
             const response = await axios.post("/api/journey/", dto, {
                 headers: {
@@ -160,8 +168,12 @@ export const useJourneyStore = defineStore("journey", () => {
     //editing
     function addToJourney(experience: ExperienceDto): Boolean {
         try {
+            if (!editJourney.value.connected) {
+                editJourney.value.connected = [];
+            }
             if (!alreadyInJourney(experience)) {
                 editJourney.value!.journey!.experiencesConnection!.edges!.push(experience);
+                editJourney.value.connected.push(experience);
             }
             return true;
         } catch (e) {

@@ -85,8 +85,6 @@ async function onDelete() {
     });
 }
 async function goToJourney(id: string) {
-    console.log(id);
-    await journeyStore.getJourney(id);
     router.push("logbook/journey/" + id);
 }
 </script>

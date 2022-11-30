@@ -55,6 +55,7 @@ import PoiCard from "components/jCards/PoiCard.vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { mapInstance } from "map/JourneysMap";
 import {
+    faSave,
     faAdd,
     faBookAtlas,
     faCircleUser,
@@ -92,7 +93,7 @@ const menuButtons = ref([
         visible: true,
         handler: async () => {
             if (router.currentRoute.value.name != "logbook") {
-                router.push("logbook");
+                router.push("/logbook");
             }
         }
     },
@@ -112,7 +113,7 @@ const menuButtons = ref([
                     end: result.data.end
                 };
                 journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
-                router.push("/edit");
+                router.push("/edit?mode=new");
             }
         }
     },
@@ -148,8 +149,22 @@ const menuButtons = ref([
         visible: true,
         handler: () => {
             if (router.currentRoute.value.name == "view") {
-                router.push("/edit?id=" + journeyStore.viewJourney.id);
+                router.push("/edit?id=" + journeyStore.viewJourney.id + "&mode=existing");
             }
+        }
+    },
+    {
+        text: "Save Journey",
+        icon: faSave,
+        visible: true,
+        handler: async () => {
+            journeyModalController.open("saveJourney");
+
+            if (router.currentRoute.value.name == "edit") {
+                //const res = await journeyStore.updateJourney("deep");
+                //router.push("logbook/journey/" + journeyStore.viewJourney.id);
+            }
+            const saved = await journeyModalController.didClose("saveJourney");
         }
     },
     {
@@ -193,6 +208,13 @@ onMounted(async () => {
         "editExperience",
         defineAsyncComponent({
             loader: () => import("components/jModals/EditExperienceModal.vue")
+        })
+    );
+
+    journeyModalController.create(
+        "saveJourney",
+        defineAsyncComponent({
+            loader: () => import("components/jModals/SaveJourneyModal.vue")
         })
     );
 });

@@ -183,7 +183,7 @@ function pushLogbook() {
         end: geocoded.end
     };
     journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
-    router.push("/edit");
+    router.push("/edit?mode=new");
 }
 const validJourney = ref<{
     start: {

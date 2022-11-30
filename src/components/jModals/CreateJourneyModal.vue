@@ -2,7 +2,7 @@
 <template>
     <JourneyModal header="Create a new Journey" name="createJourney">
         <template v-slot:body>
-            <div class="flex flex-row space-x-4 p-4">
+            <div class="flex flex-row space-x-4 p-4 bg-secondary-light dark:bg-secondary-dark justify-around">
                 <GoogleAutoComplete
                     :text="validJourney.start.text"
                     placeholder="Start"
@@ -17,8 +17,8 @@
         </template>
 
         <template v-slot:footer>
-            <div class="flex justify-end p-2" @click="gotoJourneyMap">
-                <button>CREATE</button>
+            <div class="flex justify-end">
+                <JourneyButton type="secondary" fill="contrast" @click="gotoJourneyMap">Create</JourneyButton>
             </div>
         </template>
     </JourneyModal>
@@ -30,6 +30,7 @@ import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import GoogleAutoComplete from "components/GoogleAutoComplete.vue";
 import { getGeocodedData } from "google/googleGeocoder";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
+import JourneyButton from "components/UI/Button/JourneyButton.vue";
 
 const validJourney = ref({
     start: {

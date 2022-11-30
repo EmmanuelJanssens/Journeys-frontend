@@ -37,7 +37,7 @@ import { useUserStore } from "stores/useUserStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy, A11y } from "swiper";
 
-import { onMounted, ref } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 import ExperienceCard from "components/jCards/ExperienceCard.vue";
 import router from "router/router";
 import { useJourneyStore } from "stores/useJourneyStore";
@@ -69,15 +69,16 @@ function goToLast(swiper: any) {
     console.log("HAHA");
     swiper.slideTo(journeyStore.editJourney.journey?.experiencesConnection?.edges?.length!);
 }
+
 onMounted(async () => {
     const query = router.currentRoute.value.query;
     try {
         if (userStore.isLoggedIn) {
             if (query.id) {
                 journeyStore.editJourney.journey = journeyStore.viewJourney;
-                const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey);
+                const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
                 await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
-                journeyStore.viewJourney.experiencesConnection?.edges?.forEach((exp) => {
+                journeyStore.editJourney.journey.experiencesConnection?.edges?.forEach((exp) => {
                     if (exp.editing) {
                         exp.images.forEach((img) => {
                             exp.imagesEditing?.push({
@@ -88,7 +89,6 @@ onMounted(async () => {
                     }
                 });
             } else {
-                console.log(journeyStore.editJourney.journey);
                 const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
                 await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
             }
@@ -98,6 +98,7 @@ onMounted(async () => {
         }
         drawPoisBetween();
     } catch (e) {
+        console.log(e);
         //
     }
 });

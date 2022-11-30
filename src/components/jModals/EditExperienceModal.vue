@@ -151,7 +151,7 @@ async function save() {
         currentData.value!.experience!.title = state.value.title;
         currentData.value!.experience!.date = state.value.selectedDate;
         currentData.value!.experience!.description = state.value.description;
-        currentData.value!.experience!.journey = { id: journeyStore.editJourney.journey?.id };
+        // currentData.value!.experience!.journey = { id: journeyStore.editJourney.journey?.id };
         currentData.value.experience.imagesEditing = files.value;
         journeyStore.setExperienceData(currentData.value.experience);
         journeyModalController.close("editExperience");

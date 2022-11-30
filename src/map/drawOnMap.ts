@@ -4,7 +4,7 @@ import { usePoiStore } from "stores/usePoiStore";
 
 import { mapInstance } from "./JourneysMap";
 import { LngLat } from "mapbox-gl";
-import { PoiDto } from "types/dtos";
+import { JourneyDto, PoiDto } from "types/dtos";
 import { getMidPoint } from "utils/utils";
 
 const userStore = useUserStore();
@@ -37,13 +37,13 @@ export function drawMyJourneys() {
     mapInstance.addJourneyListLayer(geoJSONJourney);
 }
 
-export function drawJourney() {
+export function drawJourney(journey: JourneyDto) {
     const featureCollection: GeoJSON.FeatureCollection = {
         type: "FeatureCollection",
         features: []
     };
 
-    journeyStore.viewJourney.experiencesConnection?.edges?.forEach((exp) => {
+    journey.experiencesConnection?.edges?.forEach((exp) => {
         const n = exp.node as PoiDto;
         featureCollection.features.push({
             type: "Feature",
@@ -58,27 +58,27 @@ export function drawJourney() {
 
     const coords = Array<number[]>();
 
-    coords.push([journeyStore.viewJourney.start?.longitude!, journeyStore.viewJourney.start?.latitude!]);
+    coords.push([journey.start?.longitude!, journey.start?.latitude!]);
     featureCollection.features.forEach((element) => {
         coords.push((element.geometry as GeoJSON.Point).coordinates);
     });
-    coords.push([journeyStore.viewJourney.end?.longitude!, journeyStore.viewJourney.end?.latitude!]);
+    coords.push([journey.end?.longitude!, journey.end?.latitude!]);
     const center = getMidPoint(
-        new LngLat(journeyStore.viewJourney.start?.longitude!, journeyStore.viewJourney.start?.latitude!),
-        new LngLat(journeyStore.viewJourney.end?.longitude!, journeyStore.viewJourney.end?.latitude!)
+        new LngLat(journey.start?.longitude!, journey.start?.latitude!),
+        new LngLat(journey.end?.longitude!, journey.end?.latitude!)
     );
     featureCollection.features.push({
         type: "Feature",
         properties: {
-            start: journeyStore.viewJourney.start,
-            end: journeyStore.viewJourney.end,
+            start: journey.start,
+            end: journey.end,
             center: center
         },
         geometry: {
             type: "LineString",
             coordinates: coords
         },
-        id: journeyStore.viewJourney.id
+        id: journey.id
     });
     mapInstance.addJourneysExperiencesLayer(featureCollection);
 }
