@@ -42,7 +42,7 @@ import ExperienceCard from "components/jCards/ExperienceCard.vue";
 import router from "router/router";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { usePoiStore } from "stores/usePoiStore";
-import { onBeforeRouteLeave } from "vue-router";
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 import { drawPoisBetween } from "map/drawOnMap";
 import { ExperienceDto } from "types/dtos";
 import { useSwiper } from "swiper/vue";
@@ -63,10 +63,14 @@ const emit = defineEmits<{
 //return false to cancel
 onBeforeRouteLeave(() => {
     poiStore.clear();
+    journeyStore.clear();
+});
+
+onBeforeRouteUpdate(() => {
+    journeyStore.init();
 });
 
 function goToLast(swiper: any) {
-    console.log("HAHA");
     swiper.slideTo(journeyStore.editJourney.journey?.experiencesConnection?.edges?.length!);
 }
 

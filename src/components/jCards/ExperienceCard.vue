@@ -71,7 +71,18 @@
                 }"
                 :loop="true"
                 :modules="modules">
-                <swiper-slide v-for="image in props.experience.images" v-bind:key="image">
+                <swiper-slide v-if="props.experience.images?.length == 0">
+                    <div class="p-4">
+                        <img
+                            class="object-cover h-52 w-full rounded-xl"
+                            v-lazy="{
+                                src: '/assets/placeholder.png',
+                                loading: '/assets/placeholder.png',
+                                error: '/assets/placeholder.png'
+                            }" />
+                    </div>
+                </swiper-slide>
+                <swiper-slide v-else v-for="image in props.experience.images" v-bind:key="image">
                     <div class="p-4">
                         <img
                             class="object-cover h-52 w-full rounded-xl"
@@ -107,6 +118,12 @@ import "swiper/css/scrollbar";
 import { onMounted, ref } from "vue";
 import { ExperienceDto, PoiDto } from "types/dtos";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
+import { useJourneyStore } from "stores/useJourneyStore";
+import { useUserStore } from "stores/useUserStore";
+import { POSITION, useToast } from "vue-toastification";
+import { drawJourney, drawPoisBetween } from "map/drawOnMap";
+import router from "router/router";
+import { computed } from "@vue/reactivity";
 const t = useSwiper();
 
 const props = defineProps<{
@@ -120,6 +137,9 @@ const emit = defineEmits<{
 
 const modules = ref([Navigation, Lazy, Pagination, Autoplay]);
 
+const journeyStore = useJourneyStore();
+const userStore = useUserStore();
+const toast = useToast();
 async function onEdit() {
     journeyModalController.open("editExperience", {
         props: {
@@ -134,7 +154,51 @@ async function onEdit() {
     }
 }
 
-async function onDelete() {}
+const route = computed(() => ({
+    name: router.currentRoute.value.name,
+    mode: router.currentRoute.value.query.mode
+}));
+async function onDelete() {
+    if (route.value.name == "edit") {
+        journeyStore.editJourney.deleted?.poi_ids.push(props.experience.node.id!);
+        journeyStore.removeFromJourney(journeyStore.editJourney.journey?.id!);
+        drawJourney(journeyStore.editJourney.journey!);
+        drawPoisBetween();
+        return;
+    }
+    journeyModalController.open("alert", {
+        props: {
+            title: "Warning",
+            message: "This action is irreversible",
+            buttons: [
+                {
+                    text: "OK",
+                    handler: async () => {
+                        const newJ = await journeyStore.removeExperience(props.experience);
+                        if (!newJ) {
+                            toast.error("Could not delete your experience", {
+                                position: POSITION.TOP_CENTER
+                            });
+                        } else {
+                            journeyStore.viewJourney = newJ;
+                            journeyModalController.close("alert");
+                            toast.success("Experience deleted!", {
+                                position: POSITION.TOP_CENTER
+                            });
+                            drawJourney(journeyStore.viewJourney);
+                        }
+                    }
+                },
+                {
+                    text: "CANCEL",
+                    handler: async () => {
+                        journeyModalController.close("alert");
+                    }
+                }
+            ]
+        }
+    });
+}
 </script>
 
 <style scoped>

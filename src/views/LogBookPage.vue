@@ -158,13 +158,9 @@ const menuButtons = ref([
         icon: faSave,
         visible: true,
         handler: async () => {
-            journeyModalController.open("saveJourney");
-
             if (router.currentRoute.value.name == "edit") {
-                //const res = await journeyStore.updateJourney("deep");
-                //router.push("logbook/journey/" + journeyStore.viewJourney.id);
+                journeyModalController.open("saveJourney");
             }
-            const saved = await journeyModalController.didClose("saveJourney");
         }
     },
     {

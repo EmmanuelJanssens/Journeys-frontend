@@ -97,9 +97,6 @@ export const useJourneyStore = defineStore("journey", () => {
         try {
             const token = await authApp.currentUser?.getIdToken(false);
             if (mode == "deep") {
-                editJourney.value!.deleted = { poi_ids: [] };
-                editJourney.value!.updated = [];
-
                 editJourney.value.connected?.forEach((experience) => {
                     experience.imagesEditing?.forEach((image) => {
                         console.log("upload image " + image.url);
@@ -108,11 +105,8 @@ export const useJourneyStore = defineStore("journey", () => {
                     if (experience.imagesEditing) delete experience.imagesEditing;
                     if (experience.journey) delete experience.journey;
                 });
-                editJourney.value!.deleted!.poi_ids = filterDeleted();
             } else {
-                delete editJourney.value.connected;
-                delete editJourney.value.deleted;
-                delete editJourney.value.updated;
+                init();
             }
             const result = await axios.put("/api/journey/", editJourney.value, {
                 headers: {
@@ -168,12 +162,9 @@ export const useJourneyStore = defineStore("journey", () => {
     //editing
     function addToJourney(experience: ExperienceDto): Boolean {
         try {
-            if (!editJourney.value.connected) {
-                editJourney.value.connected = [];
-            }
             if (!alreadyInJourney(experience)) {
                 editJourney.value!.journey!.experiencesConnection!.edges!.push(experience);
-                editJourney.value.connected.push(experience);
+                editJourney.value.connected!.push(experience);
             }
             return true;
         } catch (e) {
@@ -206,21 +197,6 @@ export const useJourneyStore = defineStore("journey", () => {
         }
     }
 
-    function findExp(poi_id: string, expList: ExperienceDto[]) {
-        return expList.find((exp) => exp.node.id === poi_id);
-    }
-
-    function filterDeleted() {
-        const deleted: string[] = [];
-        viewJourney.value!.experiencesConnection?.edges?.forEach((exp) => {
-            const node = exp.node as PoiDto;
-            if (!findExp(node.id!, editJourney.value!.journey?.experiencesConnection?.edges!)) {
-                deleted.push(node.id!);
-            }
-        });
-        return deleted;
-    }
-
     function setJourneyStartEnd(start: AddressDto, end: AddressDto) {
         console.log(start);
         console.log(end);
@@ -238,6 +214,11 @@ export const useJourneyStore = defineStore("journey", () => {
         };
     }
 
+    function init() {
+        editJourney.value.connected = [];
+        editJourney.value.deleted = { poi_ids: [] };
+        editJourney.value.updated = [];
+    }
     function clear() {
         editJourney.value = {};
         viewJourney.value = {};
@@ -282,6 +263,7 @@ export const useJourneyStore = defineStore("journey", () => {
         setJourneyStartEnd,
         getJourney,
         clear,
+        init,
         setInitial,
         getInitial,
         setExperienceData

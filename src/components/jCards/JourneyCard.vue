@@ -39,6 +39,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { POSITION, useToast } from "vue-toastification";
 import router from "router/router";
+import { drawMyJourneys } from "map/drawOnMap";
 
 const toast = useToast();
 
@@ -72,6 +73,7 @@ async function onDelete() {
                         toast.success("Journey deleted", {
                             position: POSITION.TOP_CENTER
                         });
+                        drawMyJourneys();
                     }
                 },
                 {
