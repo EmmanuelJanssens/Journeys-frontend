@@ -1,6 +1,12 @@
 <!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-    <journey-modal :header="'Edit '" name="editExperience">
+    <journey-modal
+        :header="'Edit '"
+        name="editExperience"
+        :size="{
+            w: 'w-1/2 min-w-fit',
+            h: 'h-1/3'
+        }">
         <template v-slot:loading>
             <div v-if="isLoading" class="bg-high-contrast-text h-3">
                 <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
@@ -17,20 +23,21 @@
                     <DatePicker v-model="state.selectedDate" />
                     <journey-textarea :rows="6" placeholder="description" v-model="state.description" />
                 </div>
-                <div class="flex space-x-2 flex-wrap max-w-3xl">
-                    <button class="relative w-24 h-24 rounded-lg bg-green-200" @click="selectImage">
+                <div class="flex space-x-2 flex-wrap max-w-3xl p-4 items-center">
+                    <JourneyButton class="relative w-24 h-24 rounded-lg bg-green-200" @click="selectImage">
                         <font-awesome-icon class="" :icon="faAdd" size="4x" />
-                    </button>
+                    </JourneyButton>
                     <div v-for="img in images" v-bind:key="img.url">
-                        <button class="relative">
+                        <JourneyButton class="relative" fill="none">
                             <img
                                 class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1"
                                 :src="img.url" />
                             <font-awesome-icon
-                                class="absolute top-0 right-0 text-green-400"
+                                class="absolute top-0 right-1 text-red-600"
                                 :icon="faClose"
+                                size="lg"
                                 @click="removeImage(img.url)" />
-                        </button>
+                        </JourneyButton>
                     </div>
                 </div>
             </div>
@@ -58,6 +65,7 @@ import JourneyTextarea from "components/UI/Input/JourneyTextarea.vue";
 import { POSITION, useToast } from "vue-toastification";
 import { drawExperiences, drawJourney, drawPoisBetween } from "map/drawOnMap";
 import router from "router/router";
+import JourneyButton from "components/UI/Button/JourneyButton.vue";
 const state = ref({
     description: "",
     title: "",

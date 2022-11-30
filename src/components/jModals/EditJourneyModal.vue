@@ -1,5 +1,11 @@
 <template>
-    <journey-modal :header="'Edit ' + props.journey?.title" name="editJourney">
+    <journey-modal
+        :header="'Edit ' + props.journey?.title"
+        name="editJourney"
+        :size="{
+            w: 'w-1/2  min-w-max',
+            h: 'h/1/3'
+        }">
         <template v-slot:loading>
             <div v-if="isLoading" class="bg-high-contrast-text h-3">
                 <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
