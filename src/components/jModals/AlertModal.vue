@@ -20,7 +20,7 @@
     </JourneyModal>
 </template>
 <script setup lang="ts">
-import JourneyModal from "components/Modal/JourneyModal.vue";
+import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import { ref } from "vue";
 
 const props = defineProps<{

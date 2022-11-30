@@ -3,7 +3,7 @@
         <button
             :class="{
                 'active:scale-125 p-2': true,
-                'w-full h-full rounded-lg shadow-inner transition-all ease-in-out hover:scale-110': true,
+                'w-full h-full rounded-lg  transition-all ease-in-out hover:scale-110': true,
                 'bg-btn-main   dark:bg-btn-dark text-btn-contrast-text  ': fill == 'fill' && type == 'primary',
                 'border border-primary-main dark:border-primary-dark text-primary-main ':
                     fill == 'outlined' && type == 'primary',
@@ -14,7 +14,7 @@
                 'border border-secondary-light dark:border-secondary-dark text-secondary-main':
                     fill == 'outlined' && type == 'secondary',
                 'bg-opacity-0 text-secondary-main dark:text-secondary-dark': fill == 'none' && type == 'secondary',
-                'text-btn-contrast-text': fill == 'contrast'
+                'text-btn-contrast-text border-none': fill == 'contrast'
             }">
             <slot></slot>
         </button>

@@ -1,6 +1,15 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template>
     <div class="absolute top-0 right-0 left-0 w-screen h-screen">
+        <component
+            v-if="poiOpened"
+            :is="PoiCard"
+            :poi="poiOpened"
+            @close="
+                () => {
+                    poiOpened = undefined;
+                }
+            " />
         <!-- <TheJourneysHeader class="z-50" /> -->
         <div class="relative flex flex-row-reverse h-full w-full">
             <LogbookMenu :buttons="menuButtons" />
@@ -34,7 +43,6 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
-import PoiCard from "components/Cards/PoiCard.vue";
 import { defineAsyncComponent, onActivated, onMounted, ref } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
@@ -51,7 +59,7 @@ import JourneyMap from "components/TheJourneyMap.vue";
 
 import LogbookMenu from "components/LogbookMenu.vue";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
-
+import PoiCard from "components/jCards/PoiCard.vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import {
     faAdd,
@@ -76,8 +84,7 @@ const userStore = useUserStore();
 const journeyStore = useJourneyStore();
 const poiStore = usePoiStore();
 
-const slider = ref();
-
+const poiOpened = ref<PoiDto | undefined>();
 const menuButtons = ref([
     {
         text: "View my Profile",
@@ -140,7 +147,7 @@ const menuButtons = ref([
         icon: faHome,
         visible: true,
         handler: () => {
-            router.push("home");
+            router.push("/home");
         }
     },
     {
@@ -157,8 +164,9 @@ const menuButtons = ref([
         text: "Logout",
         icon: faSignOut,
         visible: true,
-        handler: () => {
-            authApp.signOut();
+        handler: async () => {
+            await authApp.signOut();
+            router.push("/home");
         }
     }
 ]);
@@ -208,6 +216,8 @@ function onPoiClicked(poi: PoiDto, e: MapMouseEvent) {
     //     alignment: "center"
     // });
     // await popover.present();
+
+    poiOpened.value = poi;
 }
 
 async function openJourneyCreationModal() {

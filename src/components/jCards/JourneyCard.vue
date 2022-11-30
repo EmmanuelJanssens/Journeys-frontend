@@ -23,10 +23,9 @@
         </div>
         <div
             v-if="journey.description && journey.description.length > 0"
-            class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto">
+            class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto break-before-all">
             <p class="text-center text-primary-darker">{{ journey.description }}</p>
         </div>
-        <div></div>
     </div>
 </template>
 

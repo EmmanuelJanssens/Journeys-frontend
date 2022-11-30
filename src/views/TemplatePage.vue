@@ -10,7 +10,7 @@
     </div>
 </template>
 <script lang="ts" setup>
-import JourneyButton from "components/Button/JourneyButton.vue";
+import JourneyButton from "components/UI/Button/JourneyButton.vue";
 
 function test() {
     console.log("test");

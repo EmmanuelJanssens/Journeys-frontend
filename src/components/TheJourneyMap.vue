@@ -12,6 +12,8 @@
     </div>
 </template>
 <script lang="ts" setup>
+import PoiCard from "components/jCards/PoiCard.vue";
+
 import mapboxgl, { LngLat, MapMouseEvent } from "mapbox-gl";
 import { ExperienceDto, PoiDto } from "types/dtos";
 import { useJourneyStore } from "stores/useJourneyStore";
@@ -22,9 +24,10 @@ import axios from "axios";
 import { mapInstance, mapLayers } from "map/JourneysMap";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useToast } from "vue-toastification";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { getLocalityAndCountry, reverseGeocode } from "google/googleGeocoder";
 import router from "router/router";
+import test from "node:test";
 
 const props = defineProps<{
     mode: string;
@@ -49,6 +52,10 @@ async function getCountryLoc() {
     return new LngLat(loc.data.location.longitude, loc.data.location.latitude);
 }
 
+const poiBase = "absolute z-50";
+const poiadd = ref("");
+const posClass = ref(poiBase + poiadd.value);
+const poitest = ref();
 onMounted(async () => {
     const center = await getCountryLoc();
     mapInstance.loadMap(
@@ -58,7 +65,6 @@ onMounted(async () => {
         "mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx"
     );
     const map = await mapInstance.getMap()!;
-
     map.on("style.load", () => {
         map.setFog({});
         map.resize();
