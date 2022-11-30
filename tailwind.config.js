@@ -50,11 +50,25 @@ module.exports = {
                     "0%": { transform: "translate(0)", opacity: 1, visibility: "visible" },
                     "70%": { transform: "translate(20px)", opacity: 0.4 },
                     "100%": { transform: "translate(-100%)", opacity: 0, visibility: "hidden" }
+                },
+                pop: {
+                    "0%": {
+                        transform: "scale(0)",
+                        opacity: 0
+                    },
+                    "70%": {
+                        transform: "scale(110%,110%)",
+                        opacity: 1
+                    },
+                    "100%": {
+                        transform: "scale(100%,100%)"
+                    }
                 }
             },
             animation: {
                 appear: "appear 0.3s ease-in",
-                disappear: "disappear 0.3s ease-in"
+                disappear: "disappear 0.3s ease-in",
+                pop: "pop 0.2s ease-in"
             }
         }
     },

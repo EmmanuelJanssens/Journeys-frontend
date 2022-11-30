@@ -18,6 +18,9 @@
                     <journey-textarea :rows="6" placeholder="description" v-model="state.description" />
                 </div>
                 <div class="flex space-x-2 flex-wrap max-w-3xl">
+                    <button class="relative w-24 h-24 rounded-lg bg-green-200" @click="selectImage">
+                        <font-awesome-icon class="" :icon="faAdd" size="4x" />
+                    </button>
                     <div v-for="img in images" v-bind:key="img.url">
                         <button class="relative">
                             <img
@@ -29,9 +32,6 @@
                                 @click="removeImage(img.url)" />
                         </button>
                     </div>
-                    <button class="relative w-24 h-24 rounded-lg bg-green-200" @click="selectImage">
-                        <font-awesome-icon class="" :icon="faAdd" size="4x" />
-                    </button>
                 </div>
             </div>
         </template>
@@ -89,6 +89,7 @@ onMounted(() => {
     currentData.value!.experience = props.experience as ExperienceDto;
 
     state.value.title = currentData.value?.experience.title;
+    state.value.description = currentData.value.experience.description;
     currentData.value?.experience.images.forEach((image) => {
         images.value?.push({
             url: image,

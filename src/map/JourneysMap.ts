@@ -46,7 +46,7 @@ class JourneysMap {
     flyTo(lng: number, lat: number, zoom: number) {
         this.map?.flyTo({
             center: [lng, lat],
-            zoom: 20
+            zoom: zoom
         });
     }
     testMap(

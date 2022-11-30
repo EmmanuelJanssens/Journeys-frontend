@@ -1,10 +1,10 @@
 <template>
     <Teleport to="#poipopup">
-        <JourneyCard :class="pos" ref="poiEl">
-            <template v-slot:header> Name </template>
+        <JourneyCard class="absolute z-50" :pos="pos">
+            <template v-slot:header> {{ poi?.name }} </template>
             <template v-slot:subtitle> Title</template>
             <template v-slot:body>
-                <div>
+                <div ref="poiEl">
                     <swiper
                         v-if="poi?.journeysConnection?.edges?.length! > 0"
                         :slides-per-view="1"
@@ -19,7 +19,7 @@
                         <swiper-slide v-for="p in poi?.journeysConnection?.edges" v-bind:key="p?.order">
                             <div class="p-4">
                                 <img
-                                    class="object-cover w-full h-52 rounded-xl"
+                                    class="object-cover w-full h-40 rounded-xl"
                                     v-lazy="{
                                         src: p.images[0],
                                         loading: '/assets/placeholder.png',
@@ -33,10 +33,10 @@
                             </div>
                         </swiper-slide>
                     </swiper>
-                    <div v-else>
-                        <div class="p-4">
-                            <img class="object-cover w-full h-52 rounded-xl" src="/assets/placeholder.png" />
-                            <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto">
+                    <div v-else class="overflow-auto">
+                        <div class="p-4 overflow-auto">
+                            <img class="object-cover w-full h-40 rounded-xl" src="/assets/placeholder.png" />
+                            <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36">
                                 <p class="text-center text-primary-darker">Be the first here</p>
                             </div>
                         </div>
@@ -60,10 +60,14 @@ import { usePoiStore } from "stores/usePoiStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { PoiDto } from "types/dtos";
 import { onMounted, ref } from "vue";
-import { onClickOutside } from "@vueuse/core";
+import { onClickOutside, rand } from "@vueuse/core";
 
 const props = defineProps<{
     poi?: PoiDto;
+    pos: {
+        x: number;
+        y: number;
+    };
 }>();
 const poi = ref<PoiDto>();
 const poiEl = ref();
@@ -72,12 +76,15 @@ const emit = defineEmits<{
     (e: "close"): void;
     (e: "add"): void;
 }>();
+const active = ref();
 
 onClickOutside(poiEl, () => {
     emit("close");
 });
+
 onMounted(async () => {
     poi.value = await poiStore.getPoiExperiences(props.poi!);
 });
-const pos = computed(() => " absolute z-50  ");
+
+rand(0, 1000);
 </script>

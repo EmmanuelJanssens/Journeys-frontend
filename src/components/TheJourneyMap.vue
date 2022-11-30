@@ -1,5 +1,15 @@
 <template>
     <div>
+        <component
+            v-if="poiOpened"
+            :is="PoiCard"
+            :poi="poiOpened"
+            :pos="pos"
+            @close="
+                () => {
+                    poiOpened = undefined;
+                }
+            " />
         <section
             id="Map"
             style="
@@ -46,6 +56,11 @@ const emit = defineEmits<{
 
 const journeyStore = useJourneyStore();
 const poiStore = usePoiStore();
+const poiOpened = ref<PoiDto | undefined>();
+const pos = ref({
+    x: 0,
+    y: 0
+});
 
 async function getCountryLoc() {
     const loc = await axios.get(`https://api.ipregistry.co/?key=${import.meta.env.VITE_IP_REGESTRY_KEY}`);
@@ -77,7 +92,11 @@ onMounted(async () => {
                 features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
             } & mapboxgl.EventData
         ) => {
-            emit("poiClicked", e.features![0].properties as PoiDto, e);
+            poiOpened.value = e.features![0].properties as PoiDto;
+            pos.value = {
+                x: e.point.x,
+                y: e.point.y
+            };
         }
     );
     map.on("click", mapLayers.poi_list + "_cluster", (e) => {

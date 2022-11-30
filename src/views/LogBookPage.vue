@@ -1,15 +1,6 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template>
     <div class="absolute top-0 right-0 left-0 w-screen h-screen">
-        <component
-            v-if="poiOpened"
-            :is="PoiCard"
-            :poi="poiOpened"
-            @close="
-                () => {
-                    poiOpened = undefined;
-                }
-            " />
         <!-- <TheJourneysHeader class="z-50" /> -->
         <div class="relative flex flex-row-reverse h-full w-full">
             <LogbookMenu :buttons="menuButtons" />
@@ -27,6 +18,7 @@
             <ThePoiListSidebar
                 v-if="poiStore.poisBetween && poiStore.poisBetween.length > 0"
                 :poiList="poiStore.poisBetween"
+                @poi-item-clicked="flyTo"
                 class="w-[400px] h-full" />
         </div>
     </div>
@@ -61,6 +53,7 @@ import LogbookMenu from "components/LogbookMenu.vue";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
 import PoiCard from "components/jCards/PoiCard.vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
+import { mapInstance } from "map/JourneysMap";
 import {
     faAdd,
     faBookAtlas,
@@ -84,7 +77,6 @@ const userStore = useUserStore();
 const journeyStore = useJourneyStore();
 const poiStore = usePoiStore();
 
-const poiOpened = ref<PoiDto | undefined>();
 const menuButtons = ref([
     {
         text: "View my Profile",
@@ -205,6 +197,9 @@ onMounted(async () => {
     );
 });
 
+function flyTo(poi: PoiDto) {
+    mapInstance.flyTo(poi.location?.longitude!, poi.location?.latitude!, 18);
+}
 function onPoiClicked(poi: PoiDto, e: MapMouseEvent) {
     // const popover = await popoverController.create({
     //     component: PoiCard,
@@ -216,8 +211,6 @@ function onPoiClicked(poi: PoiDto, e: MapMouseEvent) {
     //     alignment: "center"
     // });
     // await popover.present();
-
-    poiOpened.value = poi;
 }
 
 async function openJourneyCreationModal() {
