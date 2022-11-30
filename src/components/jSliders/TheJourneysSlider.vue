@@ -37,6 +37,7 @@ import { Pagination, Navigation, Lazy } from "swiper";
 import { onMounted, ref } from "vue";
 import { mapInstance } from "map/JourneysMap";
 import { drawMyJourneys } from "map/drawOnMap";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 
 const modules = ref([Pagination, Navigation, Lazy]);
 
@@ -53,8 +54,20 @@ onMounted(async () => {
         await userStore.fetchMyJourneys();
         drawMyJourneys();
     } catch (e) {
-        console.log("error ");
-        console.log(e);
+        journeyModalController.open("alert", {
+            props: {
+                title: "Error",
+                message: "An Error Occured ",
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: async () => {
+                            journeyModalController.close("alert");
+                        }
+                    }
+                ]
+            }
+        });
     }
 });
 </script>

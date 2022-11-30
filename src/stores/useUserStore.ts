@@ -1,4 +1,5 @@
 import axios from "axios";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, User, UserCredential } from "firebase/auth";
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
@@ -20,13 +21,11 @@ export const useUserStore = defineStore("user", () => {
     authApp.onAuthStateChanged(async (fbuser) => {
         isLoggedIn.value = fbuser != undefined;
         if (fbuser) {
-            const token = await authApp.currentUser?.getIdToken(true);
-
-            const response = await axios.get("api/user/", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            try {
+                const token = await authApp.currentUser?.getIdToken(true);
+            } catch (e) {
+                //
+            }
         }
     });
 
@@ -53,7 +52,6 @@ export const useUserStore = defineStore("user", () => {
     }
     async function login(email: string, password: string): Promise<boolean> {
         try {
-            console.log(email);
             const creds = await signInWithEmailAndPassword(authApp, email, password);
             return creds.user != undefined;
         } catch (e) {
@@ -108,18 +106,14 @@ export const useUserStore = defineStore("user", () => {
     }
 
     async function fetchMyJourneys(): Promise<JourneyDto | undefined> {
-        try {
-            const token = await authApp.currentUser?.getIdToken(true);
-            const response = await axios.get("/api/user/journeys", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            myJourneys.value = response.data as JourneyDto[];
-            return response.data;
-        } catch (e) {
-            return undefined;
-        }
+        const token = await authApp.currentUser?.getIdToken(true);
+        const response = await axios.get("/api/user/journeys", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        myJourneys.value = response.data as JourneyDto[];
+        return response.data;
     }
 
     async function fetchMyProfile(): Promise<boolean> {

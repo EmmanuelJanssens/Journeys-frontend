@@ -28,20 +28,13 @@ import mapboxgl, { LngLat, MapMouseEvent } from "mapbox-gl";
 import { ExperienceDto, PoiDto } from "types/dtos";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { usePoiStore } from "stores/usePoiStore";
-import { useUserStore } from "stores/useUserStore";
 import { alertController } from "@ionic/core";
 import axios from "axios";
 import { mapInstance, mapLayers } from "map/JourneysMap";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useToast } from "vue-toastification";
 import { onMounted, ref } from "vue";
 import { getLocalityAndCountry, reverseGeocode } from "google/googleGeocoder";
 import router from "router/router";
-import test from "node:test";
-
-const props = defineProps<{
-    mode: string;
-}>();
 
 const emit = defineEmits<{
     (e: "markerDragged", pos: mapboxgl.LngLat, marker: string): void;
@@ -103,48 +96,46 @@ onMounted(async () => {
         onClusterClick(e);
     });
     map.on("contextmenu", async (e: MapMouseEvent) => {
-        if (props.mode == "editJourney" || props.mode == "edition") {
-            const alert = await alertController.create({
-                header: "Confirm poi details",
-                inputs: [
-                    {
-                        label: "Poi Name",
-                        name: "poiName",
-                        placeholder: "Enter name"
+        const alert = await alertController.create({
+            header: "Confirm poi details",
+            inputs: [
+                {
+                    label: "Poi Name",
+                    name: "poiName",
+                    placeholder: "Enter name"
+                }
+            ],
+            buttons: [
+                "Cancel",
+                {
+                    text: "OK",
+                    handler: (data) => {
+                        alertController.dismiss(data.poiName, "ok");
                     }
-                ],
-                buttons: [
-                    "Cancel",
-                    {
-                        text: "OK",
-                        handler: (data) => {
-                            alertController.dismiss(data.poiName, "ok");
-                        }
-                    }
-                ]
-            });
-            await alert.present();
-            const { data, role } = await alert.onDidDismiss();
-            if (role == "ok" && data?.length! > 0) {
-                const poi: PoiDto = {
-                    name: data,
-                    location: {
-                        latitude: e.lngLat.lat,
-                        longitude: e.lngLat.lng
-                    }
-                };
-                if (poi.thumbnail != undefined) delete poi.thumbnail;
-                const added = await poiStore.addPoi(poi);
-                const experience: ExperienceDto = {
-                    title: "",
-                    date: new Date().toISOString(),
-                    description: "",
-                    images: [],
-                    order: journeyStore.editJourney.journey!.experiencesConnection?.edges?.length!,
-                    node: added!
-                };
-                journeyStore.addToJourney(experience);
-            }
+                }
+            ]
+        });
+        await alert.present();
+        const { data, role } = await alert.onDidDismiss();
+        if (role == "ok" && data?.length! > 0) {
+            const poi: PoiDto = {
+                name: data,
+                location: {
+                    latitude: e.lngLat.lat,
+                    longitude: e.lngLat.lng
+                }
+            };
+            if (poi.thumbnail != undefined) delete poi.thumbnail;
+            const added = await poiStore.addPoi(poi);
+            const experience: ExperienceDto = {
+                title: "",
+                date: new Date().toISOString(),
+                description: "",
+                images: [],
+                order: journeyStore.editJourney.experiencesConnection?.edges?.length!,
+                node: added!
+            };
+            journeyStore.addToJourney(experience);
         }
     });
 });
@@ -188,14 +179,14 @@ async function onMarkerDragend(pos: LngLat, marker: string) {
     const result = getLocalityAndCountry(response!);
     if (result.country != undefined && result.locality != undefined) {
         if (marker == "journey_start") {
-            journeyStore.editJourney.journey!.start = {
+            journeyStore.editJourney.start = {
                 placeId: result.placeId,
                 address: result.locality + ", " + result.country,
                 latitude: pos.lat,
                 longitude: pos.lng
             };
         } else if (marker == "journey_end") {
-            journeyStore.editJourney.journey!.end = {
+            journeyStore.editJourney.end = {
                 placeId: result.placeId,
                 address: result.locality + ", " + result.country,
                 latitude: pos.lat,
@@ -203,7 +194,7 @@ async function onMarkerDragend(pos: LngLat, marker: string) {
             };
         }
     }
-    const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
+    const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney);
     await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
 }
 </script>

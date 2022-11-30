@@ -78,7 +78,6 @@ async function openProviderSignin() {
 
 async function submitForm() {
     v$.value.$validate();
-    console.log(state.value);
     if (!v$.value.$error) {
         isLoading.value = true;
         const response = await userStore.login(state.value.email, state.value.password);
@@ -107,9 +106,7 @@ function dismissLoginModal(success: boolean) {
     clearModal();
 }
 
-onMounted(() => {
-    console.log("safsfsdf");
-});
+onMounted(() => {});
 </script>
 
 <style></style>

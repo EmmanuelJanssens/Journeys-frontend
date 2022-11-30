@@ -56,6 +56,8 @@ import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import JourneyInput from "components/UI/Input/JourneyInput.vue";
 import JourneyTextarea from "components/UI/Input/JourneyTextarea.vue";
 import { POSITION, useToast } from "vue-toastification";
+import { drawExperiences, drawJourney, drawPoisBetween } from "map/drawOnMap";
+import router from "router/router";
 const state = ref({
     description: "",
     title: "",
@@ -85,7 +87,7 @@ onMounted(() => {
     if (props.experience.editing) {
         currentData.value = {
             experience: props.experience as ExperienceDto,
-            journey: journeyStore.editJourney.journey!
+            journey: journeyStore.editJourney
         };
         currentData.value!.experience = props.experience as ExperienceDto;
 
@@ -99,7 +101,7 @@ onMounted(() => {
     } else {
         currentData.value = {
             experience: props.experience as ExperienceDto,
-            journey: journeyStore.viewJourney
+            journey: journeyStore.editJourney
         };
         currentData.value!.experience = props.experience as ExperienceDto;
 
@@ -141,9 +143,6 @@ function removeImage(image: string) {
 
 const taskList = Array<UploadTask>();
 async function save() {
-    console.log(currentData.value?.experience);
-    console.log(journeyStore.editJourney.journey?.experiencesConnection?.edges);
-
     if (currentData.value?.experience.editing) {
         currentData.value!.experience!.images = currentData.value!.experience!.images.filter((img) =>
             images.value.find((search) => img == search.url)
@@ -169,7 +168,7 @@ async function save() {
                 const id = (f.url as string).slice((f.url as string).lastIndexOf("/") + 1);
                 const imageRef = fref(
                     storageRef,
-                    journeyStore.viewJourney.id + "/" + currentData.value!.experience?.node.id + "/" + id
+                    journeyStore.editJourney.id + "/" + currentData.value!.experience?.node.id + "/" + id
                 );
                 const metadata = {
                     contentType: f.file.mimeType
@@ -204,7 +203,7 @@ async function save() {
             currentData.value!.experience!.title = state.value.title;
             currentData.value!.experience!.date = state.value.selectedDate;
             currentData.value!.experience!.description = state.value.description;
-            currentData.value!.experience!.journey = { id: journeyStore.viewJourney.id };
+            currentData.value!.experience!.journey = { id: journeyStore.editJourney.id };
             await journeyStore.updateExperience(currentData.value!.experience!);
             journeyModalController.close("editExperience");
             toast.success("Your modifications were successfuly saved", {
@@ -212,6 +211,10 @@ async function save() {
             });
             isLoading.value = false;
         }
+    }
+    if (router.currentRoute.value.name == "edit") {
+        drawJourney(journeyStore.editJourney);
+        drawPoisBetween();
     }
 }
 </script>

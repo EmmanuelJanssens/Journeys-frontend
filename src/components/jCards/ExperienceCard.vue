@@ -148,10 +148,6 @@ async function onEdit() {
     });
 
     const res = await journeyModalController.didClose("editExperience");
-
-    if (res) {
-        emit("updated");
-    }
 }
 
 const route = computed(() => ({
@@ -160,9 +156,8 @@ const route = computed(() => ({
 }));
 async function onDelete() {
     if (route.value.name == "edit") {
-        journeyStore.editJourney.deleted?.poi_ids.push(props.experience.node.id!);
-        journeyStore.removeFromJourney(journeyStore.editJourney.journey?.id!);
-        drawJourney(journeyStore.editJourney.journey!);
+        journeyStore.removeFromJourney(props.experience.node.id!);
+        drawJourney(journeyStore.editJourney);
         drawPoisBetween();
         return;
     }
@@ -180,12 +175,12 @@ async function onDelete() {
                                 position: POSITION.TOP_CENTER
                             });
                         } else {
-                            journeyStore.viewJourney = newJ;
+                            journeyStore.editJourney = newJ;
                             journeyModalController.close("alert");
                             toast.success("Experience deleted!", {
                                 position: POSITION.TOP_CENTER
                             });
-                            drawJourney(journeyStore.viewJourney);
+                            drawJourney(journeyStore.editJourney);
                         }
                     }
                 },

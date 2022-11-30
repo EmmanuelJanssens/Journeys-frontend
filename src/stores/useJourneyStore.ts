@@ -7,8 +7,9 @@ import { getMidPoint, getRadius } from "utils/utils";
 import { LngLat, LngLatLike } from "mapbox-gl";
 
 export const useJourneyStore = defineStore("journey", () => {
-    const editJourney = ref<UpdateJourneyDto>({});
-    const viewJourney = ref<JourneyDto>({});
+    const editJourney = ref<JourneyDto>({});
+    const updateDto = ref<UpdateJourneyDto>({});
+
     const initial = ref<{
         start: string;
         end: string;
@@ -29,12 +30,8 @@ export const useJourneyStore = defineStore("journey", () => {
         };
     }
     async function getJourney(id: string): Promise<JourneyDto | undefined> {
-        try {
-            const result = await axios.get("api/journey/" + id);
-            return result.data;
-        } catch (e) {
-            return undefined;
-        }
+        const result = await axios.get("api/journey/" + id);
+        return result.data;
     }
     function getJourneyMidPoint(journey: JourneyDto): {
         center: LngLat;
@@ -48,165 +45,144 @@ export const useJourneyStore = defineStore("journey", () => {
         return { center: new LngLat(center.lng, center.lat), radius };
     }
     async function removeExperience(expDto: ExperienceDto): Promise<JourneyDto | undefined> {
-        try {
-            const token = await authApp.currentUser?.getIdToken(false);
-            const delExp = {
-                poi: {
-                    id: expDto.node.id
-                },
-                journey: {
-                    id: viewJourney.value.id
-                }
-            };
-            const response = await axios.patch("api/journey/experience", delExp, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            return (await response.data) as JourneyDto;
-        } catch (e) {
-            return undefined;
-        }
+        const token = await authApp.currentUser?.getIdToken(false);
+        const delExp = {
+            poi: {
+                id: expDto.node.id
+            },
+            journey: {
+                id: editJourney.value.id
+            }
+        };
+        const response = await axios.patch("api/journey/experience", delExp, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        editJourney.value.experiencesConnection!.edges?.sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
+        return (await response.data) as JourneyDto;
     }
 
     async function updateExperience(experience: ExperienceDto): Promise<JourneyDto | undefined> {
-        try {
-            const token = await authApp.currentUser?.getIdToken(false);
-            const response = await axios.put("api/journey/experience", experience, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            return response.data as JourneyDto;
-        } catch (e) {
-            return undefined;
-        }
+        const token = await authApp.currentUser?.getIdToken(false);
+        const response = await axios.put("api/journey/experience", experience, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        editJourney.value.experiencesConnection!.edges?.sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
+        return response.data as JourneyDto;
     }
 
     function setExperienceData(experience: ExperienceDto) {
-        editJourney.value.journey?.experiencesConnection?.edges?.forEach((exp) => {
-            if (exp.order == experience.order) {
-                console.log(exp);
+        editJourney.value?.experiencesConnection?.edges?.forEach((exp) => {
+            if (exp.node.id == experience.node.id) {
                 exp = experience;
             }
         });
-        console.log(editJourney.value.journey?.experiencesConnection?.edges);
+        editJourney.value.experiencesConnection!.edges?.sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
     }
 
     async function updateJourney(mode: string): Promise<JourneyDto | undefined> {
-        try {
-            const token = await authApp.currentUser?.getIdToken(false);
-            if (mode == "deep") {
-                editJourney.value.connected?.forEach((experience) => {
-                    experience.imagesEditing?.forEach((image) => {
-                        console.log("upload image " + image.url);
-                    });
-                    if (experience.editing) delete experience.editing;
-                    if (experience.imagesEditing) delete experience.imagesEditing;
-                    if (experience.journey) delete experience.journey;
-                });
-            } else {
-                init();
+        const token = await authApp.currentUser?.getIdToken(false);
+        const result = await axios.patch("/api/journey/", editJourney.value, {
+            headers: {
+                Authorization: `Bearer ${token}`
             }
-            const result = await axios.put("/api/journey/", editJourney.value, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+        });
+        return result.data;
+    }
+
+    async function updateJourneyExperiences() {
+        const token = await authApp.currentUser?.getIdToken(false);
+        updateDto.value?.connected?.forEach((experience) => {
+            experience.imagesEditing?.forEach((image) => {
+                console.log("upload image " + image.url);
             });
-            return result.data;
-        } catch (e) {
-            return undefined;
-        }
+            delete experience.editing;
+            delete experience.imagesEditing;
+            delete experience.journey;
+        });
+        const result = await axios.put("/api/journey/experiences/" + editJourney.value?.id, updateDto.value, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return result.data as JourneyDto;
     }
 
     async function saveJourney(name: string): Promise<JourneyDto | undefined> {
-        try {
-            const token = await authApp.currentUser?.getIdToken(false);
-            editJourney.value!.journey!.title = name;
+        const token = await authApp.currentUser?.getIdToken(false);
+        editJourney.value.title = name;
 
-            editJourney.value.journey?.experiencesConnection?.edges?.forEach((exp) => {
-                delete exp.editing;
-                delete exp.imagesEditing;
-                delete exp.journey;
-            });
-            const dto: JourneyDto = editJourney.value!.journey!;
-            const response = await axios.post("/api/journey/", dto, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            return response.data as JourneyDto;
-        } catch (e) {
-            return undefined;
-        }
+        editJourney.value.experiencesConnection?.edges?.forEach((exp) => {
+            delete exp.editing;
+            delete exp.imagesEditing;
+            delete exp.journey;
+        });
+        const response = await axios.post("/api/journey/", editJourney.value!, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data as JourneyDto;
     }
 
     async function removeJourney(id: string): Promise<Boolean> {
-        try {
-            const token = await authApp.currentUser?.getIdToken(false);
-            const result = await axios.delete("api/journey/" + id, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            if (result.data.nodesDeleted > 0) {
-                return true;
-            } else {
-                return false;
+        const token = await authApp.currentUser?.getIdToken(false);
+        const result = await axios.delete("api/journey/" + id, {
+            headers: {
+                Authorization: `Bearer ${token}`
             }
-        } catch (e) {
+        });
+        if (result.data.nodesDeleted > 0) {
+            return true;
+        } else {
             return false;
         }
     }
 
     //editing
     function addToJourney(experience: ExperienceDto): Boolean {
-        try {
-            if (!alreadyInJourney(experience)) {
-                editJourney.value!.journey!.experiencesConnection!.edges!.push(experience);
-                editJourney.value.connected!.push(experience);
-            }
-            return true;
-        } catch (e) {
-            return false;
+        if (!alreadyInJourney(experience)) {
+            editJourney.value!.experiencesConnection!.edges!.push(experience);
+            updateDto.value?.connected?.push(experience);
         }
+
+        return true;
     }
 
-    function removeFromJourney(id: string): ExperienceDto | undefined {
-        try {
-            const removed = editJourney.value!.journey!.experiencesConnection!.edges!.find(
-                (p) => p.node.id == id
-            ) as ExperienceDto;
-            editJourney.value!.journey!.experiencesConnection!.edges =
-                editJourney.value!.journey!.experiencesConnection!.edges!.filter((item) => item.node.id !== id);
-            return removed;
-        } catch (e) {
-            return undefined;
-        }
+    function removeFromJourney(id: string): void {
+        updateDto.value.deleted?.poi_ids.push(id);
+        editJourney.value.experiencesConnection!.edges = editJourney.value.experiencesConnection!.edges!.filter(
+            (item) => item.node.id !== id
+        );
+        editJourney.value.experiencesConnection!.edges.sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
     }
 
     function alreadyInJourney(expDto: ExperienceDto): Boolean {
-        try {
-            const result =
-                editJourney.value!.journey!.experiencesConnection!.edges!.find(
-                    (item) => item.node.id === expDto.node.id
-                ) !== undefined;
-            return result;
-        } catch (e) {
-            return false;
-        }
+        const result =
+            editJourney.value!.experiencesConnection!.edges!.find((item) => item.node.id === expDto.node.id) !==
+            undefined;
+        return result;
     }
 
     function setJourneyStartEnd(start: AddressDto, end: AddressDto) {
-        console.log(start);
-        console.log(end);
-        editJourney.value!.journey!.start = {
+        editJourney.value.start = {
             placeId: start.placeId,
             address: start.address,
             latitude: start.latitude,
             longitude: start.longitude
         };
-        editJourney.value!.journey!.end = {
+        editJourney.value.end = {
             placeId: end.placeId,
             address: end.address,
             latitude: end.latitude,
@@ -215,13 +191,15 @@ export const useJourneyStore = defineStore("journey", () => {
     }
 
     function init() {
-        editJourney.value.connected = [];
-        editJourney.value.deleted = { poi_ids: [] };
-        editJourney.value.updated = [];
+        updateDto.value = {
+            connected: [],
+            deleted: { poi_ids: [] },
+            updated: []
+        };
     }
     function clear() {
         editJourney.value = {};
-        viewJourney.value = {};
+        init();
     }
 
     function journeyToGeojson(journey: JourneyDto): GeoJSON.Feature[] {
@@ -249,7 +227,7 @@ export const useJourneyStore = defineStore("journey", () => {
     }
     return {
         editJourney,
-        viewJourney,
+        updateDto,
         addToJourney,
         getJourneyMidPoint,
         journeyToGeojson,
@@ -259,6 +237,7 @@ export const useJourneyStore = defineStore("journey", () => {
         removeJourney,
         saveJourney,
         updateJourney,
+        updateJourneyExperiences,
         alreadyExists: alreadyInJourney,
         setJourneyStartEnd,
         getJourney,

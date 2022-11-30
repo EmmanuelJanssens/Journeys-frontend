@@ -2,11 +2,15 @@
 <template>
     <div class="absolute top-0 right-0 left-0 w-screen h-screen">
         <!-- <TheJourneysHeader class="z-50" /> -->
-        <div class="relative flex flex-row-reverse h-full w-full">
+        <div class="relative flex h-full w-full">
             <LogbookMenu :buttons="menuButtons" />
-
+            <ThePoiListSidebar
+                v-if="poiStore.poisBetween && poiStore.poisBetween.length > 0"
+                :poiList="poiStore.poisBetween"
+                @poi-item-clicked="flyTo"
+                class="w-[400px] h-full" />
             <div class="w-full h-full">
-                <JourneyMap class="relative bg-secondary-light w-full h-full" :mode="mode" @poi-clicked="onPoiClicked">
+                <JourneyMap class="relative bg-secondary-light w-full h-full" @poi-clicked="onPoiClicked">
                     <router-view class="absolute left-0 right-0 bottom-0 p-4 h-2/5" v-slot="{ Component, route }">
                         <Transition name="fade" mode="out-in">
                             <component :is="Component" :key="route.path" />
@@ -14,12 +18,6 @@
                     </router-view>
                 </JourneyMap>
             </div>
-
-            <ThePoiListSidebar
-                v-if="poiStore.poisBetween && poiStore.poisBetween.length > 0"
-                :poiList="poiStore.poisBetween"
-                @poi-item-clicked="flyTo"
-                class="w-[400px] h-full" />
         </div>
     </div>
 </template>
@@ -83,9 +81,7 @@ const menuButtons = ref([
         text: "View my Profile",
         icon: faCircleUser as IconDefinition,
         visible: false,
-        handler: () => {
-            console.log("View my Profile");
-        }
+        handler: () => {}
     },
     {
         text: "Logbook",
@@ -107,12 +103,11 @@ const menuButtons = ref([
             const result = await journeyModalController.didClose("createJourney");
 
             if (result) {
-                mode.value = modes.edition;
-                journeyStore.editJourney.journey = {
+                journeyStore.editJourney = {
                     start: result.data.start,
                     end: result.data.end
                 };
-                journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
+                journeyStore.editJourney.experiencesConnection = { edges: [] };
                 router.push("/edit?mode=new");
             }
         }
@@ -121,19 +116,13 @@ const menuButtons = ref([
         text: "Add a Point of interest",
         icon: faLocationDot,
         visible: true,
-        handler: () => {
-            console.log("Add a Point of interest");
-        }
+        handler: () => {}
     },
     {
         text: "Explore arround Me",
         icon: faEarth,
         visible: true,
-        handler: () => {
-            console.log(menuButtons.value[0]);
-
-            console.log("Explore arround Me");
-        }
+        handler: () => {}
     },
     {
         text: "Home",
@@ -149,7 +138,7 @@ const menuButtons = ref([
         visible: true,
         handler: () => {
             if (router.currentRoute.value.name == "view") {
-                router.push("/edit?id=" + journeyStore.viewJourney.id + "&mode=existing");
+                router.push("/edit?id=" + journeyStore.editJourney.id + "&mode=existing");
             }
         }
     },
@@ -173,16 +162,6 @@ const menuButtons = ref([
         }
     }
 ]);
-const modes = {
-    logbook: "logbook",
-    exploration: "exploration",
-    edition: "edition",
-    viewJourney: "viewJourney",
-    editJourney: "editJourney",
-    createJourney: "createJourney"
-};
-
-const mode = ref(modes.logbook);
 
 onActivated(async () => {});
 onMounted(async () => {

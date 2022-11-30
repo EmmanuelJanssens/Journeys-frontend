@@ -32,20 +32,18 @@ const toast = useToast();
 const journeyStore = useJourneyStore();
 const mode = computed(() => router.currentRoute.value.query.mode);
 onMounted(() => {
-    console.log(router.currentRoute.value);
     if (mode.value == "new") {
-        state.value.title =
-            journeyStore.editJourney.journey?.start?.address + " - " + journeyStore.editJourney.journey?.end?.address;
+        state.value.title = journeyStore.editJourney.start?.address + " - " + journeyStore.editJourney.end?.address;
     } else if (mode.value == "existing") {
-        state.value.title = journeyStore.editJourney.journey?.title!;
+        state.value.title = journeyStore.editJourney.title!;
     }
 });
 async function save() {
     try {
         let saved;
         if (mode.value == "existing") {
-            journeyStore.editJourney.journey!.title = state.value.title;
-            saved = await journeyStore.updateJourney("deep");
+            journeyStore.editJourney.title = state.value.title;
+            saved = await journeyStore.updateJourneyExperiences();
         } else if (mode.value == "new") saved = await journeyStore.saveJourney(state.value.title);
         journeyModalController.close("saveJourney");
         toast.success("Journey saved!", {

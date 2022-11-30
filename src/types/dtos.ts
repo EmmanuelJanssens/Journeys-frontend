@@ -48,7 +48,6 @@ export function getAddressCoordinates(address: AddressDto): mapboxgl.LngLat {
 }
 
 export type UpdateJourneyDto = {
-    journey?: JourneyDto;
     updated?: ExperienceDto[];
     deleted?: {
         poi_ids: string[];

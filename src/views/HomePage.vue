@@ -178,11 +178,11 @@ const poiCount = ref(0);
 const poiCountEl = ref();
 
 function pushLogbook() {
-    journeyStore.editJourney.journey = {
+    journeyStore.editJourney = {
         start: geocoded.start,
         end: geocoded.end
     };
-    journeyStore.editJourney.journey!.experiencesConnection = { edges: [] };
+    journeyStore.editJourney.experiencesConnection = { edges: [] };
     router.push("/edit?mode=new");
 }
 const validJourney = ref<{

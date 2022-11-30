@@ -20,13 +20,13 @@
                 1536: { slidesPerView: 4 }
             }">
             <swiper-slide
-                v-for="item in journeyStore.editJourney.journey?.experiencesConnection?.edges"
+                v-for="item in journeyStore.editJourney.experiencesConnection?.edges"
                 v-bind:key="item.node.id">
                 <ExperienceCard
                     :experience="item"
-                    :journey="journeyStore.editJourney.journey?.id!"
+                    :journey="journeyStore.editJourney.id!"
                     class="max-w-[400px] h-full"
-                    @updated="emit('updated', journeyStore.editJourney.journey?.id!)" />
+                    @updated="emit('updated', journeyStore.editJourney.id!)" />
             </swiper-slide>
         </swiper>
     </section>
@@ -66,23 +66,19 @@ onBeforeRouteLeave(() => {
     journeyStore.clear();
 });
 
-onBeforeRouteUpdate(() => {
-    journeyStore.init();
-});
-
 function goToLast(swiper: any) {
-    swiper.slideTo(journeyStore.editJourney.journey?.experiencesConnection?.edges?.length!);
+    swiper.slideTo(journeyStore.editJourney.experiencesConnection?.edges?.length!);
 }
 
 onMounted(async () => {
+    journeyStore.init();
     const query = router.currentRoute.value.query;
     try {
         if (userStore.isLoggedIn) {
             if (query.id) {
-                journeyStore.editJourney.journey = journeyStore.viewJourney;
-                const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
+                const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney);
                 await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
-                journeyStore.editJourney.journey.experiencesConnection?.edges?.forEach((exp) => {
+                journeyStore.editJourney.experiencesConnection?.edges?.forEach((exp) => {
                     if (exp.editing) {
                         exp.images.forEach((img) => {
                             exp.imagesEditing?.push({
@@ -93,16 +89,15 @@ onMounted(async () => {
                     }
                 });
             } else {
-                const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
+                const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney);
                 await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
             }
         } else {
-            const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
+            const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney);
             await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
         }
         drawPoisBetween();
     } catch (e) {
-        console.log(e);
         //
     }
 });

@@ -65,7 +65,7 @@ import { ExperienceDto, PoiDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import { onClickOutside, rand } from "@vueuse/core";
 import { useJourneyStore } from "stores/useJourneyStore";
-import { drawExperiences, drawJourney } from "map/drawOnMap";
+import { drawExperiences } from "map/drawOnMap";
 
 const props = defineProps<{
     poi?: PoiDto;
@@ -83,16 +83,14 @@ const emit = defineEmits<{
     (e: "close"): void;
     (e: "add"): void;
 }>();
-const active = ref();
 
 function add() {
-    console.log(props.poi as PoiDto);
     const experience: ExperienceDto = {
         editing: true,
         date: new Date().toISOString(),
         imagesEditing: [],
         images: [],
-        order: journeyStore.editJourney.journey?.experiencesConnection?.edges?.length!,
+        order: journeyStore.editJourney.experiencesConnection?.edges?.length!,
         title: "",
         description: "",
         node: {

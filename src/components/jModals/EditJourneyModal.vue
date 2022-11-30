@@ -81,13 +81,12 @@ function setActive(img: string) {
 }
 
 onMounted(async () => {
-    await journeyStore.getJourney(props.journey?.id!);
-    journeyStore.editJourney.journey = journeyStore.viewJourney;
+    journeyStore.editJourney = (await journeyStore.getJourney(props.journey?.id!))!;
     selectedThumbnail.value = props.journey?.thumbnail;
     images.value = [];
-    journeyStore.editJourney.journey.experiencesConnection?.edges?.forEach((exp) => {
+    journeyStore.editJourney.experiencesConnection?.edges?.forEach((exp) => {
         exp.images.forEach((image) => {
-            if (image == journeyStore.editJourney.journey?.thumbnail) {
+            if (image == journeyStore.editJourney?.thumbnail) {
                 images.value?.push({
                     url: image,
                     active: "checked"
@@ -101,9 +100,9 @@ onMounted(async () => {
         });
     });
     state.value = {
-        title: journeyStore.editJourney.journey.title!,
-        description: journeyStore.editJourney.journey.description!,
-        selectedThumbnail: journeyStore.editJourney.journey.thumbnail!
+        title: journeyStore.editJourney.title!,
+        description: journeyStore.editJourney.description!,
+        selectedThumbnail: journeyStore.editJourney.thumbnail!
     };
 });
 
@@ -113,11 +112,11 @@ async function setThumbnail(url: string) {
 }
 async function save() {
     isLoading.value = true;
-    journeyStore.editJourney.journey!.title = state.value.title;
-    journeyStore.editJourney.journey!.description = state.value.description;
-    journeyStore.editJourney.journey!.id = props.journey?.id;
-    journeyStore.editJourney.journey!.thumbnail = selectedThumbnail.value;
-
+    journeyStore.editJourney!.title = state.value.title;
+    journeyStore.editJourney!.description = state.value.description;
+    journeyStore.editJourney!.id = props.journey?.id;
+    journeyStore.editJourney!.thumbnail = selectedThumbnail.value;
+    delete journeyStore.editJourney!.experiencesConnection;
     const res = await journeyStore.updateJourney("");
     if (!res) {
         toast.error("Could not save your modifications", {
@@ -127,9 +126,9 @@ async function save() {
     }
     const edited = userStore.myJourneys?.find((journey) => journey.id == props.journey?.id);
     if (edited) {
-        edited.title = journeyStore.editJourney.journey!.title;
-        edited.description = journeyStore.editJourney.journey!.description;
-        edited.thumbnail = journeyStore.editJourney.journey?.thumbnail;
+        edited.title = journeyStore.editJourney!.title;
+        edited.description = journeyStore.editJourney!.description;
+        edited.thumbnail = journeyStore.editJourney?.thumbnail;
         journeyModalController.close("editJourney");
         toast.success("Saved your modifications!", {
             position: POSITION.TOP_CENTER

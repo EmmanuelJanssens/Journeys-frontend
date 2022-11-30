@@ -86,15 +86,12 @@ export function drawJourney(journey: JourneyDto) {
 export function drawExperiences() {
     const array: Array<number[]> = new Array();
 
-    array.push([
-        journeyStore.editJourney.journey?.start?.longitude!,
-        journeyStore.editJourney.journey?.start?.latitude!
-    ]);
-    journeyStore.editJourney.journey?.experiencesConnection?.edges!?.forEach((exp) => {
+    array.push([journeyStore.editJourney.start?.longitude!, journeyStore.editJourney.start?.latitude!]);
+    journeyStore.editJourney.experiencesConnection?.edges!?.forEach((exp) => {
         const n = exp.node as PoiDto;
         array.push([n.location!.longitude, n.location!.latitude]);
     });
-    array.push([journeyStore.editJourney.journey?.end?.longitude!, journeyStore.editJourney.journey?.end?.latitude!]);
+    array.push([journeyStore.editJourney.end?.longitude!, journeyStore.editJourney.end?.latitude!]);
 
     const feature: GeoJSON.Feature = {
         type: "Feature",
@@ -104,7 +101,6 @@ export function drawExperiences() {
         },
         properties: {}
     };
-    console.log(feature);
     mapInstance.addStopPoint(feature);
 }
 
@@ -128,15 +124,12 @@ export async function drawPoisBetween() {
 
     const coords = Array<number[]>();
 
-    coords.push([
-        journeyStore.editJourney.journey?.start?.longitude!,
-        journeyStore.editJourney.journey?.start?.latitude!
-    ]);
-    journeyStore.editJourney.journey?.experiencesConnection?.edges?.forEach((exp) => {
+    coords.push([journeyStore.editJourney.start?.longitude!, journeyStore.editJourney.start?.latitude!]);
+    journeyStore.editJourney.experiencesConnection?.edges?.forEach((exp) => {
         const n = exp.node as PoiDto;
         coords.push([n.location!.longitude, n.location!.latitude]);
     });
-    coords.push([journeyStore.editJourney.journey?.end?.longitude!, journeyStore.editJourney.journey?.end?.latitude!]);
+    coords.push([journeyStore.editJourney.end?.longitude!, journeyStore.editJourney.end?.latitude!]);
 
     geoJsonData.features.push({
         type: "Feature",
@@ -145,8 +138,8 @@ export async function drawPoisBetween() {
             coordinates: coords
         },
         properties: {
-            start: journeyStore.editJourney.journey?.start,
-            end: journeyStore.editJourney.journey?.end
+            start: journeyStore.editJourney.start,
+            end: journeyStore.editJourney.end
         },
         id: "editJourney"
     });

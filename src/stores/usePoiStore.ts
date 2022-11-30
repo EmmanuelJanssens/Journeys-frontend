@@ -15,8 +15,6 @@ export const usePoiStore = defineStore("poi", () => {
     }
 
     function waitForPoi(time: number, resolve?: (data: any) => void, reject?: (data: any) => void) {
-        console.log("no pois");
-
         if (!poisBetween.value?.length && poisBetween.value?.length! <= 0) {
             if (time > 4) {
                 if (reject) reject(false);
@@ -27,8 +25,6 @@ export const usePoiStore = defineStore("poi", () => {
                 }, 500);
             }
         } else {
-            console.log(" pois");
-
             if (resolve) resolve(true);
         }
     }
