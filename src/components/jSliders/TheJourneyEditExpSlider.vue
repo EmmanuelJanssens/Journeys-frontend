@@ -7,8 +7,10 @@
             :lazy="{
                 enabled: true
             }"
+            navigation
             :modules="modules"
             class="h-full"
+            @slides-length-change="goToLast"
             :breakpoints="{
                 576: {
                     slidesPerView: 1
@@ -33,7 +35,7 @@
 import { useUserStore } from "stores/useUserStore";
 
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { Pagination, Navigation, Lazy } from "swiper";
+import { Pagination, Navigation, Lazy, A11y } from "swiper";
 
 import { onMounted, ref } from "vue";
 import ExperienceCard from "components/jCards/ExperienceCard.vue";
@@ -42,8 +44,13 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { usePoiStore } from "stores/usePoiStore";
 import { onBeforeRouteLeave } from "vue-router";
 import { drawPoisBetween } from "map/drawOnMap";
-
-const modules = ref([Pagination, Navigation, Lazy]);
+import { ExperienceDto } from "types/dtos";
+import { useSwiper } from "swiper/vue";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/scrollbar";
+const modules = ref([Pagination, Navigation, Lazy, A11y]);
 
 const userStore = useUserStore();
 const journeyStore = useJourneyStore();
@@ -58,6 +65,10 @@ onBeforeRouteLeave(() => {
     poiStore.clear();
 });
 
+function goToLast(swiper: any) {
+    console.log("HAHA");
+    swiper.slideTo(journeyStore.editJourney.journey?.experiencesConnection?.edges?.length!);
+}
 onMounted(async () => {
     const query = router.currentRoute.value.query;
     try {
@@ -66,13 +77,22 @@ onMounted(async () => {
                 journeyStore.editJourney.journey = journeyStore.viewJourney;
                 const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey);
                 await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
+                journeyStore.viewJourney.experiencesConnection?.edges?.forEach((exp) => {
+                    if (exp.editing) {
+                        exp.images.forEach((img) => {
+                            exp.imagesEditing?.push({
+                                file: undefined,
+                                url: img
+                            });
+                        });
+                    }
+                });
             } else {
                 console.log(journeyStore.editJourney.journey);
                 const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
                 await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
             }
         } else {
-            console.log(journeyStore.editJourney.journey);
             const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney.journey!);
             await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
         }

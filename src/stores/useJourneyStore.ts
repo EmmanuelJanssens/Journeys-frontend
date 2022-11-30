@@ -79,6 +79,16 @@ export const useJourneyStore = defineStore("journey", () => {
         }
     }
 
+    function setExperienceData(experience: ExperienceDto) {
+        editJourney.value.journey?.experiencesConnection?.edges?.forEach((exp) => {
+            if (exp.order == experience.order) {
+                console.log(exp);
+                exp = experience;
+            }
+        });
+        console.log(editJourney.value.journey?.experiencesConnection?.edges);
+    }
+
     async function updateJourney(mode: string): Promise<JourneyDto | undefined> {
         try {
             const token = await authApp.currentUser?.getIdToken(false);
@@ -261,6 +271,7 @@ export const useJourneyStore = defineStore("journey", () => {
         getJourney,
         clear,
         setInitial,
-        getInitial
+        getInitial,
+        setExperienceData
     };
 });

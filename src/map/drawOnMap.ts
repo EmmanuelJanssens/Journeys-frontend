@@ -104,6 +104,7 @@ export function drawExperiences() {
         },
         properties: {}
     };
+    console.log(feature);
     mapInstance.addStopPoint(feature);
 }
 

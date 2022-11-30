@@ -1,10 +1,11 @@
 <template>
     <Teleport to="#poipopup">
+        <div ref="poiEl"></div>
         <JourneyCard class="absolute z-50" :pos="pos">
             <template v-slot:header> {{ poi?.name }} </template>
             <template v-slot:subtitle> Title</template>
             <template v-slot:body>
-                <div ref="poiEl">
+                <div>
                     <swiper
                         v-if="poi?.journeysConnection?.edges?.length! > 0"
                         :slides-per-view="1"
@@ -44,7 +45,9 @@
                 </div>
             </template>
             <template v-slot:footer>
-                <JourneyButton fill="contrast" type="secondary"><FontAwesomeIcon :icon="faAdd" /> Add </JourneyButton>
+                <JourneyButton fill="contrast" type="secondary" @click="add"
+                    ><FontAwesomeIcon :icon="faAdd" /> Add
+                </JourneyButton>
             </template>
         </JourneyCard>
     </Teleport>
@@ -58,9 +61,11 @@ import JourneyButton from "components/UI/Button/JourneyButton.vue";
 import JourneyCard from "components/UI/Card/JourneyCard.vue";
 import { usePoiStore } from "stores/usePoiStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { PoiDto } from "types/dtos";
+import { ExperienceDto, PoiDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import { onClickOutside, rand } from "@vueuse/core";
+import { useJourneyStore } from "stores/useJourneyStore";
+import { drawExperiences, drawJourney } from "map/drawOnMap";
 
 const props = defineProps<{
     poi?: PoiDto;
@@ -72,12 +77,34 @@ const props = defineProps<{
 const poi = ref<PoiDto>();
 const poiEl = ref();
 const poiStore = usePoiStore();
+const journeyStore = useJourneyStore();
+
 const emit = defineEmits<{
     (e: "close"): void;
     (e: "add"): void;
 }>();
 const active = ref();
 
+function add() {
+    console.log(props.poi as PoiDto);
+    const experience: ExperienceDto = {
+        editing: true,
+        date: new Date().toISOString(),
+        imagesEditing: [],
+        images: [],
+        order: journeyStore.editJourney.journey?.experiencesConnection?.edges?.length!,
+        title: "",
+        description: "",
+        node: {
+            id: poi.value?.id,
+            location: poi.value?.location,
+            name: poi.value?.name,
+            thumbnail: undefined
+        }
+    };
+    journeyStore.addToJourney(experience);
+    drawExperiences();
+}
 onClickOutside(poiEl, () => {
     emit("close");
 });

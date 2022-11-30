@@ -82,21 +82,37 @@ let images = ref<
 
 const toast = useToast();
 onMounted(() => {
-    currentData.value = {
-        experience: props.experience as ExperienceDto,
-        journey: journeyStore.viewJourney
-    };
-    currentData.value!.experience = props.experience as ExperienceDto;
+    if (props.experience.editing) {
+        currentData.value = {
+            experience: props.experience as ExperienceDto,
+            journey: journeyStore.editJourney.journey!
+        };
+        currentData.value!.experience = props.experience as ExperienceDto;
 
-    state.value.title = currentData.value?.experience.title;
-    state.value.description = currentData.value.experience.description;
-    currentData.value?.experience.images.forEach((image) => {
-        images.value?.push({
-            url: image,
-            isFs: true
+        state.value.title = currentData.value?.experience.title;
+        state.value.description = currentData.value.experience.description;
+        currentData.value!.experience.imagesEditing?.forEach((img) => {
+            images.value.push(img);
         });
-    });
-    state.value.selectedDate = currentData.value?.experience.date;
+
+        state.value.selectedDate = currentData.value?.experience.date;
+    } else {
+        currentData.value = {
+            experience: props.experience as ExperienceDto,
+            journey: journeyStore.viewJourney
+        };
+        currentData.value!.experience = props.experience as ExperienceDto;
+
+        state.value.title = currentData.value?.experience.title;
+        state.value.description = currentData.value.experience.description;
+        currentData.value?.experience.images.forEach((image) => {
+            images.value?.push({
+                url: image,
+                isFs: true
+            });
+        });
+        state.value.selectedDate = currentData.value?.experience.date;
+    }
 });
 
 async function selectImage() {
@@ -125,61 +141,77 @@ function removeImage(image: string) {
 
 const taskList = Array<UploadTask>();
 async function save() {
-    const deleted = currentData.value?.experience?.images.filter(
-        (img) => !images.value.find((search) => img == search.url)
-    );
-    isLoading.value = true;
-    await deleted?.forEach(async (img) => {
-        const imgRef = fref(storageRef.storage, img);
-        await deleteObject(imgRef);
-    });
-    if (files.value.length > 0) {
-        await files.value.forEach(async (f) => {
-            const id = (f.url as string).slice((f.url as string).lastIndexOf("/") + 1);
-            const imageRef = fref(
-                storageRef,
-                journeyStore.viewJourney.id + "/" + currentData.value!.experience?.node.id + "/" + id
-            );
-            const metadata = {
-                contentType: f.file.mimeType
-            };
-            taskList.push(uploadBytesResumable(imageRef, f.file.blob, metadata));
-        });
-    }
-    var error = false;
-    const uploaded: string[] = [];
-    for (const task of taskList) {
-        const res = await task;
-        const url = await getDownloadURL(task.snapshot.ref);
-        uploaded.push(url);
-        if (res.state == "error") {
-            error = true;
-        }
-    }
-    if (error) {
-        uploaded.forEach((img) => {
-            const imgRef = fref(storageRef.storage, img);
-            deleteObject(imgRef);
-        });
-        isLoading.value = false;
-        toast.error("An error occured while uploading your image try again", {
-            position: POSITION.TOP_CENTER
-        });
-    } else {
+    console.log(currentData.value?.experience);
+    console.log(journeyStore.editJourney.journey?.experiencesConnection?.edges);
+
+    if (currentData.value?.experience.editing) {
         currentData.value!.experience!.images = currentData.value!.experience!.images.filter((img) =>
             images.value.find((search) => img == search.url)
         );
-        currentData.value!.experience!.images = currentData.value!.experience!.images.concat(...uploaded);
         currentData.value!.experience!.title = state.value.title;
         currentData.value!.experience!.date = state.value.selectedDate;
         currentData.value!.experience!.description = state.value.description;
-        currentData.value!.experience!.journey = { id: journeyStore.viewJourney.id };
-        await journeyStore.updateExperience(currentData.value!.experience!);
+        currentData.value!.experience!.journey = { id: journeyStore.editJourney.journey?.id };
+        currentData.value.experience.imagesEditing = files.value;
+        journeyStore.setExperienceData(currentData.value.experience);
         journeyModalController.close("editExperience");
-        toast.success("Your modifications were successfuly saved", {
-            position: POSITION.TOP_CENTER
+    } else {
+        const deleted = currentData.value?.experience?.images.filter(
+            (img) => !images.value.find((search) => img == search.url)
+        );
+        isLoading.value = true;
+        await deleted?.forEach(async (img) => {
+            const imgRef = fref(storageRef.storage, img);
+            await deleteObject(imgRef);
         });
-        isLoading.value = false;
+        if (files.value.length > 0) {
+            await files.value.forEach(async (f) => {
+                const id = (f.url as string).slice((f.url as string).lastIndexOf("/") + 1);
+                const imageRef = fref(
+                    storageRef,
+                    journeyStore.viewJourney.id + "/" + currentData.value!.experience?.node.id + "/" + id
+                );
+                const metadata = {
+                    contentType: f.file.mimeType
+                };
+                taskList.push(uploadBytesResumable(imageRef, f.file.blob, metadata));
+            });
+        }
+        var error = false;
+        const uploaded: string[] = [];
+        for (const task of taskList) {
+            const res = await task;
+            const url = await getDownloadURL(task.snapshot.ref);
+            uploaded.push(url);
+            if (res.state == "error") {
+                error = true;
+            }
+        }
+        if (error) {
+            uploaded.forEach((img) => {
+                const imgRef = fref(storageRef.storage, img);
+                deleteObject(imgRef);
+            });
+            isLoading.value = false;
+            toast.error("An error occured while uploading your image try again", {
+                position: POSITION.TOP_CENTER
+            });
+        } else {
+            currentData.value!.experience!.images = currentData.value!.experience!.images.filter((img) =>
+                images.value.find((search) => img == search.url)
+            );
+            currentData.value!.experience!.images = currentData.value!.experience!.images.concat(...uploaded);
+            currentData.value!.experience!.title = state.value.title;
+            currentData.value!.experience!.date = state.value.selectedDate;
+            currentData.value!.experience!.description = state.value.description;
+            currentData.value!.experience!.journey = { id: journeyStore.viewJourney.id };
+            await journeyStore.updateExperience(currentData.value!.experience!);
+            journeyModalController.close("editExperience");
+            toast.success("Your modifications were successfuly saved", {
+                position: POSITION.TOP_CENTER
+            });
+            isLoading.value = false;
+        }
     }
 }
 </script>

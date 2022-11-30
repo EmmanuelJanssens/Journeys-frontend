@@ -24,6 +24,8 @@ export type LocationDto = {
 };
 
 export type ExperienceDto = {
+    editing?: boolean;
+    imagesEditing?: any[];
     title: string;
     description: string;
     order: number;
