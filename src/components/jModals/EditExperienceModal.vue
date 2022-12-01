@@ -8,27 +8,27 @@
             w: 'w-1/2 min-w-fit',
             h: 'h-1/3'
         }">
-        <template v-slot:loading>
+        <template #loading>
             <div v-if="isLoading" class="bg-high-contrast-text h-3">
-                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
+                <div class="bg-secondary-darker h-full w-full animate-pulse" />
             </div>
             <div v-if="isLoading" class="bg-high-contrast-text h-3">
-                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
+                <div class="bg-secondary-darker h-full w-full animate-pulse" />
             </div>
         </template>
-        <template v-slot:body>
+        <template #body>
             <div class="bg-secondary-light p-4 flex flex-col h-full">
                 <div class="flex flex-col space-y-4 h-full">
-                    <journey-input placeholder="Title" v-model="state.title" />
+                    <journey-input v-model="state.title" placeholder="Title" />
                     <!-- <journey-input placeholder="Date" v-model="state.selectedDate" /> -->
                     <DatePicker v-model="state.selectedDate" />
-                    <journey-textarea :rows="6" placeholder="description" v-model="state.description" />
+                    <journey-textarea v-model="state.description" :rows="6" placeholder="description" />
                 </div>
                 <div class="flex space-x-2 flex-wrap max-w-3xl p-4 items-center">
                     <JourneyButton class="relative w-24 h-24 rounded-lg bg-green-200" @click="selectImage">
                         <font-awesome-icon class="" :icon="faAdd" size="4x" />
                     </JourneyButton>
-                    <div v-for="img in images" v-bind:key="img.url">
+                    <div v-for="img in images" :key="img.url">
                         <JourneyButton class="relative" fill="none">
                             <img
                                 class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1"
@@ -43,7 +43,7 @@
                 </div>
             </div>
         </template>
-        <template v-slot:footer>
+        <template #footer>
             <div class="flex justify-end">
                 <button @click="save">Save</button>
             </div>
@@ -56,7 +56,7 @@ import { ExperienceDto, JourneyDto, PoiDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
 import { storageRef } from "google/firebase";
-import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
+import { ref as fref, deleteObject } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faClose, faAdd } from "@fortawesome/free-solid-svg-icons";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
@@ -64,7 +64,7 @@ import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import JourneyInput from "components/UI/Input/JourneyInput.vue";
 import JourneyTextarea from "components/UI/Input/JourneyTextarea.vue";
 import { POSITION, useToast } from "vue-toastification";
-import { drawExperiences, drawJourney, drawPoisBetween } from "map/drawOnMap";
+import { drawJourney, drawPoisBetween } from "map/drawOnMap";
 import router from "router/router";
 import JourneyButton from "components/UI/Button/JourneyButton.vue";
 const state = ref({
@@ -147,7 +147,7 @@ async function selectImage() {
 function removeImage(image: string) {
     const img = images.value?.find((img) => image == img.url);
     if (img) {
-        images.value = images.value?.filter((img) => image != img.url)!;
+        images.value = images.value?.filter((img) => image != img.url);
     }
 }
 
@@ -171,14 +171,24 @@ async function save() {
         });
 
         try {
-            journeyStore.uploadImages(files.value, props.experience.node.id!, journeyStore.editJourney.id!);
+            journeyStore
+                .uploadImages(files.value, (props.experience.node as PoiDto).id!, journeyStore.editJourney.id!)
+                ?.then(() => {
+                    toast.info("Your images where uploaded you can now view them !", {
+                        position: POSITION.BOTTOM_RIGHT
+                    });
+                })
+                .catch(() => {
+                    toast.error("TAn error occured when uploading your images :(", {
+                        position: POSITION.TOP_CENTER
+                    });
+                });
             currentData.value!.experience!.images = currentData.value!.experience!.images.filter((img) =>
                 images.value.find((search) => img == search.url)
             );
             currentData.value!.experience!.title = state.value.title;
             currentData.value!.experience!.date = state.value.selectedDate;
             currentData.value!.experience!.description = state.value.description;
-            currentData.value!.experience!.journey = { id: journeyStore.editJourney.id };
             await journeyStore.updateExperience(currentData.value!.experience!);
             journeyModalController.close("editExperience");
             toast.success("Your modifications were successfuly saved", {

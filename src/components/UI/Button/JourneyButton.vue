@@ -16,7 +16,7 @@
                 'bg-opacity-0 text-secondary-main dark:text-secondary-dark': fill == 'none' && type == 'secondary',
                 'text-btn-contrast-text border-none': fill == 'contrast'
             }">
-            <slot></slot>
+            <slot />
         </button>
     </div>
 </template>

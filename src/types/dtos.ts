@@ -31,8 +31,7 @@ export type ExperienceDto = {
     order: number;
     images: string[];
     date: string;
-    node: PoiDto | JourneyDto;
-    journey?: JourneyDto;
+    node: PoiDto | JourneyDto | UserDto;
 };
 
 export type AddressDto = {

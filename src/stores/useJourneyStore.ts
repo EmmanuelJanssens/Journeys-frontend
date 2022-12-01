@@ -6,6 +6,7 @@ import { authApp, storageRef } from "google/firebase";
 import { getMidPoint, getRadius } from "utils/utils";
 import { LngLat, LngLatLike } from "mapbox-gl";
 import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
+import { POSITION, useToast } from "vue-toastification";
 export const useJourneyStore = defineStore("journey", () => {
     const editJourney = ref<JourneyDto>({});
     const updateDto = ref<UpdateJourneyDto>({});
@@ -50,7 +51,7 @@ export const useJourneyStore = defineStore("journey", () => {
         const token = await authApp.currentUser?.getIdToken(false);
         const delExp = {
             poi: {
-                id: expDto.node.id
+                id: (expDto.node as PoiDto).id
             },
             journey: {
                 id: editJourney.value.id
@@ -82,7 +83,7 @@ export const useJourneyStore = defineStore("journey", () => {
 
     function setExperienceData(experience: ExperienceDto) {
         editJourney.value?.experiencesConnection?.edges?.forEach((exp) => {
-            if (exp.node.id == experience.node.id) {
+            if ((exp.node as PoiDto).id == (experience.node as PoiDto).id) {
                 exp = experience;
             }
         });
@@ -104,50 +105,50 @@ export const useJourneyStore = defineStore("journey", () => {
 
     async function updateJourneyExperiences() {
         const token = await authApp.currentUser?.getIdToken(false);
-
         editJourney.value.experiencesConnection?.edges?.forEach(async (experience) => {
-            uploadImages(experience.imagesEditing!, experience.node.id!, editJourney.value.id!);
+            uploadImages(experience.imagesEditing!, (experience.node as PoiDto).id!, response.data.id!);
             delete experience.editing;
             delete experience.imagesEditing;
-            delete experience.journey;
         });
 
         updateDto.value?.connected?.forEach(async (experience) => {
-            uploadImages(experience.imagesEditing!, experience.node.id!, editJourney.value.id!);
+            uploadImages(experience.imagesEditing!, (experience.node as PoiDto).id!, response.data.id!);
             delete experience.editing;
             delete experience.imagesEditing;
-            delete experience.journey;
         });
-        const result = await axios.put("/api/journey/experiences/" + editJourney.value?.id, updateDto.value, {
+
+        const response = await axios.put("/api/journey/experiences/" + editJourney.value?.id, updateDto.value, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
+
         isDirty.value = false;
-        return result.data as JourneyDto;
+        return response.data as JourneyDto;
     }
 
     async function saveJourney(name: string): Promise<JourneyDto | undefined> {
         const token = await authApp.currentUser?.getIdToken(false);
         editJourney.value.title = name;
-
         editJourney.value.experiencesConnection?.edges?.forEach(async (experience) => {
-            uploadImages(experience.imagesEditing!, experience.node.id!, editJourney.value.id!);
+            const exp = experience.node as PoiDto;
+            uploadImages(experience.imagesEditing!, exp.id!, response.data.id!);
             delete experience.editing;
             delete experience.imagesEditing;
-            delete experience.journey;
         });
         updateDto.value?.connected?.forEach(async (experience) => {
-            uploadImages(experience.imagesEditing!, experience.node.id!, editJourney.value.id!);
+            const exp = experience.node as PoiDto;
+
+            uploadImages(experience.imagesEditing!, exp.id!, response.data.id!);
             delete experience.editing;
             delete experience.imagesEditing;
-            delete experience.journey;
         });
         const response = await axios.post("/api/journey/", editJourney.value!, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
+
         isDirty.value = false;
 
         return response.data as JourneyDto;
@@ -180,7 +181,7 @@ export const useJourneyStore = defineStore("journey", () => {
     function removeFromJourney(id: string): void {
         updateDto.value.deleted?.poi_ids.push(id);
         editJourney.value.experiencesConnection!.edges = editJourney.value.experiencesConnection!.edges!.filter(
-            (item) => item.node.id !== id
+            (item) => (item.node as PoiDto).id !== id
         );
         editJourney.value.experiencesConnection!.edges.sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -193,8 +194,9 @@ export const useJourneyStore = defineStore("journey", () => {
     }
     function alreadyInJourney(expDto: ExperienceDto): Boolean {
         const result =
-            editJourney.value!.experiencesConnection!.edges!.find((item) => item.node.id === expDto.node.id) !==
-            undefined;
+            editJourney.value!.experiencesConnection!.edges!.find(
+                (item) => (item.node as PoiDto).id === (expDto.node as PoiDto).id
+            ) !== undefined;
         return result;
     }
 
@@ -274,7 +276,7 @@ export const useJourneyStore = defineStore("journey", () => {
             taskList.push(uploadBytesResumable(imageRef, image.file.blob, metadata));
         });
 
-        Promise.all(taskList).then(async (tasks) => {
+        return Promise.all(taskList).then(async (tasks) => {
             await tasks.forEach(async (task) => {
                 if (task.state == "success") {
                     if (task.metadata.customMetadata?.exp && task.metadata.customMetadata?.journey) {
@@ -296,13 +298,14 @@ export const useJourneyStore = defineStore("journey", () => {
                             );
                             if (editJourney.value.id == task.metadata.customMetadata.journey) {
                                 editJourney.value.experiencesConnection?.edges?.forEach((exp) => {
-                                    if (exp.node.id == task.metadata.customMetadata?.exp) {
+                                    if ((exp.node as PoiDto).id == task.metadata.customMetadata?.exp) {
                                         exp.images.push(url);
                                     }
                                 });
                             }
                         } catch (e) {
-                            //
+                            const imgRef = fref(storageRef.storage, url);
+                            deleteObject(imgRef);
                         }
                     }
                 }

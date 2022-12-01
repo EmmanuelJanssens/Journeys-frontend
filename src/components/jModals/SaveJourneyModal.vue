@@ -1,21 +1,23 @@
 <template>
     <JourneyModal name="saveJourney" :loading="isLoading">
-        <template v-slot:header>
+        <template #header>
             <h1 class="text-high-contrast-text">Save Journey</h1>
         </template>
-        <template v-slot:body>
+        <template #body>
             <div class="flex flex-col p-4 bg-secondary-light dark:bg-secondary-dark space-y-4">
-                <JourneyInput placeholder="Journey title" v-model="state.title" />
+                <JourneyInput v-model="state.title" placeholder="Journey title" />
                 <div class="flex space-x-4 justify-between">
-                    <JourneyButton class="grow" type="primary" fill="fill" @click="quickSave">Quick Save</JourneyButton>
-                    <JourneyButton class="grow" type="secondary" fill="fill" @click="redirectionSave"
-                        >Save</JourneyButton
-                    >
+                    <JourneyButton class="grow" type="primary" fill="fill" @click="quickSave">
+                        Quick Save
+                    </JourneyButton>
+                    <JourneyButton class="grow" type="secondary" fill="fill" @click="redirectionSave">
+                        Save
+                    </JourneyButton>
                 </div>
             </div>
         </template>
-        <template v-slot:footer>
-            <span></span>
+        <template #footer>
+            <span />
         </template>
     </JourneyModal>
 </template>
@@ -47,7 +49,7 @@ onMounted(() => {
 
 async function quickSave() {
     try {
-        const saved = await save();
+        await save();
         journeyModalController.close("saveJourney");
     } catch (e) {
         console.log(e);

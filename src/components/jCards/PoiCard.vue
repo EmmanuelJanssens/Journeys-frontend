@@ -1,10 +1,12 @@
 <template>
     <Teleport to="#poipopup">
-        <div ref="poiEl"></div>
+        <div ref="poiEl" />
         <JourneyCard class="absolute z-50" :pos="pos">
-            <template v-slot:header> {{ poi?.name }} </template>
-            <template v-slot:subtitle> Title</template>
-            <template v-slot:body>
+            <template #header>
+                {{ poi?.name }}
+            </template>
+            <template #subtitle> Title </template>
+            <template #body>
                 <div>
                     <swiper
                         v-if="poi?.journeysConnection?.edges?.length! > 0"
@@ -17,15 +19,15 @@
                             clickable: true
                         }"
                         :loop="true">
-                        <swiper-slide v-for="p in poi?.journeysConnection?.edges" v-bind:key="p?.order">
+                        <swiper-slide v-for="p in poi?.journeysConnection?.edges" :key="p?.order">
                             <div class="p-4">
                                 <img
-                                    class="object-cover w-full h-40 rounded-xl"
                                     v-lazy="{
                                         src: p.images[0],
                                         loading: '/assets/placeholder.png',
                                         error: '/assets/placeholder.png'
-                                    }" />
+                                    }"
+                                    class="object-cover w-full h-40 rounded-xl" />
                                 <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto">
                                     <p class="text-center text-primary-darker">
                                         {{ p.description }}
@@ -44,9 +46,9 @@
                     </div>
                 </div>
             </template>
-            <template v-slot:footer>
-                <JourneyButton fill="contrast" type="secondary" @click="add"
-                    ><FontAwesomeIcon :icon="faAdd" /> Add
+            <template #footer>
+                <JourneyButton fill="contrast" type="secondary" @click="add">
+                    <FontAwesomeIcon :icon="faAdd" /> Add
                 </JourneyButton>
             </template>
         </JourneyCard>
@@ -56,7 +58,6 @@
 <script setup lang="ts">
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { computed } from "@vue/reactivity";
 import JourneyButton from "components/UI/Button/JourneyButton.vue";
 import JourneyCard from "components/UI/Card/JourneyCard.vue";
 import { usePoiStore } from "stores/usePoiStore";

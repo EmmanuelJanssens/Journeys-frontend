@@ -39,23 +39,23 @@
                 <swiper-slide v-if="props.experience.imagesEditing?.length == 0">
                     <div class="p-4">
                         <img
-                            class="object-cover h-52 w-full rounded-xl"
                             v-lazy="{
                                 src: '/assets/placeholder.png',
                                 loading: '/assets/placeholder.png',
                                 error: '/assets/placeholder.png'
-                            }" />
+                            }"
+                            class="object-cover h-52 w-full rounded-xl" />
                     </div>
                 </swiper-slide>
-                <swiper-slide v-else v-for="image in props.experience.imagesEditing" v-bind:key="image">
+                <swiper-slide v-for="image in props.experience.imagesEditing" v-else :key="image">
                     <div class="p-4">
                         <img
-                            class="object-cover h-52 w-full rounded-xl"
                             v-lazy="{
                                 src: image.url,
                                 loading: '/assets/placeholder.png',
                                 error: '/assets/placeholder.png'
-                            }" />
+                            }"
+                            class="object-cover h-52 w-full rounded-xl" />
                     </div>
                 </swiper-slide>
             </swiper>
@@ -74,29 +74,31 @@
                 <swiper-slide v-if="props.experience.images?.length == 0">
                     <div class="p-4">
                         <img
-                            class="object-cover h-52 w-full rounded-xl"
                             v-lazy="{
                                 src: '/assets/placeholder.png',
                                 loading: '/assets/placeholder.png',
                                 error: '/assets/placeholder.png'
-                            }" />
+                            }"
+                            class="object-cover h-52 w-full rounded-xl" />
                     </div>
                 </swiper-slide>
-                <swiper-slide v-else v-for="image in props.experience.images" v-bind:key="image">
+                <swiper-slide v-for="image in props.experience.images" v-else :key="image">
                     <div class="p-4">
                         <img
-                            class="object-cover h-52 w-full rounded-xl"
                             v-lazy="{
                                 src: image,
                                 loading: '/assets/placeholder.png',
                                 error: '/assets/placeholder.png'
-                            }" />
+                            }"
+                            class="object-cover h-52 w-full rounded-xl" />
                     </div>
                 </swiper-slide>
             </swiper>
         </div>
         <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto">
-            <p class="text-center text-primary-darker">{{ props.experience.description }}</p>
+            <p class="text-center text-primary-darker">
+                {{ props.experience.description }}
+            </p>
         </div>
     </div>
 
@@ -107,7 +109,7 @@
 import { faPencil, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
-import { Swiper, SwiperSlide, useSwiper } from "swiper/vue";
+import { Swiper, SwiperSlide } from "swiper/vue";
 import { Navigation, Lazy, Pagination, Autoplay } from "swiper";
 
 import "swiper/css";
@@ -115,30 +117,23 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { ExperienceDto, PoiDto } from "types/dtos";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { useJourneyStore } from "stores/useJourneyStore";
-import { useUserStore } from "stores/useUserStore";
 import { POSITION, useToast } from "vue-toastification";
 import { drawJourney, drawPoisBetween } from "map/drawOnMap";
 import router from "router/router";
-import { computed } from "@vue/reactivity";
-const t = useSwiper();
+import { computed } from "vue";
 
 const props = defineProps<{
     experience: ExperienceDto;
     journey: string;
 }>();
 
-const emit = defineEmits<{
-    (e: "updated"): void;
-}>();
-
 const modules = ref([Navigation, Lazy, Pagination, Autoplay]);
 
 const journeyStore = useJourneyStore();
-const userStore = useUserStore();
 const toast = useToast();
 async function onEdit() {
     journeyModalController.open("editExperience", {
@@ -147,7 +142,7 @@ async function onEdit() {
         }
     });
 
-    const res = await journeyModalController.didClose("editExperience");
+    await journeyModalController.didClose("editExperience");
 }
 
 const route = computed(() => ({
@@ -156,7 +151,7 @@ const route = computed(() => ({
 }));
 async function onDelete() {
     if (route.value.name == "edit") {
-        journeyStore.removeFromJourney(props.experience.node.id!);
+        journeyStore.removeFromJourney((props.experience.node as PoiDto).id!);
         drawJourney(journeyStore.editJourney);
         drawPoisBetween();
         return;

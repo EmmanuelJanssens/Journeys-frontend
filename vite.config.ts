@@ -30,5 +30,15 @@ export default defineConfig({
                 rewrite: (path) => path.replace(/^\/api/, "")
             }
         }
+    },
+    preview: {
+        port: 3000,
+        proxy: {
+            "/api": {
+                changeOrigin: true,
+                target: `${process.env.VITE_JOURNEYS_API_HOST}:4000/api`,
+                rewrite: (path) => path.replace(/^\/api/, "")
+            }
+        }
     }
 });

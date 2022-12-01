@@ -13,10 +13,8 @@
 </template>
 
 <script lang="ts" setup>
-// import { IonApp, IonRouterOutlet, IonContent, modalController } from "@ionic/vue";
-import DisclaimerModal from "components/Modals/DisclaimerModal.vue";
 import { RouterView } from "vue-router";
-import { defineAsyncComponent, onMounted, ref } from "vue";
+import { defineAsyncComponent, onMounted } from "vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 
 onMounted(async () => {
@@ -33,19 +31,6 @@ onMounted(async () => {
         "alert",
         defineAsyncComponent(() => import("components/jModals/AlertModal.vue"))
     );
-    //     const disclaimer = localStorage.getItem("disclaimer");
-    //     if (disclaimer != null && disclaimer == "true") {
-    //         return;
-    //     } else {
-    //         const modal = await modalController.create({
-    //             component: DisclaimerModal
-    //         });
-    //         await modal.present();
-    //         const { data, role } = await modal.onDidDismiss();
-    //         if (data?.doNotShowagain) {
-    //             localStorage.setItem("disclaimer", data?.doNotShowagain);
-    //         }
-    //     }
 });
 </script>
 

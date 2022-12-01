@@ -8,16 +8,16 @@
         }"
         :on-outside-clicked="dismissRegisterModal"
         :on-close="dismissRegisterModal">
-        <template v-slot:header>
+        <template #header>
             <h1 class="text-btn-contrast-text">Register</h1>
         </template>
 
-        <template v-slot:body>
+        <template #body>
             <div class="bg-secondary-light dark:bg-secondary-dark p-8 h-full">
                 <div class="grid grid-cols-2 gap-4">
                     <JourneyInput
-                        placeholder="First Name"
                         v-model="state.firstName"
+                        placeholder="First Name"
                         :error="v$.firstName.$error ? v$.firstName.$errors[0].$message as string : ''"
                         @keydown="
                             ifZero(
@@ -27,8 +27,8 @@
                             )
                         " />
                     <JourneyInput
-                        placeholder="Last Name"
                         v-model="state.lastName"
+                        placeholder="Last Name"
                         :error="v$.lastName.$error ? v$.lastName.$errors[0].$message as string : ''"
                         @keydown="
                             ifZero(
@@ -38,9 +38,9 @@
                             )
                         " />
                     <JourneyInput
+                        v-model="state.username"
                         class="col-span-2"
                         placeholder="username"
-                        v-model="state.username"
                         helper="required"
                         :error="v$.username.$error ? v$.username.$errors[0].$message as string : ''"
                         @keydown="
@@ -51,9 +51,9 @@
                             )
                         " />
                     <JourneyInput
+                        v-model="state.email"
                         class="col-span-2"
                         placeholder="Email"
-                        v-model="state.email"
                         helper="required"
                         :error="v$.email.$error ? v$.email.$errors[0].$message as string : ''"
                         @keydown="
@@ -64,37 +64,37 @@
                             )
                         " />
                     <JourneyInput
+                        v-model="state.password"
                         class="col-span-2"
                         placeholder="Password"
-                        v-model="state.password"
                         :error="v$.password.$error ? v$.password.$errors[0].$message as string : ''"
+                        type="password"
                         @keydown="
                             ifZero(
                                 $event,
                                 () => v$.password.$reset(),
                                 () => v$.password.$validate()
                             )
-                        "
-                        type="password" />
+                        " />
                     <JourneyInput
+                        v-model="state.confirmPassword"
                         class="col-span-2"
                         placeholder="Confirm password"
-                        v-model="state.confirmPassword"
                         :error="v$.confirmPassword.$error ? v$.confirmPassword.$errors[0].$message as string : ''"
+                        type="password"
                         @keydown="
                             ifZero(
                                 $event,
                                 () => v$.confirmPassword.$reset(),
                                 () => v$.confirmPassword.$validate()
                             )
-                        "
-                        type="password" />
+                        " />
                 </div>
             </div>
         </template>
-        <template v-slot:footer>
+        <template #footer>
             <div class="flex justify-end">
-                <JourneyButton type="secondary" fill="contrast" @click="submitForm"> Register</JourneyButton>
+                <JourneyButton type="secondary" fill="contrast" @click="submitForm"> Register </JourneyButton>
             </div>
         </template>
     </journey-modal>
@@ -135,7 +135,7 @@ const rules = {
         noSpecial: helpers.withMessage("Can only contains letters/numbers and -,_", (value: string) =>
             /^[a-zA-Z0-9-_]+$/.test(value)
         ),
-        unique: helpers.withMessage("Not available", (value: string) => true)
+        unique: helpers.withMessage("Not available", () => true)
     },
     firstName: {},
     lastName: {},

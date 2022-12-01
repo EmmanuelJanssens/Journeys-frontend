@@ -2,34 +2,39 @@
     <Teleport to="#modal">
         <Transition name="modal">
             <div
-                class="absolute flex left-0 top-0 w-screen h-screen z-[9000] bg-black bg-opacity-30 items-center justify-center"
-                v-if="journeyModalController.isOpen(name)">
-                <div :class="classList" ref="modal">
+                v-if="journeyModalController.isOpen(name)"
+                class="absolute flex left-0 top-0 w-screen h-screen z-[9000] bg-black bg-opacity-30 items-center justify-center">
+                <div ref="modal" :class="classList">
                     <header class="bg-primary-main dark:bg-primary-dark rounded-t-lg text-high-contrast-text">
                         <div class="flex items-center justify-between">
                             <div class="p-2 mx-2">
-                                <slot name="header"> {{ header }} </slot>
+                                <slot name="header">
+                                    {{ header }}
+                                </slot>
                             </div>
 
                             <div class="p-2 mx-2">
-                                <slot name="close"
-                                    ><button @click="onClose ? onClose() : close()">
-                                        <font-awesome-icon :icon="faClose" /></button
-                                ></slot>
+                                <slot name="close">
+                                    <button @click="onClose ? onClose() : close()">
+                                        <font-awesome-icon :icon="faClose" />
+                                    </button>
+                                </slot>
                             </div>
                         </div>
                         <div v-if="loading">
                             <div class="relative bg-primary-light h-2">
-                                <div class="absolute bg-secondary-main h-full w-1/3 load"></div>
+                                <div class="absolute bg-secondary-main h-full w-1/3 load" />
                             </div>
                         </div>
                     </header>
                     <section class="h-full bg-secondary-light dark:bg-secondary-dark">
-                        <slot name="body">Default body</slot>
+                        <slot name="body"> Default body </slot>
                     </section>
                     <footer class="bg-primary-main dark:bg-primary-dark rounded-b-lg">
                         <div class="p-2 mx-2 text-high-contrast-text">
-                            <slot name="footer"><button>OK</button></slot>
+                            <slot name="footer">
+                                <button>OK</button>
+                            </slot>
                         </div>
                     </footer>
                 </div>
@@ -41,11 +46,9 @@
 <script setup lang="ts">
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import { journeyModalController } from "./JourneyModalController";
-import { onClickOutside } from "@vueuse/core";
-import { string } from "yargs";
 
 const modal = ref();
 
@@ -104,7 +107,6 @@ function close() {
 onMounted(() => {
     (modal.value as HTMLElement).classList.add("animate-appear");
 });
-onBeforeUnmount(() => {});
 </script>
 
 <style scoped>

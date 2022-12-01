@@ -8,14 +8,14 @@ const routes: RouteRecordRaw[] = [
     {
         path: "/home",
         name: "home",
-        component: () => import("views/HomePage.vue")
+        component: async () => import("views/HomePage.vue")
     },
     {
         path: "/logbook",
         name: "",
-        component: () => import("views/LogBookPage.vue"),
+        component: async () => import("views/LogBookPage.vue"),
         children: [
-            { path: "", name: "logbook", component: () => import("components/JSliders/TheJourneysSlider.vue") },
+            { path: "", name: "logbook", component: async () => import("components/JSliders/TheJourneysSlider.vue") },
             {
                 path: "journey/:id",
                 name: "view",
@@ -24,7 +24,7 @@ const routes: RouteRecordRaw[] = [
             {
                 path: "/edit",
                 name: "edit",
-                component: () => import("components/JSliders/TheJourneyEditExpSlider.vue"),
+                component: async () => import("components/JSliders/TheJourneyEditExpSlider.vue"),
                 props: (route) => ({ query: route.query })
             }
         ]
@@ -32,7 +32,7 @@ const routes: RouteRecordRaw[] = [
     {
         path: "/template",
         name: "template",
-        component: () => import("views/TemplatePage.vue")
+        component: async () => import("views/TemplatePage.vue")
     }
 ];
 

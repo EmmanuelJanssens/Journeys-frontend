@@ -52,7 +52,7 @@ export function drawJourney(journey: JourneyDto) {
                 coordinates: [n.location!.longitude, n.location!.latitude]
             },
             properties: exp,
-            id: exp.node.id
+            id: (exp.node as PoiDto).id
         });
     });
 

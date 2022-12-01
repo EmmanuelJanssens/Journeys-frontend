@@ -148,7 +148,6 @@ export const useUserStore = defineStore("user", () => {
 
     function removeJourney(id: string) {
         myJourneys.value = myJourneys.value?.filter((j) => j.id != id);
-        myExperiences.value = myExperiences.value.filter((e) => e.journey != id);
     }
 
     return {

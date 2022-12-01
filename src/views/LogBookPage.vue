@@ -4,10 +4,10 @@
         <!-- <TheJourneysHeader class="z-50" /> -->
         <div class="relative flex h-full w-full">
             <LogbookMenu />
-            <ThePoiListSidebar :poiList="poiStore.poisBetween" @poi-item-clicked="flyTo" />
+            <ThePoiListSidebar :poi-list="poiStore.poisBetween" @poi-item-clicked="flyTo" />
             <div class="w-full h-full">
                 <JourneyMap class="relative bg-secondary-light w-full h-full">
-                    <router-view class="absolute left-0 right-0 bottom-0 p-4 h-2/5" v-slot="{ Component, route }">
+                    <router-view v-slot="{ Component, route }" class="absolute left-0 right-0 bottom-0 p-4 h-2/5">
                         <Transition name="fade" mode="out-in">
                             <component :is="Component" :key="route.path" />
                         </Transition>
@@ -23,7 +23,7 @@ export default {
 };
 </script>
 <script lang="ts" setup>
-import { defineAsyncComponent, onActivated, onMounted, ref } from "vue";
+import { defineAsyncComponent, onMounted } from "vue";
 
 import { usePoiStore } from "stores/usePoiStore";
 
@@ -38,7 +38,6 @@ import { mapInstance } from "map/JourneysMap";
 
 const poiStore = usePoiStore();
 
-onActivated(async () => {});
 onMounted(async () => {
     journeyModalController.create(
         "editJourney",
@@ -76,7 +75,8 @@ onMounted(async () => {
 });
 
 function flyTo(poi: PoiDto) {
-    mapInstance.flyTo(poi.location?.longitude!, poi.location?.latitude!, 18);
+    if (poi.location?.longitude && poi.location.latitude)
+        mapInstance.flyTo(poi.location?.longitude, poi.location?.latitude, 18);
 }
 </script>
 <style lang="less" scoped>

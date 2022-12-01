@@ -2,7 +2,9 @@
     <div class="flex flex-col space-y-4 bg-secondary-light dark:bg-secondary-dark rounded-xl drop-shadow-xl">
         <div class="top-0 p-3 bg-primary-main dark:primar w-full rounded-t-xl">
             <div class="flex space-x-4 justify-between">
-                <p class="text-center text-white">{{ journey.title }}</p>
+                <p class="text-center text-white">
+                    {{ journey.title }}
+                </p>
                 <div class="flex space-x-4">
                     <button class="text-white transform hover:scale-110" @click="onEdit">
                         <font-awesome-icon :icon="faPencil" class="text-white" />
@@ -18,13 +20,15 @@
             </div>
         </div>
         <div class="p-4">
-            <img class="rounded-xl object-cover h-52 w-full" v-if="journey.thumbnail" :src="journey.thumbnail" />
-            <img class="rounded-xl object-cover h-52 w-full" v-else src="/assets/placeholder.png" />
+            <img v-if="journey.thumbnail" class="rounded-xl object-cover h-52 w-full" :src="journey.thumbnail" />
+            <img v-else class="rounded-xl object-cover h-52 w-full" src="/assets/placeholder.png" />
         </div>
         <div
             v-if="journey.description && journey.description.length > 0"
             class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto break-before-all">
-            <p class="text-center text-primary-darker">{{ journey.description }}</p>
+            <p class="text-center text-primary-darker">
+                {{ journey.description }}
+            </p>
         </div>
     </div>
 </template>

@@ -1,10 +1,8 @@
 <template>
     <div class="relative">
         <input
-            @focusin="setFocus"
+            ref="text"
             :value="input"
-            @keydown="autocomplete"
-            @focusout="focusOut"
             :class="{
                 'rounded-lg': predictions.length == 0,
                 'rounded-t-lg': predictions.length > 0,
@@ -13,7 +11,9 @@
                 'h-12 p-4 sm:w-full focus:border-none bg-secondary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg outline-none focus:outline-primary-darker': true
             }"
             :placeholder="placeholder"
-            ref="text" />
+            @focusin="setFocus"
+            @keydown="autocomplete"
+            @focusout="focusOut" />
         <div
             v-if="input.length > 0"
             :class="{
@@ -23,10 +23,12 @@
             }">
             <div
                 v-for="prediction in predictions"
-                v-bind:key="prediction.key"
-                @click="select(prediction.value)"
-                class="bg-primary-main dark:hover:bg-primary-darker p-2 hover:bg-primary-dark hover:cursor-pointer">
-                <p class="">{{ prediction.value }}</p>
+                :key="prediction.key"
+                class="bg-primary-main dark:hover:bg-primary-darker p-2 hover:bg-primary-dark hover:cursor-pointer"
+                @click="select(prediction.value)">
+                <p class="">
+                    {{ prediction.value }}
+                </p>
             </div>
         </div>
     </div>

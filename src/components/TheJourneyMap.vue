@@ -1,8 +1,8 @@
 <template>
     <div>
         <component
-            v-if="poiOpened"
             :is="PoiCard"
+            v-if="poiOpened"
             :poi="poiOpened"
             :pos="pos"
             @close="
@@ -17,36 +17,21 @@
                     width: 100%;
                     height: 100%;
                 }
-            "></section>
-        <slot></slot>
+            " />
+        <slot />
     </div>
 </template>
 <script lang="ts" setup>
 import PoiCard from "components/jCards/PoiCard.vue";
 
 import mapboxgl, { LngLat, MapMouseEvent } from "mapbox-gl";
-import { ExperienceDto, PoiDto } from "types/dtos";
-import { useJourneyStore } from "stores/useJourneyStore";
-import { usePoiStore } from "stores/usePoiStore";
-import { alertController } from "@ionic/core";
+import { PoiDto } from "types/dtos";
 import axios from "axios";
 import { mapInstance, mapLayers } from "map/JourneysMap";
-import "maplibre-gl/dist/maplibre-gl.css";
 import { onMounted, ref } from "vue";
 
-const emit = defineEmits<{
-    (e: "markerDragged", pos: mapboxgl.LngLat, marker: string): void;
-    (
-        e: "poiClicked",
-        poi: PoiDto,
-        evt: mapboxgl.MapMouseEvent & {
-            features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
-        } & mapboxgl.EventData
-    ): void;
-}>();
+import "mapbox-gl/dist/mapbox-gl.css";
 
-const journeyStore = useJourneyStore();
-const poiStore = usePoiStore();
 const poiOpened = ref<PoiDto | undefined>();
 const pos = ref({
     x: 0,
@@ -58,10 +43,6 @@ async function getCountryLoc() {
     return new LngLat(loc.data.location.longitude, loc.data.location.latitude);
 }
 
-const poiBase = "absolute z-50";
-const poiadd = ref("");
-const posClass = ref(poiBase + poiadd.value);
-const poitest = ref();
 onMounted(async () => {
     const center = await getCountryLoc();
     mapInstance.loadMap(
@@ -92,49 +73,6 @@ onMounted(async () => {
     );
     map.on("click", mapLayers.poi_list + "_cluster", (e) => {
         onClusterClick(e);
-    });
-    map.on("contextmenu", async (e: MapMouseEvent) => {
-        const alert = await alertController.create({
-            header: "Confirm poi details",
-            inputs: [
-                {
-                    label: "Poi Name",
-                    name: "poiName",
-                    placeholder: "Enter name"
-                }
-            ],
-            buttons: [
-                "Cancel",
-                {
-                    text: "OK",
-                    handler: (data) => {
-                        alertController.dismiss(data.poiName, "ok");
-                    }
-                }
-            ]
-        });
-        await alert.present();
-        const { data, role } = await alert.onDidDismiss();
-        if (role == "ok" && data?.length! > 0) {
-            const poi: PoiDto = {
-                name: data,
-                location: {
-                    latitude: e.lngLat.lat,
-                    longitude: e.lngLat.lng
-                }
-            };
-            if (poi.thumbnail != undefined) delete poi.thumbnail;
-            const added = await poiStore.addPoi(poi);
-            const experience: ExperienceDto = {
-                title: "",
-                date: new Date().toISOString(),
-                description: "",
-                images: [],
-                order: journeyStore.editJourney.experiencesConnection?.edges?.length!,
-                node: added!
-            };
-            journeyStore.addToJourney(experience);
-        }
     });
 });
 

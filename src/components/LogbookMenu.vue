@@ -1,17 +1,17 @@
 <template>
     <div
-        class="flex flex-col bg-primary-light w-16 h-full transition-all shadow-inner"
         ref="menu"
+        class="flex flex-col bg-primary-light w-16 h-full transition-all shadow-inner"
         @transitionend="resize">
         <button
-            @click="toggle"
             :class="{
                 'w-full p-2 text-primary-darker': true,
                 'text-left': isOpen
-            }">
-            <FontAwesomeIcon :size="'2x'" v-if="!isOpen" :icon="faBars" /><FontAwesomeIcon
-                :size="'2x'"
+            }"
+            @click="toggle">
+            <FontAwesomeIcon v-if="!isOpen" :size="'2x'" :icon="faBars" /><FontAwesomeIcon
                 v-if="isOpen"
+                :size="'2x'"
                 :icon="faXmark" />
         </button>
         <img
@@ -22,18 +22,14 @@
             src="/assets/placeholder.png" />
 
         <div class="flex flex-col whitespace-pre-wrap text-primary-darker h-full">
-            <JourneyItem :button="homeButton" :collapsed="isOpen"></JourneyItem>
-            <JourneyItem :button="viewProfileButton" :collapsed="isOpen"></JourneyItem>
-            <JourneyItem :button="logbookButton" :collapsed="isOpen"></JourneyItem>
-            <JourneyItem :button="addPoiButton" :collapsed="isOpen"></JourneyItem>
-            <JourneyItem
-                :button="addJourneyButton"
-                :collapsed="isOpen"
-                :custom="true"
-                :visible="addVisible"></JourneyItem>
-            <JourneyItem :button="editJourneyButton" :collapsed="isOpen" :visible="editVisible"></JourneyItem>
-            <JourneyItem :button="saveJourneyButton" :collapsed="isOpen" :visible="saveVisible"></JourneyItem>
-            <JourneyItem class="last:mt-auto" :button="logoutButton" :collapsed="isOpen" :visible="true"></JourneyItem>
+            <JourneyItem :button="homeButton" :collapsed="isOpen" />
+            <JourneyItem :button="viewProfileButton" :collapsed="isOpen" />
+            <JourneyItem :button="logbookButton" :collapsed="isOpen" />
+            <JourneyItem :button="addPoiButton" :collapsed="isOpen" />
+            <JourneyItem :button="addJourneyButton" :collapsed="isOpen" :custom="true" :visible="addVisible" />
+            <JourneyItem :button="editJourneyButton" :collapsed="isOpen" :visible="editVisible" />
+            <JourneyItem :button="saveJourneyButton" :collapsed="isOpen" :visible="saveVisible" />
+            <JourneyItem class="last:mt-auto" :button="logoutButton" :collapsed="isOpen" :visible="true" />
         </div>
     </div>
 </template>
@@ -48,7 +44,6 @@ import {
     faAdd,
     faBookAtlas,
     faCircleUser,
-    faEarth,
     faLocationDot,
     faHome,
     faSignOut,
@@ -78,7 +73,9 @@ const logoutButton = ref({
 const viewProfileButton = ref({
     text: "View my Profile",
     icon: faCircleUser as IconDefinition,
-    handler: () => {}
+    handler: () => {
+        //
+    }
 });
 const homeButton = ref({
     text: "Home",

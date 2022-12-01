@@ -9,25 +9,25 @@
                         <JourneyButton
                             v-if="!userStore.isLoggedIn"
                             type="secondary"
-                            @click="journeyModalController.open('login')"
                             fill="fill"
-                            >LOGIN</JourneyButton
-                        >
+                            @click="journeyModalController.open('login')">
+                            LOGIN
+                        </JourneyButton>
 
                         <JourneyButton
                             v-if="userStore.isLoggedIn"
                             type="secondary"
                             fill="fill"
-                            @click="router.push('logbook')"
-                            >LOGBOOK</JourneyButton
-                        >
+                            @click="router.push('logbook')">
+                            LOGBOOK
+                        </JourneyButton>
                         <JourneyButton
                             v-if="userStore.isLoggedIn"
                             type="secondary"
                             fill="fill"
-                            @click="userStore.logout"
-                            >LOGOUT</JourneyButton
-                        >
+                            @click="userStore.logout">
+                            LOGOUT
+                        </JourneyButton>
                     </div>
                 </div>
                 <section class="relative sm:h-96 z-20 text-high-contrast-text">
@@ -52,25 +52,25 @@
                                 <GoogleAutoComplete
                                     :text="validJourney.start.text"
                                     placeholder="Start"
+                                    :type="['locality']"
                                     @selected="setStart"
-                                    @dirty="validJourney.start.valid = false"
-                                    :type="['locality']" />
+                                    @dirty="validJourney.start.valid = false" />
                             </div>
-                            <span class="w-1/3 h-1 bg-black hidden sm:block"></span>
+                            <span class="w-1/3 h-1 bg-black hidden sm:block" />
                             <div class="relative grow">
                                 <GoogleAutoComplete
                                     :text="validJourney.end.text"
                                     placeholder="End"
+                                    :type="['locality']"
                                     @selected="setEnd"
-                                    @dirty="validJourney.end.valid = false"
-                                    :type="['locality']" />
+                                    @dirty="validJourney.end.valid = false" />
                             </div>
                         </div>
-                        <div class="sm:absolute sm:left-0 sm:w-1/2 border-l-" ref="poiCountEl">
+                        <div ref="poiCountEl" class="sm:absolute sm:left-0 sm:w-1/2 border-l-">
                             <div
                                 class="flex flex-col items-center justify-center space-x-4 rounded-r-md p-2 drop-shadow-lg bg-secondary-light dark:bg-secondary-dark sm:flex-row sm:justify-end sm:relative">
                                 <p>{{ poiCount }} pois found!</p>
-                                <JourneyButton @click="pushLogbook">Start now!</JourneyButton>
+                                <JourneyButton @click="pushLogbook"> Start now! </JourneyButton>
                             </div>
                         </div>
                     </section>
@@ -166,9 +166,9 @@ import { journeyModalController } from "components/UI/Modal/JourneyModalControll
 import { useJourneyStore } from "stores/useJourneyStore";
 import JourneyButton from "components/UI/Button/JourneyButton.vue";
 
-const userStore = useUserStore();
-const poiStore = usePoiStore();
-const journeyStore = useJourneyStore();
+let userStore = useUserStore();
+let poiStore = usePoiStore();
+let journeyStore = useJourneyStore();
 const poiCount = ref(0);
 const poiCountEl = ref();
 

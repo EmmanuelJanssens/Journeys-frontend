@@ -10,7 +10,6 @@
             navigation
             :modules="modules"
             class="h-full"
-            @slides-length-change="goToLast"
             :breakpoints="{
                 576: {
                     slidesPerView: 1
@@ -18,10 +17,11 @@
                 600: { slidesPerView: 2 },
                 1200: { slidesPerView: 3 },
                 1536: { slidesPerView: 4 }
-            }">
+            }"
+            @slides-length-change="goToLast">
             <swiper-slide
                 v-for="item in journeyStore.editJourney.experiencesConnection?.edges"
-                v-bind:key="item.node.id">
+                :key="(item.node as PoiDto).id">
                 <ExperienceCard
                     :experience="item"
                     :journey="journeyStore.editJourney.id!"
@@ -52,7 +52,7 @@ import { getLocalityAndCountry, reverseGeocode } from "google/googleGeocoder";
 import router from "router/router";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { LngLat } from "mapbox-gl";
-import { useToast, POSITION } from "vue-toastification";
+import { PoiDto } from "types/dtos";
 const modules = ref([Pagination, Navigation, Lazy, A11y]);
 
 const userStore = useUserStore();
@@ -63,7 +63,6 @@ const emit = defineEmits<{
     (e: "updated", journeyId: string): void;
 }>();
 
-const toast = useToast();
 //return false to cancel
 onBeforeRouteLeave(async () => {
     let leave = true;

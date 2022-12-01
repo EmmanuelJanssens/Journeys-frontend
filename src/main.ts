@@ -1,4 +1,3 @@
-// import { IonicVue } from "@ionic/vue";
 import { createPinia } from "pinia";
 import { createApp } from "vue";
 import { RecycleScroller, DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
@@ -21,7 +20,6 @@ import "@vuepic/vue-datepicker/dist/main.css";
 
 const pinia = createPinia();
 const app = createApp(App);
-// app.use(IonicVue);
 
 app.component("DatePicker", DatePicker);
 app.component("RecycleScroller", RecycleScroller);

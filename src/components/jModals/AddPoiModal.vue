@@ -29,35 +29,28 @@
     </JourneyModal>
 </template>
 <script lang="ts" setup>
-import axios from "axios";
 import GoogleAutoComplete from "components/JAutocomplete/GoogleAutoComplete.vue";
 import JourneyButton from "components/UI/Button/JourneyButton.vue";
 import JourneyInput from "components/UI/Input/JourneyInput.vue";
 import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import { getGeocodedData } from "google/googleGeocoder";
-import mapboxgl from "mapbox-gl";
 import { usePoiStore } from "stores/usePoiStore";
 import { AddressDto, PoiDto } from "types/dtos";
 import { ref } from "vue";
-import { GeoJSON } from "geojson";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
+import { Feature } from "geojson";
 const input = ref("");
 const url = ref("");
 const poiName = ref("");
 const address = ref<AddressDto>();
-const predictions = ref([
-    {
-        value: "",
-        key: ""
-    }
-]);
+
 const isLoading = ref(false);
 
 async function set(res: string) {
     isLoading.value = true;
     address.value = await getGeocodedData(res);
     const coords = [address.value.longitude, address.value.latitude];
-    const marker: GeoJSON.Feature = {
+    const marker: Feature = {
         type: "Feature",
         geometry: {
             type: "Point",

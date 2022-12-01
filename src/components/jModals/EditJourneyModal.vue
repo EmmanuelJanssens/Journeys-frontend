@@ -7,14 +7,14 @@
             w: 'w-1/2  min-w-max',
             h: 'h/1/3'
         }">
-        <template v-slot:body>
+        <template #body>
             <div class="bg-secondary-light p-4 flex flex-col h-full">
                 <div class="flex space-x-2 flex-wrap max-w-3xl">
-                    <div v-for="img in images" v-bind:key="img.url">
+                    <div v-for="img in images" :key="img.url">
                         <button class="relative" @click="setThumbnail(img.url)">
                             <img
-                                class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1"
-                                v-lazy="{ src: img.url, loading: '/assets/placeholder.png' }" />
+                                v-lazy="{ src: img.url, loading: '/assets/placeholder.png' }"
+                                class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1" />
                             <font-awesome-icon
                                 v-if="img.active == 'checked'"
                                 class="absolute top-0 right-0 text-green-400"
@@ -23,12 +23,12 @@
                     </div>
                 </div>
                 <div class="flex flex-col space-y-4 h-full">
-                    <journey-input placeholder="Title" v-model="state.title" />
-                    <journey-textarea :rows="6" placeholder="description" v-model="state.description" />
+                    <journey-input v-model="state.title" placeholder="Title" />
+                    <journey-textarea v-model="state.description" :rows="6" placeholder="description" />
                 </div>
             </div>
         </template>
-        <template v-slot:footer>
+        <template #footer>
             <div class="flex justify-end">
                 <button @click="save">Save</button>
             </div>

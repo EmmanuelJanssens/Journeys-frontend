@@ -8,28 +8,32 @@
             w: 'w-1/4 min-w-max',
             h: 'h-1/3'
         }">
-        <template v-slot:body>
+        <template #body>
             <div class="h-full bg-secondary-light dark:bg-secondary-dark p-4 flex items-center justify-center">
                 <div class="flex flex-col space-y-4 justify-center">
-                    <JourneyInput placeholder="Email" v-model="state.email" />
-                    <JourneyInput placeholder="Password" v-model="state.password" type="password" />
+                    <JourneyInput v-model="state.email" placeholder="Email" />
+                    <JourneyInput v-model="state.password" placeholder="Password" type="password" />
                     <div class="flex justify-between space-x-4">
-                        <JourneyButton class="grow" type="primary" fill="fill" @click="submitForm">LOGIN</JourneyButton>
-                        <JourneyButton class="grow" type="secondary" fill="outlined" @click="openRegister"
-                            >REGISTER</JourneyButton
-                        >
+                        <JourneyButton class="grow" type="primary" fill="fill" @click="submitForm">
+                            LOGIN
+                        </JourneyButton>
+                        <JourneyButton class="grow" type="secondary" fill="outlined" @click="openRegister">
+                            REGISTER
+                        </JourneyButton>
                     </div>
-                    <JourneyLabel class="text-center" color="text-primary-dark" size="text-lg">Login with</JourneyLabel>
+                    <JourneyLabel class="text-center" color="text-primary-dark" size="text-lg">
+                        Login with
+                    </JourneyLabel>
                     <div class="w-14 h-14">
-                        <JourneyButton type="primary" fill="fill" @click="openProviderSignin"
-                            ><font-awesome-icon :icon="faGoogle"
-                        /></JourneyButton>
+                        <JourneyButton type="primary" fill="fill" @click="openProviderSignin">
+                            <font-awesome-icon :icon="faGoogle" />
+                        </JourneyButton>
                     </div>
                 </div>
             </div>
         </template>
-        <template v-slot:footer>
-            <div class="flex justify-end"></div>
+        <template #footer>
+            <div class="flex justify-end" />
         </template>
     </journey-modal>
 </template>
@@ -69,7 +73,7 @@ async function openProviderSignin() {
     isLoading.value = true;
     const credentials = await userStore.registerWith("google");
     if (credentials) {
-        dismissLoginModal(true);
+        dismissLoginModal();
         journeyModalController.close("login");
         toast.success("Welcome " + authApp.currentUser?.displayName, {
             position: POSITION.TOP_CENTER
@@ -95,7 +99,7 @@ async function submitForm() {
     if (!v$.value.$error) {
         const response = await userStore.login(state.value.email, state.value.password);
         if (response == true) {
-            dismissLoginModal(true);
+            dismissLoginModal();
             toast.success("Welcome " + authApp.currentUser?.displayName, {
                 position: POSITION.TOP_CENTER
             });
@@ -114,7 +118,7 @@ function clearModal() {
     v$.value.$reset();
 }
 
-function dismissLoginModal(success: boolean) {
+function dismissLoginModal() {
     journeyModalController.close("login");
     clearModal();
 }

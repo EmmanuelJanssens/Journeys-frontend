@@ -8,7 +8,7 @@
             w: 'w-[400px]',
             h: 'h-[250px]'
         }">
-        <template v-slot:body>
+        <template #body>
             <div class="flex flex-row space-x-4 p-4 items-center bg-secondary-light dark:bg-secondary-dark h-full">
                 <GoogleAutoComplete
                     :text="validJourney.start.text"
@@ -23,9 +23,9 @@
             </div>
         </template>
 
-        <template v-slot:footer>
+        <template #footer>
             <div class="flex justify-end">
-                <JourneyButton type="secondary" fill="contrast" @click="gotoJourneyMap">Create</JourneyButton>
+                <JourneyButton type="secondary" fill="contrast" @click="gotoJourneyMap"> Create </JourneyButton>
             </div>
         </template>
     </JourneyModal>

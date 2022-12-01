@@ -18,10 +18,10 @@
                 1200: { slidesPerView: 3 },
                 1536: { slidesPerView: 4 }
             }">
-            <swiper-slide v-for="item in journeyStore.editJourney.experiencesConnection?.edges" v-bind:key="item.order">
+            <swiper-slide v-for="item in journeyStore.editJourney.experiencesConnection?.edges" :key="item.order">
                 <ExperienceCard
                     :experience="item"
-                    :journey="   journeyStore.editJourney.id!"
+                    :journey=" journeyStore.editJourney.id!"
                     class="max-w-[400px] h-full"
                     @updated="emit('updated', journeyStore.editJourney.id!)" />
             </swiper-slide>
