@@ -122,6 +122,7 @@ onMounted(() => {
                 isFs: true
             });
         });
+
         state.value.selectedDate = currentData.value?.experience.date;
     }
 });
@@ -150,17 +151,13 @@ function removeImage(image: string) {
     }
 }
 
-const taskList = Array<UploadTask>();
 async function save() {
     if (currentData.value?.experience.editing) {
-        currentData.value!.experience!.images = currentData.value!.experience!.images.filter((img) =>
-            images.value.find((search) => img == search.url)
-        );
         currentData.value!.experience!.title = state.value.title;
         currentData.value!.experience!.date = state.value.selectedDate;
         currentData.value!.experience!.description = state.value.description;
         // currentData.value!.experience!.journey = { id: journeyStore.editJourney.journey?.id };
-        currentData.value.experience.imagesEditing = files.value;
+        currentData.value.experience.imagesEditing = currentData.value.experience.imagesEditing?.concat(...files.value);
         journeyStore.setExperienceData(currentData.value.experience);
         journeyModalController.close("editExperience");
     } else {
@@ -172,43 +169,12 @@ async function save() {
             const imgRef = fref(storageRef.storage, img);
             await deleteObject(imgRef);
         });
-        if (files.value.length > 0) {
-            await files.value.forEach(async (f) => {
-                const id = (f.url as string).slice((f.url as string).lastIndexOf("/") + 1);
-                const imageRef = fref(
-                    storageRef,
-                    journeyStore.editJourney.id + "/" + currentData.value!.experience?.node.id + "/" + id
-                );
-                const metadata = {
-                    contentType: f.file.mimeType
-                };
-                taskList.push(uploadBytesResumable(imageRef, f.file.blob, metadata));
-            });
-        }
-        var error = false;
-        const uploaded: string[] = [];
-        for (const task of taskList) {
-            const res = await task;
-            const url = await getDownloadURL(task.snapshot.ref);
-            uploaded.push(url);
-            if (res.state == "error") {
-                error = true;
-            }
-        }
-        if (error) {
-            uploaded.forEach((img) => {
-                const imgRef = fref(storageRef.storage, img);
-                deleteObject(imgRef);
-            });
-            isLoading.value = false;
-            toast.error("An error occured while uploading your image try again", {
-                position: POSITION.TOP_CENTER
-            });
-        } else {
+
+        try {
+            journeyStore.uploadImages(files.value, props.experience.node.id!, journeyStore.editJourney.id!);
             currentData.value!.experience!.images = currentData.value!.experience!.images.filter((img) =>
                 images.value.find((search) => img == search.url)
             );
-            currentData.value!.experience!.images = currentData.value!.experience!.images.concat(...uploaded);
             currentData.value!.experience!.title = state.value.title;
             currentData.value!.experience!.date = state.value.selectedDate;
             currentData.value!.experience!.description = state.value.description;
@@ -218,8 +184,13 @@ async function save() {
             toast.success("Your modifications were successfuly saved", {
                 position: POSITION.TOP_CENTER
             });
-            isLoading.value = false;
+        } catch (e) {
+            toast.error("Could not save your modifications", {
+                position: POSITION.TOP_CENTER
+            });
         }
+
+        isLoading.value = false;
     }
     if (router.currentRoute.value.name == "edit") {
         drawJourney(journeyStore.editJourney);

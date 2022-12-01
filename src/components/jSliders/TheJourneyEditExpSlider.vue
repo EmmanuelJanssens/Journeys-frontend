@@ -50,8 +50,9 @@ import "swiper/css/scrollbar";
 import { mapInstance } from "map/JourneysMap";
 import { getLocalityAndCountry, reverseGeocode } from "google/googleGeocoder";
 import router from "router/router";
-
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { LngLat } from "mapbox-gl";
+import { useToast, POSITION } from "vue-toastification";
 const modules = ref([Pagination, Navigation, Lazy, A11y]);
 
 const userStore = useUserStore();
@@ -62,10 +63,50 @@ const emit = defineEmits<{
     (e: "updated", journeyId: string): void;
 }>();
 
+const toast = useToast();
 //return false to cancel
-onBeforeRouteLeave(() => {
-    poiStore.clear();
-    journeyStore.clear();
+onBeforeRouteLeave(async () => {
+    let leave = true;
+    if (journeyStore.isDirty) {
+        journeyModalController.open("alert", {
+            props: {
+                title: "Warning",
+                message: "You have unsaved changes in your journey, do you want to save them?",
+                buttons: [
+                    {
+                        text: "YES",
+                        handler: async () => {
+                            journeyModalController.close("alert", { data: false });
+                        }
+                    },
+                    {
+                        text: "NO",
+                        handler: async () => {
+                            journeyModalController.close("alert", {
+                                data: true
+                            });
+                        }
+                    }
+                ]
+            }
+        });
+
+        const response = await journeyModalController.didClose("alert");
+        leave = response.data;
+        if (!leave) {
+            journeyModalController.open("saveJourney");
+            const didSave = await journeyModalController.didClose("saveJourney");
+            console.log(didSave);
+            if (!didSave) leave = false;
+            else leave = true;
+        }
+    }
+    if (leave) {
+        poiStore.clear();
+        journeyStore.clear();
+    }
+
+    return leave;
 });
 
 function goToLast(swiper: any) {

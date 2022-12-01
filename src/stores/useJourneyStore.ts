@@ -2,10 +2,10 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
 import { AddressDto, ExperienceDto, JourneyDto, PoiDto, UpdateJourneyDto } from "types/dtos";
-import { authApp } from "google/firebase";
+import { authApp, storageRef } from "google/firebase";
 import { getMidPoint, getRadius } from "utils/utils";
 import { LngLat, LngLatLike } from "mapbox-gl";
-
+import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
 export const useJourneyStore = defineStore("journey", () => {
     const editJourney = ref<JourneyDto>({});
     const updateDto = ref<UpdateJourneyDto>({});
@@ -14,6 +14,8 @@ export const useJourneyStore = defineStore("journey", () => {
         start: string;
         end: string;
     }>();
+
+    const isDirty = ref(false);
 
     function getInitial():
         | {
@@ -87,6 +89,7 @@ export const useJourneyStore = defineStore("journey", () => {
         editJourney.value.experiencesConnection!.edges?.sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
+        isDirty.value = true;
     }
 
     async function updateJourney(mode: string): Promise<JourneyDto | undefined> {
@@ -101,10 +104,16 @@ export const useJourneyStore = defineStore("journey", () => {
 
     async function updateJourneyExperiences() {
         const token = await authApp.currentUser?.getIdToken(false);
-        updateDto.value?.connected?.forEach((experience) => {
-            experience.imagesEditing?.forEach((image) => {
-                console.log("upload image " + image.url);
-            });
+
+        editJourney.value.experiencesConnection?.edges?.forEach(async (experience) => {
+            uploadImages(experience.imagesEditing!, experience.node.id!, editJourney.value.id!);
+            delete experience.editing;
+            delete experience.imagesEditing;
+            delete experience.journey;
+        });
+
+        updateDto.value?.connected?.forEach(async (experience) => {
+            uploadImages(experience.imagesEditing!, experience.node.id!, editJourney.value.id!);
             delete experience.editing;
             delete experience.imagesEditing;
             delete experience.journey;
@@ -114,6 +123,7 @@ export const useJourneyStore = defineStore("journey", () => {
                 Authorization: `Bearer ${token}`
             }
         });
+        isDirty.value = false;
         return result.data as JourneyDto;
     }
 
@@ -121,16 +131,25 @@ export const useJourneyStore = defineStore("journey", () => {
         const token = await authApp.currentUser?.getIdToken(false);
         editJourney.value.title = name;
 
-        editJourney.value.experiencesConnection?.edges?.forEach((exp) => {
-            delete exp.editing;
-            delete exp.imagesEditing;
-            delete exp.journey;
+        editJourney.value.experiencesConnection?.edges?.forEach(async (experience) => {
+            uploadImages(experience.imagesEditing!, experience.node.id!, editJourney.value.id!);
+            delete experience.editing;
+            delete experience.imagesEditing;
+            delete experience.journey;
+        });
+        updateDto.value?.connected?.forEach(async (experience) => {
+            uploadImages(experience.imagesEditing!, experience.node.id!, editJourney.value.id!);
+            delete experience.editing;
+            delete experience.imagesEditing;
+            delete experience.journey;
         });
         const response = await axios.post("/api/journey/", editJourney.value!, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
+        isDirty.value = false;
+
         return response.data as JourneyDto;
     }
 
@@ -153,8 +172,8 @@ export const useJourneyStore = defineStore("journey", () => {
         if (!alreadyInJourney(experience)) {
             editJourney.value!.experiencesConnection!.edges!.push(experience);
             updateDto.value?.connected?.push(experience);
+            isDirty.value = true;
         }
-
         return true;
     }
 
@@ -166,8 +185,12 @@ export const useJourneyStore = defineStore("journey", () => {
         editJourney.value.experiencesConnection!.edges.sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
+        isDirty.value = true;
     }
 
+    function setDirty(dirty: boolean) {
+        isDirty.value = dirty;
+    }
     function alreadyInJourney(expDto: ExperienceDto): Boolean {
         const result =
             editJourney.value!.experiencesConnection!.edges!.find((item) => item.node.id === expDto.node.id) !==
@@ -225,6 +248,67 @@ export const useJourneyStore = defineStore("journey", () => {
         ];
         return obj;
     }
+
+    function uploadImages(
+        images: {
+            file: any;
+            url: string;
+        }[],
+        exp: string,
+        journey: string
+    ) {
+        const taskList: UploadTask[] = [];
+
+        if (!images || images.length == 0) return undefined;
+
+        images.forEach(async (image) => {
+            const id = image.url.slice(image.url.lastIndexOf("/")) + 1;
+            const imageRef = fref(storageRef, editJourney.value.id + "/" + exp + "/" + id);
+            const metadata = {
+                contentType: image.file.mimeType,
+                customMetadata: {
+                    exp: exp,
+                    journey: journey
+                }
+            };
+            taskList.push(uploadBytesResumable(imageRef, image.file.blob, metadata));
+        });
+
+        Promise.all(taskList).then(async (tasks) => {
+            await tasks.forEach(async (task) => {
+                if (task.state == "success") {
+                    if (task.metadata.customMetadata?.exp && task.metadata.customMetadata?.journey) {
+                        const token = await authApp.currentUser?.getIdToken(false);
+                        const url = await getDownloadURL(task.ref);
+                        try {
+                            await axios.put(
+                                "api/journey/experience/image",
+                                {
+                                    journey: task.metadata.customMetadata.journey,
+                                    poi: task.metadata.customMetadata.exp,
+                                    url: url
+                                },
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${token}`
+                                    }
+                                }
+                            );
+                            if (editJourney.value.id == task.metadata.customMetadata.journey) {
+                                editJourney.value.experiencesConnection?.edges?.forEach((exp) => {
+                                    if (exp.node.id == task.metadata.customMetadata?.exp) {
+                                        exp.images.push(url);
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            //
+                        }
+                    }
+                }
+            });
+        });
+    }
     return {
         editJourney,
         updateDto,
@@ -243,8 +327,10 @@ export const useJourneyStore = defineStore("journey", () => {
         getJourney,
         clear,
         init,
+        isDirty,
         setInitial,
         getInitial,
-        setExperienceData
+        setExperienceData,
+        uploadImages
     };
 });

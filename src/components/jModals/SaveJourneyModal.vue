@@ -4,14 +4,18 @@
             <h1 class="text-high-contrast-text">Save Journey</h1>
         </template>
         <template v-slot:body>
-            <div class="flex flex-col p-4 bg-secondary-light dark:bg-secondary-dark">
+            <div class="flex flex-col p-4 bg-secondary-light dark:bg-secondary-dark space-y-4">
                 <JourneyInput placeholder="Journey title" v-model="state.title" />
+                <div class="flex space-x-4 justify-between">
+                    <JourneyButton class="grow" type="primary" fill="fill" @click="quickSave">Quick Save</JourneyButton>
+                    <JourneyButton class="grow" type="secondary" fill="fill" @click="redirectionSave"
+                        >Save</JourneyButton
+                    >
+                </div>
             </div>
         </template>
         <template v-slot:footer>
-            <div class="flex justify-end">
-                <JourneyButton type="secondary" fill="contrast" @click="save">Save</JourneyButton>
-            </div>
+            <span></span>
         </template>
     </JourneyModal>
 </template>
@@ -33,30 +37,59 @@ const journeyStore = useJourneyStore();
 const mode = computed(() => router.currentRoute.value.query.mode);
 const isLoading = ref(false);
 onMounted(() => {
+    console.log(router.currentRoute.value);
     if (mode.value == "new") {
         state.value.title = journeyStore.editJourney.start?.address + " - " + journeyStore.editJourney.end?.address;
     } else if (mode.value == "existing") {
         state.value.title = journeyStore.editJourney.title!;
     }
 });
-async function save() {
+
+async function quickSave() {
     try {
-        isLoading.value = true;
+        const saved = await save();
+        journeyModalController.close("saveJourney");
+    } catch (e) {
+        console.log(e);
+        toast.error("Could not savce your journey", {
+            position: POSITION.TOP_CENTER
+        });
+    }
+}
+
+async function redirectionSave() {
+    try {
+        const saved = await save();
+        journeyModalController.close("saveJourney", {
+            data: {
+                journey: saved?.id
+            }
+        });
+        router.push("/logbook/journey/" + saved!.id);
+    } catch (e) {
+        console.log(e);
+
+        toast.error("Could not savce your journey", {
+            position: POSITION.TOP_CENTER
+        });
+    }
+}
+async function save() {
+    isLoading.value = true;
+    try {
         let saved;
         if (mode.value == "existing") {
             journeyStore.editJourney.title = state.value.title;
             saved = await journeyStore.updateJourneyExperiences();
+            toast.success("Journey saved!", {
+                position: POSITION.TOP_CENTER
+            });
+            isLoading.value = false;
+
+            return saved;
         } else if (mode.value == "new") saved = await journeyStore.saveJourney(state.value.title);
-        journeyModalController.close("saveJourney");
-        toast.success("Journey saved!", {
-            position: POSITION.TOP_CENTER
-        });
-        if (!saved) throw new Error("Could not save");
-        router.push("/logbook/journey/" + saved?.id);
     } catch (e) {
-        toast.error("Could not savce your journey", {
-            position: POSITION.TOP_CENTER
-        });
+        throw Error(e);
     }
     isLoading.value = false;
 }
