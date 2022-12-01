@@ -59,23 +59,21 @@ export const useUserStore = defineStore("user", () => {
         }
     }
 
-    async function registerWith(provider?: string): Promise<UserCredential | undefined> {
-        try {
-            if (provider == "google") {
-                const googleAuthProvider = new GoogleAuthProvider();
-                const credentials = await signInWithPopup(authApp, googleAuthProvider);
-                const name = uniqueNamesGenerator(namesConfig);
-                const newUser: UserDto = {
-                    username: name,
-                    email: credentials.user.email!,
-                    uid: credentials.user.uid
-                };
-                const response = await axios.post("/api/authentication/provider", newUser);
-                return credentials;
-            }
-        } catch (e) {
-            return undefined;
+    async function registerWith(provider?: string): Promise<UserCredential> {
+        if (provider == "google") {
+            const googleAuthProvider = new GoogleAuthProvider();
+            const credentials = await signInWithPopup(authApp, googleAuthProvider);
+
+            const name = uniqueNamesGenerator(namesConfig);
+            const newUser: UserDto = {
+                username: name,
+                email: credentials.user.email!,
+                uid: credentials.user.uid
+            };
+            await axios.post("/api/authentication/provider", newUser);
+            return credentials;
         }
+        throw new Error("No provider specified");
     }
     async function register(user: UserDto): Promise<UserCredential | undefined> {
         try {

@@ -28,7 +28,10 @@
 </template>
 <script lang="ts" setup>
 import { useUserStore } from "stores/useUserStore";
-
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/scrollbar";
 import JourneyCard from "components/jCards/JourneyCard.vue";
 
 import { Swiper, SwiperSlide } from "swiper/vue";

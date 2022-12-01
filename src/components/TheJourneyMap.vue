@@ -33,8 +33,6 @@ import axios from "axios";
 import { mapInstance, mapLayers } from "map/JourneysMap";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { onMounted, ref } from "vue";
-import { getLocalityAndCountry, reverseGeocode } from "google/googleGeocoder";
-import router from "router/router";
 
 const emit = defineEmits<{
     (e: "markerDragged", pos: mapboxgl.LngLat, marker: string): void;
@@ -157,45 +155,6 @@ async function onClusterClick(e: MapMouseEvent) {
             });
         }
     });
-}
-
-function enableDrag() {
-    if (!router.currentRoute.value.query.id) {
-        const start = mapInstance.getmarkerbyId("journey_start")!;
-        start.setDraggable(true);
-        start.on("dragend", () => {
-            onMarkerDragend(start.getLngLat(), "journey_start");
-        });
-        const end = mapInstance.getmarkerbyId("journey_end")!;
-        end.setDraggable(true);
-        end.on("dragend", () => {
-            onMarkerDragend(end.getLngLat(), "journey_end");
-        });
-    }
-}
-
-async function onMarkerDragend(pos: LngLat, marker: string) {
-    const response = await reverseGeocode(pos.lat, pos.lng);
-    const result = getLocalityAndCountry(response!);
-    if (result.country != undefined && result.locality != undefined) {
-        if (marker == "journey_start") {
-            journeyStore.editJourney.start = {
-                placeId: result.placeId,
-                address: result.locality + ", " + result.country,
-                latitude: pos.lat,
-                longitude: pos.lng
-            };
-        } else if (marker == "journey_end") {
-            journeyStore.editJourney.end = {
-                placeId: result.placeId,
-                address: result.locality + ", " + result.country,
-                latitude: pos.lat,
-                longitude: pos.lng
-            };
-        }
-    }
-    const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney);
-    await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
 }
 </script>
 <style></style>

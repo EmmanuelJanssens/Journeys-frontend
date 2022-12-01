@@ -362,7 +362,7 @@ class JourneysMap {
                 }
             );
         }
-
+        console.log(this.existingMarkers);
         return this.map;
     }
     panTo(pos: mapboxgl.LngLat) {

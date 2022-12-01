@@ -70,8 +70,6 @@ export const usePoiStore = defineStore("poi", () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-
-            poisBetween.value?.push(result.data);
             return result.data as PoiDto;
         } catch (e) {
             return undefined;

@@ -1,5 +1,5 @@
 <template>
-    <div v-if="props.poiList" class="overflow bg-primary-light h-screen group">
+    <div class="overflow bg-primary-light w-0 h-screen group transition-all" ref="poiList" @transitionend="resize">
         <DynamicScroller :items="props.poiList" :min-item-size="54" style="height: 100%">
             <template v-slot="{ item, index, active }">
                 <DynamicScrollerItem :item="item" :active="active" :data-index="index">
@@ -19,9 +19,29 @@
 </template>
 
 <script lang="ts" setup>
+import { ref, watch } from "vue";
 import { PoiDto } from "types/dtos";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { mapInstance } from "map/JourneysMap";
+
+const poiList = ref();
+const isOpen = ref(false);
+
+async function resize() {
+    (await mapInstance.getMap()).resize();
+}
+async function toggle(on: boolean) {
+    const el = poiList.value as HTMLElement;
+    if (on) {
+        el.classList.add("w-96");
+        el.classList.remove("w-0");
+    } else if (!on) {
+        el.classList.remove("w-96");
+        el.classList.add("w-0");
+    }
+    isOpen.value = on;
+}
 
 const props = defineProps<{
     poiList?: PoiDto[];
@@ -30,6 +50,15 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: "poiItemClicked", poi: PoiDto): void;
 }>();
+
+watch(
+    () => props.poiList,
+    (newVal) => {
+        if (newVal?.length == 0) {
+            toggle(false);
+        } else toggle(true);
+    }
+);
 </script>
 
 <style>

@@ -9,15 +9,8 @@
                         <JourneyButton
                             v-if="!userStore.isLoggedIn"
                             type="secondary"
-                            fill="none"
-                            @click="journeyModalController.open('register')"
-                            >CREATE AN ACCOUNT</JourneyButton
-                        >
-                        <JourneyButton
-                            v-if="!userStore.isLoggedIn"
-                            type="secondary"
                             @click="journeyModalController.open('login')"
-                            fill="contrast"
+                            fill="fill"
                             >LOGIN</JourneyButton
                         >
 
@@ -60,7 +53,8 @@
                                     :text="validJourney.start.text"
                                     placeholder="Start"
                                     @selected="setStart"
-                                    @dirty="validJourney.start.valid = false" />
+                                    @dirty="validJourney.start.valid = false"
+                                    :type="['locality']" />
                             </div>
                             <span class="w-1/3 h-1 bg-black hidden sm:block"></span>
                             <div class="relative grow">
@@ -68,7 +62,8 @@
                                     :text="validJourney.end.text"
                                     placeholder="End"
                                     @selected="setEnd"
-                                    @dirty="validJourney.end.valid = false" />
+                                    @dirty="validJourney.end.valid = false"
+                                    :type="['locality']" />
                             </div>
                         </div>
                         <div class="sm:absolute sm:left-0 sm:w-1/2 border-l-" ref="poiCountEl">
@@ -158,7 +153,7 @@ import { useUserStore } from "stores/useUserStore";
 import { usePoiStore } from "stores/usePoiStore";
 import { getMidPoint, getRadius } from "utils/utils";
 
-import GoogleAutoComplete from "components/GoogleAutoComplete.vue";
+import GoogleAutoComplete from "components/jAutocomplete/GoogleAutoComplete.vue";
 import CardPreview from "./CardPreview.vue";
 
 import { getGeocodedData } from "google/googleGeocoder";

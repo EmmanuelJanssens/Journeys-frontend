@@ -2,6 +2,7 @@
     <journey-modal
         header="Hello"
         name="register"
+        :loading="isLoading"
         :size="{
             w: 'max-w-4xl'
         }"
@@ -10,11 +11,7 @@
         <template v-slot:header>
             <h1 class="text-btn-contrast-text">Register</h1>
         </template>
-        <template v-slot:loading>
-            <div v-if="isLoading" class="bg-high-contrast-text h-3">
-                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
-            </div>
-        </template>
+
         <template v-slot:body>
             <div class="bg-secondary-light dark:bg-secondary-dark p-8 h-full">
                 <div class="grid grid-cols-2 gap-4">
@@ -97,7 +94,7 @@
         </template>
         <template v-slot:footer>
             <div class="flex justify-end">
-                <JourneyButton type="secondary" fill="contrast"> Register</JourneyButton>
+                <JourneyButton type="secondary" fill="contrast" @click="submitForm"> Register</JourneyButton>
             </div>
         </template>
     </journey-modal>

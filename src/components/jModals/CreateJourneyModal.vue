@@ -3,6 +3,7 @@
     <JourneyModal
         header="Create a new Journey"
         name="createJourney"
+        :loading="isLoading"
         :size="{
             w: 'w-[400px]',
             h: 'h-[250px]'
@@ -33,7 +34,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import JourneyModal from "components/UI/Modal/JourneyModal.vue";
-import GoogleAutoComplete from "components/GoogleAutoComplete.vue";
+import GoogleAutoComplete from "components/jAutocomplete/GoogleAutoComplete.vue";
 import { getGeocodedData } from "google/googleGeocoder";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import JourneyButton from "components/UI/Button/JourneyButton.vue";
@@ -48,11 +49,15 @@ const validJourney = ref({
         valid: false
     }
 });
+
+const isLoading = ref(false);
 function setStart(value: string) {
+    isLoading.value = false;
     validJourney.value.start.text = value;
     validJourney.value.start.valid = true;
 }
 function setEnd(value: string) {
+    isLoading.value = false;
     validJourney.value.end.text = value;
     validJourney.value.end.valid = true;
 }

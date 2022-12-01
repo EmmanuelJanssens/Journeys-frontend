@@ -1,5 +1,5 @@
 <template>
-    <JourneyModal name="saveJourney">
+    <JourneyModal name="saveJourney" :loading="isLoading">
         <template v-slot:header>
             <h1 class="text-high-contrast-text">Save Journey</h1>
         </template>
@@ -31,6 +31,7 @@ const state = ref({
 const toast = useToast();
 const journeyStore = useJourneyStore();
 const mode = computed(() => router.currentRoute.value.query.mode);
+const isLoading = ref(false);
 onMounted(() => {
     if (mode.value == "new") {
         state.value.title = journeyStore.editJourney.start?.address + " - " + journeyStore.editJourney.end?.address;
@@ -40,6 +41,7 @@ onMounted(() => {
 });
 async function save() {
     try {
+        isLoading.value = true;
         let saved;
         if (mode.value == "existing") {
             journeyStore.editJourney.title = state.value.title;
@@ -56,5 +58,6 @@ async function save() {
             position: POSITION.TOP_CENTER
         });
     }
+    isLoading.value = false;
 }
 </script>

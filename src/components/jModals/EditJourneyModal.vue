@@ -2,18 +2,11 @@
     <journey-modal
         :header="'Edit ' + props.journey?.title"
         name="editJourney"
+        :loading="isLoading"
         :size="{
             w: 'w-1/2  min-w-max',
             h: 'h/1/3'
         }">
-        <template v-slot:loading>
-            <div v-if="isLoading" class="bg-high-contrast-text h-3">
-                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
-            </div>
-            <div v-if="isLoading" class="bg-high-contrast-text h-3">
-                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
-            </div>
-        </template>
         <template v-slot:body>
             <div class="bg-secondary-light p-4 flex flex-col h-full">
                 <div class="flex space-x-2 flex-wrap max-w-3xl">

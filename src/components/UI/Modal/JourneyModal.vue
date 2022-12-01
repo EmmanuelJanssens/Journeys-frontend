@@ -18,9 +18,13 @@
                                 ></slot>
                             </div>
                         </div>
-                        <slot name="loading"></slot>
+                        <div v-if="loading">
+                            <div class="relative bg-primary-light h-2">
+                                <div class="absolute bg-secondary-main h-full w-1/3 load"></div>
+                            </div>
+                        </div>
                     </header>
-                    <section class="h-full">
+                    <section class="h-full bg-secondary-light dark:bg-secondary-dark">
                         <slot name="body">Default body</slot>
                     </section>
                     <footer class="bg-primary-main dark:bg-primary-dark rounded-b-lg">
@@ -57,6 +61,10 @@ const modal = ref();
 const props = defineProps({
     onOutsideClicked: Function,
     onClose: Function,
+    loading: {
+        type: Boolean,
+        default: false
+    },
     header: {
         type: String,
         default: "Header"
@@ -102,5 +110,17 @@ onBeforeUnmount(() => {});
 <style scoped>
 .bg-dim {
     background-color: rgba(0, 0, 0, 0.5);
+}
+
+@keyframes left-right {
+    0% {
+        transform: translateX(0px);
+    }
+    50% {
+        transform: translateX(200%);
+    }
+}
+.load {
+    animation: left-right 1.5s ease-in-out infinite;
 }
 </style>

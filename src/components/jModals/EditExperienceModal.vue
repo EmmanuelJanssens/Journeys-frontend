@@ -3,6 +3,7 @@
     <journey-modal
         :header="'Edit '"
         name="editExperience"
+        :loading="isLoading"
         :size="{
             w: 'w-1/2 min-w-fit',
             h: 'h-1/3'

@@ -3,21 +3,23 @@
     <journey-modal
         header="Login"
         name="login"
+        :loading="isLoading"
         :size="{
             w: 'w-1/4 min-w-max',
             h: 'h-1/3'
         }">
-        <template v-slot:loading>
-            <div v-if="isLoading" class="bg-high-contrast-text h-3">
-                <div class="bg-secondary-darker h-full w-full animate-pulse"></div>
-            </div>
-        </template>
         <template v-slot:body>
             <div class="h-full bg-secondary-light dark:bg-secondary-dark p-4 flex items-center justify-center">
                 <div class="flex flex-col space-y-4 justify-center">
                     <JourneyInput placeholder="Email" v-model="state.email" />
                     <JourneyInput placeholder="Password" v-model="state.password" type="password" />
-                    <JourneyLabel color="text-primary-dark" size="text-lg">Login with</JourneyLabel>
+                    <div class="flex justify-between space-x-4">
+                        <JourneyButton class="grow" type="primary" fill="fill" @click="submitForm">LOGIN</JourneyButton>
+                        <JourneyButton class="grow" type="secondary" fill="outlined" @click="openRegister"
+                            >REGISTER</JourneyButton
+                        >
+                    </div>
+                    <JourneyLabel class="text-center" color="text-primary-dark" size="text-lg">Login with</JourneyLabel>
                     <div class="w-14 h-14">
                         <JourneyButton type="primary" fill="fill" @click="openProviderSignin"
                             ><font-awesome-icon :icon="faGoogle"
@@ -27,9 +29,7 @@
             </div>
         </template>
         <template v-slot:footer>
-            <div class="flex justify-end">
-                <button @click="submitForm">Login</button>
-            </div>
+            <div class="flex justify-end"></div>
         </template>
     </journey-modal>
 </template>
@@ -84,10 +84,15 @@ async function openProviderSignin() {
     isLoading.value = false;
 }
 
+function openRegister() {
+    journeyModalController.close("login");
+    journeyModalController.open("register");
+}
 async function submitForm() {
     v$.value.$validate();
+    isLoading.value = true;
+
     if (!v$.value.$error) {
-        isLoading.value = true;
         const response = await userStore.login(state.value.email, state.value.password);
         if (response == true) {
             dismissLoginModal(true);
@@ -99,8 +104,8 @@ async function submitForm() {
                 position: POSITION.TOP_CENTER
             });
         }
-        isLoading.value = false;
     }
+    isLoading.value = false;
 }
 
 function clearModal() {

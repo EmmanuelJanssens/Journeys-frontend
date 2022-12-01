@@ -12,10 +12,10 @@ const routes: RouteRecordRaw[] = [
     },
     {
         path: "/logbook",
-        name: "logbook",
+        name: "",
         component: () => import("views/LogBookPage.vue"),
         children: [
-            { path: "", name: "main", component: () => import("components/JSliders/TheJourneysSlider.vue") },
+            { path: "", name: "logbook", component: () => import("components/JSliders/TheJourneysSlider.vue") },
             {
                 path: "journey/:id",
                 name: "view",

@@ -11,9 +11,10 @@
 <script lang="ts" setup>
 import googleLoader from "google/googleLoader";
 import { onMounted, ref } from "vue";
-import AutoComplete from "./JAutocomplete/AutoComplete.vue";
+import AutoComplete from "components/jAutocomplete/AutoComplete.vue";
 
 const input = ref<string>("");
+
 const predictions = ref<
     {
         value: string;
@@ -21,10 +22,18 @@ const predictions = ref<
     }[]
 >([]);
 
-defineProps<{
-    text: string;
-    placeholder: string;
-}>();
+const props = defineProps({
+    text: String,
+    placeholder: String,
+    type: {
+        type: Array<string>,
+        default: ["locality"]
+    },
+    restriction: {
+        type: String,
+        default: "ch"
+    }
+});
 
 const emits = defineEmits<{
     (e: "selected", value: string): void;
@@ -42,10 +51,12 @@ function onAutoComplete(value: string) {
     input.value = value;
     emits("dirty");
     if (value.length > 3) {
+        predictions.value = [];
+
         const request: google.maps.places.AutocompletionRequest = {
             input: value,
-            types: ["locality"],
-            componentRestrictions: { country: "ch" }
+            types: props.type,
+            componentRestrictions: { country: props.restriction }
         };
         service.getPlacePredictions(request).then((response) => {
             response.predictions.forEach((prediction) => {

@@ -43,7 +43,7 @@ class JourneyModalController {
         if (param.open) {
             setTimeout(() => {
                 this.checkClose(param, resolve);
-            }, 1000);
+            }, 500);
         } else {
             resolve(this._close.value);
         }

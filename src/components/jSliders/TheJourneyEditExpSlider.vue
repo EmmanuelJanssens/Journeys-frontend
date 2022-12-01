@@ -37,19 +37,21 @@ import { useUserStore } from "stores/useUserStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy, A11y } from "swiper";
 
-import { onMounted, ref, toRaw } from "vue";
+import { onMounted, ref } from "vue";
 import ExperienceCard from "components/jCards/ExperienceCard.vue";
-import router from "router/router";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { usePoiStore } from "stores/usePoiStore";
-import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+import { onBeforeRouteLeave } from "vue-router";
 import { drawPoisBetween } from "map/drawOnMap";
-import { ExperienceDto } from "types/dtos";
-import { useSwiper } from "swiper/vue";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
+import { mapInstance } from "map/JourneysMap";
+import { getLocalityAndCountry, reverseGeocode } from "google/googleGeocoder";
+import router from "router/router";
+
+import { LngLat } from "mapbox-gl";
 const modules = ref([Pagination, Navigation, Lazy, A11y]);
 
 const userStore = useUserStore();
@@ -72,6 +74,7 @@ function goToLast(swiper: any) {
 
 onMounted(async () => {
     journeyStore.init();
+    console.log("FSAIJhfIOSAFhISUh");
     const query = router.currentRoute.value.query;
     try {
         if (userStore.isLoggedIn) {
@@ -96,10 +99,66 @@ onMounted(async () => {
             const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney);
             await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
         }
-        drawPoisBetween();
+
+        await mapInstance.getMap();
+        await drawPoisBetween();
+        if (router.currentRoute.value.query.mode == "new") {
+            enableDrag();
+        }
     } catch (e) {
+        console.log(e);
         //
     }
 });
+
+function enableDrag() {
+    const start = mapInstance.getmarkerbyId("journey_start")!;
+    start.setDraggable(true);
+    start.on("dragend", () => {
+        onMarkerDragend(start.getLngLat(), "journey_start");
+    });
+    const end = mapInstance.getmarkerbyId("journey_end")!;
+    end.setDraggable(true);
+    end.on("dragend", () => {
+        onMarkerDragend(end.getLngLat(), "journey_end");
+    });
+}
+
+async function onMarkerDragend(pos: LngLat, marker: string) {
+    const response = await reverseGeocode(pos.lat, pos.lng);
+    const result = getLocalityAndCountry(response!);
+    if (result.country != undefined && result.locality != undefined) {
+        if (marker == "journey_start") {
+            journeyStore.editJourney.start = {
+                placeId: result.placeId,
+                address: result.locality + ", " + result.country,
+                latitude: pos.lat,
+                longitude: pos.lng
+            };
+        } else if (marker == "journey_end") {
+            journeyStore.editJourney.end = {
+                placeId: result.placeId,
+                address: result.locality + ", " + result.country,
+                latitude: pos.lat,
+                longitude: pos.lng
+            };
+        }
+    }
+    const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney);
+    await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
+    await drawPoisBetween();
+    await mapInstance.getMap();
+
+    const start = mapInstance.getmarkerbyId("journey_start")!;
+    start.setDraggable(true);
+    start.on("dragend", () => {
+        onMarkerDragend(start.getLngLat(), "journey_start");
+    });
+    const end = mapInstance.getmarkerbyId("journey_end")!;
+    end.setDraggable(true);
+    end.on("dragend", () => {
+        onMarkerDragend(end.getLngLat(), "journey_end");
+    });
+}
 </script>
 <style lang="less" scoped></style>
