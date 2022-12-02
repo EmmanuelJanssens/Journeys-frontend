@@ -1,10 +1,29 @@
 <template>
     <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner">
-        <div class="relative">
-            <img src="/assets/images/banner/mountains.jpg" class="object-cover h-full w-full absolute z-10" />
-
-            <div class="container mx-auto">
-                <div class="absolute z-50 w-full container">
+        <div
+            class="relative bg-secondary-main bg-opacity-10 bg-gradient-to-t from-primary-light to-transparen dark:from-gray-800">
+            <img src="/assets/images/banner/banner.png" class="object-cover h-full w-full absolute -z-10" />
+            <div class="custom-shape-divider-top-1670000317">
+                <svg
+                    data-name="Layer 1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 1200 120"
+                    preserveAspectRatio="none">
+                    <path
+                        d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
+                        opacity=".25"
+                        class="fill-gray-800"></path>
+                    <path
+                        d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z"
+                        opacity=".5"
+                        class="fill-gray-800"></path>
+                    <path
+                        d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
+                        class="fill-gray-800"></path>
+                </svg>
+            </div>
+            <div class="relative container mx-auto">
+                <div class="absolute z-50 w-full">
                     <div class="flex justify-end p-4 space-x-4">
                         <JourneyButton
                             v-if="!userStore.isLoggedIn"
@@ -30,94 +49,147 @@
                         </JourneyButton>
                     </div>
                 </div>
-                <section class="relative sm:h-96 z-20 text-high-contrast-text">
-                    <h1 class="text-4xl sm:text-9xl">Journeys</h1>
+                <section class="h-56 sm:h-96 text-high-contrast-text text-center sm:text-left">
+                    <h1 class="text-7xl sm:text-9xl">Journeys</h1>
                     <p>It's not always about the destination</p>
                 </section>
             </div>
         </div>
 
-        <div class="relative overflow-auto bg-primary-light dark:bg-primary-dark">
-            <div class="static mx-auto container">
-                <div clas="flex flex-col">
-                    <section class="sm:py-8">
-                        <div class="">
-                            <h1 class="sm:text-5xl my-6">Discover activities</h1>
+        <div class="sm:relative overflow-auto bg-primary-light dark:bg-gray-800 p-4 sm:p-0">
+            <div class="mx-auto container">
+                <section class="sm:py-8 space-y-4">
+                    <h1
+                        ref="title"
+                        :class="{
+                            'text-2xl font-bold sm:text-5xl my-6 text-primary-main': true
+                        }">
+                        Discover activities
+                    </h1>
+
+                    <p class="text-primary-darker dark:text-primary-dark">
+                        From one point to another there will always be something to do, discover immediatly by entering
+                        your starting point and destination
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center sm:m-16 space-y-4 sm:space-y-0 justify-center">
+                        <div class="grow">
+                            <GoogleAutoComplete
+                                :text="validJourney.start.text"
+                                placeholder="Start"
+                                :type="['locality']"
+                                @selected="setStart"
+                                @dirty="
+                                    () => {
+                                        validJourney.start.valid = false;
+                                        poiCount = 0;
+                                    }
+                                " />
+                        </div>
+                        <span
+                            :class="{
+                                'w-1/3 h-1 bg-black hidden sm:block origin-left': true,
+                                'transition-all ease-out scale-x-0 opacity-0': !validJourney.start.valid,
+                                'transition-all ease-in scale-x-100 duration-200 opacity-100': validJourney.start.valid
+                            }" />
+                        <div
+                            :class="{
+                                ' grow ': true,
+                                'transition-all ease-out -translate-x-24 opacity-0 ': !validJourney.start.valid,
+                                'transition-all ease-in translate-x-0 opacity-100 delay-200': validJourney.start.valid
+                            }">
+                            <GoogleAutoComplete
+                                :text="validJourney.end.text"
+                                placeholder="End"
+                                :type="['locality']"
+                                @selected="setEnd"
+                                @dirty="
+                                    () => {
+                                        validJourney.end.valid = false;
+                                        poiCount = 0;
+                                    }
+                                " />
                         </div>
 
-                        <p>No mather where you go there will always be a beginning and an end</p>
+                        <div
+                            :class="{
+                                'sm:hidden': true,
+                                'transition-all -translate-x-60 opacity-0': poiCount == 0,
+                                'transition-all translate-x-0 opacity-100': poiCount > 0
+                            }">
+                            <p>{{ poiCount }} pois found!</p>
+                            <JourneyButton @click="pushLogbook"> Start now! </JourneyButton>
+                        </div>
+                    </div>
 
-                        <div class="flex flex-col sm:flex-row items-center sm:m-16 justify-center">
-                            <div class="relative grow">
-                                <GoogleAutoComplete
-                                    :text="validJourney.start.text"
-                                    placeholder="Start"
-                                    :type="['locality']"
-                                    @selected="setStart"
-                                    @dirty="validJourney.start.valid = false" />
-                            </div>
-                            <span class="w-1/3 h-1 bg-black hidden sm:block" />
-                            <div class="relative grow">
-                                <GoogleAutoComplete
-                                    :text="validJourney.end.text"
-                                    placeholder="End"
-                                    :type="['locality']"
-                                    @selected="setEnd"
-                                    @dirty="validJourney.end.valid = false" />
-                            </div>
+                    <div
+                        ref="poiCountEl"
+                        :class="{
+                            '': true,
+                            'sm:absolute sm:left-0 sm:w-1/2 hidden sm:block': true,
+                            'sm:transition-all sm:-translate-x-full': poiCount == 0,
+                            'sm:transition-all sm:translate-x-0': poiCount > 0
+                        }">
+                        <div
+                            class="flex flex-col items-center justify-center space-x-4 rounded-r-md p-2 drop-shadow-lg sm:bg-secondary-light sm:dark:bg-primary-contrast-text sm:flex-row sm:justify-end">
+                            <p>{{ poiCount }} pois found!</p>
+                            <JourneyButton type="secondary" @click="pushLogbook"> Start now! </JourneyButton>
                         </div>
-                        <div ref="poiCountEl" class="sm:absolute sm:left-0 sm:w-1/2 border-l-">
-                            <div
-                                class="flex flex-col items-center justify-center space-x-4 rounded-r-md p-2 drop-shadow-lg bg-secondary-light dark:bg-secondary-dark sm:flex-row sm:justify-end sm:relative">
-                                <p>{{ poiCount }} pois found!</p>
-                                <JourneyButton @click="pushLogbook"> Start now! </JourneyButton>
-                            </div>
+                    </div>
+                </section>
+
+                <section class="sm:py-8">
+                    <h1 class="sm:text-5xl my-6 text-2xl font-bold text-primary-darker dark:text-primary-main">
+                        Journal your outings
+                    </h1>
+                    <p class="sm:w-2/5 mb-4 text-primary-darker dark:text-primary-dark">
+                        You may have done some things that you found interesting to keep in your memories and maybe
+                        share them with others.
+                    </p>
+                    <div class="columns-1 md:columns-2 lg:columns-3 -scroll-my-16 space-y-4 gap-x-4">
+                        <card-preview
+                            image="https://images.unsplash.com/photo-1501555088652-021faa106b9b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1173&q=80"
+                            description="I went for a little hike in the mountains not far from where I am, beutifull landscape as always" />
+                        <card-preview
+                            description="A fancy new bar opened in town I had to check it out! I was not deceived"
+                            image="https://images.unsplash.com/photo-1543007630-9710e4a00a20?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1335&q=80" />
+                        <card-preview
+                            description="I was hungry and I wanted to discover a new restaurant, good food and friendly people"
+                            image="https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1335&q=80" />
+                        <card-preview
+                            description="Never been to an art museum but I must say the paintings where Awesome"
+                            image="https://images.unsplash.com/photo-1554907984-15263bfd63bd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" />
+                        <card-preview
+                            description="Traditional housings are the best"
+                            image="https://images.unsplash.com/photo-1596178196494-c9a3d1b1c151?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1065&q=80" />
+                    </div>
+                </section>
+                <section class="sm:py-8">
+                    <h1 class="sm:text-5xl my-6 text-2xl font-bold text-primary-darker dark:text-primary-main">
+                        Get started now
+                    </h1>
+                    <div class="flex flex-wrap justify-center">
+                        <div class="flex flex-col space-x-4 max-w-xl p-2 justify-center items-center space-y-4">
+                            <p class="text-primary-darker dark:text-primary-dark">
+                                open your personal logbook and see A list of journeys you have saved.
+                            </p>
+                            <img
+                                class="w-4/5 object-cover rounded-xl drop-shadow-lg"
+                                src="/assets/images/features/featureImg1.png" />
                         </div>
-                    </section>
-                    <section class="relative sm:py-8">
-                        <h1 class="sm:text-5xl my-6">Journal your outings</h1>
-                        <p class="sm:w-2/5 mb-4">
-                            You may have done some things in between that you found interesting and want to keep them
-                            with you and maybe share them with others.
-                        </p>
-                        <div class="columns-1 md:columns-2 lg:columns-3 -scroll-my-16 space-y-4 gap-x-4">
-                            <card-preview
-                                image="https://images.unsplash.com/photo-1501555088652-021faa106b9b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1173&q=80"
-                                description="I went for a little hike in the mountains not far from where I am, beutifull landscape as always" />
-                            <card-preview
-                                description="A fancy new bar opened in town I had to check it out! I was not deceived"
-                                image="https://images.unsplash.com/photo-1543007630-9710e4a00a20?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1335&q=80" />
-                            <card-preview
-                                description="I was hungry and I wanted to discover a new restaurant, good food and friendly people"
-                                image="https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1335&q=80" />
-                            <card-preview
-                                description="Never been to an art museum but I must say the paintings where Awesome"
-                                image="https://images.unsplash.com/photo-1554907984-15263bfd63bd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" />
-                            <card-preview
-                                description="Traditional housings are the best"
-                                image="https://images.unsplash.com/photo-1596178196494-c9a3d1b1c151?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1065&q=80" />
+                        <div class="flex flex-col space-x-4 max-w-xl p-2 justify-center items-center space-y-4">
+                            <p class="text-primary-darker dark:text-primary-dark">
+                                Add various activities to your journey, and save them to edit later on
+                            </p>
+                            <img
+                                class="w-4/5 object-cover rounded-xl drop-shadow-lg"
+                                src="/assets/images/features/featureImg3.png" />
                         </div>
-                    </section>
-                    <section class="relative sm:py-8">
-                        <h1 class="sm:text-5xl my-6">Get started now</h1>
-                        <div class="flex flex-wrap justify-center">
-                            <div class="flex space-x-4 max-w-xl p-2">
-                                <p class="w-48">
-                                    open your personal logbook and see A list of journeys you have saved.
-                                </p>
-                                <img class="w-2/3 rounded-xl drop-shadow-lg" src="/assets/placeholder.png" />
-                            </div>
-                            <div class="flex space-x-4 max-w-xl p-2">
-                                <p class="w-48">
-                                    Add various activities to your journey, and save them to edit later on
-                                </p>
-                                <img class="w-2/3 r rounded-xl drop-shadow-lg" src="/assets/placeholder.png" />
-                            </div>
-                        </div>
-                    </section>
-                    <section class="relative sm:py-8">
+                    </div>
+                </section>
+                <!-- <section class="sm:py-8">
                         <div class="flex flex-col items-center space-y-4">
-                            <p class="text-center w-96">
+                            <p class="text-center w-96 text-primary-darker">
                                 Trouble finding an activity? No problem, A simple search is at your disposition and as a
                                 last resort you can even add your own activities to the vast dataset
                             </p>
@@ -127,17 +199,20 @@
                                     src="/assets/placeholder.png" />
                             </div>
                         </div>
-                    </section>
+                    </section> -->
 
-                    <section class="relative">
-                        <div>
-                            <p>
-                                Original product on <a href="https://gitlab.com/pdg-journeys/journeys">Gitlab</a>
-                                <font-awesome-icon class="ml-1" :icon="faGitlab" />
-                            </p>
-                        </div>
-                    </section>
-                </div>
+                <section class="">
+                    <div>
+                        <p class="w-1/3 p-4 text-primary-darker dark:text-primary-dark">
+                            The original product was made by a team of 5 students, but was remade to accomodate further
+                            improvements and broaden my knowledge
+                        </p>
+                        <p class="p-4 text-primary-darker dark:text-primary-dark">
+                            Original product on <a href="https://gitlab.com/pdg-journeys/journeys">Gitlab</a>
+                            <font-awesome-icon class="ml-1" :icon="faGitlab" />
+                        </p>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
@@ -169,15 +244,22 @@ import JourneyButton from "components/UI/Button/JourneyButton.vue";
 let userStore = useUserStore();
 let poiStore = usePoiStore();
 let journeyStore = useJourneyStore();
+
 const poiCount = ref(0);
 const poiCountEl = ref();
 
 function pushLogbook() {
-    journeyStore.editJourney = {
-        start: geocoded.start,
-        end: geocoded.end
+    journeyStore.journey = {
+        start: {
+            latitude: geocoded.start.latitude,
+            longitude: geocoded.start.longitude
+        },
+        end: {
+            latitude: geocoded.end.latitude,
+            longitude: geocoded.end.longitude
+        }
     };
-    journeyStore.editJourney.experiencesConnection = { edges: [] };
+    journeyStore.journey.experiences = [];
     router.push("/edit?mode=new");
 }
 const validJourney = ref<{
@@ -246,12 +328,12 @@ watch(
 <style scoped lang="less">
 ::-webkit-scrollbar {
     height: 12px;
-    width: 12px;
-    background: #6c9d89;
+    width: 6px;
+    background: #dae1db;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #687a6e;
+    background: #a6cabd;
     -webkit-border-radius: 1ex;
     -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
     border-radius: 5%;
@@ -260,5 +342,24 @@ watch(
 
 ::-webkit-scrollbar-corner {
     background: #000;
+}
+.custom-shape-divider-top-1670000317 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.custom-shape-divider-top-1670000317 svg {
+    position: relative;
+    display: block;
+    width: calc(199% + 1.3px);
+    height: 397px;
+}
+
+.shape-fill {
+    fill: #a6cabd;
 }
 </style>

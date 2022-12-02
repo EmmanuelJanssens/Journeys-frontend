@@ -1,7 +1,7 @@
 <template>
     <Teleport to="#poipopup">
         <div ref="poiEl" />
-        <JourneyCard class="absolute z-50" :pos="pos">
+        <JourneyCard class="absolute" :pos="pos">
             <template #header>
                 {{ poi?.name }}
             </template>
@@ -9,7 +9,7 @@
             <template #body>
                 <div>
                     <swiper
-                        v-if="poi?.journeysConnection?.edges?.length! > 0"
+                        v-if="poi?.experiences?.length! > 0"
                         :slides-per-view="1"
                         :initial-slide="0"
                         :lazy="{
@@ -19,18 +19,18 @@
                             clickable: true
                         }"
                         :loop="true">
-                        <swiper-slide v-for="p in poi?.journeysConnection?.edges" :key="p?.order">
+                        <swiper-slide v-for="experience in poi?.experiences" :key="experience.date">
                             <div class="p-4">
                                 <img
                                     v-lazy="{
-                                        src: p.images[0],
+                                        src: experience.images?.at(0),
                                         loading: '/assets/placeholder.png',
                                         error: '/assets/placeholder.png'
                                     }"
                                     class="object-cover w-full h-40 rounded-xl" />
                                 <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto">
                                     <p class="text-center text-primary-darker">
-                                        {{ p.description }}
+                                        {{ experience.description }}
                                     </p>
                                 </div>
                             </div>
@@ -62,20 +62,20 @@ import JourneyButton from "components/UI/Button/JourneyButton.vue";
 import JourneyCard from "components/UI/Card/JourneyCard.vue";
 import { usePoiStore } from "stores/usePoiStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { ExperienceDto, PoiDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import { onClickOutside, rand } from "@vueuse/core";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { drawExperiences } from "map/drawOnMap";
+import { Experience, PointOfInterest } from "types/JourneyDtos";
 
 const props = defineProps<{
-    poi?: PoiDto;
+    poi?: PointOfInterest;
     pos: {
         x: number;
         y: number;
     };
 }>();
-const poi = ref<PoiDto>();
+const poi = ref<PointOfInterest>();
 const poiEl = ref();
 const poiStore = usePoiStore();
 const journeyStore = useJourneyStore();
@@ -86,22 +86,13 @@ const emit = defineEmits<{
 }>();
 
 function add() {
-    const experience: ExperienceDto = {
-        editing: true,
-        date: new Date().toISOString(),
-        imagesEditing: [],
-        images: [],
-        order: journeyStore.editJourney.experiencesConnection?.edges?.length!,
-        title: "",
+    const experience: Experience = {
         description: "",
-        node: {
-            id: poi.value?.id,
-            location: poi.value?.location,
-            name: poi.value?.name,
-            thumbnail: undefined
-        }
+        images: [],
+        date: new Date().toISOString(),
+        title: ""
     };
-    journeyStore.addToJourney(experience);
+    journeyStore.addToJourney(experience, props.poi!);
     drawExperiences();
 }
 onClickOutside(poiEl, () => {

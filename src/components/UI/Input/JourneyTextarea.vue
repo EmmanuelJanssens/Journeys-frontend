@@ -3,7 +3,7 @@
         <textarea
             :rows="rows"
             :value="modelValue"
-            class="w-full p-4 focus:border-none bg-secondary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg outline-none focus:outline-primary-main transform transition-all focus:scale-105 rounded-lg"
+            class="w-full p-4 focus:border-none bg-secondary-main dark:bg-primary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg outline-none focus:outline-primary-main transform transition-all focus:scale-105 rounded-lg"
             :placeholder="placeholder"
             :type="type"
             @input="emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)" />

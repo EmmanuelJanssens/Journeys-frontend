@@ -25,14 +25,17 @@
 import PoiCard from "components/jCards/PoiCard.vue";
 
 import mapboxgl, { LngLat, MapMouseEvent } from "mapbox-gl";
-import { PoiDto } from "types/dtos";
 import axios from "axios";
 import { mapInstance, mapLayers } from "map/JourneysMap";
 import { onMounted, ref } from "vue";
 
 import "mapbox-gl/dist/mapbox-gl.css";
+import { PointOfInterest } from "types/JourneyDtos";
+import { useDark } from "@vueuse/core";
 
-const poiOpened = ref<PoiDto | undefined>();
+const style = ref("mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx");
+const isDark = useDark();
+const poiOpened = ref<PointOfInterest | undefined>();
 const pos = ref({
     x: 0,
     y: 0
@@ -43,13 +46,13 @@ async function getCountryLoc() {
     return new LngLat(loc.data.location.longitude, loc.data.location.latitude);
 }
 
-onMounted(async () => {
+async function loadMap() {
     const center = await getCountryLoc();
     mapInstance.loadMap(
         "pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg",
         "Map",
         center,
-        "mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx"
+        style.value
     );
     const map = await mapInstance.getMap()!;
     map.on("style.load", () => {
@@ -64,16 +67,30 @@ onMounted(async () => {
                 features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
             } & mapboxgl.EventData
         ) => {
-            poiOpened.value = e.features![0].properties as PoiDto;
+            const poi: PointOfInterest = {
+                location: JSON.parse(e.features![0].properties!.location),
+                name: e.features![0].properties!.name,
+                id: e.features![0].properties!.id
+            };
+            poiOpened.value = poi;
+
             pos.value = {
-                x: e.point.x,
-                y: e.point.y
+                x: e.originalEvent.x,
+                y: e.originalEvent.y
             };
         }
     );
     map.on("click", mapLayers.poi_list + "_cluster", (e) => {
         onClusterClick(e);
     });
+}
+onMounted(async () => {
+    if (!isDark.value) {
+        style.value = "mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx";
+    } else {
+        style.value = "mapbox://styles/heymanuel/clb6telhc003w15qeoepfpd8c";
+    }
+    loadMap();
 });
 
 async function onClusterClick(e: MapMouseEvent) {

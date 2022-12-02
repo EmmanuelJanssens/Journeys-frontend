@@ -1,10 +1,8 @@
 <template>
-    <div class="flex flex-col space-y-4 bg-secondary-light dark:bg-secondary-dark rounded-xl drop-shadow-xl">
-        <div class="top-0 p-3 bg-primary-main dark:primar w-full rounded-t-xl">
+    <div class="flex flex-col space-y-4 bg-secondary-light dark:bg-gray-800 rounded-xl drop-shadow-xl">
+        <div class="top-0 p-3 bg-primary-main dark:bg-primary-dark w-full rounded-t-xl">
             <div class="flex space-x-4 justify-between">
-                <p class="text-center text-white">
-                    {{ (props.experience.node as PoiDto).name }}: {{ props.experience.title }}
-                </p>
+                <p class="text-center text-white">{{ props.poi.name }}: {{ props.experience.title }}</p>
                 <div class="flex space-x-4">
                     <button class="text-white transform hover:scale-110" @click="onEdit">
                         <font-awesome-icon :icon="faPencil" class="text-white" />
@@ -25,7 +23,6 @@
 
         <div>
             <swiper
-                v-if="props.experience.editing"
                 :slides-per-view="1"
                 :initial-slide="0"
                 :lazy="{
@@ -36,7 +33,7 @@
                 }"
                 :loop="true"
                 :modules="modules">
-                <swiper-slide v-if="props.experience.imagesEditing?.length == 0">
+                <swiper-slide v-if="props.experience.images?.length == 0 && !props.experience.imagesToUpload">
                     <div class="p-4">
                         <img
                             v-lazy="{
@@ -47,46 +44,22 @@
                             class="object-cover h-52 w-full rounded-xl" />
                     </div>
                 </swiper-slide>
-                <swiper-slide v-for="image in props.experience.imagesEditing" v-else :key="image">
-                    <div class="p-4">
-                        <img
-                            v-lazy="{
-                                src: image.url,
-                                loading: '/assets/placeholder.png',
-                                error: '/assets/placeholder.png'
-                            }"
-                            class="object-cover h-52 w-full rounded-xl" />
-                    </div>
-                </swiper-slide>
-            </swiper>
-            <swiper
-                v-else
-                :slides-per-view="1"
-                :initial-slide="0"
-                :lazy="{
-                    enabled: true
-                }"
-                :pagination="{
-                    clickable: true
-                }"
-                :loop="true"
-                :modules="modules">
-                <swiper-slide v-if="props.experience.images?.length == 0">
-                    <div class="p-4">
-                        <img
-                            v-lazy="{
-                                src: '/assets/placeholder.png',
-                                loading: '/assets/placeholder.png',
-                                error: '/assets/placeholder.png'
-                            }"
-                            class="object-cover h-52 w-full rounded-xl" />
-                    </div>
-                </swiper-slide>
-                <swiper-slide v-for="image in props.experience.images" v-else :key="image">
+                <swiper-slide v-for="image in props.experience.images" :key="image">
                     <div class="p-4">
                         <img
                             v-lazy="{
                                 src: image,
+                                loading: '/assets/placeholder.png',
+                                error: '/assets/placeholder.png'
+                            }"
+                            class="object-cover h-52 w-full rounded-xl" />
+                    </div>
+                </swiper-slide>
+                <swiper-slide v-for="image in props.experience.imagesToUpload" :key="image">
+                    <div class="p-4">
+                        <img
+                            v-lazy="{
+                                src: image.url,
                                 loading: '/assets/placeholder.png',
                                 error: '/assets/placeholder.png'
                             }"
@@ -118,17 +91,18 @@ import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 
 import { ref } from "vue";
-import { ExperienceDto, PoiDto } from "types/dtos";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { POSITION, useToast } from "vue-toastification";
 import { drawJourney, drawPoisBetween } from "map/drawOnMap";
 import router from "router/router";
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
+import { Experience, PointOfInterest } from "types/JourneyDtos";
 
 const props = defineProps<{
-    experience: ExperienceDto;
-    journey: string;
+    experience: Experience;
+    poi: PointOfInterest;
+    mode: "edit" | "view";
 }>();
 
 const modules = ref([Navigation, Lazy, Pagination, Autoplay]);
@@ -138,7 +112,9 @@ const toast = useToast();
 async function onEdit() {
     journeyModalController.open("editExperience", {
         props: {
-            experience: props.experience
+            experience: props.experience,
+            poi: props.poi,
+            mode: props.mode
         }
     });
 
@@ -149,10 +125,14 @@ const route = computed(() => ({
     name: router.currentRoute.value.name,
     mode: router.currentRoute.value.query.mode
 }));
+
+onMounted(() => {
+    console.log(props.experience);
+});
 async function onDelete() {
     if (route.value.name == "edit") {
-        journeyStore.removeFromJourney((props.experience.node as PoiDto).id!);
-        drawJourney(journeyStore.editJourney);
+        journeyStore.removeFromJourney(props.poi.id!);
+        drawJourney(journeyStore.journey);
         drawPoisBetween();
         return;
     }
@@ -164,18 +144,18 @@ async function onDelete() {
                 {
                     text: "OK",
                     handler: async () => {
-                        const newJ = await journeyStore.removeExperience(props.experience);
+                        const newJ = await journeyStore.removeExperience(props.poi.id!);
                         if (!newJ) {
                             toast.error("Could not delete your experience", {
                                 position: POSITION.TOP_CENTER
                             });
                         } else {
-                            journeyStore.editJourney = newJ;
+                            journeyStore.journey = newJ;
                             journeyModalController.close("alert");
                             toast.success("Experience deleted!", {
                                 position: POSITION.TOP_CENTER
                             });
-                            drawJourney(journeyStore.editJourney);
+                            drawJourney(journeyStore.journey);
                         }
                     }
                 },

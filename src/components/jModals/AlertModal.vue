@@ -6,7 +6,7 @@
             </div>
         </template>
         <template #body>
-            <div class="p-4 bg-secondary-light">
+            <div class="p-4 bg-secondary-light text-black dark:text-white dark:bg-gray-800">
                 {{ message }}
             </div>
         </template>

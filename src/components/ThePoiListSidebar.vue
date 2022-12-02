@@ -1,5 +1,8 @@
 <template>
-    <div ref="poiList" class="overflow bg-primary-light w-0 h-screen group transition-all" @transitionend="resize">
+    <div
+        ref="poiList"
+        class="overflow bg-primary-light : dark:bg-gray-800 w-0 h-screen group transition-all hidden sm:block"
+        @transitionend="resize">
         <DynamicScroller :items="props.poiList" :min-item-size="54" style="height: 100%">
             <template #default="{ item, index, active }">
                 <DynamicScrollerItem :item="item" :active="active" :data-index="index">
@@ -22,10 +25,10 @@
 
 <script lang="ts" setup>
 import { ref, watch } from "vue";
-import { PoiDto } from "types/dtos";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
 import { mapInstance } from "map/JourneysMap";
+import { PointOfInterest } from "types/JourneyDtos";
 
 const poiList = ref();
 const isOpen = ref(false);
@@ -46,11 +49,11 @@ async function toggle(on: boolean) {
 }
 
 const props = defineProps<{
-    poiList?: PoiDto[];
+    poiList?: PointOfInterest[];
 }>();
 
 const emit = defineEmits<{
-    (e: "poiItemClicked", poi: PoiDto): void;
+    (e: "poiItemClicked", poi: PointOfInterest): void;
 }>();
 
 watch(

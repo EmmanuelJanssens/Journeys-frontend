@@ -6,7 +6,7 @@
         :loading="isLoading"
         :size="{
             w: 'w-1/2 min-w-fit',
-            h: 'h-1/3'
+            h: ' '
         }">
         <template #loading>
             <div v-if="isLoading" class="bg-high-contrast-text h-3">
@@ -17,14 +17,14 @@
             </div>
         </template>
         <template #body>
-            <div class="bg-secondary-light p-4 flex flex-col h-full">
+            <div class="bg-secondary-light dark:bg-gray-800 p-4 flex flex-col h-full">
                 <div class="flex flex-col space-y-4 h-full">
                     <journey-input v-model="state.title" placeholder="Title" />
                     <!-- <journey-input placeholder="Date" v-model="state.selectedDate" /> -->
                     <DatePicker v-model="state.selectedDate" />
-                    <journey-textarea v-model="state.description" :rows="6" placeholder="description" />
+                    <journey-textarea v-model="state.description" :rows="4" placeholder="description" />
                 </div>
-                <div class="flex space-x-2 flex-wrap max-w-3xl p-4 items-center">
+                <div class="flex space-x-2 flex-wrap max-w-3xl p-4 items-center overflow-auto">
                     <JourneyButton class="relative w-24 h-24 rounded-lg bg-green-200" @click="selectImage">
                         <font-awesome-icon class="" :icon="faAdd" size="4x" />
                     </JourneyButton>
@@ -52,7 +52,6 @@
 </template>
 <script lang="ts" setup>
 import { useJourneyStore } from "stores/useJourneyStore";
-import { ExperienceDto, JourneyDto, PoiDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
 import { storageRef } from "google/firebase";
@@ -67,6 +66,7 @@ import { POSITION, useToast } from "vue-toastification";
 import { drawJourney, drawPoisBetween } from "map/drawOnMap";
 import router from "router/router";
 import JourneyButton from "components/UI/Button/JourneyButton.vue";
+import { Experience, PointOfInterest } from "types/JourneyDtos";
 const state = ref({
     description: "",
     title: "",
@@ -76,13 +76,15 @@ const state = ref({
 
 const journeyStore = useJourneyStore();
 const props = defineProps<{
-    experience: ExperienceDto;
+    experience: Experience;
+    poi: PointOfInterest;
+    mode: "edit" | "view";
 }>();
 const files = ref<Array<any>>([]);
 const isLoading = ref(false);
 let currentData = ref<{
-    experience: ExperienceDto;
-    journey: JourneyDto;
+    experience: Experience;
+    poi: PointOfInterest;
 }>();
 let images = ref<
     {
@@ -93,36 +95,40 @@ let images = ref<
 
 const toast = useToast();
 onMounted(() => {
-    if (props.experience.editing) {
+    if (props.mode == "edit") {
         currentData.value = {
-            experience: props.experience as ExperienceDto,
-            journey: journeyStore.editJourney
+            experience: props.experience,
+            poi: props.poi
         };
-        currentData.value!.experience = props.experience as ExperienceDto;
-
-        state.value.title = currentData.value?.experience.title;
-        state.value.description = currentData.value.experience.description;
-        currentData.value!.experience.imagesEditing?.forEach((img) => {
-            images.value.push(img);
-        });
-
-        state.value.selectedDate = currentData.value?.experience.date;
-    } else {
-        currentData.value = {
-            experience: props.experience as ExperienceDto,
-            journey: journeyStore.editJourney
-        };
-        currentData.value!.experience = props.experience as ExperienceDto;
-
-        state.value.title = currentData.value?.experience.title;
-        state.value.description = currentData.value.experience.description;
-        currentData.value?.experience.images.forEach((image) => {
-            images.value?.push({
-                url: image,
-                isFs: true
+        currentData.value!.experience = props.experience as Experience;
+        currentData.value.experience.images?.forEach((image) => {
+            images.value.push({
+                isFs: true,
+                url: image
             });
         });
 
+        if (currentData.value.experience.title) state.value.title = currentData.value.experience.title;
+        if (currentData.value.experience.description)
+            state.value.description = currentData.value.experience.description;
+        state.value.selectedDate = currentData.value?.experience.date;
+    } else if (props.mode == "view") {
+        currentData.value = {
+            experience: props.experience,
+            poi: props.poi
+        };
+        currentData.value!.experience = props.experience as Experience;
+        if (currentData.value.experience.title) state.value.title = currentData.value.experience.title;
+        if (currentData.value.experience.description)
+            state.value.description = currentData.value.experience.description;
+        if (currentData.value.experience.images) {
+            currentData.value!.experience.images.forEach((img) => {
+                images.value.push({
+                    isFs: true,
+                    url: img
+                });
+            });
+        }
         state.value.selectedDate = currentData.value?.experience.date;
     }
 });
@@ -152,58 +158,72 @@ function removeImage(image: string) {
 }
 
 async function save() {
-    if (currentData.value?.experience.editing) {
-        currentData.value!.experience!.title = state.value.title;
-        currentData.value!.experience!.date = state.value.selectedDate;
-        currentData.value!.experience!.description = state.value.description;
-        // currentData.value!.experience!.journey = { id: journeyStore.editJourney.journey?.id };
-        currentData.value.experience.imagesEditing = currentData.value.experience.imagesEditing?.concat(...files.value);
-        journeyStore.setExperienceData(currentData.value.experience);
-        journeyModalController.close("editExperience");
-    } else {
-        const deleted = currentData.value?.experience?.images.filter(
-            (img) => !images.value.find((search) => img == search.url)
-        );
-        isLoading.value = true;
-        await deleted?.forEach(async (img) => {
-            const imgRef = fref(storageRef.storage, img);
-            await deleteObject(imgRef);
-        });
-
-        try {
-            journeyStore
-                .uploadImages(files.value, (props.experience.node as PoiDto).id!, journeyStore.editJourney.id!)
-                ?.then(() => {
-                    toast.info("Your images where uploaded you can now view them !", {
-                        position: POSITION.BOTTOM_RIGHT
-                    });
-                })
-                .catch(() => {
-                    toast.error("TAn error occured when uploading your images :(", {
-                        position: POSITION.TOP_CENTER
-                    });
-                });
-            currentData.value!.experience!.images = currentData.value!.experience!.images.filter((img) =>
-                images.value.find((search) => img == search.url)
-            );
+    if (props.mode == "edit") {
+        if (currentData.value && currentData.value.experience) {
             currentData.value!.experience!.title = state.value.title;
             currentData.value!.experience!.date = state.value.selectedDate;
             currentData.value!.experience!.description = state.value.description;
-            await journeyStore.updateExperience(currentData.value!.experience!);
-            journeyModalController.close("editExperience");
-            toast.success("Your modifications were successfuly saved", {
-                position: POSITION.TOP_CENTER
-            });
-        } catch (e) {
-            toast.error("Could not save your modifications", {
-                position: POSITION.TOP_CENTER
-            });
-        }
+            // currentData.value!.experience!.journey = { id: journeyStore.editJourney.journey?.id };
+            if (!currentData.value.experience.imagesToUpload) currentData.value.experience.imagesToUpload = [];
+            currentData.value.experience.imagesToUpload = currentData.value.experience.imagesToUpload?.concat(
+                ...files.value
+            );
 
-        isLoading.value = false;
+            // currentData.value!.experience!.journey = { id: journeyStore.journey.journey?.id };
+            journeyStore.setExperienceData(currentData.value.experience, currentData.value.poi);
+        }
+        journeyModalController.close("editExperience");
+    } else {
+        if (currentData.value) {
+            const deleted = currentData.value?.experience?.images?.filter(
+                (img) => !images.value.find((search) => img == search.url)
+            );
+            isLoading.value = true;
+            await deleted?.forEach(async (img) => {
+                const imgRef = fref(storageRef.storage, img);
+                await deleteObject(imgRef);
+            });
+
+            try {
+                journeyStore
+                    .uploadImages(files.value, props.poi.id!, journeyStore.journey.id!)
+                    ?.then(() => {
+                        toast.info("Your images where uploaded you can now view them !", {
+                            position: POSITION.BOTTOM_RIGHT
+                        });
+                    })
+                    .catch(() => {
+                        toast.error("TAn error occured when uploading your images :(", {
+                            position: POSITION.TOP_CENTER
+                        });
+                    });
+
+                //set deleted images
+                if (currentData.value.experience && currentData.value.experience.images) {
+                    currentData.value.experience.images = currentData.value.experience.images?.filter((img) =>
+                        images.value.find((search) => img == search.url)
+                    );
+                }
+
+                currentData.value!.experience!.title = state.value.title;
+                currentData.value!.experience!.date = state.value.selectedDate;
+                currentData.value!.experience!.description = state.value.description;
+                await journeyStore.updateExperience(currentData.value.experience, currentData.value.poi.id!);
+                journeyModalController.close("editExperience");
+                toast.success("Your modifications were successfuly saved", {
+                    position: POSITION.TOP_CENTER
+                });
+            } catch (e) {
+                toast.error("Could not save your modifications", {
+                    position: POSITION.TOP_CENTER
+                });
+            }
+
+            isLoading.value = false;
+        }
     }
     if (router.currentRoute.value.name == "edit") {
-        drawJourney(journeyStore.editJourney);
+        drawJourney(journeyStore.journey);
         drawPoisBetween();
     }
 }

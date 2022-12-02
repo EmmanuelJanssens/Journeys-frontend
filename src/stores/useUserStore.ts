@@ -1,16 +1,26 @@
 import axios from "axios";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
-import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, User, UserCredential } from "firebase/auth";
+import {
+    createUserWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    updateCurrentUser,
+    updateProfile,
+    User,
+    UserCredential
+} from "firebase/auth";
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
-import { ExperienceDto, JourneyDto, UserDto } from "types/dtos";
+import { isErrored } from "stream";
+import { Experience, Journey, User as JUser } from "types/JourneyDtos";
 import { uniqueNamesGenerator, adjectives, colors, animals, Config } from "unique-names-generator";
 import { ref } from "vue";
 
 export const useUserStore = defineStore("user", () => {
     const isLoggedIn = ref(false);
-    const myJourneys = ref<JourneyDto[]>();
-    const myExperiences = ref<ExperienceDto[]>([]);
+    const myJourneys = ref<Journey[]>();
+    const myExperiences = ref<Experience[]>([]);
 
     const namesConfig: Config = {
         dictionaries: [adjectives, colors, animals],
@@ -65,21 +75,36 @@ export const useUserStore = defineStore("user", () => {
             const credentials = await signInWithPopup(authApp, googleAuthProvider);
 
             const name = uniqueNamesGenerator(namesConfig);
-            const newUser: UserDto = {
+            const newUser = {
                 username: name,
-                email: credentials.user.email!,
-                uid: credentials.user.uid
+                uid: credentials.user.uid,
+                completed: credentials.user.emailVerified
             };
-            await axios.post("/api/authentication/provider", newUser);
+            await axios.post("/api/authentication/register", newUser);
             return credentials;
         }
         throw new Error("No provider specified");
     }
-    async function register(user: UserDto): Promise<UserCredential | undefined> {
+    async function register(user: JUser): Promise<UserCredential | undefined> {
         try {
-            await axios.post("/api/authentication/register", user);
-            const signin = await signInWithEmailAndPassword(authApp, user.email!, user.password!);
-            return signin;
+            const credentials = await createUserWithEmailAndPassword(authApp, user.email!, user.password!);
+
+            const dto = {
+                uid: credentials.user.uid,
+                username: user.username,
+                firstname: user.firstName,
+                lastname: user.lastName,
+                visibility: "public",
+                completed: false
+            };
+            await axios.post("/api/authentication/register", dto);
+            await updateProfile(credentials.user, {
+                displayName: user.username
+            });
+
+            await updateCurrentUser(authApp, credentials.user);
+            //const signin = await signInWithEmailAndPassword(authApp, user.email!, user.password!);
+            return credentials;
         } catch (e) {
             return undefined;
         }
@@ -89,7 +114,7 @@ export const useUserStore = defineStore("user", () => {
 
         await authApp.signOut();
     }
-    async function saveUser(user: UserDto): Promise<UserDto | undefined> {
+    async function saveUser(user: JUser): Promise<any | undefined> {
         try {
             const token = await authApp.currentUser?.getIdToken(true);
             const response = await axios.put("/api/user", user, {
@@ -97,20 +122,20 @@ export const useUserStore = defineStore("user", () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            return response.data as UserDto;
+            return response.data;
         } catch (e) {
             return undefined;
         }
     }
 
-    async function fetchMyJourneys(): Promise<JourneyDto | undefined> {
+    async function fetchMyJourneys(): Promise<Journey[] | undefined> {
         const token = await authApp.currentUser?.getIdToken(true);
         const response = await axios.get("/api/user/journeys", {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        myJourneys.value = response.data as JourneyDto[];
+        myJourneys.value = response.data as Journey[];
         return response.data;
     }
 

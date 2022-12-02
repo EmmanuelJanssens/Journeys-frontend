@@ -1,7 +1,7 @@
 <template>
     <section>
         <swiper
-            v-if="journeyStore.editJourney"
+            v-if="journeyStore.journey"
             :center-insufficient-slides="true"
             :pagination="{ clickable: true }"
             :space-between="40"
@@ -18,12 +18,14 @@
                 1200: { slidesPerView: 3 },
                 1536: { slidesPerView: 4 }
             }">
-            <swiper-slide v-for="item in journeyStore.editJourney.experiencesConnection?.edges" :key="item.order">
+            <swiper-slide v-for="experience in journeyStore.journey.experiences" :key="experience.poi.id">
                 <ExperienceCard
-                    :experience="item"
-                    :journey=" journeyStore.editJourney.id!"
+                    :experience="experience.data"
+                    :poi="experience.poi"
+                    :mode="'view'"
+                    :journey=" journeyStore.journey.id!"
                     class="max-w-[400px] h-full"
-                    @updated="emit('updated', journeyStore.editJourney.id!)" />
+                    @updated="emit('updated', journeyStore.journey.id!)" />
             </swiper-slide>
         </swiper>
     </section>
@@ -50,8 +52,8 @@ const emit = defineEmits<{
 onMounted(async () => {
     const id = router.currentRoute.value.params.id as string;
     const journey = await journeyStore.getJourney(id);
-    journeyStore.editJourney = journey!;
-    drawJourney(journeyStore.editJourney);
+    journeyStore.journey = journey!;
+    drawJourney(journeyStore.journey);
 });
 </script>
 <style lang="less" scoped></style>

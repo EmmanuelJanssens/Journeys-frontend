@@ -5,17 +5,20 @@
         name="createJourney"
         :loading="isLoading"
         :size="{
-            w: 'w-[400px]',
+            w: 'w-full',
             h: 'h-[250px]'
         }">
         <template #body>
-            <div class="flex flex-row space-x-4 p-4 items-center bg-secondary-light dark:bg-secondary-dark h-full">
+            <div
+                class="flex flex-row space-x-4 p-4 justify-between items-center bg-secondary-light dark:bg-gray-800 h-full">
                 <GoogleAutoComplete
+                    class="grow"
                     :text="validJourney.start.text"
                     placeholder="Start"
                     @selected="setStart"
                     @dirty="validJourney.start.valid = false" />
                 <GoogleAutoComplete
+                    class="grow"
                     :text="validJourney.start.text"
                     placeholder="End"
                     @selected="setEnd"
@@ -66,12 +69,20 @@ async function gotoJourneyMap() {
     if (validJourney.value.start.valid && validJourney.value.end.valid) {
         const geocodedStart = await getGeocodedData(validJourney.value.start.text);
         const geocodedEnd = await getGeocodedData(validJourney.value.end.text);
-
+        const start = {
+            latitude: geocodedStart.latitude,
+            longitude: geocodedStart.longitude
+        };
+        const end = {
+            latitude: geocodedEnd.latitude,
+            longitude: geocodedEnd.longitude
+        };
         if (geocodedStart.error === undefined && geocodedEnd.error === undefined) {
             journeyModalController.close("createJourney", {
                 data: {
-                    start: geocodedStart,
-                    end: geocodedEnd
+                    start: start,
+                    end: end,
+                    title: geocodedStart.address + " - " + geocodedEnd.address
                 }
             });
         }
@@ -79,8 +90,4 @@ async function gotoJourneyMap() {
 }
 </script>
 
-<style scoped>
-ion-button {
-    z-index: 999;
-}
-</style>
+<style scoped></style>

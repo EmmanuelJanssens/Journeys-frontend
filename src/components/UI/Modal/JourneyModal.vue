@@ -3,7 +3,7 @@
         <Transition name="modal">
             <div
                 v-if="journeyModalController.isOpen(name)"
-                class="absolute flex left-0 top-0 w-screen h-screen z-[9000] bg-black bg-opacity-30 items-center justify-center">
+                class="absolute flex left-0 top-0 w-screen h-screen bg-black bg-opacity-30 items-center justify-center z-50">
                 <div ref="modal" :class="classList">
                     <header class="bg-primary-main dark:bg-primary-dark rounded-t-lg text-high-contrast-text">
                         <div class="flex items-center justify-between">
@@ -23,11 +23,11 @@
                         </div>
                         <div v-if="loading">
                             <div class="relative bg-primary-light h-2">
-                                <div class="absolute bg-secondary-main h-full w-1/3 load" />
+                                <div class="absolute bg-secondary-main dark:bg-gray-800 h-full w-1/3 load" />
                             </div>
                         </div>
                     </header>
-                    <section class="h-full bg-secondary-light dark:bg-secondary-dark">
+                    <section class="h-full bg-secondary-light dark:bg-gray-800">
                         <slot name="body"> Default body </slot>
                     </section>
                     <footer class="bg-primary-main dark:bg-primary-dark rounded-b-lg">

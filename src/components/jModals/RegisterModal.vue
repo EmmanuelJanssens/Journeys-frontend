@@ -13,7 +13,7 @@
         </template>
 
         <template #body>
-            <div class="bg-secondary-light dark:bg-secondary-dark p-8 h-full">
+            <div class="bg-secondary-light dark:bg-gray-800 p-8 h-full">
                 <div class="grid grid-cols-2 gap-4">
                     <JourneyInput
                         v-model="state.firstName"

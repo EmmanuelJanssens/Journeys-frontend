@@ -1,6 +1,6 @@
 <template>
-    <div class="flex flex-col space-y-4 bg-secondary-light dark:bg-secondary-dark rounded-xl drop-shadow-xl">
-        <div class="top-0 p-3 bg-primary-main dark:primar w-full rounded-t-xl">
+    <div class="flex flex-col space-y-4 bg-secondary-light dark:bg-gray-800 rounded-xl drop-shadow-xl">
+        <div class="top-0 p-3 bg-primary-main dark:bg-primary-dark w-full rounded-t-xl">
             <div class="flex space-x-4 justify-between">
                 <p class="text-center text-white">
                     {{ journey.title }}
@@ -36,7 +36,6 @@
 <script lang="ts" setup>
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
-import { JourneyDto } from "types/dtos";
 
 import { faPencil, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -44,11 +43,12 @@ import { journeyModalController } from "components/UI/Modal/JourneyModalControll
 import { POSITION, useToast } from "vue-toastification";
 import router from "router/router";
 import { drawMyJourneys } from "map/drawOnMap";
+import { Journey } from "types/JourneyDtos";
 
 const toast = useToast();
 
 const props = defineProps<{
-    journey: JourneyDto;
+    journey: Journey;
 }>();
 
 const journeyStore = useJourneyStore();

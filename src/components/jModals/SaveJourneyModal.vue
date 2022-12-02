@@ -1,10 +1,16 @@
 <template>
-    <JourneyModal name="saveJourney" :loading="isLoading">
+    <JourneyModal
+        name="saveJourney"
+        :loading="isLoading"
+        :size="{
+            w: 'w-1/3',
+            h: 'h-1/5'
+        }">
         <template #header>
             <h1 class="text-high-contrast-text">Save Journey</h1>
         </template>
         <template #body>
-            <div class="flex flex-col p-4 bg-secondary-light dark:bg-secondary-dark space-y-4">
+            <div class="flex flex-col p-4 justify-around h-full bg-secondary-light dark:bg-gray-800 space-y-4">
                 <JourneyInput v-model="state.title" placeholder="Journey title" />
                 <div class="flex space-x-4 justify-between">
                     <JourneyButton class="grow" type="primary" fill="fill" @click="quickSave">
@@ -38,22 +44,21 @@ const toast = useToast();
 const journeyStore = useJourneyStore();
 const mode = computed(() => router.currentRoute.value.query.mode);
 const isLoading = ref(false);
+
 onMounted(() => {
     console.log(router.currentRoute.value);
-    if (mode.value == "new") {
-        state.value.title = journeyStore.editJourney.start?.address + " - " + journeyStore.editJourney.end?.address;
-    } else if (mode.value == "existing") {
-        state.value.title = journeyStore.editJourney.title!;
-    }
+    state.value.title = journeyStore.journey.title!;
 });
 
 async function quickSave() {
     try {
         await save();
         journeyModalController.close("saveJourney");
+        toast.success("Journey saved!", {
+            position: POSITION.TOP_CENTER
+        });
     } catch (e) {
-        console.log(e);
-        toast.error("Could not savce your journey", {
+        toast.error("Could not save your journey", {
             position: POSITION.TOP_CENTER
         });
     }
@@ -67,11 +72,12 @@ async function redirectionSave() {
                 journey: saved?.id
             }
         });
+        toast.success("Journey saved!", {
+            position: POSITION.TOP_CENTER
+        });
         router.push("/logbook/journey/" + saved!.id);
     } catch (e) {
-        console.log(e);
-
-        toast.error("Could not savce your journey", {
+        toast.error("Could not save your journey", {
             position: POSITION.TOP_CENTER
         });
     }
@@ -81,15 +87,43 @@ async function save() {
     try {
         let saved;
         if (mode.value == "existing") {
-            journeyStore.editJourney.title = state.value.title;
+            journeyStore.journey.title = state.value.title;
+            journeyStore.journey.visibility = "public";
             saved = await journeyStore.updateJourneyExperiences();
-            toast.success("Journey saved!", {
-                position: POSITION.TOP_CENTER
-            });
             isLoading.value = false;
 
-            return saved;
-        } else if (mode.value == "new") saved = await journeyStore.saveJourney(state.value.title);
+            Promise.all(saved.uploadTask)
+                .then((tast) => {
+                    if (tast.length > 0) {
+                        toast.info("Your images have been uploaded you can now see them", {
+                            position: POSITION.BOTTOM_RIGHT
+                        });
+                    }
+                })
+                .catch(() => {
+                    toast.error("Could not upload your images", {
+                        position: POSITION.TOP_CENTER
+                    });
+                });
+            return saved.journey;
+        } else if (mode.value == "new") {
+            saved = await journeyStore.saveJourney(state.value.title);
+
+            Promise.all(saved.uploadTask)
+                .then((tast) => {
+                    if (tast.length > 0) {
+                        toast.info("Your images have been uploaded you can now see them", {
+                            position: POSITION.BOTTOM_RIGHT
+                        });
+                    }
+                })
+                .catch(() => {
+                    toast.error("Could not upload your images", {
+                        position: POSITION.TOP_CENTER
+                    });
+                });
+            return saved.journey;
+        }
     } catch (e) {
         throw Error(e);
     }

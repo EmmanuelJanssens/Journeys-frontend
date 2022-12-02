@@ -8,7 +8,7 @@
             h: 'h/1/3'
         }">
         <template #body>
-            <div class="bg-secondary-light p-4 flex flex-col h-full">
+            <div class="bg-secondary-light dark:bg-gray-800 p-4 flex flex-col h-full">
                 <div class="flex space-x-2 flex-wrap max-w-3xl">
                     <div v-for="img in images" :key="img.url">
                         <button class="relative" @click="setThumbnail(img.url)">
@@ -38,7 +38,6 @@
 <script lang="ts" setup>
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useUserStore } from "stores/useUserStore";
-import { JourneyDto } from "types/dtos";
 import { onMounted, ref } from "vue";
 import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import JourneyInput from "components/UI/Input/JourneyInput.vue";
@@ -47,12 +46,13 @@ import { journeyModalController } from "components/UI/Modal/JourneyModalControll
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import { POSITION, useToast } from "vue-toastification";
+import { Journey } from "types/JourneyDtos";
 
 const userStore = useUserStore();
 const journeyStore = useJourneyStore();
 const toast = useToast();
 const props = defineProps<{
-    journey?: JourneyDto;
+    journey?: Journey;
 }>();
 
 const state = ref({
@@ -80,12 +80,12 @@ function setActive(img: string) {
 }
 
 onMounted(async () => {
-    journeyStore.editJourney = (await journeyStore.getJourney(props.journey?.id!))!;
+    journeyStore.journey = (await journeyStore.getJourney(props.journey?.id!))!;
     selectedThumbnail.value = props.journey?.thumbnail;
     images.value = [];
-    journeyStore.editJourney.experiencesConnection?.edges?.forEach((exp) => {
-        exp.images.forEach((image) => {
-            if (image == journeyStore.editJourney?.thumbnail) {
+    journeyStore.journey.experiences?.forEach((experience) => {
+        experience.data.images?.forEach((image) => {
+            if (image == journeyStore.journey?.thumbnail) {
                 images.value?.push({
                     url: image,
                     active: "checked"
@@ -99,9 +99,9 @@ onMounted(async () => {
         });
     });
     state.value = {
-        title: journeyStore.editJourney.title!,
-        description: journeyStore.editJourney.description!,
-        selectedThumbnail: journeyStore.editJourney.thumbnail!
+        title: journeyStore.journey.title!,
+        description: journeyStore.journey.description!,
+        selectedThumbnail: journeyStore.journey.thumbnail!
     };
 });
 
@@ -111,27 +111,29 @@ async function setThumbnail(url: string) {
 }
 async function save() {
     isLoading.value = true;
-    journeyStore.editJourney!.title = state.value.title;
-    journeyStore.editJourney!.description = state.value.description;
-    journeyStore.editJourney!.id = props.journey?.id;
-    journeyStore.editJourney!.thumbnail = selectedThumbnail.value;
-    delete journeyStore.editJourney!.experiencesConnection;
-    const res = await journeyStore.updateJourney("");
-    if (!res) {
-        toast.error("Could not save your modifications", {
-            position: POSITION.TOP_CENTER
-        });
-        return;
-    }
-    const edited = userStore.myJourneys?.find((journey) => journey.id == props.journey?.id);
-    if (edited) {
-        edited.title = journeyStore.editJourney!.title;
-        edited.description = journeyStore.editJourney!.description;
-        edited.thumbnail = journeyStore.editJourney?.thumbnail;
-        journeyModalController.close("editJourney");
-        toast.success("Saved your modifications!", {
-            position: POSITION.TOP_CENTER
-        });
+    if (journeyStore.journey) {
+        journeyStore.journey.title = state.value.title;
+        journeyStore.journey.description = state.value.description;
+        journeyStore.journey.id = props.journey?.id;
+        journeyStore.journey.thumbnail = selectedThumbnail.value;
+        delete journeyStore.journey!.experiences;
+        const res = await journeyStore.updateJourney();
+        if (!res) {
+            toast.error("Could not save your modifications", {
+                position: POSITION.TOP_CENTER
+            });
+            return;
+        }
+        const edited = userStore.myJourneys?.find((journey) => journey.id == props.journey?.id);
+        if (edited) {
+            edited.title = journeyStore.journey.title;
+            edited.description = journeyStore.journey.description;
+            edited.thumbnail = journeyStore.journey?.thumbnail;
+            journeyModalController.close("editJourney");
+            toast.success("Saved your modifications!", {
+                position: POSITION.TOP_CENTER
+            });
+        }
     }
 
     isLoading.value = false;

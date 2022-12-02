@@ -19,14 +19,14 @@
                 1536: { slidesPerView: 4 }
             }"
             @slides-length-change="goToLast">
-            <swiper-slide
-                v-for="item in journeyStore.editJourney.experiencesConnection?.edges"
-                :key="(item.node as PoiDto).id">
+            <swiper-slide v-for="experience in journeyStore.journey.experiences" :key="experience.poi.id">
                 <ExperienceCard
-                    :experience="item"
-                    :journey="journeyStore.editJourney.id!"
+                    :experience="experience.data"
+                    :poi="experience.poi"
+                    :mode="'edit'"
+                    :journey="journeyStore.journey.id!"
                     class="max-w-[400px] h-full"
-                    @updated="emit('updated', journeyStore.editJourney.id!)" />
+                    @updated="emit('updated', journeyStore.journey.id!)" />
             </swiper-slide>
         </swiper>
     </section>
@@ -52,7 +52,6 @@ import { getLocalityAndCountry, reverseGeocode } from "google/googleGeocoder";
 import router from "router/router";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { LngLat } from "mapbox-gl";
-import { PoiDto } from "types/dtos";
 const modules = ref([Pagination, Navigation, Lazy, A11y]);
 
 const userStore = useUserStore();
@@ -95,7 +94,6 @@ onBeforeRouteLeave(async () => {
         if (!leave) {
             journeyModalController.open("saveJourney");
             const didSave = await journeyModalController.didClose("saveJourney");
-            console.log(didSave);
             if (!didSave) leave = false;
             else leave = true;
         }
@@ -109,34 +107,23 @@ onBeforeRouteLeave(async () => {
 });
 
 function goToLast(swiper: any) {
-    swiper.slideTo(journeyStore.editJourney.experiencesConnection?.edges?.length!);
+    swiper.slideTo(journeyStore.journey.experiences!.length!);
 }
 
 onMounted(async () => {
     journeyStore.init();
-    console.log("FSAIJhfIOSAFhISUh");
     const query = router.currentRoute.value.query;
     try {
         if (userStore.isLoggedIn) {
             if (query.id) {
-                const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney);
+                const mid = journeyStore.getJourneyMidPoint(journeyStore.journey);
                 await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
-                journeyStore.editJourney.experiencesConnection?.edges?.forEach((exp) => {
-                    if (exp.editing) {
-                        exp.images.forEach((img) => {
-                            exp.imagesEditing?.push({
-                                file: undefined,
-                                url: img
-                            });
-                        });
-                    }
-                });
             } else {
-                const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney);
+                const mid = journeyStore.getJourneyMidPoint(journeyStore.journey);
                 await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
             }
         } else {
-            const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney);
+            const mid = journeyStore.getJourneyMidPoint(journeyStore.journey);
             await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
         }
 
@@ -146,7 +133,6 @@ onMounted(async () => {
             enableDrag();
         }
     } catch (e) {
-        console.log(e);
         //
     }
 });
@@ -169,22 +155,18 @@ async function onMarkerDragend(pos: LngLat, marker: string) {
     const result = getLocalityAndCountry(response!);
     if (result.country != undefined && result.locality != undefined) {
         if (marker == "journey_start") {
-            journeyStore.editJourney.start = {
-                placeId: result.placeId,
-                address: result.locality + ", " + result.country,
+            journeyStore.journey.start = {
                 latitude: pos.lat,
                 longitude: pos.lng
             };
         } else if (marker == "journey_end") {
-            journeyStore.editJourney.end = {
-                placeId: result.placeId,
-                address: result.locality + ", " + result.country,
+            journeyStore.journey.end = {
                 latitude: pos.lat,
                 longitude: pos.lng
             };
         }
     }
-    const mid = journeyStore.getJourneyMidPoint(journeyStore.editJourney);
+    const mid = journeyStore.getJourneyMidPoint(journeyStore.journey);
     await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
     await drawPoisBetween();
     await mapInstance.getMap();

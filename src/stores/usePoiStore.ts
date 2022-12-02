@@ -2,13 +2,13 @@ import type { AxiosError } from "axios";
 import axios from "axios";
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
-import { PoiDto } from "types/dtos";
+import { PointOfInterest } from "types/JourneyDtos";
 import { ref } from "vue";
 
 export const usePoiStore = defineStore("poi", () => {
-    const poisBetween = ref<PoiDto[]>([]);
+    const poisBetween = ref<PointOfInterest[]>([]);
 
-    async function getThumbnail(poi: PoiDto) {
+    async function getThumbnail(poi: PointOfInterest) {
         return await axios.post("api/poi/thumbnail", poi).then((r) => {
             return r;
         });
@@ -38,7 +38,17 @@ export const usePoiStore = defineStore("poi", () => {
 
     async function poiCountBetween(lat: number, lng: number, radius: number): Promise<number> {
         try {
-            const res = await axios.get(`api/poi/count?lat=${lat}&lng=${lng}&radius=${radius}`);
+            const query = JSON.stringify({
+                location: {
+                    longitude: lng,
+                    latitude: lat
+                },
+                radius
+            });
+
+            const url = encodeURI(query);
+
+            const res = await axios.get(`api/poi/search/${url}/count`);
             return res.data;
         } catch (e) {
             return 0;
@@ -46,23 +56,32 @@ export const usePoiStore = defineStore("poi", () => {
     }
     async function searchBetween(lat: number, lng: number, radius: number): Promise<boolean> {
         try {
-            const response = await axios.get(`api/poi?lat=${lat}&lng=${lng}&radius=${radius}`);
+            const query = JSON.stringify({
+                location: {
+                    longitude: lng,
+                    latitude: lat
+                },
+                radius
+            });
+            const url = encodeURI(query);
+
+            const res = await axios.get(`api/poi/search/${url}`);
             if (poisBetween.value?.length! > 0) {
                 poisBetween.value = [];
             }
-            poisBetween.value = response.data.data;
+            poisBetween.value = res.data;
             return true;
         } catch (e) {
             return false;
         }
     }
-    async function getPoiExperiences(poi: PoiDto) {
+    async function getPoiExperiences(poi: PointOfInterest) {
         return await (
             await axios.get("api/poi/" + poi.id)
         ).data;
     }
 
-    async function addPoi(poi: PoiDto) {
+    async function addPoi(poi: PointOfInterest) {
         try {
             const token = await authApp.currentUser?.getIdToken(true);
             const result = await axios.post("api/poi/", poi, {
@@ -70,7 +89,7 @@ export const usePoiStore = defineStore("poi", () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            return result.data as PoiDto;
+            return result.data as PointOfInterest;
         } catch (e) {
             return undefined;
         }

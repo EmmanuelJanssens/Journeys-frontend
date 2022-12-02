@@ -51,7 +51,10 @@ function onAutoComplete(value: string) {
     input.value = value;
     emits("dirty");
     if (value.length > 3) {
-        predictions.value = [];
+        const newPredictions: {
+            value: string;
+            key: string | number | any;
+        }[] = [];
 
         const request: google.maps.places.AutocompletionRequest = {
             input: value,
@@ -60,11 +63,12 @@ function onAutoComplete(value: string) {
         };
         service.getPlacePredictions(request).then((response) => {
             response.predictions.forEach((prediction) => {
-                predictions.value.push({
+                newPredictions.push({
                     value: prediction.description,
                     key: prediction.place_id
                 });
             });
+            predictions.value = newPredictions;
         });
     } else {
         predictions.value = [];

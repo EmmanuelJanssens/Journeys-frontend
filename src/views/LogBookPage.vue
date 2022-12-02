@@ -1,7 +1,6 @@
 <!-- eslint-disable vue/valid-v-for -->
 <template>
     <div class="absolute top-0 right-0 left-0 w-screen h-screen">
-        <!-- <TheJourneysHeader class="z-50" /> -->
         <div class="relative flex h-full w-full">
             <LogbookMenu />
             <ThePoiListSidebar :poi-list="poiStore.poisBetween" @poi-item-clicked="flyTo" />
@@ -27,14 +26,13 @@ import { defineAsyncComponent, onMounted } from "vue";
 
 import { usePoiStore } from "stores/usePoiStore";
 
-import { PoiDto } from "types/dtos";
-
 import JourneyMap from "components/TheJourneyMap.vue";
 
 import LogbookMenu from "components/LogbookMenu.vue";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { mapInstance } from "map/JourneysMap";
+import { PointOfInterest } from "types/JourneyDtos";
 
 const poiStore = usePoiStore();
 
@@ -74,7 +72,7 @@ onMounted(async () => {
     );
 });
 
-function flyTo(poi: PoiDto) {
+function flyTo(poi: PointOfInterest) {
     if (poi.location?.longitude && poi.location.latitude)
         mapInstance.flyTo(poi.location?.longitude, poi.location?.latitude, 18);
 }

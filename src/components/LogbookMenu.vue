@@ -1,11 +1,11 @@
 <template>
     <div
         ref="menu"
-        class="flex flex-col bg-primary-light w-16 h-full transition-all shadow-inner"
+        class="flex flex-col bg-primary-light dark:bg-gray-800 w-16 h-full transition-all shadow-inner"
         @transitionend="resize">
         <button
             :class="{
-                'w-full p-2 text-primary-darker': true,
+                'w-full p-2 text-primary-darker dark:text-primary-main': true,
                 'text-left': isOpen
             }"
             @click="toggle">
@@ -22,14 +22,14 @@
             src="/assets/placeholder.png" />
 
         <div class="flex flex-col whitespace-pre-wrap text-primary-darker h-full">
-            <JourneyItem :button="homeButton" :collapsed="isOpen" />
-            <JourneyItem :button="viewProfileButton" :collapsed="isOpen" />
-            <JourneyItem :button="logbookButton" :collapsed="isOpen" />
-            <JourneyItem :button="addPoiButton" :collapsed="isOpen" />
-            <JourneyItem :button="addJourneyButton" :collapsed="isOpen" :custom="true" :visible="addVisible" />
-            <JourneyItem :button="editJourneyButton" :collapsed="isOpen" :visible="editVisible" />
-            <JourneyItem :button="saveJourneyButton" :collapsed="isOpen" :visible="saveVisible" />
-            <JourneyItem class="last:mt-auto" :button="logoutButton" :collapsed="isOpen" :visible="true" />
+            <JourneyItem :button="homeButton" :collapsed="!isOpen" />
+            <JourneyItem :button="viewProfileButton" :collapsed="!isOpen" />
+            <JourneyItem :button="logbookButton" :collapsed="!isOpen" />
+            <JourneyItem :button="addPoiButton" :collapsed="!isOpen" />
+            <JourneyItem :button="addJourneyButton" :collapsed="!isOpen" :custom="true" :visible="addVisible" />
+            <JourneyItem :button="editJourneyButton" :collapsed="!isOpen" :visible="editVisible" />
+            <JourneyItem :button="saveJourneyButton" :collapsed="!isOpen" :visible="saveVisible" />
+            <JourneyItem class="last:mt-auto" :button="logoutButton" :collapsed="!isOpen" :visible="true" />
         </div>
     </div>
 </template>
@@ -113,11 +113,12 @@ const addJourneyButton = ref({
         const result = await journeyModalController.didClose("createJourney");
 
         if (result) {
-            journeyStore.editJourney = {
+            journeyStore.journey = {
                 start: result.data.start,
-                end: result.data.end
+                end: result.data.end,
+                title: result.data.title
             };
-            journeyStore.editJourney.experiencesConnection = { edges: [] };
+            journeyStore.journey.experiences = [];
             router.push("/edit?mode=new");
         }
     }
@@ -130,7 +131,7 @@ const editJourneyButton = ref({
     icon: faPencil,
     handler: () => {
         if (router.currentRoute.value.name == "view") {
-            router.push("/edit?id=" + journeyStore.editJourney.id + "&mode=existing");
+            router.push("/edit?id=" + journeyStore.journey.id + "&mode=existing");
         }
     }
 });

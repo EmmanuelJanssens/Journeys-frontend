@@ -9,7 +9,7 @@
             h: 'h-1/3'
         }">
         <template #body>
-            <div class="h-full bg-secondary-light dark:bg-secondary-dark p-4 flex items-center justify-center">
+            <div class="h-full bg-secondary-light dark:bg-gray-800 p-4 flex items-center justify-center">
                 <div class="flex flex-col space-y-4 justify-center">
                     <JourneyInput v-model="state.email" placeholder="Email" />
                     <JourneyInput v-model="state.password" placeholder="Password" type="password" />

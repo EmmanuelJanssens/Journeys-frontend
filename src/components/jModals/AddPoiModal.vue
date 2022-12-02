@@ -35,10 +35,11 @@ import JourneyInput from "components/UI/Input/JourneyInput.vue";
 import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import { getGeocodedData } from "google/googleGeocoder";
 import { usePoiStore } from "stores/usePoiStore";
-import { AddressDto, PoiDto } from "types/dtos";
+import { AddressDto } from "types/dtos";
 import { ref } from "vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { Feature } from "geojson";
+import { PointOfInterest } from "types/JourneyDtos";
 const input = ref("");
 const url = ref("");
 const poiName = ref("");
@@ -70,7 +71,7 @@ const poiStore = usePoiStore();
 async function save() {
     isLoading.value = true;
 
-    const poi: PoiDto = {
+    const poi: PointOfInterest = {
         location: {
             longitude: address.value?.longitude!,
             latitude: address.value?.latitude!

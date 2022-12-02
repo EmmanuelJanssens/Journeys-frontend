@@ -4,8 +4,8 @@ import { usePoiStore } from "stores/usePoiStore";
 
 import { mapInstance } from "./JourneysMap";
 import { LngLat } from "mapbox-gl";
-import { JourneyDto, PoiDto } from "types/dtos";
 import { getMidPoint } from "utils/utils";
+import { Journey } from "types/JourneyDtos";
 
 const userStore = useUserStore();
 const poiStore = usePoiStore();
@@ -37,22 +37,21 @@ export function drawMyJourneys() {
     mapInstance.addJourneyListLayer(geoJSONJourney);
 }
 
-export function drawJourney(journey: JourneyDto) {
+export function drawJourney(journey: Journey) {
     const featureCollection: GeoJSON.FeatureCollection = {
         type: "FeatureCollection",
         features: []
     };
 
-    journey.experiencesConnection?.edges?.forEach((exp) => {
-        const n = exp.node as PoiDto;
+    journey.experiences?.forEach((experience) => {
         featureCollection.features.push({
             type: "Feature",
             geometry: {
                 type: "Point",
-                coordinates: [n.location!.longitude, n.location!.latitude]
+                coordinates: [experience.poi.location.longitude, experience.poi.location.latitude]
             },
-            properties: exp,
-            id: (exp.node as PoiDto).id
+            properties: experience.data,
+            id: experience.poi.id
         });
     });
 
@@ -86,12 +85,11 @@ export function drawJourney(journey: JourneyDto) {
 export function drawExperiences() {
     const array: Array<number[]> = new Array();
 
-    array.push([journeyStore.editJourney.start?.longitude!, journeyStore.editJourney.start?.latitude!]);
-    journeyStore.editJourney.experiencesConnection?.edges!?.forEach((exp) => {
-        const n = exp.node as PoiDto;
-        array.push([n.location!.longitude, n.location!.latitude]);
+    array.push([journeyStore.journey.start?.longitude!, journeyStore.journey.start?.latitude!]);
+    journeyStore.journey.experiences?.forEach((experience) => {
+        array.push([experience.poi.location.longitude, experience.poi.location.latitude]);
     });
-    array.push([journeyStore.editJourney.end?.longitude!, journeyStore.editJourney.end?.latitude!]);
+    array.push([journeyStore.journey.end?.longitude!, journeyStore.journey.end?.latitude!]);
 
     const feature: GeoJSON.Feature = {
         type: "Feature",
@@ -124,12 +122,11 @@ export async function drawPoisBetween() {
 
     const coords = Array<number[]>();
 
-    coords.push([journeyStore.editJourney.start?.longitude!, journeyStore.editJourney.start?.latitude!]);
-    journeyStore.editJourney.experiencesConnection?.edges?.forEach((exp) => {
-        const n = exp.node as PoiDto;
-        coords.push([n.location!.longitude, n.location!.latitude]);
+    coords.push([journeyStore.journey.start?.longitude!, journeyStore.journey.start?.latitude!]);
+    journeyStore.journey.experiences?.forEach((experience) => {
+        coords.push([experience.poi.location.longitude, experience.poi.location.latitude]);
     });
-    coords.push([journeyStore.editJourney.end?.longitude!, journeyStore.editJourney.end?.latitude!]);
+    coords.push([journeyStore.journey.end?.longitude!, journeyStore.journey.end?.latitude!]);
 
     geoJsonData.features.push({
         type: "Feature",
@@ -138,10 +135,10 @@ export async function drawPoisBetween() {
             coordinates: coords
         },
         properties: {
-            start: journeyStore.editJourney.start,
-            end: journeyStore.editJourney.end
+            start: journeyStore.journey.start,
+            end: journeyStore.journey.end
         },
-        id: "editJourney"
+        id: "journey"
     });
     mapInstance.addPoiListLayer(geoJsonData);
 }
