@@ -1,29 +1,33 @@
 <template>
     <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner">
-        <div
-            class="relative bg-secondary-main bg-opacity-10 bg-gradient-to-t from-primary-light to-transparen dark:from-gray-800">
-            <img src="/assets/images/banner/banner.png" class="object-cover h-full w-full absolute -z-10" />
-            <div class="custom-shape-divider-top-1670000317">
-                <svg
-                    data-name="Layer 1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 1200 120"
-                    preserveAspectRatio="none">
-                    <path
-                        d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
-                        opacity=".25"
-                        class="fill-gray-800"></path>
-                    <path
-                        d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z"
-                        opacity=".5"
-                        class="fill-gray-800"></path>
-                    <path
-                        d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
-                        class="fill-gray-800"></path>
-                </svg>
-            </div>
-            <div class="relative container mx-auto">
-                <div class="absolute z-50 w-full">
+        <div class="relative h-full bg-opacity-10 bg-header bg-cover z-0">
+            <img src="/assets/images/banner/banner.png" class="hero object-cover h-full w-full absolute -z-10" />
+            <!-- <svg
+                class="absolute w-full left-0 rig"
+                viewBox="0 0 1200 120"
+                width="100%"
+                data-name="Layer 1"
+                xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="none">
+                <path
+                    d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
+                    opacity=".25"
+                    class="fill-gray-800l"></path>
+                <path
+                    d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z"
+                    opacity=".5"
+                    class="fill-gray-800"></path>
+                <path
+                    d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
+                    class="fill-gray-800"></path>
+            </svg> -->
+
+            <div class="flex container mx-auto z-50">
+                <section class="text-high-contrast-text text-center sm:text-left">
+                    <h1 class="text-7xl sm:text-9xl">Journeys</h1>
+                    <p>It's not always about the destination</p>
+                </section>
+                <div class="z-50 w-full">
                     <div class="flex justify-end p-4 space-x-4">
                         <JourneyButton
                             v-if="!userStore.isLoggedIn"
@@ -49,10 +53,6 @@
                         </JourneyButton>
                     </div>
                 </div>
-                <section class="h-56 sm:h-96 text-high-contrast-text text-center sm:text-left">
-                    <h1 class="text-7xl sm:text-9xl">Journeys</h1>
-                    <p>It's not always about the destination</p>
-                </section>
             </div>
         </div>
 
@@ -340,26 +340,32 @@ watch(
     box-shadow: none;
 }
 
+.shape {
+    overflow: hidden;
+    position: absolute;
+}
+.shape::before {
+    content: "";
+    font-family: "shape divider from ShapeDividers.com";
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    bottom: -0.1vw;
+    left: -0.1vw;
+    right: -0.1vw;
+    top: -0.1vw;
+    background-size: 90px 109%;
+    background-position: 100% 50%;
+    background-image: url('data:image/svg+xml;charset=utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.17 35.28" preserveAspectRatio="none"><path d="M1.67 0c-.55 3.07.41 9.27 0 16.14-.4 6.88-.58 13.75.1 19.14h.4V0z" fill="%23fbd8c2"/><path d="M1.16 0c-.8 3.17.4 7.29.56 10.04C1.89 12.8.25 19.3.42 22.71c.16 3.43.84 4.65.86 7.05.03 2.4-.88 5.52-.88 5.52h1.77V0z" opacity=".5" fill="%23fbd8c2"/><path d="M.31 0c.84 2.56.3 7.68.43 11.79.12 4.1.61 6.86.28 9.58-.33 2.73-1.18 5.61-1 8.61.19 3 .82 4.73.84 5.3h1.2V0z" opacity=".5" fill="%23fbd8c2"/></svg>');
+}
+
 ::-webkit-scrollbar-corner {
     background: #000;
 }
-.custom-shape-divider-top-1670000317 {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    overflow: hidden;
-    line-height: 0;
-}
 
-.custom-shape-divider-top-1670000317 svg {
-    position: relative;
-    display: block;
-    width: calc(199% + 1.3px);
-    height: 397px;
-}
-
-.shape-fill {
-    fill: #a6cabd;
+.hero {
+    -webkit-mask: url("/assets/images/layered-peaks-haikei.svg");
+    max-width: 100%;
 }
 </style>

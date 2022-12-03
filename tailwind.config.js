@@ -69,8 +69,12 @@ module.exports = {
                 appear: "appear 0.3s ease-in",
                 disappear: "disappear 0.3s ease-in",
                 pop: "pop 0.2s ease-in"
+            },
+            backgroundImage: {
+                feature: "url('/assets/images/features/featureImg1.png')",
+                header: "url('/assets/images/banner/mountains.jpg')"
             }
         }
     },
-    plugins: []
+    plugins: [require("daisyui")]
 };

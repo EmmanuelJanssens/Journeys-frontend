@@ -5,7 +5,7 @@
             <LogbookMenu />
             <ThePoiListSidebar :poi-list="poiStore.poisBetween" @poi-item-clicked="flyTo" />
             <div class="w-full h-full">
-                <JourneyMap class="relative bg-secondary-light w-full h-full">
+                <JourneyMap class="relative w-full h-full">
                     <router-view v-slot="{ Component, route }" class="absolute left-0 right-0 bottom-0 p-4 h-2/5">
                         <Transition name="fade" mode="out-in">
                             <component :is="Component" :key="route.path" />
