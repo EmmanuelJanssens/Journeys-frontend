@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col space-y-4 bg-secondary-light dark:bg-gray-800 rounded-xl drop-shadow-xl">
+    <div class="card w-auto bg-base-100 shadow-xl max-w-xs">
         <div class="top-0 p-3 bg-primary-main dark:bg-primary-dark w-full rounded-t-xl">
             <div class="flex space-x-4 justify-between">
                 <p class="text-center text-white">
@@ -19,16 +19,24 @@
                 </div>
             </div>
         </div>
-        <div class="p-4">
-            <img v-if="journey.thumbnail" class="rounded-xl object-cover h-52 w-full" :src="journey.thumbnail" />
-            <img v-else class="rounded-xl object-cover h-52 w-full" src="/assets/placeholder.png" />
-        </div>
-        <div
-            v-if="journey.description && journey.description.length > 0"
-            class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto break-before-all">
-            <p class="text-center text-primary-darker">
-                {{ journey.description }}
-            </p>
+        <div class="card-body">
+            <figure>
+                <img
+                    class="rounded-xl object-cover h-52 w-full shadow-lg"
+                    v-lazy="{
+                        src: journey.thumbnail,
+                        loading: '/assets/placeholder.png',
+                        error: '/assets/placeholder.png'
+                    }" />
+            </figure>
+
+            <div
+                v-if="journey.description && journey.description.length > 0"
+                class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto break-before-all">
+                <p class="text-center text-primary-darker">
+                    {{ journey.description }}
+                </p>
+            </div>
         </div>
     </div>
 </template>

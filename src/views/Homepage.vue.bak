@@ -300,12 +300,7 @@ watch(
 
 const windowSize = useWindowSize();
 </script>
-
 <style scoped lang="less">
-.inner-shadow {
-    background-image: url(/assets/images/banner/mountains.jpg);
-}
-
 ::-webkit-scrollbar {
     height: 12px;
     width: 6px;

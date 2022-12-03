@@ -1,57 +1,61 @@
 <template>
     <Teleport to="#poipopup">
-        <div ref="poiEl" />
-        <JourneyCard class="absolute" :pos="pos">
-            <template #header>
-                {{ poi?.name }}
-            </template>
-            <template #subtitle> Title </template>
-            <template #body>
-                <div>
-                    <swiper
-                        v-if="poi?.experiences?.length! > 0"
-                        :slides-per-view="1"
-                        :initial-slide="0"
-                        :lazy="{
-                            enabled: true
-                        }"
-                        :pagination="{
-                            clickable: true
-                        }"
-                        :loop="true">
-                        <swiper-slide v-for="experience in poi?.experiences" :key="experience.date">
-                            <div class="p-4">
-                                <img
-                                    v-lazy="{
-                                        src: experience.images?.at(0),
-                                        loading: '/assets/placeholder.png',
-                                        error: '/assets/placeholder.png'
-                                    }"
-                                    class="object-cover w-full h-40 rounded-xl" />
-                                <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto">
-                                    <p class="text-center text-primary-darker">
-                                        {{ experience.description }}
-                                    </p>
-                                </div>
+        <div class="card absolute bg-base-100 w-80 z-50" ref="card">
+            <div class="top-0 p-3 bg-primary-main dark:primar w-full rounded-t-xl">
+                <div class="flex space-x-4 justify-between">
+                    <p class="text-center text-white">
+                        {{ poi?.name }}
+                    </p>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="px-4">
+                    <div class="text-opacity-80 text-gray-600">{{ title }}</div>
+                </div>
+                <swiper
+                    v-if="poi?.experiences?.length! > 0"
+                    :slides-per-view="1"
+                    :space-between="10"
+                    :initial-slide="0"
+                    class="w-full"
+                    :lazy="{
+                        enabled: true
+                    }"
+                    :pagination="{
+                        clickable: true
+                    }"
+                    :loop="true"
+                    @slide-change="setTitle">
+                    <swiper-slide v-for="experience in poi?.experiences" :key="experience.date">
+                        <div class="flex flex-col space-y-4">
+                            <img
+                                v-lazy="{
+                                    src: experience.images?.at(0),
+                                    loading: '/assets/placeholder.png',
+                                    error: '/assets/placeholder.png'
+                                }"
+                                class="object-cover w-full h-40 rounded-xl shadow-md" />
+                            <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto">
+                                <p class="text-center text-primary-darker">
+                                    {{ experience.description }}
+                                </p>
                             </div>
-                        </swiper-slide>
-                    </swiper>
-                    <div v-else class="overflow-auto">
-                        <div class="p-4 overflow-auto">
-                            <img class="object-cover w-full h-40 rounded-xl" src="/assets/placeholder.png" />
-                            <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36">
-                                <p class="text-center text-primary-darker">Be the first here</p>
-                            </div>
+                        </div>
+                    </swiper-slide>
+                </swiper>
+                <div v-else class="overflow-auto">
+                    <div class="p-4 overflow-auto">
+                        <img class="object-cover w-full h-40 rounded-xl shadow-md" src="/assets/placeholder.png" />
+                        <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36">
+                            <p class="text-center text-primary-darker">Be the first here</p>
                         </div>
                     </div>
                 </div>
-            </template>
-            <template #footer>
-                <JourneyButton fill="contrast" type="secondary" @click="add">
-                    <FontAwesomeIcon :icon="faAdd" /> Add
-                </JourneyButton>
-            </template>
-        </JourneyCard>
+                <div class="card-actions justify-end">
+                    <JourneyButton type="secondary" @click="add"> <FontAwesomeIcon :icon="faAdd" /> Add </JourneyButton>
+                </div>
+            </div>
+        </div>
     </Teleport>
 </template>
 
@@ -76,15 +80,23 @@ const props = defineProps<{
     };
 }>();
 const poi = ref<PointOfInterest>();
-const poiEl = ref();
+const card = ref();
 const poiStore = usePoiStore();
 const journeyStore = useJourneyStore();
-
+const title = ref("");
 const emit = defineEmits<{
     (e: "close"): void;
     (e: "add"): void;
 }>();
 
+function setTitle(value: any) {
+    const titleAt = poi.value?.experiences?.at(value.activeIndex - 1)?.title;
+    if (titleAt && titleAt?.length! > 0) {
+        title.value = titleAt!;
+    } else {
+        title.value = "No title";
+    }
+}
 function add() {
     const experience: Experience = {
         description: "",
@@ -94,14 +106,37 @@ function add() {
     };
     journeyStore.addToJourney(experience, props.poi!);
     drawExperiences();
+    emit("close");
 }
-onClickOutside(poiEl, () => {
+onClickOutside(card, () => {
     emit("close");
 });
-
 onMounted(async () => {
+    if (props.pos) {
+        const el = card.value as HTMLDivElement;
+        el.classList.add("animate-pop");
+        el.style.left = props.pos!.x - el.getBoundingClientRect().x + "px";
+        el.style.top = props.pos!.y - el.getBoundingClientRect().y + "px";
+    }
+
     poi.value = await poiStore.getPoiExperiences(props.poi!);
 });
 
 rand(0, 1000);
 </script>
+
+<style>
+::-webkit-scrollbar {
+    height: 12px;
+    width: 6px;
+    background: #dae1db;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #a6cabd;
+    -webkit-border-radius: 1ex;
+    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+    border-radius: 5%;
+    box-shadow: none;
+}
+</style>

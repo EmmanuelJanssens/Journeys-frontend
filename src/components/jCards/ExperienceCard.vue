@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col space-y-4 bg-secondary-light dark:bg-gray-800 rounded-xl drop-shadow-xl">
+    <div class="card bg-base-100 shadow-xl">
         <div class="top-0 p-3 bg-primary-main dark:bg-primary-dark w-full rounded-t-xl">
             <div class="flex space-x-4 justify-between">
                 <p class="text-center text-white">{{ props.poi.name }}: {{ props.experience.title }}</p>
@@ -14,64 +14,70 @@
                 </div>
             </div>
         </div>
-
-        <div class="px-4">
-            <div class="text-opacity-80 text-gray-600">
-                <p>{{ new Date(props.experience.date).toDateString() }}</p>
+        <div class="card-body">
+            <div class="px-4">
+                <div class="text-opacity-80 text-gray-600">
+                    <p>{{ new Date(props.experience.date).toDateString() }}</p>
+                </div>
             </div>
-        </div>
 
-        <div>
-            <swiper
-                :slides-per-view="1"
-                :initial-slide="0"
-                :lazy="{
-                    enabled: true
-                }"
-                :pagination="{
-                    clickable: true
-                }"
-                :loop="true"
-                :modules="modules">
-                <swiper-slide v-if="props.experience.images?.length == 0 && !props.experience.imagesToUpload">
-                    <div class="p-4">
-                        <img
-                            v-lazy="{
-                                src: '/assets/placeholder.png',
-                                loading: '/assets/placeholder.png',
-                                error: '/assets/placeholder.png'
-                            }"
-                            class="object-cover h-52 w-full rounded-xl" />
-                    </div>
-                </swiper-slide>
-                <swiper-slide v-for="image in props.experience.images" :key="image">
-                    <div class="p-4">
-                        <img
-                            v-lazy="{
-                                src: image,
-                                loading: '/assets/placeholder.png',
-                                error: '/assets/placeholder.png'
-                            }"
-                            class="object-cover h-52 w-full rounded-xl" />
-                    </div>
-                </swiper-slide>
-                <swiper-slide v-for="image in props.experience.imagesToUpload" :key="image">
-                    <div class="p-4">
-                        <img
-                            v-lazy="{
-                                src: image.url,
-                                loading: '/assets/placeholder.png',
-                                error: '/assets/placeholder.png'
-                            }"
-                            class="object-cover h-52 w-full rounded-xl" />
-                    </div>
-                </swiper-slide>
-            </swiper>
-        </div>
-        <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto">
-            <p class="text-center text-primary-darker">
-                {{ props.experience.description }}
-            </p>
+            <div>
+                <swiper
+                    :slides-per-view="1"
+                    :space-between="10"
+                    :initial-slide="0"
+                    :lazy="{
+                        enabled: true
+                    }"
+                    :pagination="{
+                        clickable: true
+                    }"
+                    :loop="true"
+                    :modules="modules">
+                    <swiper-slide
+                        v-if="
+                            props.experience.images?.length == 0 &&
+                            (!props.experience.imagesToUpload || props.experience.imagesToUpload?.length == 0)
+                        ">
+                        <div class="p-4">
+                            <img
+                                v-lazy="{
+                                    src: '/assets/placeholder.png',
+                                    loading: '/assets/placeholder.png',
+                                    error: '/assets/placeholder.png'
+                                }"
+                                class="object-cover h-52 w-full rounded-xl shadow-md" />
+                        </div>
+                    </swiper-slide>
+                    <swiper-slide v-for="image in props.experience.images" :key="image">
+                        <div class="p-4">
+                            <img
+                                v-lazy="{
+                                    src: image,
+                                    loading: '/assets/placeholder.png',
+                                    error: '/assets/placeholder.png'
+                                }"
+                                class="object-cover h-52 w-full rounded-xl shadow-md" />
+                        </div>
+                    </swiper-slide>
+                    <swiper-slide v-for="image in props.experience.imagesToUpload" :key="image">
+                        <div class="p-4">
+                            <img
+                                v-lazy="{
+                                    src: image.url,
+                                    loading: '/assets/placeholder.png',
+                                    error: '/assets/placeholder.png'
+                                }"
+                                class="object-cover h-52 w-full rounded-xl shadow-md" />
+                        </div>
+                    </swiper-slide>
+                </swiper>
+            </div>
+            <div class="bottom-0 p-4 w-full rounded-xl opacity-70 max-h-36 overflow-auto">
+                <p class="text-center text-primary-darker">
+                    {{ props.experience.description }}
+                </p>
+            </div>
         </div>
     </div>
 
@@ -98,7 +104,7 @@ import { drawJourney, drawPoisBetween } from "map/drawOnMap";
 import router from "router/router";
 import { computed, onMounted } from "vue";
 import { Experience, PointOfInterest } from "types/JourneyDtos";
-
+import JourneyCard from "components/UI/Card/JourneyCard.vue";
 const props = defineProps<{
     experience: Experience;
     poi: PointOfInterest;
@@ -118,7 +124,7 @@ async function onEdit() {
         }
     });
 
-    await journeyModalController.didClose("editExperience");
+    const newExp = await journeyModalController.didClose("editExperience");
 }
 
 const route = computed(() => ({
@@ -126,9 +132,7 @@ const route = computed(() => ({
     mode: router.currentRoute.value.query.mode
 }));
 
-onMounted(() => {
-    console.log(props.experience);
-});
+onMounted(() => {});
 async function onDelete() {
     if (route.value.name == "edit") {
         journeyStore.removeFromJourney(props.poi.id!);

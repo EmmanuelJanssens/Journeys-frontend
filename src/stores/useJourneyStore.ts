@@ -7,6 +7,7 @@ import { LngLat } from "mapbox-gl";
 import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
 import { Experience, Journey, Locality, PointOfInterest, UpdateJourneyDto } from "types/JourneyDtos";
 import { uuidv4 } from "@firebase/util";
+
 export const useJourneyStore = defineStore("journey", () => {
     const journey = ref<Journey>({});
     const updateDto = ref<UpdateJourneyDto>({});
@@ -33,7 +34,7 @@ export const useJourneyStore = defineStore("journey", () => {
         };
     }
     async function getJourney(id: string): Promise<Journey | undefined> {
-        const result = await axios.get("api/journey/" + id);
+        const result = await axios.get("/api/journey/" + id);
         return result.data;
     }
     function getJourneyMidPoint(journey: Journey): {
@@ -49,7 +50,7 @@ export const useJourneyStore = defineStore("journey", () => {
     }
     async function removeExperience(poi_id: string): Promise<Journey | undefined> {
         const token = await authApp.currentUser?.getIdToken(false);
-        const url = "api/journey/" + journey.value.id! + "/experience/" + poi_id;
+        const url = "/api/journey/" + journey.value.id! + "/experience/" + poi_id;
         const response = await axios.delete(url, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -62,7 +63,7 @@ export const useJourneyStore = defineStore("journey", () => {
 
     async function updateExperience(experience: Experience, poi: string): Promise<Journey | undefined> {
         const token = await authApp.currentUser?.getIdToken(false);
-        const url = "api/journey/" + journey.value.id + "/experience/" + poi;
+        const url = "/api/journey/" + journey.value.id + "/experience/" + poi;
         const response = await axios.put(url, experience, {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -103,8 +104,8 @@ export const useJourneyStore = defineStore("journey", () => {
             journey.value.experiences?.sort(
                 (a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime()
             );
-            isDirty.value = true;
         }
+        isDirty.value = true;
     }
 
     async function updateJourney(): Promise<Journey | undefined> {
@@ -122,17 +123,17 @@ export const useJourneyStore = defineStore("journey", () => {
         const token = await authApp.currentUser?.getIdToken(false);
 
         journey.value.experiences?.forEach((experience) => {
-            if (experience.data.imagesToUpload) {
+            if (experience.data.imagesToUpload && experience.data.imagesToUpload.length > 0) {
                 uploading.push(uploadImages(experience.data.imagesToUpload, experience.poi.id!, journey.value.id!));
-                delete experience.data.imagesToUpload;
             }
+            delete experience.data.imagesToUpload;
         });
 
         updateDto.value?.connected?.forEach(async (experience) => {
-            if (experience.data.imagesToUpload) {
+            if (experience.data.imagesToUpload && experience.data.imagesToUpload.length > 0) {
                 uploading.push(uploadImages(experience.data.imagesToUpload!, experience.poi.id!, journey.value.id!));
-                delete experience.data.imagesToUpload;
             }
+            delete experience.data.imagesToUpload;
         });
         const url = `/api/journey/${journey.value.id}/experiences`;
         updateDto.value.journey = journey.value;
@@ -158,10 +159,10 @@ export const useJourneyStore = defineStore("journey", () => {
         journey.value.visibility = "public";
         journey.value.id = uuidv4();
         journey.value.experiences?.forEach((experience) => {
-            if (experience.data.imagesToUpload) {
+            if (experience.data.imagesToUpload && experience.data.imagesToUpload.length > 0) {
                 uploading.push(uploadImages(experience.data.imagesToUpload, experience.poi.id!, journey.value.id!));
-                delete experience.data.imagesToUpload;
             }
+            delete experience.data.imagesToUpload;
         });
         const response = await axios.post("/api/journey/", journey.value!, {
             headers: {
@@ -177,7 +178,7 @@ export const useJourneyStore = defineStore("journey", () => {
 
     async function removeJourney(id: string): Promise<Boolean> {
         const token = await authApp.currentUser?.getIdToken(false);
-        const result = await axios.delete("api/journey/" + id, {
+        const result = await axios.delete("/api/journey/" + id, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -230,6 +231,7 @@ export const useJourneyStore = defineStore("journey", () => {
     }
     function clear() {
         // journey.value = {};
+        isDirty.value = false;
         init();
     }
 
@@ -266,55 +268,57 @@ export const useJourneyStore = defineStore("journey", () => {
         journey_id: string
     ) {
         const taskList: UploadTask[] = [];
+        if (images.length > 0) {
+            if (!images || images.length == 0) return undefined;
 
-        if (!images || images.length == 0) return undefined;
+            images.forEach(async (image) => {
+                const id = image.url.slice(image.url.lastIndexOf("/")) + 1;
+                const imageRef = fref(storageRef, journey.value.id + "/" + exp + "/" + id);
+                const metadata = {
+                    contentType: image.file.mimeType,
+                    customMetadata: {
+                        exp: exp,
+                        journey: journey_id
+                    }
+                };
+                taskList.push(uploadBytesResumable(imageRef, image.file.blob, metadata));
+            });
 
-        images.forEach(async (image) => {
-            const id = image.url.slice(image.url.lastIndexOf("/")) + 1;
-            const imageRef = fref(storageRef, journey.value.id + "/" + exp + "/" + id);
-            const metadata = {
-                contentType: image.file.mimeType,
-                customMetadata: {
-                    exp: exp,
-                    journey: journey_id
-                }
-            };
-            taskList.push(uploadBytesResumable(imageRef, image.file.blob, metadata));
-        });
-
-        return Promise.all(taskList).then((tasks) => {
-            tasks.forEach(async (task) => {
-                if (task.state == "success") {
-                    if (task.metadata.customMetadata?.exp && task.metadata.customMetadata?.journey) {
-                        const token = await authApp.currentUser?.getIdToken(false);
-                        const url = await getDownloadURL(task.ref);
-                        try {
-                            await axios.put(
-                                `api/journey/${task.metadata.customMetadata.journey}/experience/${task.metadata.customMetadata.exp}/image`,
-                                {
-                                    url: url
-                                },
-                                {
-                                    headers: {
-                                        Authorization: `Bearer ${token}`
+            return Promise.all(taskList).then((tasks) => {
+                tasks.forEach(async (task) => {
+                    if (task.state == "success") {
+                        if (task.metadata.customMetadata?.exp && task.metadata.customMetadata?.journey) {
+                            const token = await authApp.currentUser?.getIdToken(false);
+                            const url = await getDownloadURL(task.ref);
+                            try {
+                                await axios.put(
+                                    `/api/journey/${task.metadata.customMetadata.journey}/experience/${task.metadata.customMetadata.exp}/image`,
+                                    {
+                                        url: url
+                                    },
+                                    {
+                                        headers: {
+                                            Authorization: `Bearer ${token}`
+                                        }
                                     }
+                                );
+                                if (journey.value.id == task.metadata.customMetadata.journey) {
+                                    journey.value.experiences?.forEach((experience) => {
+                                        if (experience.poi.id == task.metadata.customMetadata?.exp) {
+                                            experience.data.images?.push(url);
+                                        }
+                                    });
                                 }
-                            );
-                            if (journey.value.id == task.metadata.customMetadata.journey) {
-                                journey.value.experiences?.forEach((experience) => {
-                                    if (experience.poi.id == task.metadata.customMetadata?.exp) {
-                                        experience.data.images?.push(url);
-                                    }
-                                });
+                            } catch (e) {
+                                const imgRef = fref(storageRef.storage, url);
+                                deleteObject(imgRef);
                             }
-                        } catch (e) {
-                            const imgRef = fref(storageRef.storage, url);
-                            deleteObject(imgRef);
                         }
                     }
-                }
+                });
             });
-        });
+        }
+        return undefined;
     }
     return {
         journey,

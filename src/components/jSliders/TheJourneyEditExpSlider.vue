@@ -52,6 +52,7 @@ import { getLocalityAndCountry, reverseGeocode } from "google/googleGeocoder";
 import router from "router/router";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { LngLat } from "mapbox-gl";
+
 const modules = ref([Pagination, Navigation, Lazy, A11y]);
 
 const userStore = useUserStore();
@@ -63,7 +64,7 @@ const emit = defineEmits<{
 }>();
 
 //return false to cancel
-onBeforeRouteLeave(async () => {
+onBeforeRouteLeave(async (action) => {
     let leave = true;
     if (journeyStore.isDirty) {
         journeyModalController.open("alert", {
@@ -90,13 +91,15 @@ onBeforeRouteLeave(async () => {
         });
 
         const response = await journeyModalController.didClose("alert");
-        leave = response.data;
-        if (!leave) {
-            journeyModalController.open("saveJourney");
-            const didSave = await journeyModalController.didClose("saveJourney");
-            if (!didSave) leave = false;
-            else leave = true;
-        }
+        if (response != undefined) {
+            leave = response.data;
+            if (!leave) {
+                journeyModalController.open("saveJourney");
+                const didSave = await journeyModalController.didClose("saveJourney");
+                if (!didSave) leave = false;
+                else leave = true;
+            }
+        } else leave = false;
     }
     if (leave) {
         poiStore.clear();

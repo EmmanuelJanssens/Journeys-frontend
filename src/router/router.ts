@@ -15,16 +15,16 @@ const routes: RouteRecordRaw[] = [
         name: "",
         component: async () => import("views/LogBookPage.vue"),
         children: [
-            { path: "", name: "logbook", component: async () => import("components/JSliders/TheJourneysSlider.vue") },
+            { path: "", name: "logbook", component: async () => import("components/jSliders/TheJourneysSlider.vue") },
             {
                 path: "journey/:id",
                 name: "view",
-                component: () => import("components/JSliders/TheJourneyExpSlider.vue")
+                component: () => import("components/jSliders/TheJourneyExpSlider.vue")
             },
             {
                 path: "/edit",
                 name: "edit",
-                component: async () => import("components/JSliders/TheJourneyEditExpSlider.vue"),
+                component: async () => import("components/jSliders/TheJourneyEditExpSlider.vue"),
                 props: (route) => ({ query: route.query })
             }
         ]

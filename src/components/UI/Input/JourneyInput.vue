@@ -2,7 +2,7 @@
     <div class="relative">
         <input
             :value="modelValue"
-            class="w-full h-12 p-4 focus:border-none bg-secondary-main dark:bg-primary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg outline-none focus:outline-primary-main transform transition-all focus:scale-105 rounded-lg"
+            class="input w-full input-secondary bg-secondary text-white placeholder-base-100"
             :placeholder="placeholder"
             :type="type"
             @input="emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)" />

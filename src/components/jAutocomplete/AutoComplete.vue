@@ -1,15 +1,11 @@
 <template>
     <div class="relative">
-        <input
+        <JourneyInput
             ref="text"
-            :value="input"
+            v-model="input"
             :class="{
                 'rounded-lg': predictions.length == 0,
-                'rounded-t-lg ': predictions.length > 0,
-
-                'transition ease-in-out scale-100': !focus,
-                'transition ease-in-out scale-105 ': focus,
-                'h-12 p-4 sm:w-full  bg-secondary-main dark:bg-primary-main placeholder-opacity-70 placeholder-high-contrast-text text-high-contrast-text drop-shadow-lg outline-none focus:outline-primary-darker': true
+                'rounded-t-lg ': predictions.length > 0
             }"
             :placeholder="placeholder"
             @focusin="setFocus"
@@ -19,9 +15,8 @@
         <div
             v-if="input.length > 0"
             :class="{
-                'absolute flex flex-col bg-primary-main dark:bg-gray-700 w-full  items-start  max-h-80 overflow-auto': true,
-                'transition ease-in-out scale-100': !focus,
-                'transition ease-in-out scale-105': focus,
+                'absolute flex flex-col bg-primary-main dark:bg-gray-700 w-full  items-start  max-h-80 overflow-auto z-50': true,
+
                 'transition ease-in-out duration-100 opacity-0': predictions.length == 0,
                 'transition ease-in-out duration-100 opacity-100': predictions.length > 0
             }"
@@ -30,40 +25,42 @@
                 v-for="prediction in predictions"
                 :button="{
                     text: prediction.value,
-                    icon: faCity
+                    icon: icon
                 }"
                 :collapsed="false"
                 :key="prediction.key"
                 class="bg-primary-main dark:bg-primary-darker border-none w-full dark:hover:bg-primary-darker p-2 hover:cursor-pointer"
-                @click="select(prediction.value)" />
+                @click="select(prediction.value, prediction.additional)" />
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
 import JourneyItem from "components/UI/Item/JourneyItem.vue";
-import { faCity } from "@fortawesome/free-solid-svg-icons";
 import { onClickOutside } from "@vueuse/core";
-import { emit } from "process";
+import JourneyInput from "components/UI/Input/JourneyInput.vue";
 const focus = ref(false);
 const props = defineProps<{
     focusIn?: (payload: FocusEvent) => void;
-    input: string;
+    icon: any;
+    modelValue?: string;
     placeholder?: string;
     debounce: number;
     predictions: {
         value: string;
         key: string | number | any;
+        additional?: any;
     }[];
 }>();
 
 const text = ref();
-
+const input = ref("");
 const emits = defineEmits<{
     (e: "complete", value: string): void;
-    (e: "selected", value: string): void;
+    (e: "selected", value: string, additional?: any): void;
     (e: "empty"): void;
     (e: "focus-out"): void;
+    (e: "update:modelValue", value: string): void;
 }>();
 
 const predListRef = ref();
@@ -76,12 +73,14 @@ let timeout: any;
 function autocomplete() {
     clearTimeout(timeout);
     timeout = setTimeout(() => {
-        emits("complete", text.value.value);
+        emits("complete", input.value);
+        emits("update:modelValue", input.value);
     }, props.debounce);
 }
 
-function select(value: string) {
-    emits("selected", value);
+function select(value: string, additional?: any) {
+    input.value = value;
+    emits("selected", value, additional);
 }
 
 function setFocus(evt: FocusEvent) {

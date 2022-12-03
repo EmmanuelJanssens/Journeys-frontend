@@ -1,35 +1,84 @@
 <template>
-    <div
-        ref="menu"
-        class="flex flex-col bg-primary-light dark:bg-gray-800 w-16 h-full transition-all shadow-inner"
-        @transitionend="resize">
-        <button
-            :class="{
-                'w-full p-2 text-primary-darker dark:text-primary-main': true,
-                'text-left': isOpen
-            }"
-            @click="toggle">
-            <FontAwesomeIcon v-if="!isOpen" :size="'2x'" :icon="faBars" /><FontAwesomeIcon
-                v-if="isOpen"
-                :size="'2x'"
-                :icon="faXmark" />
-        </button>
-        <img
-            :class="{
-                'rounded-full p-1': !isOpen,
-                'rounded-full p-4': isOpen
-            }"
-            src="/assets/placeholder.png" />
+    <div class="absolute top-0 w-full">
+        <div class="flex space-x-4 w-full justify-center justify-items-center p-4">
+            <div
+                :class="{
+                    'w-full flex space-x-4 ': true,
+                    ' transition-all': true,
+                    'transform translate-y-0 duration-200 opacity-100 scale-y-100': route == 'edit',
+                    'transform -translate-y-5 duration-200 opacity-0  scale-y-0': route != 'edit'
+                }">
+                <div class="flex justify-start">
+                    <JourneyButton><FontAwesomeIcon :icon="filterButton.icon" size="2x" /></JourneyButton>
+                </div>
+                <AutoComplete
+                    :icon="faLocation"
+                    class="w-full"
+                    v-model="search"
+                    :predictions="predictions"
+                    :debounce="100"
+                    @selected="flyTo"
+                    @complete="filterPois"
+                    @focus-out="clear" />
+            </div>
+            <div class="flex justify-center items-center space-x-4">
+                <button class="btn btn-primary group" @click="homeButton.handler">
+                    <FontAwesomeIcon :icon="homeButton.icon" size="2x" class="group-hover:pr-2" />
+                    <p
+                        class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
+                        {{ homeButton.text }}
+                    </p>
+                </button>
 
-        <div class="flex flex-col whitespace-pre-wrap text-primary-darker h-full">
-            <JourneyItem :button="homeButton" :collapsed="!isOpen" />
-            <JourneyItem :button="viewProfileButton" :collapsed="!isOpen" />
-            <JourneyItem :button="logbookButton" :collapsed="!isOpen" />
-            <JourneyItem :button="addPoiButton" :collapsed="!isOpen" />
-            <JourneyItem :button="addJourneyButton" :collapsed="!isOpen" :custom="true" :visible="addVisible" />
-            <JourneyItem :button="editJourneyButton" :collapsed="!isOpen" :visible="editVisible" />
-            <JourneyItem :button="saveJourneyButton" :collapsed="!isOpen" :visible="saveVisible" />
-            <JourneyItem class="last:mt-auto" :button="logoutButton" :collapsed="!isOpen" :visible="true" />
+                <button class="btn btn-primary group" @click="logbookButton.handler">
+                    <FontAwesomeIcon :icon="logbookButton.icon" size="2x" class="group-hover:pr-2" />
+                    <p
+                        class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
+                        {{ logbookButton.text }}
+                    </p>
+                </button>
+                <button class="btn btn-primary group" @click="addJourneyButton.handler">
+                    <FontAwesomeIcon :icon="addJourneyButton.icon" size="2x" class="group-hover:pr-2" />
+                    <p
+                        class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
+                        {{ addJourneyButton.text }}
+                    </p>
+                </button>
+                <button class="btn btn-primary group" @click="addPoiButton.handler">
+                    <FontAwesomeIcon :icon="addPoiButton.icon" size="2x" class="group-hover:pr-2" />
+                    <p
+                        class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
+                        {{ addPoiButton.text }}
+                    </p>
+                </button>
+                <JourneyButton
+                    ref="editBtn"
+                    :class="{
+                        ' transition-all origin-left ': true,
+                        'transform  duration-300 opacity-100 scale-x-100': route == 'view',
+                        'transform  duration-300 opacity-0 scale-x-0 hidden': route != 'view'
+                    }"
+                    type="secondary"
+                    @click="editJourneyButton.handler"
+                    ><FontAwesomeIcon :icon="editJourneyButton.icon" size="2x"
+                /></JourneyButton>
+
+                <JourneyButton
+                    :class="{
+                        ' transition-all origin-left': true,
+                        ' animate-pulse transform  duration-300 opacity-100 scale-x-100': journeyStore.isDirty,
+                        'transform  duration-300 opacity-0 scale-x-0 hidden': !journeyStore.isDirty
+                    }"
+                    type="secondary"
+                    @click="saveJourneyButton.handler"
+                    ><FontAwesomeIcon :icon="saveJourneyButton.icon" size="2x"
+                /></JourneyButton>
+            </div>
+            <div class="flex w-full justify-end">
+                <JourneyButton @click="logoutButton.handler"
+                    ><FontAwesomeIcon :icon="logoutButton.icon" size="2x"
+                /></JourneyButton>
+            </div>
         </div>
     </div>
 </template>
@@ -37,9 +86,9 @@
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { computed, ref } from "vue";
 import { mapInstance } from "map/JourneysMap";
+import JourneyButton from "./UI/Button/JourneyButton.vue";
 import {
-    faBars,
-    faXmark,
+    faFilter,
     faSave,
     faAdd,
     faBookAtlas,
@@ -48,16 +97,20 @@ import {
     faHome,
     faSignOut,
     IconDefinition,
-    faPencil
+    faPencil,
+    faLocation
 } from "@fortawesome/free-solid-svg-icons";
 import { authApp } from "google/firebase";
 import router from "router/router";
 import { journeyModalController } from "./UI/Modal/JourneyModalController";
 import { useJourneyStore } from "stores/useJourneyStore";
-import JourneyItem from "./UI/Item/JourneyItem.vue";
+import AutoComplete from "./jAutocomplete/AutoComplete.vue";
+import { usePoiStore } from "stores/usePoiStore";
+import { Locality } from "types/JourneyDtos";
+import { useElementVisibility, useMouseInElement } from "@vueuse/core";
+import { useVisibility } from "composables/style";
 
-const menu = ref();
-const isOpen = ref(false);
+const route = computed(() => router.currentRoute.value.name);
 
 const journeyStore = useJourneyStore();
 
@@ -71,8 +124,16 @@ const logoutButton = ref({
     }
 });
 const viewProfileButton = ref({
-    text: "View my Profile",
+    text: "Profile",
     icon: faCircleUser as IconDefinition,
+    handler: () => {
+        //
+    }
+});
+
+const filterButton = ref({
+    text: "Filter",
+    icon: faFilter,
     handler: () => {
         //
     }
@@ -94,7 +155,7 @@ const logbookButton = ref({
     }
 });
 const addPoiButton = ref({
-    text: "Add a Point of interest",
+    text: "New POI",
     icon: faLocationDot,
     handler: () => {
         journeyModalController.open("createPoi");
@@ -105,7 +166,7 @@ const addVisible = computed(() => {
     return router.currentRoute.value.name == "logbook" || router.currentRoute.value.name == "view";
 });
 const addJourneyButton = ref({
-    text: "Add a journey",
+    text: "New Journey",
     icon: faAdd,
     handler: async () => {
         journeyModalController.open("createJourney");
@@ -147,18 +208,40 @@ const saveJourneyButton = ref({
         }
     }
 });
-async function resize() {
-    (await mapInstance.getMap()).resize();
+
+const predictions = ref<
+    {
+        value: string;
+        key: string | number;
+    }[]
+>([]);
+const search = ref("");
+
+const poiStore = usePoiStore();
+function filterPois(value: string) {
+    const filtered: {
+        value: string;
+        key: string | number | any;
+        additional?: any;
+    }[] = [];
+    poiStore.poisBetween
+        .filter((poi) => poi.name.toLocaleLowerCase().includes(value.toLocaleLowerCase()))
+        .forEach((poi) => {
+            filtered.push({
+                value: poi.name,
+                key: poi.id!,
+                additional: poi.location
+            });
+        });
+    predictions.value = filtered;
 }
-async function toggle() {
-    const el = menu.value as HTMLElement;
-    if (el.classList.contains("w-16")) {
-        el.classList.add("w-96");
-        el.classList.remove("w-16");
-    } else if (el.classList.contains("w-96")) {
-        el.classList.remove("w-96");
-        el.classList.add("w-16");
-    }
-    isOpen.value = !isOpen.value;
+
+function flyTo(pred: string, additional: Locality) {
+    predictions.value = [];
+    mapInstance.flyTo(additional.longitude, additional.latitude, 16);
+}
+
+function clear() {
+    predictions.value = [];
 }
 </script>

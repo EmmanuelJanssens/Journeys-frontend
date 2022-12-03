@@ -1,10 +1,12 @@
 <template>
     <AutoComplete
-        :input="input!"
+        :icon="faCity"
         :placeholder="placeholder"
         :debounce="500"
         :predictions="predictions!"
+        v-model="input"
         @complete="onAutoComplete"
+        @input="emits('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
         @selected="onSelected"
         @focus-out="predictions = []" />
 </template>
@@ -12,7 +14,7 @@
 import googleLoader from "google/googleLoader";
 import { onMounted, ref } from "vue";
 import AutoComplete from "components/jAutocomplete/AutoComplete.vue";
-
+import { faCity } from "@fortawesome/free-solid-svg-icons";
 const input = ref<string>("");
 
 const predictions = ref<
@@ -23,7 +25,7 @@ const predictions = ref<
 >([]);
 
 const props = defineProps({
-    text: String,
+    modelValue: String,
     placeholder: String,
     type: {
         type: Array<string>,
@@ -38,6 +40,7 @@ const props = defineProps({
 const emits = defineEmits<{
     (e: "selected", value: string): void;
     (e: "dirty"): void;
+    (e: "update:modelValue", value: string): void;
 }>();
 let service: google.maps.places.AutocompleteService;
 
@@ -48,7 +51,6 @@ onMounted(() => {
 });
 
 function onAutoComplete(value: string) {
-    input.value = value;
     emits("dirty");
     if (value.length > 3) {
         const newPredictions: {
@@ -76,8 +78,8 @@ function onAutoComplete(value: string) {
 }
 
 function onSelected(value: string) {
-    input.value = value;
     predictions.value = [];
-    emits("selected", input.value);
+    input.value = value;
+    emits("selected", value);
 }
 </script>

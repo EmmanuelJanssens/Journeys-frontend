@@ -2,10 +2,10 @@
 <template>
     <div class="absolute top-0 right-0 left-0 w-screen h-screen">
         <div class="relative flex h-full w-full">
-            <LogbookMenu />
             <ThePoiListSidebar :poi-list="poiStore.poisBetween" @poi-item-clicked="flyTo" />
             <div class="w-full h-full">
                 <JourneyMap class="relative w-full h-full">
+                    <LogbookMenu />
                     <router-view v-slot="{ Component, route }" class="absolute left-0 right-0 bottom-0 p-4 h-2/5">
                         <Transition name="fade" mode="out-in">
                             <component :is="Component" :key="route.path" />
@@ -18,7 +18,8 @@
 </template>
 <script lang="ts">
 export default {
-    name: "LogbookPage"
+    name: "LogbookPage",
+    components: { JourneyButton }
 };
 </script>
 <script lang="ts" setup>
@@ -33,6 +34,7 @@ import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { mapInstance } from "map/JourneysMap";
 import { PointOfInterest } from "types/JourneyDtos";
+import JourneyButton from "components/UI/Button/JourneyButton.vue";
 
 const poiStore = usePoiStore();
 
@@ -75,6 +77,10 @@ onMounted(async () => {
 function flyTo(poi: PointOfInterest) {
     if (poi.location?.longitude && poi.location.latitude)
         mapInstance.flyTo(poi.location?.longitude, poi.location?.latitude, 18);
+}
+
+function prevent(event: Event) {
+    event.preventDefault();
 }
 </script>
 <style lang="less" scoped>

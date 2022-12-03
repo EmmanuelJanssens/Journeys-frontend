@@ -1,12 +1,19 @@
 <template>
-    <JourneyModal header="alert" name="alert" class="w-24">
+    <JourneyModal
+        header="alert"
+        name="alert"
+        class="w-24"
+        :size="{
+            w: 'w-1/5',
+            h: 'h-auto'
+        }">
         <template #header>
-            <div class="">
+            <div class="text-2xl">
                 {{ title }}
             </div>
         </template>
         <template #body>
-            <div class="p-4 bg-secondary-light text-black dark:text-white dark:bg-gray-800">
+            <div class="p-4 bg-secondary-light text-black dark:text-white dark:bg-gray-800 font-bold">
                 {{ message }}
             </div>
         </template>

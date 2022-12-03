@@ -41,7 +41,6 @@
                         v-model="state.username"
                         class="col-span-2"
                         placeholder="username"
-                        helper="required"
                         :error="v$.username.$error ? v$.username.$errors[0].$message as string : ''"
                         @keydown="
                             ifZero(
@@ -54,7 +53,7 @@
                         v-model="state.email"
                         class="col-span-2"
                         placeholder="Email"
-                        helper="required"
+                        helper="required *this is used to log you in"
                         :error="v$.email.$error ? v$.email.$errors[0].$message as string : ''"
                         @keydown="
                             ifZero(

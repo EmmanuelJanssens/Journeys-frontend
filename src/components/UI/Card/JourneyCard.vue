@@ -38,7 +38,6 @@ onMounted(() => {
     if (props.pos) {
         const el = card.value as HTMLDivElement;
         el.classList.add("animate-pop");
-        console.log(el.getBoundingClientRect());
         el.style.left = props.pos!.x - el.getBoundingClientRect().x + "px";
         el.style.top = props.pos!.y - el.getBoundingClientRect().y + "px";
     }

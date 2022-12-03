@@ -2,6 +2,7 @@ import axios from "axios";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import {
     createUserWithEmailAndPassword,
+    getAdditionalUserInfo,
     GoogleAuthProvider,
     signInWithEmailAndPassword,
     signInWithPopup,
@@ -73,14 +74,19 @@ export const useUserStore = defineStore("user", () => {
         if (provider == "google") {
             const googleAuthProvider = new GoogleAuthProvider();
             const credentials = await signInWithPopup(authApp, googleAuthProvider);
+            if (getAdditionalUserInfo(credentials)?.isNewUser) {
+                const name =
+                    credentials.user.displayName?.length! > 0
+                        ? credentials.user.displayName
+                        : uniqueNamesGenerator(namesConfig);
+                const newUser = {
+                    username: name,
+                    uid: credentials.user.uid,
+                    completed: credentials.user.emailVerified
+                };
+                await axios.post("/api/authentication/register", newUser);
+            }
 
-            const name = uniqueNamesGenerator(namesConfig);
-            const newUser = {
-                username: name,
-                uid: credentials.user.uid,
-                completed: credentials.user.emailVerified
-            };
-            await axios.post("/api/authentication/register", newUser);
             return credentials;
         }
         throw new Error("No provider specified");

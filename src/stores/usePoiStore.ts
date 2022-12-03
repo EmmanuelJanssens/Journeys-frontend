@@ -9,7 +9,7 @@ export const usePoiStore = defineStore("poi", () => {
     const poisBetween = ref<PointOfInterest[]>([]);
 
     async function getThumbnail(poi: PointOfInterest) {
-        return await axios.post("api/poi/thumbnail", poi).then((r) => {
+        return await axios.post("/api/poi/thumbnail", poi).then((r) => {
             return r;
         });
     }
@@ -48,7 +48,7 @@ export const usePoiStore = defineStore("poi", () => {
 
             const url = encodeURI(query);
 
-            const res = await axios.get(`api/poi/search/${url}/count`);
+            const res = await axios.get(`/api/poi/search/${url}/count`);
             return res.data;
         } catch (e) {
             return 0;
@@ -65,7 +65,7 @@ export const usePoiStore = defineStore("poi", () => {
             });
             const url = encodeURI(query);
 
-            const res = await axios.get(`api/poi/search/${url}`);
+            const res = await axios.get(`/api/poi/search/${url}`);
             if (poisBetween.value?.length! > 0) {
                 poisBetween.value = [];
             }
@@ -77,14 +77,14 @@ export const usePoiStore = defineStore("poi", () => {
     }
     async function getPoiExperiences(poi: PointOfInterest) {
         return await (
-            await axios.get("api/poi/" + poi.id)
+            await axios.get("/api/poi/" + poi.id)
         ).data;
     }
 
     async function addPoi(poi: PointOfInterest) {
         try {
             const token = await authApp.currentUser?.getIdToken(true);
-            const result = await axios.post("api/poi/", poi, {
+            const result = await axios.post("/api/poi/", poi, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

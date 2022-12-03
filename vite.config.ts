@@ -12,6 +12,7 @@ export default defineConfig({
             views: path.resolve(__dirname, "./src/views"),
             types: path.resolve(__dirname, "./src/types"),
             components: path.resolve(__dirname, "./src/components"),
+            composables: path.resolve(__dirname, "./src/composables"),
             router: path.resolve(__dirname, "./src/router"),
             assets: path.resolve(__dirname, "./src/assets"),
             google: path.resolve(__dirname, "./src/google"),

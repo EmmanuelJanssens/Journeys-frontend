@@ -25,20 +25,22 @@
                     <journey-textarea v-model="state.description" :rows="4" placeholder="description" />
                 </div>
                 <div class="flex space-x-2 flex-wrap max-w-3xl p-4 items-center overflow-auto">
-                    <JourneyButton class="relative w-24 h-24 rounded-lg bg-green-200" @click="selectImage">
-                        <font-awesome-icon class="" :icon="faAdd" size="4x" />
-                    </JourneyButton>
+                    <div
+                        class="relative w-24 h-24 rounded-lg bg-primary flex justify-center items-center cursor-pointer btn btn-primary"
+                        @click="selectImage">
+                        <FontAwesomeIcon class="" :icon="faAdd" size="4x" />
+                    </div>
                     <div v-for="img in images" :key="img.url">
-                        <JourneyButton class="relative" fill="none">
+                        <div class="relative w-24 h-24 rounded-lg">
                             <img
                                 class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1"
                                 :src="img.url" />
-                            <font-awesome-icon
-                                class="absolute top-0 right-1 text-red-600"
+                            <FontAwesomeIcon
+                                class="absolute top-0 right-1 text-red-600 cursor-pointer"
                                 :icon="faClose"
                                 size="lg"
                                 @click="removeImage(img.url)" />
-                        </JourneyButton>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -107,7 +109,16 @@ onMounted(() => {
                 url: image
             });
         });
-
+        currentData.value.experience.imagesToUpload?.forEach((image) => {
+            images.value.push({
+                isFs: false,
+                url: image.url
+            });
+            files.value.push({
+                url: image.url,
+                file: image.file
+            });
+        });
         if (currentData.value.experience.title) state.value.title = currentData.value.experience.title;
         if (currentData.value.experience.description)
             state.value.description = currentData.value.experience.description;
@@ -154,6 +165,7 @@ function removeImage(image: string) {
     const img = images.value?.find((img) => image == img.url);
     if (img) {
         images.value = images.value?.filter((img) => image != img.url);
+        files.value = files.value.filter((img) => image != img.url);
     }
 }
 
@@ -163,8 +175,11 @@ async function save() {
             currentData.value!.experience!.title = state.value.title;
             currentData.value!.experience!.date = state.value.selectedDate;
             currentData.value!.experience!.description = state.value.description;
-            // currentData.value!.experience!.journey = { id: journeyStore.editJourney.journey?.id };
-            if (!currentData.value.experience.imagesToUpload) currentData.value.experience.imagesToUpload = [];
+            currentData.value.experience.images = [];
+            images.value.forEach((img) => {
+                if (img.isFs) currentData.value?.experience.images?.push(img.url);
+            });
+            currentData.value.experience.imagesToUpload = [];
             currentData.value.experience.imagesToUpload = currentData.value.experience.imagesToUpload?.concat(
                 ...files.value
             );

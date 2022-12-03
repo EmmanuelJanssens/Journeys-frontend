@@ -46,7 +46,6 @@ const mode = computed(() => router.currentRoute.value.query.mode);
 const isLoading = ref(false);
 
 onMounted(() => {
-    console.log(router.currentRoute.value);
     state.value.title = journeyStore.journey.title!;
 });
 
@@ -57,6 +56,7 @@ async function quickSave() {
         toast.success("Journey saved!", {
             position: POSITION.TOP_CENTER
         });
+        journeyStore.isDirty = false;
     } catch (e) {
         toast.error("Could not save your journey", {
             position: POSITION.TOP_CENTER
@@ -94,7 +94,7 @@ async function save() {
 
             Promise.all(saved.uploadTask)
                 .then((tast) => {
-                    if (tast.length > 0) {
+                    if (tast != undefined && tast.length > 0) {
                         toast.info("Your images have been uploaded you can now see them", {
                             position: POSITION.BOTTOM_RIGHT
                         });

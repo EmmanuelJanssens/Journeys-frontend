@@ -1,6 +1,32 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: ["./index.html", "./src/**/*.{ts,js,vue,jsx,tsx}"],
+    daisyui: {
+        themes: [
+            {
+                journeys: {
+                    primary: "#a6cabd",
+
+                    secondary: "#e2b4a5",
+
+                    accent: "#d56b48",
+
+                    neutral: "#3D4451",
+
+                    "base-100": "#f0e4d8",
+
+                    info: "#3ABFF8",
+
+                    success: "#36D399",
+
+                    warning: "#FBBD23",
+
+                    error: "#F87272",
+                    bg: "#f0e4d8"
+                }
+            }
+        ]
+    },
     theme: {
         screens: {
             sm: "576px",
