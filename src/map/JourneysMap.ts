@@ -55,7 +55,7 @@ class JourneysMap {
         reject: (message: string) => void
     ) {
         if (!this.isLoaded) {
-            if (time > 5) {
+            if (time > 10) {
                 reject("Could not load map");
             }
             setTimeout(() => {
@@ -248,7 +248,7 @@ class JourneysMap {
         return this.map;
     }
 
-    addPoiListLayer(data: GeoJSON.FeatureCollection): mapboxgl.Map | undefined {
+    addPoiListLayer(data: GeoJSON.FeatureCollection, zoom = true): mapboxgl.Map | undefined {
         this.clearMap();
         if (this.map) {
             this.map.off("click", () => {});
@@ -352,15 +352,18 @@ class JourneysMap {
                     "20px"
                 )
             );
-            this.map.fitBounds(
-                [
-                    [lines[0].properties!.end.longitude, lines[0].properties!.end.latitude],
-                    [lines[0].properties!.start.longitude, lines[0].properties!.start.latitude]
-                ],
-                {
-                    padding: 200
-                }
-            );
+
+            if (zoom == true) {
+                this.map.fitBounds(
+                    [
+                        [lines[0].properties!.end.longitude, lines[0].properties!.end.latitude],
+                        [lines[0].properties!.start.longitude, lines[0].properties!.start.latitude]
+                    ],
+                    {
+                        padding: 200
+                    }
+                );
+            }
         }
         return this.map;
     }

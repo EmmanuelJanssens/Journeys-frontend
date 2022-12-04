@@ -12,19 +12,19 @@ import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
 //map
 
-// import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
-// import "@vuepic/vue-datepicker/dist/main.css";
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import "@vuepic/vue-datepicker/dist/main.css";
 
-// import { RecycleScroller, DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
-// import DatePicker from "@vuepic/vue-datepicker";
+import { RecycleScroller, DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
+import DatePicker from "@vuepic/vue-datepicker";
 
 const pinia = createPinia();
 const app = createApp(App);
 
-// app.component("DatePicker", DatePicker);
-// app.component("RecycleScroller", RecycleScroller);
-// app.component("DynamicScroller", DynamicScroller);
-// app.component("DynamicScrollerItem", DynamicScrollerItem);
+app.component("DatePicker", DatePicker);
+app.component("RecycleScroller", RecycleScroller);
+app.component("DynamicScroller", DynamicScroller);
+app.component("DynamicScrollerItem", DynamicScrollerItem);
 
 app.use(router);
 app.use(pinia);

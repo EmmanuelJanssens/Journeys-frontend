@@ -1,8 +1,6 @@
 <template>
     <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner">
-        <div class="relative bg-opacity-10 bg-header bg-cover z-0 h-96">
-            <img src="/assets/images/banner/mountains.jpg" class="hero object-cover h-full w-full absolute -z-10" />
-
+        <div class="bg-opacity-10 z-0 bg-header bg-cover h-full">
             <div class="flex container mx-auto z-50 items-center justify-between">
                 <section class="text-high-contrast-text text-center sm:text-left">
                     <h1 class="text-7xl sm:text-9xl">Journeys</h1>

@@ -102,7 +102,7 @@ export function drawExperiences() {
     mapInstance.addStopPoint(feature);
 }
 
-export async function drawPoisBetween() {
+export async function drawPoisBetween(zoom?: boolean) {
     const geoJsonData: GeoJSON.FeatureCollection = {
         type: "FeatureCollection",
         features: []
@@ -140,5 +140,5 @@ export async function drawPoisBetween() {
         },
         id: "journey"
     });
-    mapInstance.addPoiListLayer(geoJsonData);
+    mapInstance.addPoiListLayer(geoJsonData, zoom);
 }
