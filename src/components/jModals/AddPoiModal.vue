@@ -12,17 +12,21 @@
             <div class="flex flex-col space-y-4 p-4 items-center justify-start">
                 <GoogleAutoComplete
                     class="w-full"
-                    :text="input"
+                    v-model="state.address"
                     placeholder="Address"
-                    @selected="set"
+                    @selected="setLocation"
+                    @dirty="reset"
                     :type="['geocode']" />
+                <p v-if="v$.address.$error" class="text-error">{{ v$.address.$errors[0].$message }}</p>
+
                 <img
                     class="object-cover w-1/2 h-[200px] rounded-lg shadow-lg"
-                    v-lazy="{ src: url, loading: '/assets/placeholder.png', error: '/assets/placeholder.png' }" />
-                <JourneyInput class="w-full" v-model="poiName" placeholder="Name" />
+                    v-lazy="{ src: state.url, loading: '/assets/placeholder.png', error: '/assets/placeholder.png' }" />
+                <JourneyInput class="w-full" v-model="state.name" placeholder="Name" />
+                <p v-if="v$.name.$error" class="text-error">{{ v$.name.$errors[0].$message }}</p>
 
                 <form @submit.prevent="addTag" class="self-start flex items-center space-x-2">
-                    <JourneyInput class="w-full" v-model="poiTag" placeholder="Tag" />
+                    <JourneyInput class="w-full" v-model="state.tag" placeholder="Tag" />
                     <div
                         class="badge badge-primary cursor-pointer space-x-2"
                         v-for="tag in tags"
@@ -32,6 +36,7 @@
                         <p>{{ tag }}</p>
                     </div>
                 </form>
+                <p v-if="v$.tag.$error" class="text-error">{{ v$.tag.$errors[0].$message }}</p>
                 <JourneyButton @click="save">Confirm</JourneyButton>
             </div>
         </template>
@@ -60,15 +65,34 @@ import { LngLat } from "mapbox-gl";
 import { mapInstance } from "map/JourneysMap";
 import { drawPoisBetween } from "map/drawOnMap";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
-import { map } from "@firebase/util";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-const input = ref("");
-const url = ref("");
-const poiName = ref("");
+
+import { maxLength, alpha, required } from "@vuelidate/validators";
+import useVuelidate from "@vuelidate/core";
+import { uuidv4 } from "@firebase/util";
+
+//setup vuelidate
+const state = ref({
+    address: "",
+    name: "",
+    tag: "",
+    url: ""
+});
+const rules = ref({
+    tag: { maxLength: maxLength(10), alpha },
+    address: { required },
+    name: { required },
+    url: { required }
+});
+const v$ = useVuelidate(rules, state);
+
 const address = ref<AddressDto>();
 const isLoading = ref(false);
 
-async function set(res: string) {
+function reset() {
+    state.value.url = "";
+}
+async function setLocation(res: string) {
     isLoading.value = true;
     address.value = await getGeocodedData(res);
     const coords = [address.value.longitude, address.value.latitude];
@@ -83,8 +107,8 @@ async function set(res: string) {
 
     const encoded = encodeURIComponent(JSON.stringify(marker));
 
-    url.value = `https://api.mapbox.com/styles/v1/heymanuel/clawunauz000814nsgx6d2fjx/static/geojson(${encoded})/${address.value.longitude},${address.value.latitude},15/300x200?access_token=pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg`;
-
+    state.value.url = `https://api.mapbox.com/styles/v1/heymanuel/clawunauz000814nsgx6d2fjx/static/geojson(${encoded})/${address.value.longitude},${address.value.latitude},15/300x200?access_token=pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg`;
+    console.log(state.value.address);
     isLoading.value = false;
 }
 
@@ -92,14 +116,19 @@ const poiStore = usePoiStore();
 const journeyStore = useJourneyStore();
 const toast = useToast();
 async function save() {
+    v$.value.$validate();
+    if (v$.value.$error) {
+        return;
+    }
     isLoading.value = true;
 
     const poi: PointOfInterest = {
+        id: uuidv4(),
         location: {
             longitude: address.value?.longitude!,
             latitude: address.value?.latitude!
         },
-        name: poiName.value,
+        name: state.value.name,
         tags: tags.value
     };
 
@@ -128,18 +157,22 @@ async function save() {
     isLoading.value = false;
 }
 
-const poiTag = ref("");
 const tags = ref<string[]>([]);
-
 function addTag() {
-    if (tags.value.length < 6) {
-        const found = tags.value.find((val) => poiTag.value == val);
-        if (!found) {
-            tags.value.push(poiTag.value);
-            console.log(tags.value);
+    if (state.value.tag.length > 0) {
+        v$.value.tag.$validate();
+        console.log(v$.value.$errors);
+        if (!v$.value.tag.$error) {
+            if (tags.value.length < 6) {
+                const found = tags.value.find((val) => state.value.tag == val);
+                if (!found) {
+                    tags.value.push(state.value.tag);
+                    console.log(tags.value);
+                }
+            }
+            state.value.tag = "";
         }
     }
-    poiTag.value = "";
 }
 function removeTag(toRemove: string) {
     tags.value = tags.value.filter((tag) => tag != toRemove);

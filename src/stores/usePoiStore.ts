@@ -7,7 +7,7 @@ import { ref } from "vue";
 
 export const usePoiStore = defineStore("poi", () => {
     const poisBetween = ref<PointOfInterest[]>([]);
-
+    const tagList = ref<{ type: string }[]>();
     async function getThumbnail(poi: PointOfInterest) {
         return await axios.post("/api/poi/thumbnail", poi).then((r) => {
             return r;
@@ -27,6 +27,11 @@ export const usePoiStore = defineStore("poi", () => {
         } else {
             if (resolve) resolve(true);
         }
+    }
+    async function getTags() {
+        const result = await axios.get(`/api/tag`);
+        tagList;
+        return result.data as { type: string }[];
     }
 
     async function poiDidLoad() {
@@ -82,20 +87,27 @@ export const usePoiStore = defineStore("poi", () => {
     }
 
     async function addPoi(poi: PointOfInterest) {
-        try {
-            const token = await authApp.currentUser?.getIdToken(true);
-            const result = await axios.post("/api/poi/", poi, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            return result.data as PointOfInterest;
-        } catch (e) {
-            return undefined;
-        }
+        const token = await authApp.currentUser?.getIdToken(true);
+        const result = await axios.post("/api/poi/", poi, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return result.data as PointOfInterest;
     }
     function clear() {
         poisBetween.value = [];
     }
-    return { poiCountBetween, searchBetween, getThumbnail, clear, poisBetween, getPoiExperiences, addPoi, poiDidLoad };
+    return {
+        poiCountBetween,
+        searchBetween,
+        getThumbnail,
+        clear,
+        poisBetween,
+        getPoiExperiences,
+        addPoi,
+        poiDidLoad,
+        getTags,
+        tagList
+    };
 });

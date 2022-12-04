@@ -4,44 +4,11 @@
             <div
                 :class="{
                     'w-full flex space-x-4 ': true,
-                    ' transition-all': true
-                    // 'transform translate-y-0 duration-200 opacity-100 scale-y-100': route == 'edit',
-                    // 'transform -translate-y-5 duration-200 opacity-0  scale-y-0': route != 'edit'
+                    ' transition-all': true,
+                    'transform translate-y-0 duration-200 opacity-100 scale-y-100': route == 'edit',
+                    'transform -translate-y-5 duration-200 opacity-0  scale-y-0': route != 'edit'
                 }">
-                <div class="dropdown" ref="filters">
-                    <JourneyButton tabindex="0"><FontAwesomeIcon :icon="filterButton.icon" size="2x" /></JourneyButton>
-                    <div tabindex="0" class="dropdown-content bg-secondary p-2 shadow rounded-lg w-96 mt-4">
-                        <label class="flex items-center space-x-4 cursor-pointer">
-                            <span> keep open </span>
-                            <input type="checkbox" class="checkbox" ref="filterKeepOpen" />
-                        </label>
-                        <p>
-                            <label for="radius">Radius of: {{ currentRadius }} km</label>
-                        </p>
-                        <input
-                            id="radius"
-                            type="range"
-                            min="0"
-                            max="20"
-                            value="0"
-                            class="range range-primary"
-                            ref="radiusRange" />
-                        <p>
-                            <label for="order">Sort by</label>
-                        </p>
-                        <p>
-                            <label for="tags">Tags</label>
-                        </p>
-                        <div class="flex w-full flex-wrap space-x-2 overflow-y-auto max-h-40" ref="tagList">
-                            <div v-for="tag in 100" v-bind:key="tag" class="cursor-pointer">
-                                <div class="badge badge-outline rounded-lg" @click="toggleTag($event, tag)">
-                                    bar{{ tag }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                <PoiFilterControll />
                 <AutoComplete
                     :icon="faLocation"
                     class="w-full"
@@ -123,7 +90,6 @@ import {
     faSave,
     faAdd,
     faBookAtlas,
-    faCircleUser,
     faLocationDot,
     faHome,
     faSignOut,
@@ -138,8 +104,7 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import AutoComplete from "./jAutocomplete/AutoComplete.vue";
 import { usePoiStore } from "stores/usePoiStore";
 import { Locality } from "types/JourneyDtos";
-import { useMutationObserver } from "@vueuse/core";
-import { drawPoisBetween } from "map/drawOnMap";
+import PoiFilterControll from "./PoiFilterControll.vue";
 
 const route = computed(() => router.currentRoute.value.name);
 
@@ -260,63 +225,5 @@ function flyTo(pred: string, additional: Locality) {
 
 function clear() {
     predictions.value = [];
-}
-
-const filters = ref();
-const filterKeepOpen = ref();
-
-const tagList = ref();
-
-useMutationObserver(
-    filterKeepOpen,
-    (mutations) => {
-        for (const mutation of mutations) {
-            const checked = (mutation.target as HTMLInputElement).checked;
-            if (checked) {
-                (filters.value as HTMLElement).classList.add("dropdown-open");
-            } else {
-                (filters.value as HTMLElement).classList.remove("dropdown-open");
-            }
-        }
-    },
-    {
-        attributes: true
-    }
-);
-
-const radiusRange = ref();
-const currentRadius = ref(0);
-let timeout: any;
-useMutationObserver(
-    radiusRange,
-    async (mutations) => {
-        clearTimeout(timeout);
-        const mid = journeyStore.getJourneyMidPoint(journeyStore.journey);
-        const val = Number((mutations[0].target as HTMLInputElement).value);
-        currentRadius.value = val;
-        timeout = setTimeout(async () => {
-            await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius + val * 1000);
-            drawPoisBetween(false);
-        }, 500);
-    },
-    { attributes: true }
-);
-
-const activeTags = ref<Map<string, boolean>>();
-activeTags.value = new Map();
-function toggleTag(event: Event, id: any) {
-    const target = event.target as HTMLElement;
-    const active = target.classList.contains("badge-accent");
-
-    if (active) {
-        target.classList.remove("badge-accent");
-        target.classList.add("badge-outline");
-        activeTags.value?.delete(target.textContent!);
-    } else {
-        target.classList.remove("badge-outline");
-        target.classList.add("badge-accent");
-        activeTags.value?.set(target.textContent!, true);
-    }
-    console.log(activeTags.value);
 }
 </script>

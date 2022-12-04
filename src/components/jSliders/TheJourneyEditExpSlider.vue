@@ -132,6 +132,7 @@ onMounted(async () => {
 
         await mapInstance.getMap();
         await drawPoisBetween();
+        poiStore.tagList = await poiStore.getTags();
         if (router.currentRoute.value.query.mode == "new") {
             enableDrag();
         }
