@@ -37,6 +37,7 @@ export type PointOfInterest = {
     location: Locality;
     journeys?: Array<Journey>;
     experiences?: Array<Experience>;
+    tags?: string[];
 };
 
 export type Journey = {

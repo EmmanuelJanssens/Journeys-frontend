@@ -76,13 +76,13 @@ async function openProviderSignin() {
         dismissLoginModal();
         journeyModalController.close("login");
         toast.success("Welcome " + authApp.currentUser?.displayName, {
-            position: POSITION.TOP_CENTER
+            position: POSITION.BOTTOM_RIGHT
         });
     } else {
         await userStore.logout();
 
         toast.error("Error login in", {
-            position: POSITION.TOP_CENTER
+            position: POSITION.BOTTOM_RIGHT
         });
     }
     isLoading.value = false;
@@ -101,11 +101,11 @@ async function submitForm() {
         if (response == true) {
             dismissLoginModal();
             toast.success("Welcome " + authApp.currentUser?.displayName, {
-                position: POSITION.TOP_CENTER
+                position: POSITION.BOTTOM_RIGHT
             });
         } else {
             toast.error("Error login in", {
-                position: POSITION.TOP_CENTER
+                position: POSITION.BOTTOM_RIGHT
             });
         }
     }

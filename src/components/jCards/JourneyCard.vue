@@ -83,7 +83,7 @@ async function onDelete() {
                         userStore.removeJourney(props.journey.id!);
                         journeyModalController.close("alert");
                         toast.success("Journey deleted", {
-                            position: POSITION.TOP_CENTER
+                            position: POSITION.BOTTOM_RIGHT
                         });
                         drawMyJourneys();
                     }

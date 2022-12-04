@@ -151,13 +151,13 @@ async function onDelete() {
                         const newJ = await journeyStore.removeExperience(props.poi.id!);
                         if (!newJ) {
                             toast.error("Could not delete your experience", {
-                                position: POSITION.TOP_CENTER
+                                position: POSITION.BOTTOM_RIGHT
                             });
                         } else {
                             journeyStore.journey = newJ;
                             journeyModalController.close("alert");
                             toast.success("Experience deleted!", {
-                                position: POSITION.TOP_CENTER
+                                position: POSITION.BOTTOM_RIGHT
                             });
                             drawJourney(journeyStore.journey);
                         }

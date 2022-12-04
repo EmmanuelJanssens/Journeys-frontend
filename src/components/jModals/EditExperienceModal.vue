@@ -209,7 +209,7 @@ async function save() {
                     })
                     .catch(() => {
                         toast.error("TAn error occured when uploading your images :(", {
-                            position: POSITION.TOP_CENTER
+                            position: POSITION.BOTTOM_RIGHT
                         });
                     });
 
@@ -226,11 +226,11 @@ async function save() {
                 await journeyStore.updateExperience(currentData.value.experience, currentData.value.poi.id!);
                 journeyModalController.close("editExperience");
                 toast.success("Your modifications were successfuly saved", {
-                    position: POSITION.TOP_CENTER
+                    position: POSITION.BOTTOM_RIGHT
                 });
             } catch (e) {
                 toast.error("Could not save your modifications", {
-                    position: POSITION.TOP_CENTER
+                    position: POSITION.BOTTOM_RIGHT
                 });
             }
 

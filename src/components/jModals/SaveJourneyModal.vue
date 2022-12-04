@@ -54,12 +54,12 @@ async function quickSave() {
         await save();
         journeyModalController.close("saveJourney");
         toast.success("Journey saved!", {
-            position: POSITION.TOP_CENTER
+            position: POSITION.BOTTOM_RIGHT
         });
         journeyStore.isDirty = false;
     } catch (e) {
         toast.error("Could not save your journey", {
-            position: POSITION.TOP_CENTER
+            position: POSITION.BOTTOM_RIGHT
         });
     }
 }
@@ -73,12 +73,12 @@ async function redirectionSave() {
             }
         });
         toast.success("Journey saved!", {
-            position: POSITION.TOP_CENTER
+            position: POSITION.BOTTOM_RIGHT
         });
         router.push("/logbook/journey/" + saved!.id);
     } catch (e) {
         toast.error("Could not save your journey", {
-            position: POSITION.TOP_CENTER
+            position: POSITION.BOTTOM_RIGHT
         });
     }
 }
@@ -102,7 +102,7 @@ async function save() {
                 })
                 .catch(() => {
                     toast.error("Could not upload your images", {
-                        position: POSITION.TOP_CENTER
+                        position: POSITION.BOTTOM_RIGHT
                     });
                 });
             return saved.journey;
@@ -119,7 +119,7 @@ async function save() {
                 })
                 .catch(() => {
                     toast.error("Could not upload your images", {
-                        position: POSITION.TOP_CENTER
+                        position: POSITION.BOTTOM_RIGHT
                     });
                 });
             return saved.journey;

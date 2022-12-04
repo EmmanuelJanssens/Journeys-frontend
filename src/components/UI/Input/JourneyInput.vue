@@ -5,7 +5,7 @@
             class="input w-full input-secondary bg-secondary text-white placeholder-base-100"
             :placeholder="placeholder"
             :type="type"
-            @input="emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)" />
+            @input="keyDown" />
         <p v-if="!error || error.length == 0" class="mx-2 text-primary-darker">
             {{ helper }}
         </p>
@@ -22,6 +22,10 @@ defineProps<{
     error?: string;
     type?: string;
 }>();
-const emit = defineEmits(["update:modelValue", "focus-in", "focus-out", "key-down"]);
+const emit = defineEmits(["update:modelValue", "focus-in", "focus-out", "key-down", "enter-pressed"]);
+
+function keyDown(event: Event) {
+    emit("update:modelValue", (event.target as HTMLTextAreaElement).value);
+}
 </script>
 <style></style>

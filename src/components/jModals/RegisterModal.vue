@@ -125,7 +125,7 @@ const passwordRef = computed(() => state.value.password);
 
 const toast = useToast();
 const toastOptions = {
-    position: POSITION.TOP_CENTER
+    position: POSITION.BOTTOM_RIGHT
 };
 const rules = {
     username: {

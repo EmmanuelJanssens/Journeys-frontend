@@ -120,7 +120,7 @@ async function save() {
         const res = await journeyStore.updateJourney();
         if (!res) {
             toast.error("Could not save your modifications", {
-                position: POSITION.TOP_CENTER
+                position: POSITION.BOTTOM_RIGHT
             });
             return;
         }
@@ -131,7 +131,7 @@ async function save() {
             edited.thumbnail = journeyStore.journey?.thumbnail;
             journeyModalController.close("editJourney");
             toast.success("Saved your modifications!", {
-                position: POSITION.TOP_CENTER
+                position: POSITION.BOTTOM_RIGHT
             });
         }
     }
