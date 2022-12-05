@@ -10,7 +10,7 @@
                 <label for="radius">Radius of: {{ currentRadius }} km</label>
             </p>
             <input id="radius" type="range" min="0" max="20" value="0" class="range range-primary" ref="radiusRange" />
-            <p>
+            <!-- <p>
                 <label for="order">Sort by</label>
             </p>
             <p>
@@ -20,7 +20,7 @@
                 <div v-for="tag in poiStore.tagList" v-bind:key="tag.type" class="cursor-pointer">
                     <div class="badge badge-outline rounded-lg" @click="toggleTag($event, tag)">{{ tag.type }}</div>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
@@ -96,6 +96,5 @@ function toggleTag(event: Event, id: any) {
         target.classList.add("badge-accent");
         activeTags.value?.set(target.textContent!, true);
     }
-    console.log(activeTags.value);
 }
 </script>

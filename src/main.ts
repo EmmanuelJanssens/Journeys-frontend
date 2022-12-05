@@ -1,3 +1,5 @@
+import router from "./router/router";
+
 import { createPinia } from "pinia";
 import { createApp } from "vue";
 import { MotionPlugin } from "@vueuse/motion";
@@ -6,7 +8,6 @@ import VueLazyLoad from "vue3-lazyload";
 import axios from "axios";
 import VueAxios from "vue-axios";
 import App from "./App.vue";
-import router from "./router/router";
 
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
@@ -26,12 +27,13 @@ app.component("RecycleScroller", RecycleScroller);
 app.component("DynamicScroller", DynamicScroller);
 app.component("DynamicScrollerItem", DynamicScrollerItem);
 
-app.use(router);
 app.use(pinia);
 app.use(VueAxios, axios);
 app.use(VueLazyLoad);
 app.use(MotionPlugin);
 app.use(Toast);
+app.use(router);
+
 router.isReady().then(() => {
     app.mount("#app");
 });

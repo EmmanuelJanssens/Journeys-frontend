@@ -1,3 +1,4 @@
+import { useUserStore } from "stores/useUserStore";
 import { RouteRecordRaw, createRouter, createWebHistory } from "vue-router";
 
 const routes: RouteRecordRaw[] = [
@@ -33,6 +34,12 @@ const routes: RouteRecordRaw[] = [
         path: "/template",
         name: "template",
         component: async () => import("views/TemplatePage.vue")
+    },
+    {
+        path: "/dashboard",
+        name: "dashboard",
+
+        component: async () => import("views/DashboardPage.vue")
     }
 ];
 

@@ -8,21 +8,23 @@ import {
     signInWithPopup,
     updateCurrentUser,
     updateProfile,
-    User,
     UserCredential
 } from "firebase/auth";
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
-import { isErrored } from "stream";
 import { Experience, Journey, User as JUser } from "types/JourneyDtos";
 import { uniqueNamesGenerator, adjectives, colors, animals, Config } from "unique-names-generator";
 import { ref } from "vue";
 
 export const useUserStore = defineStore("user", () => {
-    const isLoggedIn = ref(false);
     const myJourneys = ref<Journey[]>();
     const myExperiences = ref<Experience[]>([]);
 
+    const state = ref({
+        fetchingMyJourneys: false,
+        isLoggedIn: false,
+        currentUser: "guest"
+    });
     const namesConfig: Config = {
         dictionaries: [adjectives, colors, animals],
         separator: "-",
@@ -30,16 +32,12 @@ export const useUserStore = defineStore("user", () => {
     };
 
     authApp.onAuthStateChanged(async (fbuser) => {
-        isLoggedIn.value = fbuser != undefined;
-        if (fbuser) {
-            try {
-                const token = await authApp.currentUser?.getIdToken(true);
-            } catch (e) {
-                //
-            }
-        }
+        state.value.isLoggedIn = fbuser != undefined;
+        if (fbuser) state.value.currentUser = fbuser.displayName!;
+        else state.value.currentUser = "guest";
     });
 
+    //start a timeout to check if the user loggedin, resolving or rejecting a promise
     function waitForUser(time: number, resolve?: (data: any) => void, reject?: (data: any) => void) {
         if (!authApp.currentUser) {
             if (time > 4) {
@@ -54,7 +52,7 @@ export const useUserStore = defineStore("user", () => {
             if (resolve) resolve(true);
         }
     }
-
+    //returns a promise wether the user loggedin
     async function didLogin() {
         const promise = new Promise<any>((resolve, reject) => {
             waitForUser(0, resolve, reject);
@@ -70,6 +68,8 @@ export const useUserStore = defineStore("user", () => {
         }
     }
 
+    //register with a specified provider
+    //if the user is a new user we need to register im in the database
     async function registerWith(provider?: string): Promise<UserCredential> {
         if (provider == "google") {
             const googleAuthProvider = new GoogleAuthProvider();
@@ -82,7 +82,8 @@ export const useUserStore = defineStore("user", () => {
                 const newUser = {
                     username: name,
                     uid: credentials.user.uid,
-                    completed: credentials.user.emailVerified
+                    completed: credentials.user.emailVerified,
+                    visibility: "public"
                 };
                 await axios.post("/api/authentication/register", newUser);
             }
@@ -91,6 +92,8 @@ export const useUserStore = defineStore("user", () => {
         }
         throw new Error("No provider specified");
     }
+
+    //classic registration with an email and a password
     async function register(user: JUser): Promise<UserCredential | undefined> {
         try {
             const credentials = await createUserWithEmailAndPassword(authApp, user.email!, user.password!);
@@ -109,17 +112,19 @@ export const useUserStore = defineStore("user", () => {
             });
 
             await updateCurrentUser(authApp, credentials.user);
-            //const signin = await signInWithEmailAndPassword(authApp, user.email!, user.password!);
             return credentials;
         } catch (e) {
             return undefined;
         }
     }
+
+    //resets the user to undefined and clears the store
     async function logout() {
         myJourneys.value = [];
-
+        myExperiences.value = [];
         await authApp.signOut();
     }
+
     async function saveUser(user: JUser): Promise<any | undefined> {
         try {
             const token = await authApp.currentUser?.getIdToken(true);
@@ -134,7 +139,9 @@ export const useUserStore = defineStore("user", () => {
         }
     }
 
+    //fetch a list of journeys belonging to the current user
     async function fetchMyJourneys(): Promise<Journey[] | undefined> {
+        state.value.fetchingMyJourneys = true;
         const token = await authApp.currentUser?.getIdToken(true);
         const response = await axios.get("/api/user/journeys", {
             headers: {
@@ -142,9 +149,11 @@ export const useUserStore = defineStore("user", () => {
             }
         });
         myJourneys.value = response.data as Journey[];
+        state.value.fetchingMyJourneys = false;
         return response.data;
     }
 
+    //fetch user information
     async function fetchMyProfile(): Promise<boolean> {
         try {
             const token = await authApp.currentUser?.getIdToken(false);
@@ -160,6 +169,8 @@ export const useUserStore = defineStore("user", () => {
         }
     }
 
+    //check if the username is availabele
+    //TODO remove because a user is not identified by his username anymore
     async function checkUserName(username: string): Promise<boolean> {
         try {
             const user = {
@@ -177,6 +188,7 @@ export const useUserStore = defineStore("user", () => {
         return new Promise(() => false);
     }
 
+    //for immediate feedback when removing a journey from our list
     function removeJourney(id: string) {
         myJourneys.value = myJourneys.value?.filter((j) => j.id != id);
     }
@@ -184,7 +196,6 @@ export const useUserStore = defineStore("user", () => {
     return {
         myJourneys,
         myExperiences,
-        isLoggedIn,
         login,
         logout,
         registerWith,
@@ -195,6 +206,7 @@ export const useUserStore = defineStore("user", () => {
         saveUser,
         checkUserName,
         updatePassword,
-        didLogin
+        didLogin,
+        state
     };
 });

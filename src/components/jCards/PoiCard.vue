@@ -1,6 +1,6 @@
 <template>
     <Teleport to="#poipopup">
-        <div class="card absolute bg-base-100 w-80 z-50" ref="card">
+        <div class="card absolute bg-base-100 w-80 z-50 shadow" ref="card">
             <div class="top-0 p-3 bg-primary-main dark:primar w-full rounded-t-xl">
                 <div class="flex space-x-4 justify-between">
                     <p class="text-center text-white">
@@ -11,6 +11,11 @@
             <div class="card-body">
                 <div class="px-4">
                     <div class="text-opacity-80 text-gray-600">{{ title }}</div>
+                </div>
+                <div class="flex flex-row space-x-2">
+                    <div class="badge badge-primary rounded-lg" v-for="tag in poi?.tags" v-bind:key="tag">
+                        {{ tag }}
+                    </div>
                 </div>
                 <swiper
                     v-if="poi?.experiences?.length! > 0"
@@ -51,6 +56,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="card-actions justify-end">
                     <JourneyButton type="secondary" @click="add"> <FontAwesomeIcon :icon="faAdd" /> Add </JourneyButton>
                 </div>
@@ -79,7 +85,6 @@ const props = defineProps<{
         y: number;
     };
 }>();
-const poi = ref<PointOfInterest>();
 const card = ref();
 const poiStore = usePoiStore();
 const journeyStore = useJourneyStore();
@@ -90,7 +95,7 @@ const emit = defineEmits<{
 }>();
 
 function setTitle(value: any) {
-    const titleAt = poi.value?.experiences?.at(value.activeIndex - 1)?.title;
+    const titleAt = props.poi?.experiences?.at(value.activeIndex - 1)?.title;
     if (titleAt && titleAt?.length! > 0) {
         title.value = titleAt!;
     } else {
@@ -111,6 +116,8 @@ function add() {
 onClickOutside(card, () => {
     emit("close");
 });
+
+const experiences = ref<Experience[]>([]);
 onMounted(async () => {
     if (props.pos) {
         const el = card.value as HTMLDivElement;
@@ -119,7 +126,8 @@ onMounted(async () => {
         el.style.top = props.pos!.y - el.getBoundingClientRect().y + "px";
     }
 
-    poi.value = await poiStore.getPoiExperiences(props.poi!);
+    //poi.value = await poiStore.getPoiExperiences(props.poi!);
+    experiences.value = await poiStore.getPoiExperiences(props.poi!);
 });
 
 rand(0, 1000);

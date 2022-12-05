@@ -1,4 +1,3 @@
-import type { AxiosError } from "axios";
 import axios from "axios";
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
@@ -7,13 +6,14 @@ import { ref } from "vue";
 
 export const usePoiStore = defineStore("poi", () => {
     const poisBetween = ref<PointOfInterest[]>([]);
-    const tagList = ref<{ type: string }[]>();
-    async function getThumbnail(poi: PointOfInterest) {
-        return await axios.post("/api/poi/thumbnail", poi).then((r) => {
-            return r;
-        });
-    }
+    const tagList = ref<{ type: string }[]>([]);
 
+    const state = ref({
+        poisAreLoading: false,
+        poiIsLoading: false
+    });
+
+    //
     function waitForPoi(time: number, resolve?: (data: any) => void, reject?: (data: any) => void) {
         if (!poisBetween.value?.length && poisBetween.value?.length! <= 0) {
             if (time > 4) {
@@ -30,7 +30,6 @@ export const usePoiStore = defineStore("poi", () => {
     }
     async function getTags() {
         const result = await axios.get(`/api/tag`);
-        tagList;
         return result.data as { type: string }[];
     }
 
@@ -42,72 +41,71 @@ export const usePoiStore = defineStore("poi", () => {
     }
 
     async function poiCountBetween(lat: number, lng: number, radius: number): Promise<number> {
-        try {
-            const query = JSON.stringify({
-                location: {
-                    longitude: lng,
-                    latitude: lat
-                },
-                radius
-            });
+        const query = JSON.stringify({
+            location: {
+                longitude: lng,
+                latitude: lat
+            },
+            radius
+        });
 
-            const url = encodeURI(query);
+        const url = encodeURI(query);
 
-            const res = await axios.get(`/api/poi/search/${url}/count`);
-            return res.data;
-        } catch (e) {
-            return 0;
-        }
+        const res = await axios.get(`/api/poi/search/${url}/count`);
+        return res.data;
     }
     async function searchBetween(lat: number, lng: number, radius: number): Promise<boolean> {
-        try {
-            const query = JSON.stringify({
-                location: {
-                    longitude: lng,
-                    latitude: lat
-                },
-                radius
-            });
-            const url = encodeURI(query);
+        state.value.poisAreLoading = true;
+        const query = JSON.stringify({
+            location: {
+                longitude: lng,
+                latitude: lat
+            },
+            radius
+        });
+        const url = encodeURI(query);
 
-            const res = await axios.get(`/api/poi/search/${url}`);
-            if (poisBetween.value?.length! > 0) {
-                poisBetween.value = [];
-            }
-            poisBetween.value = res.data;
-            return true;
-        } catch (e) {
-            return false;
+        const res = await axios.get(`/api/poi/search/${url}`);
+        if (poisBetween.value?.length! > 0) {
+            poisBetween.value = [];
         }
+        poisBetween.value = res.data;
+        state.value.poisAreLoading = false;
+        return true;
     }
     async function getPoiExperiences(poi: PointOfInterest) {
-        return await (
-            await axios.get("/api/poi/" + poi.id)
-        ).data;
+        state.value.poiIsLoading = true;
+        const result = await axios.get("/api/poi/" + poi.id);
+        state.value.poiIsLoading = false;
+        return result.data;
     }
 
     async function addPoi(poi: PointOfInterest) {
+        state.value.poiIsLoading = true;
         const token = await authApp.currentUser?.getIdToken(true);
         const result = await axios.post("/api/poi/", poi, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
+        state.value.poiIsLoading = false;
         return result.data as PointOfInterest;
     }
+
     function clear() {
         poisBetween.value = [];
+        tagList.value = [];
     }
     return {
         poiCountBetween,
         searchBetween,
-        getThumbnail,
         clear,
         poisBetween,
         getPoiExperiences,
         addPoi,
         poiDidLoad,
         getTags,
-        tagList
+        tagList,
+        state
     };
 });

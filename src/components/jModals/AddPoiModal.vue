@@ -108,7 +108,6 @@ async function setLocation(res: string) {
     const encoded = encodeURIComponent(JSON.stringify(marker));
 
     state.value.url = `https://api.mapbox.com/styles/v1/heymanuel/clawunauz000814nsgx6d2fjx/static/geojson(${encoded})/${address.value.longitude},${address.value.latitude},15/300x200?access_token=pk.eyJ1IjoiaGV5bWFudWVsIiwiYSI6ImNsOXR1Zm5tbDFlYm8zdXRmaDRwY21qYXoifQ.3A8osuJSSk3nzULihiAOPg`;
-    console.log(state.value.address);
     isLoading.value = false;
 }
 
@@ -161,13 +160,11 @@ const tags = ref<string[]>([]);
 function addTag() {
     if (state.value.tag.length > 0) {
         v$.value.tag.$validate();
-        console.log(v$.value.$errors);
         if (!v$.value.tag.$error) {
             if (tags.value.length < 6) {
                 const found = tags.value.find((val) => state.value.tag == val);
                 if (!found) {
                     tags.value.push(state.value.tag);
-                    console.log(tags.value);
                 }
             }
             state.value.tag = "";

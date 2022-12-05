@@ -14,9 +14,12 @@
 
 <script lang="ts" setup>
 import { RouterView } from "vue-router";
-import { defineAsyncComponent, onMounted } from "vue";
+import { defineAsyncComponent, onBeforeMount, onMounted } from "vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
+import { useUserStore } from "stores/useUserStore";
 
+const userStore = useUserStore();
+onBeforeMount(() => {});
 onMounted(async () => {
     journeyModalController.create(
         "login",

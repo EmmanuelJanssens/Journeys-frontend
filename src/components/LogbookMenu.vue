@@ -9,6 +9,7 @@
                     'transform -translate-y-5 duration-200 opacity-0  scale-y-0': route != 'edit'
                 }">
                 <PoiFilterControll />
+
                 <AutoComplete
                     :icon="faLocation"
                     class="w-full"
@@ -19,59 +20,75 @@
                     @complete="filterPois"
                     @focus-out="clear" />
             </div>
-            <div class="flex justify-center items-center space-x-4">
-                <button class="btn btn-primary group" @click="homeButton.handler">
-                    <FontAwesomeIcon :icon="homeButton.icon" size="2x" class="group-hover:pr-2" />
-                    <p
-                        class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
-                        {{ homeButton.text }}
-                    </p>
-                </button>
+            <div>
+                <div class="flex justify-center items-center space-x-4">
+                    <!-- <button class="btn btn-primary group" @click="homeButton.handler">
+                        <FontAwesomeIcon :icon="homeButton.icon" size="2x" class="group-hover:pr-2" />
+                        <p
+                            class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
+                            {{ homeButton.text }}
+                        </p>
+                    </button> -->
+                    <button class="btn btn-primary group" @click="userProfileButton.handler">
+                        <FontAwesomeIcon :icon="userProfileButton.icon" size="2x" class="group-hover:pr-2" />
+                        <p
+                            class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
+                            {{ userProfileButton.text }}
+                        </p>
+                    </button>
+                    <button class="btn btn-primary group" @click="logbookButton.handler">
+                        <FontAwesomeIcon :icon="logbookButton.icon" size="2x" class="group-hover:pr-2" />
+                        <p
+                            class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
+                            {{ logbookButton.text }}
+                        </p>
+                    </button>
+                    <button class="btn btn-primary group" @click="addJourneyButton.handler">
+                        <FontAwesomeIcon :icon="addJourneyButton.icon" size="2x" class="group-hover:pr-2" />
+                        <p
+                            class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
+                            {{ addJourneyButton.text }}
+                        </p>
+                    </button>
+                    <button class="btn btn-primary group" @click="addPoiButton.handler">
+                        <FontAwesomeIcon :icon="addPoiButton.icon" size="2x" class="group-hover:pr-2" />
+                        <p
+                            class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
+                            {{ addPoiButton.text }}
+                        </p>
+                    </button>
+                    <JourneyButton
+                        ref="editBtn"
+                        :class="{
+                            ' transition-all origin-left ': true,
+                            'transform  duration-300 opacity-100 scale-x-100': route == 'view',
+                            'transform  duration-300 opacity-0 scale-x-0 hidden': route != 'view'
+                        }"
+                        type="secondary"
+                        @click="editJourneyButton.handler"
+                        ><FontAwesomeIcon :icon="editJourneyButton.icon" size="2x"
+                    /></JourneyButton>
 
-                <button class="btn btn-primary group" @click="logbookButton.handler">
-                    <FontAwesomeIcon :icon="logbookButton.icon" size="2x" class="group-hover:pr-2" />
-                    <p
-                        class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
-                        {{ logbookButton.text }}
-                    </p>
-                </button>
-                <button class="btn btn-primary group" @click="addJourneyButton.handler">
-                    <FontAwesomeIcon :icon="addJourneyButton.icon" size="2x" class="group-hover:pr-2" />
-                    <p
-                        class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
-                        {{ addJourneyButton.text }}
-                    </p>
-                </button>
-                <button class="btn btn-primary group" @click="addPoiButton.handler">
-                    <FontAwesomeIcon :icon="addPoiButton.icon" size="2x" class="group-hover:pr-2" />
-                    <p
-                        class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
-                        {{ addPoiButton.text }}
-                    </p>
-                </button>
-                <JourneyButton
-                    ref="editBtn"
-                    :class="{
-                        ' transition-all origin-left ': true,
-                        'transform  duration-300 opacity-100 scale-x-100': route == 'view',
-                        'transform  duration-300 opacity-0 scale-x-0 hidden': route != 'view'
-                    }"
-                    type="secondary"
-                    @click="editJourneyButton.handler"
-                    ><FontAwesomeIcon :icon="editJourneyButton.icon" size="2x"
-                /></JourneyButton>
-
-                <JourneyButton
-                    :class="{
-                        ' transition-all origin-left': true,
-                        ' animate-pulse transform  duration-300 opacity-100 scale-x-100': journeyStore.isDirty,
-                        'transform  duration-300 opacity-0 scale-x-0 hidden': !journeyStore.isDirty
-                    }"
-                    type="secondary"
-                    @click="saveJourneyButton.handler"
-                    ><FontAwesomeIcon :icon="saveJourneyButton.icon" size="2x"
-                /></JourneyButton>
+                    <JourneyButton
+                        :class="{
+                            ' transition-all origin-left': true,
+                            ' animate-pulse transform  duration-300 opacity-100 scale-x-100': journeyStore.isDirty,
+                            'transform  duration-300 opacity-0 scale-x-0 hidden': !journeyStore.isDirty
+                        }"
+                        type="secondary"
+                        @click="saveJourneyButton.handler"
+                        ><FontAwesomeIcon :icon="saveJourneyButton.icon" size="2x"
+                    /></JourneyButton>
+                </div>
+                <progress
+                    v-if="
+                        userStore.state.fetchingMyJourneys ||
+                        poiStore.state.poisAreLoading ||
+                        poiStore.state.poiIsLoading
+                    "
+                    class="progress progress-secondary w-full"></progress>
             </div>
+
             <div class="flex w-full justify-end">
                 <JourneyButton @click="logoutButton.handler"
                     ><FontAwesomeIcon :icon="logoutButton.icon" size="2x"
@@ -87,6 +104,7 @@ import { mapInstance } from "map/JourneysMap";
 import JourneyButton from "./UI/Button/JourneyButton.vue";
 import {
     faFilter,
+    faUserCircle,
     faSave,
     faAdd,
     faBookAtlas,
@@ -105,6 +123,7 @@ import AutoComplete from "./jAutocomplete/AutoComplete.vue";
 import { usePoiStore } from "stores/usePoiStore";
 import { Locality } from "types/JourneyDtos";
 import PoiFilterControll from "./PoiFilterControll.vue";
+import { useUserStore } from "stores/useUserStore";
 
 const route = computed(() => router.currentRoute.value.name);
 
@@ -120,13 +139,6 @@ const logoutButton = ref({
     }
 });
 
-const filterButton = ref({
-    text: "Filter",
-    icon: faFilter,
-    handler: () => {
-        //
-    }
-});
 const homeButton = ref({
     text: "Home",
     icon: faHome,
@@ -191,6 +203,13 @@ const saveJourneyButton = ref({
     }
 });
 
+const userProfileButton = ref({
+    text: "Profile",
+    icon: faUserCircle,
+    handler: async () => {
+        router.push("/dashboard");
+    }
+});
 const predictions = ref<
     {
         value: string;
@@ -226,4 +245,6 @@ function flyTo(pred: string, additional: Locality) {
 function clear() {
     predictions.value = [];
 }
+
+const userStore = useUserStore();
 </script>

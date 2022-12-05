@@ -10,7 +10,7 @@
                 <div v-if="windowSize.width.value > 400" class="z-50 w-full">
                     <div class="flex justify-end p-4 space-x-4">
                         <JourneyButton
-                            v-if="!userStore.isLoggedIn"
+                            v-if="!userStore.state.isLoggedIn"
                             type="secondary"
                             fill="fill"
                             @click="journeyModalController.open('login')">
@@ -18,14 +18,14 @@
                         </JourneyButton>
 
                         <JourneyButton
-                            v-if="userStore.isLoggedIn"
+                            v-if="userStore.state.isLoggedIn"
                             type="secondary"
                             fill="fill"
                             @click="router.push('logbook')">
                             LOGBOOK
                         </JourneyButton>
                         <JourneyButton
-                            v-if="userStore.isLoggedIn"
+                            v-if="userStore.state.isLoggedIn"
                             type="secondary"
                             fill="fill"
                             @click="userStore.logout">
@@ -42,7 +42,7 @@
                     <h1
                         ref="title"
                         :class="{
-                            'text-2xl font-bold sm:text-5xl my-6 text-primary-main': true
+                            'text-2xl font-bold sm:text-5xl my-6 text-primary-darker': true
                         }">
                         Discover activities
                     </h1>
@@ -197,7 +197,7 @@ import { usePoiStore } from "stores/usePoiStore";
 import { getMidPoint, getRadius } from "utils/utils";
 
 import GoogleAutoComplete from "components/jAutocomplete/GoogleAutoComplete.vue";
-import CardPreview from "./CardPreview.vue";
+import CardPreview from "../components/CardPreview.vue";
 
 import { getGeocodedData } from "google/googleGeocoder";
 

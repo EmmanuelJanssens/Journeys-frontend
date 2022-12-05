@@ -36,12 +36,14 @@ import { POSITION, useToast } from "vue-toastification";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { computed, onMounted, ref } from "vue";
 import router from "router/router";
+import { useUserStore } from "stores/useUserStore";
 
 const state = ref({
     title: ""
 });
 const toast = useToast();
 const journeyStore = useJourneyStore();
+const userStore = useUserStore();
 const mode = computed(() => router.currentRoute.value.query.mode);
 const isLoading = ref(false);
 
@@ -62,6 +64,7 @@ async function quickSave() {
             position: POSITION.BOTTOM_RIGHT
         });
     }
+    isLoading.value = false;
 }
 
 async function redirectionSave() {
@@ -81,6 +84,7 @@ async function redirectionSave() {
             position: POSITION.BOTTOM_RIGHT
         });
     }
+    isLoading.value = false;
 }
 async function save() {
     isLoading.value = true;
@@ -105,10 +109,11 @@ async function save() {
                         position: POSITION.BOTTOM_RIGHT
                     });
                 });
+
             return saved.journey;
         } else if (mode.value == "new") {
             saved = await journeyStore.saveJourney(state.value.title);
-
+            userStore.myJourneys?.push(saved.journey);
             Promise.all(saved.uploadTask)
                 .then((tast) => {
                     if (tast.length > 0) {
@@ -122,11 +127,13 @@ async function save() {
                         position: POSITION.BOTTOM_RIGHT
                     });
                 });
+
             return saved.journey;
+        } else {
+            throw Error("error");
         }
     } catch (e) {
         throw Error(e);
     }
-    isLoading.value = false;
 }
 </script>

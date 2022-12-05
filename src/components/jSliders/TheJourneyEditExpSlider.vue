@@ -1,5 +1,5 @@
 <template>
-    <section>
+    <section class="pointer-events-none">
         <swiper
             :center-insufficient-slides="true"
             :pagination="{ clickable: true }"
@@ -19,7 +19,10 @@
                 1536: { slidesPerView: 4 }
             }"
             @slides-length-change="goToLast">
-            <swiper-slide v-for="experience in journeyStore.journey.experiences" :key="experience.poi.id">
+            <swiper-slide
+                v-for="experience in journeyStore.journey.experiences"
+                :key="experience.poi.id"
+                class="h-full pointer-events-auto">
                 <ExperienceCard
                     :experience="experience.data"
                     :poi="experience.poi"
@@ -117,7 +120,7 @@ onMounted(async () => {
     journeyStore.init();
     const query = router.currentRoute.value.query;
     try {
-        if (userStore.isLoggedIn) {
+        if (userStore.state.isLoggedIn) {
             if (query.id) {
                 const mid = journeyStore.getJourneyMidPoint(journeyStore.journey);
                 await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);

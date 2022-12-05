@@ -71,7 +71,8 @@ async function loadMap() {
                 location: JSON.parse(e.features![0].properties!.location),
                 name: e.features![0].properties!.name,
                 id: e.features![0].properties!.id,
-                experiences: e.features![0].properties!.experiences
+                experiences: e.features![0].properties!.experiences,
+                tags: JSON.parse(e.features![0].properties!.tags)
             };
             poiOpened.value = poi;
 
