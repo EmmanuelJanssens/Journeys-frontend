@@ -69,7 +69,7 @@ const emit = defineEmits<{
 //return false to cancel
 onBeforeRouteLeave(async (action) => {
     let leave = true;
-    if (journeyStore.isDirty) {
+    if (journeyStore.state.journeyIsDirty) {
         journeyModalController.open("alert", {
             props: {
                 title: "Warning",
@@ -113,7 +113,7 @@ onBeforeRouteLeave(async (action) => {
 });
 
 function goToLast(swiper: any) {
-    swiper.slideTo(journeyStore.journey.experiences!.length!);
+    if (journeyStore.journey.experiences) swiper.slideTo(journeyStore.journey.experiences.length!);
 }
 
 onMounted(async () => {

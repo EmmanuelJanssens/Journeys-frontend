@@ -58,7 +58,6 @@ async function quickSave() {
         toast.success("Journey saved!", {
             position: POSITION.BOTTOM_RIGHT
         });
-        journeyStore.isDirty = false;
     } catch (e) {
         toast.error("Could not save your journey", {
             position: POSITION.BOTTOM_RIGHT
@@ -93,7 +92,7 @@ async function save() {
         if (mode.value == "existing") {
             journeyStore.journey.title = state.value.title;
             journeyStore.journey.visibility = "public";
-            saved = await journeyStore.updateJourneyExperiences();
+            saved = await journeyStore.updateExperiencesFromJourney();
             isLoading.value = false;
 
             Promise.all(saved.uploadTask)
@@ -112,7 +111,7 @@ async function save() {
 
             return saved.journey;
         } else if (mode.value == "new") {
-            saved = await journeyStore.saveJourney(state.value.title);
+            saved = await journeyStore.saveJourneyWithExperiences(state.value.title);
             userStore.myJourneys?.push(saved.journey);
             Promise.all(saved.uploadTask)
                 .then((tast) => {

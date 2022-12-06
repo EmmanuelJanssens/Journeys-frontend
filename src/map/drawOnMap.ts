@@ -16,7 +16,7 @@ export function drawMyJourneys() {
         type: "FeatureCollection",
         features: []
     };
-    userStore.myJourneys!.forEach((journey) => {
+    userStore.myJourneys.journeys.forEach((journey) => {
         geoJSONJourney.features.push(journeyStore.journeyToGeojson(journey)[0]);
         geoJSONJourney.features.push(journeyStore.journeyToGeojson(journey)[1]);
         geoJSONJourney.features.push({

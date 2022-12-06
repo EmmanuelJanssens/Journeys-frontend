@@ -223,7 +223,10 @@ async function save() {
                 currentData.value!.experience!.title = state.value.title;
                 currentData.value!.experience!.date = state.value.selectedDate;
                 currentData.value!.experience!.description = state.value.description;
-                await journeyStore.updateExperience(currentData.value.experience, currentData.value.poi.id!);
+                await journeyStore.updateSingleExperienceFromJourney(
+                    currentData.value.experience,
+                    currentData.value.poi.id!
+                );
                 journeyModalController.close("editExperience");
                 toast.success("Your modifications were successfuly saved", {
                     position: POSITION.BOTTOM_RIGHT

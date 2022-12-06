@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="flex flex-col items-center space-y-4">
         <!-- <div
             class="card card-side bg-base-100 shadow-lg w-96"
             v-for="journey in userStore.myJourneys"
@@ -42,7 +42,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="journey in userStore.myJourneys" v-bind:key="journey.id">
+                <tr v-for="journey in userStore.myJourneys?.journeys" v-bind:key="journey.id">
                     <th>
                         <div class="flex items-center space-x-3">
                             <div class="avatar">
@@ -87,6 +87,9 @@
                 </tr>
             </tbody>
         </table>
+        <button v-if="userStore.myJourneys.pageInfo?.hasNextPage" class="btn btn-secondary" @click="nextPage">
+            <p>More</p>
+        </button>
     </div>
 </template>
 <script lang="ts" setup>
@@ -131,5 +134,9 @@ async function onDelete(journey: Journey) {
             ]
         }
     });
+}
+
+async function nextPage() {
+    await userStore.fetchMyJourneys(userStore.myJourneys.pageInfo?.endCursor);
 }
 </script>

@@ -97,13 +97,13 @@ async function submitForm() {
     isLoading.value = true;
 
     if (!v$.value.$error) {
-        const response = await userStore.login(state.value.email, state.value.password);
-        if (response == true) {
+        try {
+            await userStore.login(state.value.email, state.value.password);
             dismissLoginModal();
             toast.success("Welcome " + authApp.currentUser?.displayName, {
                 position: POSITION.BOTTOM_RIGHT
             });
-        } else {
+        } catch (error) {
             toast.error("Error login in", {
                 position: POSITION.BOTTOM_RIGHT
             });

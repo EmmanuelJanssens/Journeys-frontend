@@ -135,7 +135,7 @@ const route = computed(() => ({
 onMounted(() => {});
 async function onDelete() {
     if (route.value.name == "edit") {
-        journeyStore.removeFromJourney(props.poi.id!);
+        journeyStore.removeFromJourneyLocal(props.poi.id!);
         drawJourney(journeyStore.journey);
         drawPoisBetween();
         return;
@@ -148,7 +148,7 @@ async function onDelete() {
                 {
                     text: "OK",
                     handler: async () => {
-                        const newJ = await journeyStore.removeExperience(props.poi.id!);
+                        const newJ = await journeyStore.removeSingleExperienceFromJourney(props.poi.id!);
                         if (!newJ) {
                             toast.error("Could not delete your experience", {
                                 position: POSITION.BOTTOM_RIGHT

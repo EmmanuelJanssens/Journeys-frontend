@@ -72,8 +72,9 @@
                     <JourneyButton
                         :class="{
                             ' transition-all origin-left': true,
-                            ' animate-pulse transform  duration-300 opacity-100 scale-x-100': journeyStore.isDirty,
-                            'transform  duration-300 opacity-0 scale-x-0 hidden': !journeyStore.isDirty
+                            ' animate-pulse transform  duration-300 opacity-100 scale-x-100':
+                                journeyStore.state.journeyIsDirty,
+                            'transform  duration-300 opacity-0 scale-x-0 hidden': !journeyStore.state.journeyIsDirty
                         }"
                         type="secondary"
                         @click="saveJourneyButton.handler"

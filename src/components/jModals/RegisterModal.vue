@@ -129,7 +129,6 @@ const toastOptions = {
 };
 const rules = {
     username: {
-        required,
         minLenght: minLength(5),
         noSpecial: helpers.withMessage("Can only contains letters/numbers and -,_", (value: string) =>
             /^[a-zA-Z0-9-_]+$/.test(value)
@@ -165,13 +164,6 @@ async function submitForm() {
     v$.value.$validate();
     if (!v$.value.$error) {
         isLoading.value = true;
-
-        const validUsername = await userStore.checkUserName(state.value.username);
-        if (!validUsername) {
-            toast.error("User name not available", toastOptions);
-            isLoading.value = false;
-            return;
-        }
         const response = await userStore.register(state.value);
         if (response) {
             dismissRegisterModal();

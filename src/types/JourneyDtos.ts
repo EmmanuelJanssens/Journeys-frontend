@@ -56,6 +56,18 @@ export type Journey = {
     creator?: string;
 };
 
+export type PagedJourneys = {
+    total?: number;
+    totalExperiences?: number;
+    journeys: Journey[];
+    pageInfo?: {
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+        startCursor: string;
+        endCursor: string;
+    };
+};
+
 export type UpdateJourneyDto = {
     journey?: Journey;
     updated?: Array<{

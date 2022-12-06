@@ -9,7 +9,7 @@
                 <FontAwesomeIcon class="btn btn-circle btn-secondary btn-outline btn-sm" :icon="faPencil" />
             </div>
         </div>
-        <div class="container mx-auto w-full h-full">
+        <div class="mx-auto w-full h-full overflow-auto">
             <div class="flex flex-col justify-center items-center space-y-4">
                 <div class="stats shadow">
                     <div class="stat">
@@ -17,7 +17,7 @@
                             <FontAwesomeIcon :icon="faEarth" />
                         </div>
                         <div class="stat-title">Total Journeys</div>
-                        <div class="stat-value text-primary">{{ userStore.myJourneys?.length }}</div>
+                        <div class="stat-value text-primary">{{ userStore.myStats.journeys }}</div>
                         <div class="stat-desc">Go out and explore</div>
                     </div>
                     <div class="stat">
@@ -25,7 +25,7 @@
                             <FontAwesomeIcon :icon="faMap" />
                         </div>
                         <div class="stat-title">Total experiences</div>
-                        <div class="stat-value text-primary">{{ totalExperiences }}</div>
+                        <div class="stat-value text-primary">{{ userStore.myStats.experiences }}</div>
                         <div class="stat-desc">Share your experiences!</div>
                     </div>
                     <div class="stat">
@@ -33,7 +33,7 @@
                             <FontAwesomeIcon :icon="faLocationPin" />
                         </div>
                         <div class="stat-title">Poi Contributions</div>
-                        <div class="stat-value text-primary">0</div>
+                        <div class="stat-value text-primary">{{ userStore.myStats.pois }}</div>
                         <div class="stat-desc">Thank you for contributing!</div>
                     </div>
                 </div>
@@ -43,10 +43,15 @@
                     </button>
                 </div>
                 <div class="tabs">
-                    <a class="tab tab-bordered tab-active">Journeys</a>
-                    <a class="tab tab-bordered">Points of interest</a>
+                    <a class="tab tab-bordered tab-active" @click="openTab('journeys')" ref="journeysTab">Journeys</a>
+                    <a class="tab tab-bordered" @click="openTab('pois')" ref="poisTab">Points of interest</a>
                 </div>
-                <JourneyList />
+
+                <RouterView v-slot="{ Component }">
+                    <Transition name="fade" mode="out-in">
+                        <Component :is="Component" />
+                    </Transition>
+                </RouterView>
             </div>
         </div>
     </div>
@@ -57,20 +62,54 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faEarth, faLocationPin, faMap, faPencil } from "@fortawesome/free-solid-svg-icons";
 
 import router from "router/router";
-import JourneyList from "components/dashboard/JourneyList.vue";
-import { onMounted, ref } from "vue";
-import { authApp } from "google/firebase";
+import { onMounted, ref, watch } from "vue";
 
 const userStore = useUserStore();
 const totalExperiences = ref(0);
+watch(
+    () => userStore.myJourneys.journeys,
+    (newVal) => {
+        totalExperiences.value = 0;
+        newVal.forEach((journey) => {
+            totalExperiences.value += journey.nExperiences ? journey.nExperiences : 0;
+        });
+    }
+);
+
 onMounted(async () => {
     await userStore.didLogin();
-    if (!userStore.myJourneys || userStore.myJourneys.length == 0) {
+    if (!userStore.myJourneys || !userStore.myJourneys.journeys || userStore.myJourneys.journeys.length == 0) {
         await userStore.fetchMyJourneys();
     }
-    userStore.myJourneys?.forEach((journey) => {
+    userStore.myJourneys?.journeys?.forEach((journey) => {
         totalExperiences.value += journey.nExperiences ? journey.nExperiences : 0;
     });
+
+    await userStore.fetchMyStats();
 });
+
+const journeysTab = ref();
+const poisTab = ref();
+async function openTab(tab: string) {
+    if (tab == "journeys") {
+        router.push("/dashboard");
+        (journeysTab.value as HTMLElement).classList.add("tab-active");
+        (poisTab.value as HTMLElement).classList.remove("tab-active");
+    } else if (tab == "pois") {
+        router.push("/dashboard/pois");
+        (journeysTab.value as HTMLElement).classList.remove("tab-active");
+        (poisTab.value as HTMLElement).classList.add("tab-active");
+    }
+}
 </script>
-<style></style>
+<style>
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease-out;
+}
+</style>

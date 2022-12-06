@@ -1,5 +1,4 @@
 import axios from "axios";
-import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import {
     createUserWithEmailAndPassword,
     getAdditionalUserInfo,
@@ -12,19 +11,29 @@ import {
 } from "firebase/auth";
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
-import { Experience, Journey, User as JUser } from "types/JourneyDtos";
+import { Journey, PagedJourneys, PointOfInterest, User as JUser } from "types/JourneyDtos";
 import { uniqueNamesGenerator, adjectives, colors, animals, Config } from "unique-names-generator";
 import { ref } from "vue";
 
 export const useUserStore = defineStore("user", () => {
-    const myJourneys = ref<Journey[]>();
-    const myExperiences = ref<Experience[]>([]);
+    const myJourneys = ref<PagedJourneys>({
+        journeys: []
+    });
+    const myPois = ref<PointOfInterest[]>([]);
 
+    const myStats = ref({
+        experiences: 0,
+        pois: 0,
+        journeys: 0
+    });
     const state = ref({
         fetchingMyJourneys: false,
+        fetchingMyPois: false,
         isLoggedIn: false,
+        nextPage: "",
         currentUser: "guest"
     });
+
     const namesConfig: Config = {
         dictionaries: [adjectives, colors, animals],
         separator: "-",
@@ -59,13 +68,10 @@ export const useUserStore = defineStore("user", () => {
         });
         return promise;
     }
-    async function login(email: string, password: string): Promise<boolean> {
-        try {
-            const creds = await signInWithEmailAndPassword(authApp, email, password);
-            return creds.user != undefined;
-        } catch (e) {
-            return false;
-        }
+
+    async function login(email: string, password: string) {
+        const creds = await signInWithEmailAndPassword(authApp, email, password);
+        await updateCurrentUser(authApp, creds.user);
     }
 
     //register with a specified provider
@@ -95,33 +101,32 @@ export const useUserStore = defineStore("user", () => {
 
     //classic registration with an email and a password
     async function register(user: JUser): Promise<UserCredential | undefined> {
-        try {
-            const credentials = await createUserWithEmailAndPassword(authApp, user.email!, user.password!);
+        const credentials = await createUserWithEmailAndPassword(authApp, user.email!, user.password!);
+        if (!user.username || user.username.length == 0) user.username = uniqueNamesGenerator(namesConfig);
+        const dto = {
+            uid: credentials.user.uid,
+            username: user.username,
+            firstname: user.firstName,
+            lastname: user.lastName,
+            visibility: "public",
+            completed: false
+        };
+        await axios.post("/api/authentication/register", dto);
+        await updateProfile(credentials.user, {
+            displayName: user.username
+        });
 
-            const dto = {
-                uid: credentials.user.uid,
-                username: user.username,
-                firstname: user.firstName,
-                lastname: user.lastName,
-                visibility: "public",
-                completed: false
-            };
-            await axios.post("/api/authentication/register", dto);
-            await updateProfile(credentials.user, {
-                displayName: user.username
-            });
-
-            await updateCurrentUser(authApp, credentials.user);
-            return credentials;
-        } catch (e) {
-            return undefined;
-        }
+        await updateCurrentUser(authApp, credentials.user);
+        return credentials;
     }
 
     //resets the user to undefined and clears the store
     async function logout() {
-        myJourneys.value = [];
-        myExperiences.value = [];
+        myJourneys.value = {
+            journeys: [],
+            pageInfo: undefined
+        };
+        myPois.value = [];
         await authApp.signOut();
     }
 
@@ -140,72 +145,65 @@ export const useUserStore = defineStore("user", () => {
     }
 
     //fetch a list of journeys belonging to the current user
-    async function fetchMyJourneys(): Promise<Journey[] | undefined> {
+    async function fetchMyJourneys(cursor?: string): Promise<PagedJourneys[] | undefined> {
         state.value.fetchingMyJourneys = true;
         const token = await authApp.currentUser?.getIdToken(true);
-        const response = await axios.get("/api/user/journeys", {
+        const url = `/api/user/journeys?pages=5&cursor=${cursor}`;
+        const response = await axios.get(url, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        myJourneys.value = response.data as Journey[];
+        myJourneys.value.journeys = myJourneys.value.journeys.concat(...response.data.journeys);
+        myJourneys.value.pageInfo = response.data.pageInfo;
+        myJourneys.value.total = response.data.total;
+        myJourneys.value.totalExperiences = response.data.totalExperiences;
         state.value.fetchingMyJourneys = false;
         return response.data;
     }
 
-    //fetch user information
-    async function fetchMyProfile(): Promise<boolean> {
-        try {
-            const token = await authApp.currentUser?.getIdToken(false);
-            const response = await axios.get("/api/user/profile", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            return true;
-        } catch (e) {
-            return false;
-        }
+    async function fetchMyPois() {
+        state.value.fetchingMyPois = true;
+        const token = await authApp.currentUser?.getIdToken(false);
+        const response = await axios.get("/api/user/pois", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        myPois.value = response.data;
+        state.value.fetchingMyPois = false;
+        return response.data;
     }
 
-    //check if the username is availabele
-    //TODO remove because a user is not identified by his username anymore
-    async function checkUserName(username: string): Promise<boolean> {
-        try {
-            const user = {
-                username: username
-            };
-            const response = await axios.post("/api/user/username", user);
-            if (response.data) return true;
-            else return false;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    async function updatePassword(): Promise<boolean> {
-        return new Promise(() => false);
+    async function fetchMyStats() {
+        const token = await authApp.currentUser?.getIdToken(false);
+        const response = await axios.get("/api/user/stats", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        myStats.value = response.data;
+        return response.data;
     }
 
     //for immediate feedback when removing a journey from our list
     function removeJourney(id: string) {
-        myJourneys.value = myJourneys.value?.filter((j) => j.id != id);
+        myJourneys.value!.journeys = myJourneys.value?.journeys.filter((j) => j.id != id)!;
     }
 
     return {
         myJourneys,
-        myExperiences,
+        myPois,
+        myStats,
+        fetchMyJourneys,
+        fetchMyPois,
+        fetchMyStats,
         login,
         logout,
         registerWith,
         register,
         removeJourney,
-        fetchMyJourneys,
-        fetchMyProfile,
         saveUser,
-        checkUserName,
-        updatePassword,
         didLogin,
         state
     };

@@ -109,7 +109,7 @@ function add() {
         date: new Date().toISOString(),
         title: ""
     };
-    journeyStore.addToJourney(experience, props.poi!);
+    journeyStore.addToJourneyLocal(experience, props.poi!);
     drawExperiences();
     emit("close");
 }

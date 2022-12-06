@@ -20,7 +20,7 @@ const routes: RouteRecordRaw[] = [
             {
                 path: "journey/:id",
                 name: "view",
-                component: () => import("components/jSliders/TheJourneyExpSlider.vue")
+                component: async () => import("components/jSliders/TheJourneyExpSlider.vue")
             },
             {
                 path: "/edit",
@@ -39,7 +39,11 @@ const routes: RouteRecordRaw[] = [
         path: "/dashboard",
         name: "dashboard",
 
-        component: async () => import("views/DashboardPage.vue")
+        component: async () => import("views/DashboardPage.vue"),
+        children: [
+            { path: "", name: "myJourneys", component: async () => import("components/dashboard/JourneyList.vue") },
+            { path: "pois", name: "myPois", component: async () => import("components/dashboard/PoiList.vue") }
+        ]
     }
 ];
 

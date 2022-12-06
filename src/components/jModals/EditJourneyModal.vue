@@ -117,7 +117,7 @@ async function save() {
         journeyStore.journey.id = props.journey?.id;
         journeyStore.journey.thumbnail = selectedThumbnail.value;
         delete journeyStore.journey!.experiences;
-        const res = await journeyStore.updateJourney();
+        const res = await journeyStore.updateJourneyDetails();
         if (!res) {
             toast.error("Could not save your modifications", {
                 position: POSITION.BOTTOM_RIGHT

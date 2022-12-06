@@ -10,14 +10,18 @@ import { uuidv4 } from "@firebase/util";
 
 export const useJourneyStore = defineStore("journey", () => {
     const journey = ref<Journey>({});
-    const updateDto = ref<UpdateJourneyDto>({});
+    const updateJourneyDto = ref<UpdateJourneyDto>({});
+
+    const state = ref({
+        joureyIsLoading: false,
+        journeyIsDirty: false,
+        journeyIsNew: false
+    });
 
     const initial = ref<{
         start: string;
         end: string;
     }>();
-
-    const isDirty = ref(false);
 
     function getInitial():
         | {
@@ -48,7 +52,8 @@ export const useJourneyStore = defineStore("journey", () => {
         const radius = getRadius(start, end);
         return { center: new LngLat(center.lng, center.lat), radius };
     }
-    async function removeExperience(poi_id: string): Promise<Journey | undefined> {
+
+    async function removeSingleExperienceFromJourney(poi_id: string): Promise<Journey | undefined> {
         const token = await authApp.currentUser?.getIdToken(false);
         const url = "/api/journey/" + journey.value.id! + "/experience/" + poi_id;
         const response = await axios.delete(url, {
@@ -61,7 +66,10 @@ export const useJourneyStore = defineStore("journey", () => {
         return response.data as Journey;
     }
 
-    async function updateExperience(experience: Experience, poi: string): Promise<Journey | undefined> {
+    async function updateSingleExperienceFromJourney(
+        experience: Experience,
+        poi: string
+    ): Promise<Journey | undefined> {
         const token = await authApp.currentUser?.getIdToken(false);
         const url = "/api/journey/" + journey.value.id + "/experience/" + poi;
         const response = await axios.put(url, experience, {
@@ -78,22 +86,22 @@ export const useJourneyStore = defineStore("journey", () => {
         const idx = journey.value.experiences?.findIndex((exp) => exp.poi.id == poi.id);
 
         let updateIdx = -1;
-        if (updateDto.value.updated) {
-            updateIdx = updateDto.value.updated?.findIndex((exp) => exp.poi.id == poi.id);
+        if (updateJourneyDto.value.updated) {
+            updateIdx = updateJourneyDto.value.updated?.findIndex((exp) => exp.poi.id == poi.id);
             if (updateIdx < 0) {
-                updateDto.value.updated.push({
+                updateJourneyDto.value.updated.push({
                     data: experience,
                     poi: poi
                 });
             } else {
-                updateDto.value.updated[updateIdx] = {
+                updateJourneyDto.value.updated[updateIdx] = {
                     data: experience,
                     poi: poi
                 };
             }
         } else {
-            updateDto.value.updated = [];
-            updateDto.value.updated.push({
+            updateJourneyDto.value.updated = [];
+            updateJourneyDto.value.updated.push({
                 data: experience,
                 poi: poi
             });
@@ -105,10 +113,10 @@ export const useJourneyStore = defineStore("journey", () => {
                 (a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime()
             );
         }
-        isDirty.value = true;
+        state.value.journeyIsDirty = true;
     }
 
-    async function updateJourney(): Promise<Journey | undefined> {
+    async function updateJourneyDetails(): Promise<Journey | undefined> {
         const token = await authApp.currentUser?.getIdToken(false);
         const result = await axios.patch("/api/journey/", journey.value, {
             headers: {
@@ -118,7 +126,7 @@ export const useJourneyStore = defineStore("journey", () => {
         return result.data;
     }
 
-    async function updateJourneyExperiences() {
+    async function updateExperiencesFromJourney() {
         const uploading: Array<Promise<void> | undefined> = [];
         const token = await authApp.currentUser?.getIdToken(false);
 
@@ -129,29 +137,29 @@ export const useJourneyStore = defineStore("journey", () => {
             delete experience.data.imagesToUpload;
         });
 
-        updateDto.value?.connected?.forEach(async (experience) => {
+        updateJourneyDto.value?.connected?.forEach(async (experience) => {
             if (experience.data.imagesToUpload && experience.data.imagesToUpload.length > 0) {
                 uploading.push(uploadImages(experience.data.imagesToUpload!, experience.poi.id!, journey.value.id!));
             }
             delete experience.data.imagesToUpload;
         });
         const url = `/api/journey/${journey.value.id}/experiences`;
-        updateDto.value.journey = journey.value;
+        updateJourneyDto.value.journey = journey.value;
 
-        const response = await axios.put(url, updateDto.value, {
+        const response = await axios.put(url, updateJourneyDto.value, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
 
-        isDirty.value = false;
+        state.value.journeyIsDirty = false;
         return {
             journey: response.data as Journey,
             uploadTask: uploading
         };
     }
 
-    async function saveJourney(name: string) {
+    async function saveJourneyWithExperiences(name: string) {
         const token = await authApp.currentUser?.getIdToken(false);
         const uploading: Array<Promise<void> | undefined> = [];
 
@@ -169,7 +177,7 @@ export const useJourneyStore = defineStore("journey", () => {
                 Authorization: `Bearer ${token}`
             }
         });
-        isDirty.value = false;
+        state.value.journeyIsDirty = false;
         return {
             journey: response.data as Journey,
             uploadTask: uploading
@@ -190,29 +198,29 @@ export const useJourneyStore = defineStore("journey", () => {
         }
     }
 
-    function addToJourney(experience: Experience, poi: PointOfInterest) {
-        if (!alreadyInJourney(poi)) {
+    function addToJourneyLocal(experience: Experience, poi: PointOfInterest) {
+        if (!alreadyInJourneyLocal(poi)) {
             const toAdd = {
                 data: experience,
                 poi: poi
             };
             journey.value.experiences?.push(toAdd);
-            updateDto.value?.connected?.push(toAdd);
-            isDirty.value = true;
+            updateJourneyDto.value?.connected?.push(toAdd);
+            state.value.journeyIsDirty = true;
         }
     }
-    function removeFromJourney(poi_id: string): void {
+    function removeFromJourneyLocal(poi_id: string): void {
         if (journey.value.experiences) {
-            updateDto.value.deleted?.push(poi_id);
+            updateJourneyDto.value.deleted?.push(poi_id);
             journey.value.experiences = journey.value.experiences.filter((experience) => experience.poi.id != poi_id);
             journey.value.experiences?.sort(
                 (a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime()
             );
-            isDirty.value = true;
+            state.value.journeyIsDirty = true;
         }
     }
 
-    function alreadyInJourney(poi: PointOfInterest): Boolean {
+    function alreadyInJourneyLocal(poi: PointOfInterest): Boolean {
         const result = journey.value.experiences?.find((experience) => experience.poi.id === poi.id) !== undefined;
         return result;
     }
@@ -223,15 +231,21 @@ export const useJourneyStore = defineStore("journey", () => {
     }
 
     function init() {
-        updateDto.value = {
+        updateJourneyDto.value = {
             connected: [],
             deleted: [],
             updated: []
         };
     }
     function clear() {
-        // journey.value = {};
-        isDirty.value = false;
+        journey.value = {};
+        updateJourneyDto.value = {};
+        state.value = {
+            joureyIsLoading: false,
+            journeyIsDirty: false,
+            journeyIsNew: false
+        };
+        state.value.journeyIsDirty = false;
         init();
     }
 
@@ -322,22 +336,21 @@ export const useJourneyStore = defineStore("journey", () => {
     }
     return {
         journey,
-        updateDto,
-        addToJourney,
+        state,
+        addToJourneyLocal,
         getJourneyMidPoint,
         journeyToGeojson,
-        updateExperience,
-        removeExperience,
-        removeFromJourney,
+        updateSingleExperienceFromJourney,
+        removeSingleExperienceFromJourney,
+        removeFromJourneyLocal,
         removeJourney,
-        saveJourney,
-        updateJourney,
-        updateJourneyExperiences,
+        saveJourneyWithExperiences,
+        updateJourneyDetails,
+        updateExperiencesFromJourney,
         setJourneyStartEnd,
         getJourney,
         clear,
         init,
-        isDirty,
         setInitial,
         getInitial,
         setExperienceData,

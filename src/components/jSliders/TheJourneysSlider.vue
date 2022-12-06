@@ -17,7 +17,7 @@
                 1200: { slidesPerView: 3 },
                 1536: { slidesPerView: 4 }
             }">
-            <swiper-slide v-for="item in userStore.myJourneys" :key="item.id">
+            <swiper-slide v-for="item in userStore.myJourneys.journeys" :key="item.id">
                 <JourneyCard
                     :journey="item"
                     class="max-w-[400px] h-full"
