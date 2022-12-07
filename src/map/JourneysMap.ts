@@ -153,7 +153,7 @@ class JourneysMap {
             this.existingMarkers.set(
                 "start",
                 this.createMarker(
-                    "assets/icon/flag-start.svg",
+                    "/assets/icon/flag-start.svg",
                     lines[0].properties!.start.longitude,
                     lines[0].properties!.start.latitude,
                     "cover",
@@ -163,7 +163,7 @@ class JourneysMap {
             this.existingMarkers.set(
                 "end",
                 this.createMarker(
-                    "assets/icon/flag-end.svg",
+                    "/assets/icon/flag-end.svg",
                     lines[0].properties!.end.longitude,
                     lines[0].properties!.end.latitude,
                     "cover",
@@ -335,7 +335,7 @@ class JourneysMap {
             this.existingMarkers.set(
                 "journey_start",
                 this.createMarker(
-                    "assets/icon/flag-start.svg",
+                    "/assets/icon/flag-start.svg",
                     lines[0].properties!.start.longitude,
                     lines[0].properties!.start.latitude,
                     "cover",
@@ -345,7 +345,7 @@ class JourneysMap {
             this.existingMarkers.set(
                 "journey_end",
                 this.createMarker(
-                    "assets/icon/flag-end.svg",
+                    "/assets/icon/flag-end.svg",
                     lines[0].properties!.end.longitude,
                     lines[0].properties!.end.latitude,
                     "cover",

@@ -28,16 +28,18 @@ export const usePoiStore = defineStore("poi", () => {
             if (resolve) resolve(true);
         }
     }
-    async function getTags() {
-        const result = await axios.get(`/api/tag`);
-        return result.data as { type: string }[];
-    }
 
     async function poiDidLoad() {
         const promise = new Promise<any>((resolve, reject) => {
             waitForPoi(0, resolve, reject);
         });
         return promise;
+    }
+
+    //all available tags
+    async function getTags() {
+        const result = await axios.get(`/api/tag`);
+        return result.data as { type: string }[];
     }
 
     async function poiCountBetween(lat: number, lng: number, radius: number): Promise<number> {
@@ -48,12 +50,11 @@ export const usePoiStore = defineStore("poi", () => {
             },
             radius
         });
-
         const url = encodeURI(query);
-
         const res = await axios.get(`/api/poi/search/${url}/count`);
         return res.data;
     }
+
     async function searchBetween(lat: number, lng: number, radius: number): Promise<boolean> {
         state.value.poisAreLoading = true;
         const query = JSON.stringify({
@@ -73,6 +74,7 @@ export const usePoiStore = defineStore("poi", () => {
         state.value.poisAreLoading = false;
         return true;
     }
+
     async function getPoiExperiences(poi: PointOfInterest) {
         state.value.poiIsLoading = true;
         const result = await axios.get("/api/poi/" + poi.id);

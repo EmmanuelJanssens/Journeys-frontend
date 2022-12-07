@@ -47,6 +47,7 @@ export type Journey = {
     end?: Locality;
     description?: string;
     thumbnail?: string;
+    thumbnails?: string[];
     visibility?: "public" | "private";
     nExperiences?: number;
     experiences?: Array<{

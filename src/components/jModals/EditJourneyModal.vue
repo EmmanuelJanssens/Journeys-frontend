@@ -80,24 +80,23 @@ function setActive(img: string) {
 }
 
 onMounted(async () => {
-    journeyStore.journey = (await journeyStore.getJourney(props.journey?.id!))!;
+    journeyStore.journey = userStore.myJourneys.journeys.find((journey) => journey.id == props.journey!.id)!;
     selectedThumbnail.value = props.journey?.thumbnail;
     images.value = [];
-    journeyStore.journey.experiences?.forEach((experience) => {
-        experience.data.images?.forEach((image) => {
-            if (image == journeyStore.journey?.thumbnail) {
-                images.value?.push({
-                    url: image,
-                    active: "checked"
-                });
-            } else {
-                images.value?.push({
-                    url: image,
-                    active: "unchecked"
-                });
-            }
-        });
+    journeyStore.journey.thumbnails?.forEach((img) => {
+        if (img == journeyStore.journey?.thumbnail) {
+            images.value?.push({
+                url: img,
+                active: "checked"
+            });
+        } else {
+            images.value?.push({
+                url: img,
+                active: "unchecked"
+            });
+        }
     });
+
     state.value = {
         title: journeyStore.journey.title!,
         description: journeyStore.journey.description!,
@@ -124,11 +123,11 @@ async function save() {
             });
             return;
         }
-        const edited = userStore.myJourneys?.find((journey) => journey.id == props.journey?.id);
+        const edited = userStore.myJourneys?.journeys.find((journey) => journey.id == props.journey?.id);
         if (edited) {
-            edited.title = journeyStore.journey.title;
-            edited.description = journeyStore.journey.description;
-            edited.thumbnail = journeyStore.journey?.thumbnail;
+            edited.title = res.title;
+            edited.description = res.description;
+            edited.thumbnail = res.thumbnail;
             journeyModalController.close("editJourney");
             toast.success("Saved your modifications!", {
                 position: POSITION.BOTTOM_RIGHT

@@ -13,10 +13,10 @@
             <div class="flex flex-col p-4 justify-around h-full bg-secondary-light dark:bg-gray-800 space-y-4">
                 <JourneyInput v-model="state.title" placeholder="Journey title" />
                 <div class="flex space-x-4 justify-between">
-                    <JourneyButton class="grow" type="primary" fill="fill" @click="quickSave">
+                    <JourneyButton class="grow" type="primary" fill="fill" @click="saveMode('quick')">
                         Quick Save
                     </JourneyButton>
-                    <JourneyButton class="grow" type="secondary" fill="fill" @click="redirectionSave">
+                    <JourneyButton class="grow" type="secondary" fill="fill" @click="saveMode('redirect')">
                         Save
                     </JourneyButton>
                 </div>
@@ -51,24 +51,14 @@ onMounted(() => {
     state.value.title = journeyStore.journey.title!;
 });
 
-async function quickSave() {
-    try {
-        await save();
+async function saveMode(mode: "quick" | "redirect") {
+    if (!userStore.state.isLoggedIn) {
         journeyModalController.close("saveJourney");
-        toast.success("Journey saved!", {
-            position: POSITION.BOTTOM_RIGHT
-        });
-    } catch (e) {
-        toast.error("Could not save your journey", {
-            position: POSITION.BOTTOM_RIGHT
-        });
+        journeyModalController.open("login");
+        return;
     }
-    isLoading.value = false;
-}
-
-async function redirectionSave() {
-    try {
-        const saved = await save();
+    const saved = await save();
+    if (saved) {
         journeyModalController.close("saveJourney", {
             data: {
                 journey: saved?.id
@@ -77,62 +67,42 @@ async function redirectionSave() {
         toast.success("Journey saved!", {
             position: POSITION.BOTTOM_RIGHT
         });
-        router.push("/logbook/journey/" + saved!.id);
-    } catch (e) {
+        if (mode == "redirect") router.push("/logbook/journey/" + saved!.id);
+    } else {
         toast.error("Could not save your journey", {
             position: POSITION.BOTTOM_RIGHT
         });
     }
     isLoading.value = false;
 }
+
 async function save() {
     isLoading.value = true;
-    try {
-        let saved;
-        if (mode.value == "existing") {
-            journeyStore.journey.title = state.value.title;
-            journeyStore.journey.visibility = "public";
-            saved = await journeyStore.updateExperiencesFromJourney();
-            isLoading.value = false;
-
-            Promise.all(saved.uploadTask)
-                .then((tast) => {
-                    if (tast != undefined && tast.length > 0) {
-                        toast.info("Your images have been uploaded you can now see them", {
-                            position: POSITION.BOTTOM_RIGHT
-                        });
-                    }
-                })
-                .catch(() => {
-                    toast.error("Could not upload your images", {
-                        position: POSITION.BOTTOM_RIGHT
-                    });
-                });
-
-            return saved.journey;
-        } else if (mode.value == "new") {
-            saved = await journeyStore.saveJourneyWithExperiences(state.value.title);
-            userStore.myJourneys?.push(saved.journey);
-            Promise.all(saved.uploadTask)
-                .then((tast) => {
-                    if (tast.length > 0) {
-                        toast.info("Your images have been uploaded you can now see them", {
-                            position: POSITION.BOTTOM_RIGHT
-                        });
-                    }
-                })
-                .catch(() => {
-                    toast.error("Could not upload your images", {
-                        position: POSITION.BOTTOM_RIGHT
-                    });
-                });
-
-            return saved.journey;
-        } else {
-            throw Error("error");
-        }
-    } catch (e) {
-        throw Error(e);
+    let saved;
+    if (mode.value == "existing") {
+        journeyStore.journey.title = state.value.title;
+        journeyStore.journey.visibility = "public";
+        saved = await journeyStore.updateExperiencesFromJourney();
+    } else if (mode.value == "new") {
+        saved = await journeyStore.saveJourneyWithExperiences(state.value.title);
+        userStore.myJourneys?.journeys.push(saved.journey);
     }
+    if (saved) {
+        Promise.all(saved.uploadTask)
+            .then((tasks) => {
+                if (tasks != undefined && tasks.length > 0) {
+                    toast.info("Your images have been uploaded you can now see them", {
+                        position: POSITION.BOTTOM_RIGHT
+                    });
+                }
+            })
+            .catch(() => {
+                toast.error("Could not upload your images", {
+                    position: POSITION.BOTTOM_RIGHT
+                });
+            });
+    }
+    isLoading.value = false;
+    return saved?.journey;
 }
 </script>

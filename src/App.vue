@@ -16,16 +16,13 @@
 import { RouterView } from "vue-router";
 import { defineAsyncComponent, onBeforeMount, onMounted } from "vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
-import { useUserStore } from "stores/useUserStore";
 
-const userStore = useUserStore();
 onBeforeMount(() => {});
 onMounted(async () => {
     journeyModalController.create(
         "login",
         defineAsyncComponent(() => import("components/jModals/LoginModal.vue"))
     );
-
     journeyModalController.create(
         "register",
         defineAsyncComponent(() => import("components/jModals/RegisterModal.vue"))

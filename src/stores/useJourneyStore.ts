@@ -9,8 +9,16 @@ import { Experience, Journey, Locality, PointOfInterest, UpdateJourneyDto } from
 import { uuidv4 } from "@firebase/util";
 
 export const useJourneyStore = defineStore("journey", () => {
-    const journey = ref<Journey>({});
-    const updateJourneyDto = ref<UpdateJourneyDto>({});
+    const journey = ref<Journey>({
+        experiences: []
+    });
+
+    const updateJourneyDto = ref<UpdateJourneyDto>({
+        connected: [],
+        journey: {},
+        deleted: [],
+        updated: []
+    });
 
     const state = ref({
         joureyIsLoading: false,
@@ -18,29 +26,65 @@ export const useJourneyStore = defineStore("journey", () => {
         journeyIsNew: false
     });
 
-    const initial = ref<{
-        start: string;
-        end: string;
-    }>();
-
-    function getInitial():
-        | {
-              start: string;
-              end: string;
-          }
-        | undefined {
-        return initial.value;
+    function addToJourneyLocal(experience: Experience, poi: PointOfInterest) {
+        if (!alreadyInJourneyLocal(poi)) {
+            const toAdd = {
+                data: experience,
+                poi: poi
+            };
+            journey.value.experiences?.push(toAdd);
+            updateJourneyDto.value?.connected?.push(toAdd);
+            state.value.journeyIsDirty = true;
+        }
     }
-    function setInitial(start: string, end: string) {
-        initial.value = {
-            start: start,
-            end: end
+    function removeFromJourneyLocal(poi_id: string): void {
+        if (journey.value.experiences) {
+            updateJourneyDto.value.deleted?.push(poi_id);
+            journey.value.experiences = journey.value.experiences.filter((experience) => experience.poi.id != poi_id);
+            journey.value.experiences?.sort(
+                (a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime()
+            );
+            state.value.journeyIsDirty = true;
+        }
+    }
+
+    function alreadyInJourneyLocal(poi: PointOfInterest): Boolean {
+        const result = journey.value.experiences?.find((experience) => experience.poi.id === poi.id) !== undefined;
+        return result;
+    }
+
+    function init() {
+        updateJourneyDto.value = {
+            connected: [],
+            deleted: [],
+            updated: []
+        };
+
+        journey.value = {
+            experiences: []
+        };
+
+        updateJourneyDto.value = {
+            connected: [],
+            journey: {},
+            deleted: [],
+            updated: []
+        };
+
+        state.value = {
+            joureyIsLoading: false,
+            journeyIsDirty: false,
+            journeyIsNew: false
         };
     }
+
+    //----API CALLS----
+
     async function getJourney(id: string): Promise<Journey | undefined> {
         const result = await axios.get("/api/journey/" + id);
         return result.data;
     }
+
     function getJourneyMidPoint(journey: Journey): {
         center: LngLat;
         radius: number;
@@ -89,17 +133,20 @@ export const useJourneyStore = defineStore("journey", () => {
         if (updateJourneyDto.value.updated) {
             updateIdx = updateJourneyDto.value.updated?.findIndex((exp) => exp.poi.id == poi.id);
             if (updateIdx < 0) {
+                //create if not exsist
                 updateJourneyDto.value.updated.push({
                     data: experience,
                     poi: poi
                 });
             } else {
+                //update otherwise
                 updateJourneyDto.value.updated[updateIdx] = {
                     data: experience,
                     poi: poi
                 };
             }
         } else {
+            //only if our update dto is not initialized/ == undefined
             updateJourneyDto.value.updated = [];
             updateJourneyDto.value.updated.push({
                 data: experience,
@@ -107,6 +154,7 @@ export const useJourneyStore = defineStore("journey", () => {
             });
         }
 
+        //for immediate feedback
         if (idx && idx > 0 && journey.value.experiences) {
             journey.value.experiences[idx].data = experience;
             journey.value.experiences?.sort(
@@ -198,79 +246,9 @@ export const useJourneyStore = defineStore("journey", () => {
         }
     }
 
-    function addToJourneyLocal(experience: Experience, poi: PointOfInterest) {
-        if (!alreadyInJourneyLocal(poi)) {
-            const toAdd = {
-                data: experience,
-                poi: poi
-            };
-            journey.value.experiences?.push(toAdd);
-            updateJourneyDto.value?.connected?.push(toAdd);
-            state.value.journeyIsDirty = true;
-        }
-    }
-    function removeFromJourneyLocal(poi_id: string): void {
-        if (journey.value.experiences) {
-            updateJourneyDto.value.deleted?.push(poi_id);
-            journey.value.experiences = journey.value.experiences.filter((experience) => experience.poi.id != poi_id);
-            journey.value.experiences?.sort(
-                (a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime()
-            );
-            state.value.journeyIsDirty = true;
-        }
-    }
-
-    function alreadyInJourneyLocal(poi: PointOfInterest): Boolean {
-        const result = journey.value.experiences?.find((experience) => experience.poi.id === poi.id) !== undefined;
-        return result;
-    }
-
     function setJourneyStartEnd(start: Locality, end: Locality) {
         journey.value.start = start;
         journey.value.end = end;
-    }
-
-    function init() {
-        updateJourneyDto.value = {
-            connected: [],
-            deleted: [],
-            updated: []
-        };
-    }
-    function clear() {
-        journey.value = {};
-        updateJourneyDto.value = {};
-        state.value = {
-            joureyIsLoading: false,
-            journeyIsDirty: false,
-            journeyIsNew: false
-        };
-        state.value.journeyIsDirty = false;
-        init();
-    }
-
-    function journeyToGeojson(journey: Journey): GeoJSON.Feature[] {
-        const obj: GeoJSON.Feature[] = [
-            {
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: [journey.start?.longitude!, journey.start?.latitude!]
-                },
-                properties: journey,
-                id: journey.id
-            },
-            {
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: [journey.end?.longitude!, journey.end?.latitude!]
-                },
-                properties: journey,
-                id: journey.id
-            }
-        ];
-        return obj;
     }
 
     function uploadImages(
@@ -334,6 +312,31 @@ export const useJourneyStore = defineStore("journey", () => {
         }
         return undefined;
     }
+
+    function journeyToGeojson(journey: Journey): GeoJSON.Feature[] {
+        const obj: GeoJSON.Feature[] = [
+            {
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [journey.start?.longitude!, journey.start?.latitude!]
+                },
+                properties: journey,
+                id: journey.id
+            },
+            {
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [journey.end?.longitude!, journey.end?.latitude!]
+                },
+                properties: journey,
+                id: journey.id
+            }
+        ];
+        return obj;
+    }
+
     return {
         journey,
         state,
@@ -349,10 +352,7 @@ export const useJourneyStore = defineStore("journey", () => {
         updateExperiencesFromJourney,
         setJourneyStartEnd,
         getJourney,
-        clear,
         init,
-        setInitial,
-        getInitial,
         setExperienceData,
         uploadImages
     };

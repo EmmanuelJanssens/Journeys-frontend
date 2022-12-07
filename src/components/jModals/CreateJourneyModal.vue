@@ -80,9 +80,10 @@ async function gotoJourneyMap() {
         if (geocodedStart.error === undefined && geocodedEnd.error === undefined) {
             journeyModalController.close("createJourney", {
                 data: {
-                    start: start,
-                    end: end,
-                    title: geocodedStart.address + " - " + geocodedEnd.address
+                    startLoc: start,
+                    endLoc: end,
+                    start: geocodedStart.address,
+                    end: geocodedEnd.address
                 }
             });
         }

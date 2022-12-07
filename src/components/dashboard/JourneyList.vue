@@ -1,37 +1,18 @@
 <template>
     <div class="flex flex-col items-center space-y-4">
-        <!-- <div
-            class="card card-side bg-base-100 shadow-lg w-96"
-            v-for="journey in userStore.myJourneys"
-            v-bind:key="journey.id">
-            <figure>
-                <img
-                    class="h-24 w-24 object-cover"
-                    v-lazy="{
-                        src: journey.thumbnail,
-                        loading: '/assets/placeholder.png',
-                        error: '/assets/placeholder.png'
-                    }" />
-            </figure>
-            <div class="card-body">
-                <h2 class="card-title">{{ journey.title }}</h2>
-                <p>{{ journey.description }}</p>
-                <div class="card-actions justify-end">
-                    <button
-                        class="btn btn-primary"
-                        @click="
-                            () =>
-                                journeyModalController.open('editJourney', {
-                                    props: {
-                                        journey: journey
-                                    }
-                                })
-                        ">
-                        <FontAwesomeIcon :icon="faPencil" />
-                    </button>
-                </div>
-            </div>
+        <!-- <div class="flex items-center justify-center">
+            <select class="select select-primary w-full max-w-xs" ref="sortMode" @change="sort">
+                <option disabled selected>Sort by</option>
+                <option>Title</option>
+                <option>Amount of Experiences</option>
+            </select>
+            <select class="select select-primary w-full max-w-xs" ref="sortOrder" @change="sort">
+                <option disabled selected>Sorting Mode</option>
+                <option>ASC</option>
+                <option>DESC</option>
+            </select>
         </div> -->
+
         <table class="table w-full">
             <thead>
                 <tr>
@@ -42,7 +23,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="journey in userStore.myJourneys?.journeys" v-bind:key="journey.id">
+                <tr v-for="journey in journeyList?.journeys" v-bind:key="journey.id">
                     <th>
                         <div class="flex items-center space-x-3">
                             <div class="avatar">
@@ -87,7 +68,7 @@
                 </tr>
             </tbody>
         </table>
-        <button v-if="userStore.myJourneys.pageInfo?.hasNextPage" class="btn btn-secondary" @click="nextPage">
+        <button v-if="journeyList?.pageInfo?.hasNextPage" class="btn btn-secondary" @click="nextPage">
             <p>More</p>
         </button>
     </div>
@@ -100,7 +81,8 @@ import { journeyModalController } from "components/UI/Modal/JourneyModalControll
 import { drawMyJourneys } from "map/drawOnMap";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { useToast, POSITION } from "vue-toastification";
-import { Journey } from "types/JourneyDtos";
+import { Journey, PagedJourneys } from "types/JourneyDtos";
+import { onMounted, ref } from "vue";
 
 const userStore = useUserStore();
 const journeyStore = useJourneyStore();
@@ -136,7 +118,49 @@ async function onDelete(journey: Journey) {
     });
 }
 
+const journeyList = ref<PagedJourneys>();
+
+onMounted(async () => {
+    await userStore.didLogin();
+    if (userStore.state.isLoggedIn) journeyList.value = await userStore.fetchNextPage(5, undefined);
+    else journeyModalController.open("login");
+});
 async function nextPage() {
-    await userStore.fetchMyJourneys(userStore.myJourneys.pageInfo?.endCursor);
+    const fetched = await userStore.fetchNextPage(5, journeyList.value?.pageInfo?.endCursor!);
+    journeyList.value!.pageInfo = fetched.pageInfo;
+    journeyList.value!.journeys = journeyList.value?.journeys.concat(...fetched.journeys)!;
+}
+
+const sortMode = ref();
+const sortOrder = ref();
+function sort(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const order = sortOrder.value as HTMLSelectElement;
+
+    switch (target.options.selectedIndex) {
+        case 1:
+            if (order.options.selectedIndex == 2) {
+                userStore.myJourneys.journeys.sort((a, b) => {
+                    if (a.title! < b.title!) return 1;
+                    else if (a.title! > b.title!) return -1;
+                    else return 0;
+                });
+            } else {
+                userStore.myJourneys.journeys.sort((a, b) => {
+                    if (a.title! < b.title!) return -1;
+                    else if (a.title! > b.title!) return 1;
+                    else return 0;
+                });
+            }
+
+            break;
+        case 2:
+            if (order.options.selectedIndex == 2) {
+                userStore.myJourneys.journeys.sort((a, b) => b.nExperiences! - a.nExperiences!);
+            } else {
+                userStore.myJourneys.journeys.sort((a, b) => a.nExperiences! - b.nExperiences!);
+            }
+            break;
+    }
 }
 </script>

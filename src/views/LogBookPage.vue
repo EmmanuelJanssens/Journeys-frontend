@@ -78,10 +78,6 @@ function flyTo(poi: PointOfInterest) {
     if (poi.location?.longitude && poi.location.latitude)
         mapInstance.flyTo(poi.location?.longitude, poi.location?.latitude, 18);
 }
-
-function prevent(event: Event) {
-    event.preventDefault();
-}
 </script>
 <style lang="less" scoped>
 .fade-enter-from,

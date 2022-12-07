@@ -187,17 +187,14 @@
 
 <script lang="ts" setup>
 import { ref, watch } from "vue";
+import { useWindowSize } from "@vueuse/core";
 
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { faGitlab } from "@fortawesome/free-brands-svg-icons";
 
 import { useUserStore } from "stores/useUserStore";
 import { usePoiStore } from "stores/usePoiStore";
 import { getMidPoint, getRadius } from "utils/utils";
-
-import GoogleAutoComplete from "components/jAutocomplete/GoogleAutoComplete.vue";
-import CardPreview from "../components/CardPreview.vue";
 
 import { getGeocodedData } from "google/googleGeocoder";
 
@@ -206,32 +203,31 @@ import router from "router/router";
 import { LngLat } from "mapbox-gl";
 import { AddressDto } from "types/dtos";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
-import { useJourneyStore } from "stores/useJourneyStore";
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
-import { val } from "dom7";
-import { useWindowSize } from "@vueuse/core";
 
+import GoogleAutoComplete from "components/jAutocomplete/GoogleAutoComplete.vue";
+import CardPreview from "components/CardPreview.vue";
+import JourneyButton from "components/UI/Button/JourneyButton.vue";
 let userStore = useUserStore();
 let poiStore = usePoiStore();
-let journeyStore = useJourneyStore();
 
 const poiCount = ref(0);
 const poiCountEl = ref();
 
 function pushLogbook() {
-    journeyStore.journey = {
-        start: {
-            latitude: geocoded.start.latitude,
-            longitude: geocoded.start.longitude
-        },
-        end: {
-            latitude: geocoded.end.latitude,
-            longitude: geocoded.end.longitude
-        }
-    };
-    journeyStore.journey.experiences = [];
-    router.push("/edit?mode=new");
+    const start = JSON.stringify({
+        latitude: geocoded.start.latitude,
+        longitude: geocoded.start.longitude
+    });
+    const end = JSON.stringify({
+        latitude: geocoded.end.latitude,
+        longitude: geocoded.end.longitude
+    });
+
+    let routeParams = `/edit?mode=new&start=${geocoded.start.address}&startLoc=${start}&end=${geocoded.end.address}&endLoc=${end}`;
+    routeParams = encodeURI(routeParams);
+    router.push(routeParams);
 }
+
 const validJourney = ref<{
     start: {
         text: string;
@@ -258,7 +254,6 @@ let geocoded: {
 };
 function setStart(value: string) {
     validJourney.value.start.text = value;
-
     validJourney.value.start.valid = true;
 }
 function setEnd(value: string) {
@@ -298,23 +293,3 @@ watch(
 
 const windowSize = useWindowSize();
 </script>
-
-<style scoped lang="less">
-.inner-shadow {
-    background-image: url(/assets/images/banner/mountains.jpg);
-}
-
-::-webkit-scrollbar {
-    height: 12px;
-    width: 6px;
-    background: #dae1db;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #a6cabd;
-    -webkit-border-radius: 1ex;
-    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
-    border-radius: 5%;
-    box-shadow: none;
-}
-</style>

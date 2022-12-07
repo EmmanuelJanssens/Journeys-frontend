@@ -6,7 +6,10 @@
                 class="flex z-50 justify-center space-x-4 items-center h-full text-high-contrast-text text-center sm:text-left">
                 <h1 class="text-xl sm:text-6xl">{{ userStore.state.currentUser }}</h1>
 
-                <FontAwesomeIcon class="btn btn-circle btn-secondary btn-outline btn-sm" :icon="faPencil" />
+                <FontAwesomeIcon
+                    class="btn btn-circle btn-secondary btn-outline btn-sm"
+                    :icon="faPencil"
+                    @click="openUpdateUserModal" />
             </div>
         </div>
         <div class="mx-auto w-full h-full overflow-auto">
@@ -60,9 +63,10 @@
 import { useUserStore } from "stores/useUserStore";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faEarth, faLocationPin, faMap, faPencil } from "@fortawesome/free-solid-svg-icons";
-
 import router from "router/router";
-import { onMounted, ref, watch } from "vue";
+import { defineAsyncComponent, defineComponent, onMounted, ref, watch } from "vue";
+import { journeyModalController } from "components/UI/Modal/JourneyModalController";
+import { authApp } from "google/firebase";
 
 const userStore = useUserStore();
 const totalExperiences = ref(0);
@@ -78,14 +82,17 @@ watch(
 
 onMounted(async () => {
     await userStore.didLogin();
-    if (!userStore.myJourneys || !userStore.myJourneys.journeys || userStore.myJourneys.journeys.length == 0) {
-        await userStore.fetchMyJourneys();
-    }
+
     userStore.myJourneys?.journeys?.forEach((journey) => {
         totalExperiences.value += journey.nExperiences ? journey.nExperiences : 0;
     });
 
     await userStore.fetchMyStats();
+
+    journeyModalController.create(
+        "updateUser",
+        defineAsyncComponent(() => import("components/jModals/UpdateUserModal.vue"))
+    );
 });
 
 const journeysTab = ref();
@@ -100,6 +107,10 @@ async function openTab(tab: string) {
         (journeysTab.value as HTMLElement).classList.remove("tab-active");
         (poisTab.value as HTMLElement).classList.add("tab-active");
     }
+}
+
+function openUpdateUserModal() {
+    journeyModalController.open("updateUser");
 }
 </script>
 <style>

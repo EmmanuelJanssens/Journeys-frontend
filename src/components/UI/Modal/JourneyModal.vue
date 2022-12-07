@@ -46,6 +46,7 @@
 <script setup lang="ts">
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { onClickOutside } from "@vueuse/core";
 import { computed, onMounted, ref } from "vue";
 
 import { journeyModalController } from "./JourneyModalController";
@@ -96,13 +97,13 @@ function close() {
     journeyModalController.close(props.name);
 }
 
-// onClickOutside(modal, () => {
-//     if (props.onOutsideClicked) {
-//         props.onOutsideClicked();
-//     } else {
-//         journeyModalController.close(props.name);
-//     }
-// });
+onClickOutside(modal, () => {
+    if (props.onOutsideClicked) {
+        props.onOutsideClicked();
+    } else {
+        journeyModalController.close(props.name);
+    }
+});
 
 onMounted(() => {
     (modal.value as HTMLElement).classList.add("animate-appear");

@@ -58,7 +58,6 @@ import { LngLat } from "mapbox-gl";
 
 const modules = ref([Pagination, Navigation, Lazy, A11y]);
 
-const userStore = useUserStore();
 const journeyStore = useJourneyStore();
 const poiStore = usePoiStore();
 
@@ -67,7 +66,7 @@ const emit = defineEmits<{
 }>();
 
 //return false to cancel
-onBeforeRouteLeave(async (action) => {
+onBeforeRouteLeave(async () => {
     let leave = true;
     if (journeyStore.state.journeyIsDirty) {
         journeyModalController.open("alert", {
@@ -106,7 +105,7 @@ onBeforeRouteLeave(async (action) => {
     }
     if (leave) {
         poiStore.clear();
-        journeyStore.clear();
+        journeyStore.init();
     }
 
     return leave;
@@ -117,30 +116,31 @@ function goToLast(swiper: any) {
 }
 
 onMounted(async () => {
-    journeyStore.init();
     const query = router.currentRoute.value.query;
     try {
-        if (userStore.state.isLoggedIn) {
-            if (query.id) {
-                const mid = journeyStore.getJourneyMidPoint(journeyStore.journey);
-                await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
-            } else {
-                const mid = journeyStore.getJourneyMidPoint(journeyStore.journey);
-                await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
-            }
-        } else {
-            const mid = journeyStore.getJourneyMidPoint(journeyStore.journey);
-            await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
-        }
+        if (query.mode == "new") {
+            journeyStore.init();
 
+            journeyStore.journey.title = query.start + " - " + query.end;
+
+            const start = JSON.parse(query.startLoc as string);
+            const end = JSON.parse(query.endLoc as string);
+
+            journeyStore.journey.start = start;
+            journeyStore.journey.end = end;
+        }
+        const mid = journeyStore.getJourneyMidPoint(journeyStore.journey);
+        await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
+        //wait for map
         await mapInstance.getMap();
+        //draw pois
         await drawPoisBetween();
         poiStore.tagList = await poiStore.getTags();
-        if (router.currentRoute.value.query.mode == "new") {
-            enableDrag();
-        }
-    } catch (e) {
-        //
+
+        //after everything is loaded ensure that we can drag markers only if the journey is newly created
+        if (query.mode == "new") enableDrag();
+    } catch (e: any) {
+        //handle errors
     }
 });
 

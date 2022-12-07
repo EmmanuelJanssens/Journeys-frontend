@@ -1,40 +1,52 @@
+import { type } from "os";
 import { Component, markRaw, ref } from "vue";
+
+export type ModalType =
+    | "register"
+    | "login"
+    | "alert"
+    | "editJourney"
+    | "createJourney"
+    | "editExperience"
+    | "saveJourney"
+    | "createPoi"
+    | "updateUser";
 
 class JourneyModalController {
     private _modals = ref<Map<string, { component: Component; open: boolean }>>();
-
     private _props = ref();
-
     private _close = ref();
+
     constructor() {
         this._modals.value = new Map();
     }
 
-    create(modal: string, component: any) {
+    create(modal: ModalType, component: any) {
         this._modals.value?.set(modal, {
             component: markRaw(component),
             open: false
         });
     }
-    open(modal: string, options?: { props: any }): void {
+
+    open(modal: ModalType, options?: { props: any }): void {
         this._modals.value?.get(modal)?.component;
         this._props = options?.props;
         if (this._modals.value?.get(modal) != undefined) this._modals.value.get(modal)!.open = true;
     }
 
-    async close(modal: string, data?: { data: any }) {
+    async close(modal: ModalType, data?: { data: any }) {
         if (this._modals.value?.get(modal) != undefined) this._modals.value.get(modal)!.open = false;
         this._close.value = data;
     }
+
     async closeAsync(callback: () => Promise<void>): Promise<void> {
         await callback();
     }
-    isOpen(modal: string): boolean | undefined {
+
+    isOpen(modal: ModalType): boolean | undefined {
         return this._modals.value?.get(modal)?.open;
     }
-    get(modal: string) {
-        return this._modals.value?.get(modal)?.component;
-    }
+
     getProps() {
         return this._props;
     }
@@ -48,13 +60,15 @@ class JourneyModalController {
             resolve(this._close.value);
         }
     }
-    async didClose(modal: string) {
+
+    async didClose(modal: ModalType) {
         const promise = new Promise<any>((resolve) => {
             this.checkClose(this._modals.value?.get(modal)!, resolve);
         });
 
         return promise;
     }
+
     getOpen() {
         let openComp;
         this._modals.value?.forEach((v) => {
@@ -64,4 +78,5 @@ class JourneyModalController {
     }
 }
 
+//single instance for the project
 export const journeyModalController = new JourneyModalController();

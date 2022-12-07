@@ -108,10 +108,7 @@ import { computed, ref } from "vue";
 
 import { useUserStore } from "stores/useUserStore";
 import { authApp } from "google/firebase";
-import JourneyInput from "components/UI/Input/JourneyInput.vue";
-import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
 
 const state = ref({
     username: "",
@@ -127,6 +124,7 @@ const toast = useToast();
 const toastOptions = {
     position: POSITION.BOTTOM_RIGHT
 };
+
 const rules = {
     username: {
         minLenght: minLength(5),

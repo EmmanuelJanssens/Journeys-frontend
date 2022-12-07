@@ -20,7 +20,7 @@
                     @complete="filterPois"
                     @focus-out="clear" />
             </div>
-            <div>
+            <div v-if="userStore.state.isLoggedIn">
                 <div class="flex justify-center items-center space-x-4">
                     <!-- <button class="btn btn-primary group" @click="homeButton.handler">
                         <FontAwesomeIcon :icon="homeButton.icon" size="2x" class="group-hover:pr-2" />
@@ -91,9 +91,20 @@
             </div>
 
             <div class="flex w-full justify-end">
-                <JourneyButton @click="logoutButton.handler"
-                    ><FontAwesomeIcon :icon="logoutButton.icon" size="2x"
-                /></JourneyButton>
+                <JourneyButton v-if="userStore.state.isLoggedIn" @click="logoutButton.handler" class="group"
+                    ><FontAwesomeIcon :icon="logoutButton.icon" size="2x" class="group-hover:pr-2" />
+                    <p
+                        class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
+                        {{ logoutButton.text }}
+                    </p></JourneyButton
+                >
+                <JourneyButton v-else @click="signInButton.handler" class="group"
+                    ><FontAwesomeIcon :icon="signInButton.icon" size="2x" class="group-hover:pr-2" />
+                    <p
+                        class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
+                        {{ signInButton.text }}
+                    </p></JourneyButton
+                >
             </div>
         </div>
     </div>
@@ -104,6 +115,7 @@ import { computed, ref, watch } from "vue";
 import { mapInstance } from "map/JourneysMap";
 import JourneyButton from "./UI/Button/JourneyButton.vue";
 import {
+    faSignIn,
     faFilter,
     faUserCircle,
     faSave,
@@ -129,6 +141,15 @@ import { useUserStore } from "stores/useUserStore";
 const route = computed(() => router.currentRoute.value.name);
 
 const journeyStore = useJourneyStore();
+
+const signInButton = ref({
+    text: "Sign in",
+    icon: faSignIn,
+    slot: "signin",
+    handler: async () => {
+        journeyModalController.open("login");
+    }
+});
 
 const logoutButton = ref({
     text: "Logout",
@@ -173,13 +194,12 @@ const addJourneyButton = ref({
         const result = await journeyModalController.didClose("createJourney");
 
         if (result) {
-            journeyStore.journey = {
-                start: result.data.start,
-                end: result.data.end,
-                title: result.data.title
-            };
-            journeyStore.journey.experiences = [];
-            router.push("/edit?mode=new");
+            const start = JSON.stringify(result.data.startLoc);
+            const end = JSON.stringify(result.data.endLoc);
+
+            let routeParams = `/edit?mode=new&start=${result.data.start}&startLoc=${start}&end=${result.data.end}&endLoc=${end}`;
+            routeParams = encodeURI(routeParams);
+            router.push(routeParams);
         }
     }
 });

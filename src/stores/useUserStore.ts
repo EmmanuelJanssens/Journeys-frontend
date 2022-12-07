@@ -11,11 +11,13 @@ import {
 } from "firebase/auth";
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
-import { Journey, PagedJourneys, PointOfInterest, User as JUser } from "types/JourneyDtos";
+import { PagedJourneys, PointOfInterest, User } from "types/JourneyDtos";
 import { uniqueNamesGenerator, adjectives, colors, animals, Config } from "unique-names-generator";
 import { ref } from "vue";
 
+export class UserDidNotLogIn extends Error {}
 export const useUserStore = defineStore("user", () => {
+    //will always be loaded on first logbook render
     const myJourneys = ref<PagedJourneys>({
         journeys: []
     });
@@ -50,7 +52,9 @@ export const useUserStore = defineStore("user", () => {
     function waitForUser(time: number, resolve?: (data: any) => void, reject?: (data: any) => void) {
         if (!authApp.currentUser) {
             if (time > 4) {
-                if (reject) reject(false);
+                if (reject) {
+                    reject(new UserDidNotLogIn("User is not logged in"));
+                }
                 return;
             } else {
                 setTimeout(() => {
@@ -58,7 +62,9 @@ export const useUserStore = defineStore("user", () => {
                 }, 500);
             }
         } else {
-            if (resolve) resolve(true);
+            if (resolve) {
+                resolve(true);
+            }
         }
     }
     //returns a promise wether the user loggedin
@@ -100,7 +106,7 @@ export const useUserStore = defineStore("user", () => {
     }
 
     //classic registration with an email and a password
-    async function register(user: JUser): Promise<UserCredential | undefined> {
+    async function register(user: User): Promise<UserCredential | undefined> {
         const credentials = await createUserWithEmailAndPassword(authApp, user.email!, user.password!);
         if (!user.username || user.username.length == 0) user.username = uniqueNamesGenerator(namesConfig);
         const dto = {
@@ -130,9 +136,15 @@ export const useUserStore = defineStore("user", () => {
         await authApp.signOut();
     }
 
-    async function saveUser(user: JUser): Promise<any | undefined> {
+    async function saveUser(user: {
+        username?: string;
+        firstName?: string;
+        lastName?: string;
+    }): Promise<any | undefined> {
         try {
             const token = await authApp.currentUser?.getIdToken(true);
+            if (user.firstName?.length == 0) delete user.firstName;
+            if (user.lastName?.length == 0) delete user.lastName;
             const response = await axios.put("/api/user", user, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -144,20 +156,28 @@ export const useUserStore = defineStore("user", () => {
         }
     }
 
-    //fetch a list of journeys belonging to the current user
-    async function fetchMyJourneys(cursor?: string): Promise<PagedJourneys[] | undefined> {
+    async function fetchNextPage(page: number, cursor?: string) {
         state.value.fetchingMyJourneys = true;
         const token = await authApp.currentUser?.getIdToken(true);
-        const url = `/api/user/journeys?pages=5&cursor=${cursor}`;
+        const url = `/api/user/journeys?pages=${page}&cursor=${cursor}`;
         const response = await axios.get(url, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        myJourneys.value.journeys = myJourneys.value.journeys.concat(...response.data.journeys);
-        myJourneys.value.pageInfo = response.data.pageInfo;
-        myJourneys.value.total = response.data.total;
-        myJourneys.value.totalExperiences = response.data.totalExperiences;
+        return response.data;
+    }
+    //fetch a list of journeys belonging to the current user
+    async function fetchMyJourneys() {
+        state.value.fetchingMyJourneys = true;
+        const token = await authApp.currentUser?.getIdToken(true);
+        const url = `/api/user/journeys`;
+        const response = await axios.get(url, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        myJourneys.value = response.data;
         state.value.fetchingMyJourneys = false;
         return response.data;
     }
@@ -196,6 +216,7 @@ export const useUserStore = defineStore("user", () => {
         myPois,
         myStats,
         fetchMyJourneys,
+        fetchNextPage,
         fetchMyPois,
         fetchMyStats,
         login,
