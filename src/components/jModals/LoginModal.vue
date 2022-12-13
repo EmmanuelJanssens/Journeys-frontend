@@ -14,20 +14,16 @@
                     <JourneyInput v-model="state.email" placeholder="Email" />
                     <JourneyInput v-model="state.password" placeholder="Password" type="password" />
                     <div class="flex justify-between space-x-4">
-                        <JourneyButton class="grow" type="primary" fill="fill" @click="submitForm">
-                            LOGIN
-                        </JourneyButton>
-                        <JourneyButton class="grow" type="secondary" fill="outlined" @click="openRegister">
-                            REGISTER
-                        </JourneyButton>
+                        <button class="btn btn-primary grow" @click="submitForm">Login</button>
+                        <button class="btn btn-secondary btn-outline" @click="openRegister">Register</button>
                     </div>
                     <JourneyLabel class="text-center" color="text-primary-dark" size="text-lg">
                         Login with
                     </JourneyLabel>
                     <div class="w-14 h-14">
-                        <JourneyButton type="primary" fill="fill" @click="openProviderSignin">
+                        <button class="btn btn-primary" @click="openProviderSignin">
                             <font-awesome-icon :icon="faGoogle" />
-                        </JourneyButton>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -51,7 +47,6 @@ import { journeyModalController } from "components/UI/Modal/JourneyModalControll
 import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import JourneyInput from "components/UI/Input/JourneyInput.vue";
 import { POSITION, useToast } from "vue-toastification";
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
 import JourneyLabel from "components/UI/Label/JourneyLabel.vue";
 
 const toast = useToast();

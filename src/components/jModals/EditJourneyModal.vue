@@ -14,7 +14,8 @@
                         <button class="relative" @click="setThumbnail(img.url)">
                             <img
                                 v-lazy="{ src: img.url, loading: '/assets/placeholder.png' }"
-                                class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1" />
+                                class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1"
+                                alt="thumbnail" />
                             <font-awesome-icon
                                 v-if="img.active == 'checked'"
                                 class="absolute top-0 right-0 text-green-400"
@@ -81,6 +82,9 @@ function setActive(img: string) {
 
 onMounted(async () => {
     journeyStore.journey = userStore.myJourneys.journeys.find((journey) => journey.id == props.journey!.id)!;
+    console.log(userStore.myJourneys.journeys.length);
+    console.log(props.journey);
+    console.log(journeyStore.journey);
     selectedThumbnail.value = props.journey?.thumbnail;
     images.value = [];
     journeyStore.journey.thumbnails?.forEach((img) => {

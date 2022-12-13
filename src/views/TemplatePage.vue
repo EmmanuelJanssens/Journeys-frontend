@@ -9,6 +9,4 @@
         <JourneyButton class="w-16 h-16" type="secondary" fill="none"> Test </JourneyButton>
     </div>
 </template>
-<script lang="ts" setup>
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
-</script>
+<script lang="ts" setup></script>

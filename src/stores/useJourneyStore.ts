@@ -9,17 +9,19 @@ import { Experience, Journey, Locality, PointOfInterest, UpdateJourneyDto } from
 import { uuidv4 } from "@firebase/util";
 
 export const useJourneyStore = defineStore("journey", () => {
+    //journey state used accross the application
     const journey = ref<Journey>({
         experiences: []
     });
 
+    //used when editing a journey
     const updateJourneyDto = ref<UpdateJourneyDto>({
         connected: [],
-        journey: {},
         deleted: [],
         updated: []
     });
 
+    //
     const state = ref({
         joureyIsLoading: false,
         journeyIsDirty: false,
@@ -29,7 +31,7 @@ export const useJourneyStore = defineStore("journey", () => {
     function addToJourneyLocal(experience: Experience, poi: PointOfInterest) {
         if (!alreadyInJourneyLocal(poi)) {
             const toAdd = {
-                data: experience,
+                experience: experience,
                 poi: poi
             };
             journey.value.experiences?.push(toAdd);
@@ -42,7 +44,7 @@ export const useJourneyStore = defineStore("journey", () => {
             updateJourneyDto.value.deleted?.push(poi_id);
             journey.value.experiences = journey.value.experiences.filter((experience) => experience.poi.id != poi_id);
             journey.value.experiences?.sort(
-                (a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime()
+                (a, b) => new Date(a.experience.date).getTime() - new Date(b.experience.date).getTime()
             );
             state.value.journeyIsDirty = true;
         }
@@ -66,7 +68,6 @@ export const useJourneyStore = defineStore("journey", () => {
 
         updateJourneyDto.value = {
             connected: [],
-            journey: {},
             deleted: [],
             updated: []
         };
@@ -81,7 +82,7 @@ export const useJourneyStore = defineStore("journey", () => {
     //----API CALLS----
 
     async function getJourney(id: string): Promise<Journey | undefined> {
-        const result = await axios.get("/api/journey/" + id);
+        const result = await axios.get("/api/journey/" + id + "/experiences");
         return result.data;
     }
 
@@ -105,7 +106,9 @@ export const useJourneyStore = defineStore("journey", () => {
                 Authorization: `Bearer ${token}`
             }
         });
-        journey.value.experiences?.sort((a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime());
+        journey.value.experiences?.sort(
+            (a, b) => new Date(a.experience.date).getTime() - new Date(b.experience.date).getTime()
+        );
 
         return response.data as Journey;
     }
@@ -116,12 +119,14 @@ export const useJourneyStore = defineStore("journey", () => {
     ): Promise<Journey | undefined> {
         const token = await authApp.currentUser?.getIdToken(false);
         const url = "/api/journey/" + journey.value.id + "/experience/" + poi;
-        const response = await axios.put(url, experience, {
+        const response = await axios.patch(url, experience, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        journey.value.experiences?.sort((a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime());
+        journey.value.experiences?.sort(
+            (a, b) => new Date(a.experience.date).getTime() - new Date(b.experience.date).getTime()
+        );
 
         return response.data as Journey;
     }
@@ -135,13 +140,13 @@ export const useJourneyStore = defineStore("journey", () => {
             if (updateIdx < 0) {
                 //create if not exsist
                 updateJourneyDto.value.updated.push({
-                    data: experience,
+                    experience: experience,
                     poi: poi
                 });
             } else {
                 //update otherwise
                 updateJourneyDto.value.updated[updateIdx] = {
-                    data: experience,
+                    experience: experience,
                     poi: poi
                 };
             }
@@ -149,16 +154,16 @@ export const useJourneyStore = defineStore("journey", () => {
             //only if our update dto is not initialized/ == undefined
             updateJourneyDto.value.updated = [];
             updateJourneyDto.value.updated.push({
-                data: experience,
+                experience: experience,
                 poi: poi
             });
         }
 
         //for immediate feedback
         if (idx && idx > 0 && journey.value.experiences) {
-            journey.value.experiences[idx].data = experience;
+            journey.value.experiences[idx].experience = experience;
             journey.value.experiences?.sort(
-                (a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime()
+                (a, b) => new Date(a.experience.date).getTime() - new Date(b.experience.date).getTime()
             );
         }
         state.value.journeyIsDirty = true;
@@ -179,22 +184,25 @@ export const useJourneyStore = defineStore("journey", () => {
         const token = await authApp.currentUser?.getIdToken(false);
 
         journey.value.experiences?.forEach((experience) => {
-            if (experience.data.imagesToUpload && experience.data.imagesToUpload.length > 0) {
-                uploading.push(uploadImages(experience.data.imagesToUpload, experience.poi.id!, journey.value.id!));
+            if (experience.experience.imagesToUpload && experience.experience.imagesToUpload.length > 0) {
+                uploading.push(
+                    uploadImages(experience.experience.imagesToUpload, experience.poi.id!, journey.value.id!)
+                );
             }
-            delete experience.data.imagesToUpload;
+            delete experience.experience.imagesToUpload;
         });
 
-        updateJourneyDto.value?.connected?.forEach(async (experience) => {
-            if (experience.data.imagesToUpload && experience.data.imagesToUpload.length > 0) {
-                uploading.push(uploadImages(experience.data.imagesToUpload!, experience.poi.id!, journey.value.id!));
+        updateJourneyDto.value?.connected?.forEach(async (connected) => {
+            if (connected.experience.imagesToUpload && connected.experience.imagesToUpload.length > 0) {
+                uploading.push(
+                    uploadImages(connected.experience.imagesToUpload!, connected.poi.id!, journey.value.id!)
+                );
             }
-            delete experience.data.imagesToUpload;
+            delete connected.experience.imagesToUpload;
         });
         const url = `/api/journey/${journey.value.id}/experiences`;
-        updateJourneyDto.value.journey = journey.value;
 
-        const response = await axios.put(url, updateJourneyDto.value, {
+        const response = await axios.patch(url, updateJourneyDto.value, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -215,10 +223,12 @@ export const useJourneyStore = defineStore("journey", () => {
         journey.value.visibility = "public";
         journey.value.id = uuidv4();
         journey.value.experiences?.forEach((experience) => {
-            if (experience.data.imagesToUpload && experience.data.imagesToUpload.length > 0) {
-                uploading.push(uploadImages(experience.data.imagesToUpload, experience.poi.id!, journey.value.id!));
+            if (experience.experience.imagesToUpload && experience.experience.imagesToUpload.length > 0) {
+                uploading.push(
+                    uploadImages(experience.experience.imagesToUpload, experience.poi.id!, journey.value.id!)
+                );
             }
-            delete experience.data.imagesToUpload;
+            delete experience.experience.imagesToUpload;
         });
         const response = await axios.post("/api/journey/", journey.value!, {
             headers: {
@@ -283,7 +293,7 @@ export const useJourneyStore = defineStore("journey", () => {
                             const token = await authApp.currentUser?.getIdToken(false);
                             const url = await getDownloadURL(task.ref);
                             try {
-                                await axios.put(
+                                await axios.patch(
                                     `/api/journey/${task.metadata.customMetadata.journey}/experience/${task.metadata.customMetadata.exp}/image`,
                                     {
                                         url: url
@@ -297,7 +307,7 @@ export const useJourneyStore = defineStore("journey", () => {
                                 if (journey.value.id == task.metadata.customMetadata.journey) {
                                     journey.value.experiences?.forEach((experience) => {
                                         if (experience.poi.id == task.metadata.customMetadata?.exp) {
-                                            experience.data.images?.push(url);
+                                            experience.experience.images?.push(url);
                                         }
                                     });
                                 }

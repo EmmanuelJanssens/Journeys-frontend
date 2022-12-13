@@ -23,7 +23,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="journey in journeyList?.journeys" v-bind:key="journey.id">
+                <tr v-for="journey in journeyList" v-bind:key="journey.id">
                     <th>
                         <div class="flex items-center space-x-3">
                             <div class="avatar">
@@ -34,7 +34,8 @@
                                             src: journey.thumbnail,
                                             loading: '/assets/placeholder.png',
                                             error: '/assets/placeholder.png'
-                                        }" />img
+                                        }"
+                                        alt="thumbnail" />img
                                 </div>
                             </div>
                         </div>
@@ -44,7 +45,7 @@
                         <div class="text sm opacity-50">{{ journey.description }}</div>
                     </td>
                     <td>
-                        <div>{{ journey.nExperiences }}</div>
+                        <div>{{ journey.experiencesAggregate?.count }}</div>
                     </td>
                     <td>
                         <div class="flex space-x-1">
@@ -68,7 +69,7 @@
                 </tr>
             </tbody>
         </table>
-        <button v-if="journeyList?.pageInfo?.hasNextPage" class="btn btn-secondary" @click="nextPage">
+        <button class="btn btn-secondary" @click="nextPage">
             <p>More</p>
         </button>
     </div>
@@ -118,17 +119,17 @@ async function onDelete(journey: Journey) {
     });
 }
 
-const journeyList = ref<PagedJourneys>();
-
+const journeyList = ref<Journey[]>();
+const currentPage = ref(1);
 onMounted(async () => {
     await userStore.didLogin();
-    if (userStore.state.isLoggedIn) journeyList.value = await userStore.fetchNextPage(5, undefined);
+    if (userStore.state.isLoggedIn) journeyList.value = await userStore.fetchNextJourneyPage(currentPage.value);
     else journeyModalController.open("login");
 });
 async function nextPage() {
-    const fetched = await userStore.fetchNextPage(5, journeyList.value?.pageInfo?.endCursor!);
-    journeyList.value!.pageInfo = fetched.pageInfo;
-    journeyList.value!.journeys = journeyList.value?.journeys.concat(...fetched.journeys)!;
+    const fetched = await userStore.fetchNextJourneyPage(currentPage.value + 1);
+
+    journeyList.value = journeyList.value!.concat(...fetched.journeys)!;
 }
 
 const sortMode = ref();
@@ -156,9 +157,13 @@ function sort(event: Event) {
             break;
         case 2:
             if (order.options.selectedIndex == 2) {
-                userStore.myJourneys.journeys.sort((a, b) => b.nExperiences! - a.nExperiences!);
+                userStore.myJourneys.journeys.sort(
+                    (a, b) => b.experiencesAggregate?.count! - a.experiencesAggregate?.count!
+                );
             } else {
-                userStore.myJourneys.journeys.sort((a, b) => a.nExperiences! - b.nExperiences!);
+                userStore.myJourneys.journeys.sort(
+                    (a, b) => a.experiencesAggregate?.count! - b.experiencesAggregate?.count!
+                );
             }
             break;
     }

@@ -24,7 +24,7 @@
                 :key="experience.poi.id"
                 class="h-full pointer-events-auto">
                 <ExperienceCard
-                    :experience="experience.data"
+                    :experience="experience.experience"
                     :poi="experience.poi"
                     :mode="'edit'"
                     :journey="journeyStore.journey.id!"
@@ -135,7 +135,6 @@ onMounted(async () => {
         await mapInstance.getMap();
         //draw pois
         await drawPoisBetween();
-        poiStore.tagList = await poiStore.getTags();
 
         //after everything is loaded ensure that we can drag markers only if the journey is newly created
         if (query.mode == "new") enableDrag();

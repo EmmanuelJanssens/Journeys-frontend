@@ -98,11 +98,11 @@ function close() {
 }
 
 onClickOutside(modal, () => {
-    if (props.onOutsideClicked) {
-        props.onOutsideClicked();
-    } else {
-        journeyModalController.close(props.name);
-    }
+    // if (props.onOutsideClicked) {
+    //     props.onOutsideClicked();
+    // } else {
+    //     journeyModalController.close(props.name);
+    // }
 });
 
 onMounted(() => {

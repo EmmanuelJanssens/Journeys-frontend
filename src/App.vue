@@ -31,6 +31,12 @@ onMounted(async () => {
         "alert",
         defineAsyncComponent(() => import("components/jModals/AlertModal.vue"))
     );
+    journeyModalController.create(
+        "editJourney",
+        defineAsyncComponent({
+            loader: () => import("components/jModals/EditJourneyModal.vue")
+        })
+    );
 });
 </script>
 

@@ -1,22 +1,15 @@
-import { type } from "os";
-
 export type User = {
     uid?: string;
-    username?: string;
-    firstName?: string;
-    lastName?: string;
     email?: string;
     password?: string;
-    token?: string;
-    public?: boolean;
-    citation?: string;
-    banner?: string[];
+    username?: string;
+    firstname?: string;
+    lastname?: string;
+    visibility?: "private" | "public";
     journeysAggregate?: {
         count: number;
     };
-    journeysConnection?: {
-        edges: [{ node: { experiencesAggregate: { count: number } } }];
-    };
+    poisAggregate?: { count: number };
 };
 
 export type Locality = {
@@ -47,14 +40,15 @@ export type Journey = {
     end?: Locality;
     description?: string;
     thumbnail?: string;
-    thumbnails?: string[];
+    creator?: string;
     visibility?: "public" | "private";
-    nExperiences?: number;
+    experiencesAggregate?: { count: number };
     experiences?: Array<{
-        data: Experience;
+        experience: Experience;
         poi: PointOfInterest;
     }>;
-    creator?: string;
+
+    thumbnails?: string[];
 };
 
 export type PagedJourneys = {
@@ -70,14 +64,13 @@ export type PagedJourneys = {
 };
 
 export type UpdateJourneyDto = {
-    journey?: Journey;
     updated?: Array<{
-        data: Experience;
+        experience: Experience;
         poi: PointOfInterest;
     }>;
     deleted?: Array<String>;
     connected?: Array<{
-        data: Experience;
+        experience: Experience;
         poi: PointOfInterest;
     }>;
 };

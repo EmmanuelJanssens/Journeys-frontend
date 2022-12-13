@@ -29,15 +29,16 @@
                                     () => v$.username.$validate()
                                 )
                             " />
-                        <JourneyButton
+                        <button
+                            class="btn btn-primary"
                             @click="
                                 () => {
                                     security.password = true;
                                     security.email = false;
                                 }
-                            "
-                            >Change password</JourneyButton
-                        >
+                            ">
+                            Change password
+                        </button>
                         <!-- <JourneyButton
                             @click="
                                 () => {
@@ -97,7 +98,7 @@
         </template>
         <template #footer>
             <div class="flex justify-end">
-                <JourneyButton type="secondary" fill="contrast" @click="submitForm"> Update </JourneyButton>
+                <button class="btn btn-primary" @click="submitForm">Update</button>
             </div>
         </template>
     </journey-modal>
@@ -113,7 +114,6 @@ import { POSITION, useToast } from "vue-toastification";
 
 import JourneyInput from "components/UI/Input/JourneyInput.vue";
 import JourneyModal from "components/UI/Modal/JourneyModal.vue";
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
 import { GoogleAuthProvider, reauthenticateWithPopup, updatePassword, updateProfile } from "@firebase/auth";
 const state = ref({
     username: "",
@@ -184,7 +184,6 @@ async function submitForm() {
     }
     if (security.value.password) {
         if (!v$.value.password.$error && !v$.value.confirmPassword.$error) {
-            console.log(authApp.currentUser?.providerId);
             if (authApp.currentUser?.providerId == "firebase") {
                 const user = await reauthenticateWithPopup(authApp.currentUser, new GoogleAuthProvider());
                 if (user.user) {

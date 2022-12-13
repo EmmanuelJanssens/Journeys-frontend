@@ -57,29 +57,27 @@
                             {{ addPoiButton.text }}
                         </p>
                     </button>
-                    <JourneyButton
+                    <button
                         ref="editBtn"
                         :class="{
-                            ' transition-all origin-left ': true,
+                            'btn btn-secondary transition-all origin-left ': true,
                             'transform  duration-300 opacity-100 scale-x-100': route == 'view',
                             'transform  duration-300 opacity-0 scale-x-0 hidden': route != 'view'
                         }"
-                        type="secondary"
-                        @click="editJourneyButton.handler"
-                        ><FontAwesomeIcon :icon="editJourneyButton.icon" size="2x"
-                    /></JourneyButton>
+                        @click="editJourneyButton.handler">
+                        <FontAwesomeIcon :icon="editJourneyButton.icon" size="2x" />
+                    </button>
 
-                    <JourneyButton
+                    <button
                         :class="{
-                            ' transition-all origin-left': true,
+                            ' btn btn-secondary transition-all origin-left': true,
                             ' animate-pulse transform  duration-300 opacity-100 scale-x-100':
                                 journeyStore.state.journeyIsDirty,
                             'transform  duration-300 opacity-0 scale-x-0 hidden': !journeyStore.state.journeyIsDirty
                         }"
-                        type="secondary"
-                        @click="saveJourneyButton.handler"
-                        ><FontAwesomeIcon :icon="saveJourneyButton.icon" size="2x"
-                    /></JourneyButton>
+                        @click="saveJourneyButton.handler">
+                        <FontAwesomeIcon :icon="saveJourneyButton.icon" size="2x" />
+                    </button>
                 </div>
                 <progress
                     v-if="
@@ -91,20 +89,20 @@
             </div>
 
             <div class="flex w-full justify-end">
-                <JourneyButton v-if="userStore.state.isLoggedIn" @click="logoutButton.handler" class="group"
-                    ><FontAwesomeIcon :icon="logoutButton.icon" size="2x" class="group-hover:pr-2" />
+                <button v-if="userStore.state.isLoggedIn" @click="logoutButton.handler" class="btn btn-primary group">
+                    <FontAwesomeIcon :icon="logoutButton.icon" size="2x" class="group-hover:pr-2" />
                     <p
                         class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
                         {{ logoutButton.text }}
-                    </p></JourneyButton
-                >
-                <JourneyButton v-else @click="signInButton.handler" class="group"
-                    ><FontAwesomeIcon :icon="signInButton.icon" size="2x" class="group-hover:pr-2" />
+                    </p>
+                </button>
+                <button v-else @click="signInButton.handler" class="btn btn-primary group">
+                    <FontAwesomeIcon :icon="signInButton.icon" size="2x" class="group-hover:pr-2" />
                     <p
                         class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
                         {{ signInButton.text }}
-                    </p></JourneyButton
-                >
+                    </p>
+                </button>
             </div>
         </div>
     </div>
@@ -113,7 +111,6 @@
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { computed, ref, watch } from "vue";
 import { mapInstance } from "map/JourneysMap";
-import JourneyButton from "./UI/Button/JourneyButton.vue";
 import {
     faSignIn,
     faFilter,

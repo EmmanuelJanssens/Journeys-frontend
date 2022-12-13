@@ -10,7 +10,8 @@ export type ModalType =
     | "editExperience"
     | "saveJourney"
     | "createPoi"
-    | "updateUser";
+    | "updateUser"
+    | string;
 
 class JourneyModalController {
     private _modals = ref<Map<string, { component: Component; open: boolean }>>();

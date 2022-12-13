@@ -10,7 +10,7 @@
                         class="flex space-x-0 p-2 items-center justify-between hover:cursor-pointer hover:bg-primary-darker hover:bg-opacity-30"
                         @click="emit('poiItemClicked', item)">
                         <div class="flex space-x-2">
-                            <img class="object-cover w-16 h-16 rounded-lg" :src="item.thumbnail" />
+                            <img class="object-cover w-16 h-16 rounded-lg" :src="item.thumbnail" alt="thumbnail" />
                             <p class="p-2 truncate">
                                 {{ item.name }}
                             </p>

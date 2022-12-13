@@ -17,14 +17,13 @@
         <slot name="body" />
         <div class="flex justify-end bg-primary-main rounded-b-lg">
             <slot name="footer">
-                <JourneyButton fill="none"> Add </JourneyButton>
+                <button class="btn btn-primary btn-outline">Add</button>
             </slot>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
 import { onMounted, ref } from "vue";
 
 const card = ref();

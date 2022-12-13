@@ -28,7 +28,7 @@
 
         <template #footer>
             <div class="flex justify-end">
-                <JourneyButton type="secondary" fill="contrast" @click="gotoJourneyMap"> Create </JourneyButton>
+                <button class="btn btn-secondary" @click="gotoJourneyMap">Create</button>
             </div>
         </template>
     </JourneyModal>
@@ -40,7 +40,6 @@ import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import GoogleAutoComplete from "components/jAutocomplete/GoogleAutoComplete.vue";
 import { getGeocodedData } from "google/googleGeocoder";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
 
 const validJourney = ref({
     start: {

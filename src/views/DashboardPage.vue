@@ -1,7 +1,10 @@
 <template>
     <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inne bg-primary space-y-4">
         <div class="relative bg-opacity-20 bg-black z-0 bg-cover h-96">
-            <img src="/assets/images/banner/mountains.jpg" class="object-cover h-full w-full absolute -z-10" />
+            <img
+                src="/assets/images/banner/mountains.jpg"
+                class="object-cover h-full w-full absolute -z-10"
+                alt="header" />
             <div
                 class="flex z-50 justify-center space-x-4 items-center h-full text-high-contrast-text text-center sm:text-left">
                 <h1 class="text-xl sm:text-6xl">{{ userStore.state.currentUser }}</h1>
@@ -75,7 +78,7 @@ watch(
     (newVal) => {
         totalExperiences.value = 0;
         newVal.forEach((journey) => {
-            totalExperiences.value += journey.nExperiences ? journey.nExperiences : 0;
+            totalExperiences.value += journey.experiencesAggregate?.count ? journey.experiencesAggregate.count : 0;
         });
     }
 );
@@ -84,7 +87,7 @@ onMounted(async () => {
     await userStore.didLogin();
 
     userStore.myJourneys?.journeys?.forEach((journey) => {
-        totalExperiences.value += journey.nExperiences ? journey.nExperiences : 0;
+        totalExperiences.value += journey.experiencesAggregate?.count ? journey.experiencesAggregate.count : 0;
     });
 
     await userStore.fetchMyStats();

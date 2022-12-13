@@ -93,7 +93,7 @@
         </template>
         <template #footer>
             <div class="flex justify-end">
-                <JourneyButton type="secondary" fill="contrast" @click="submitForm"> Register </JourneyButton>
+                <button class="btn btn-secondary" @click="submitForm">Register</button>
             </div>
         </template>
     </journey-modal>
@@ -109,7 +109,8 @@ import { computed, ref } from "vue";
 import { useUserStore } from "stores/useUserStore";
 import { authApp } from "google/firebase";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
-
+import JourneyInput from "components/UI/Input/JourneyInput.vue";
+import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 const state = ref({
     username: "",
     firstName: "",

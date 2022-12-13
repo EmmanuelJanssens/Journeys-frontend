@@ -20,7 +20,7 @@
             }">
             <swiper-slide v-for="experience in journeyStore.journey.experiences" :key="experience.poi.id">
                 <ExperienceCard
-                    :experience="experience.data"
+                    :experience="experience.experience"
                     :poi="experience.poi"
                     :mode="'view'"
                     :journey=" journeyStore.journey.id!"

@@ -16,12 +16,7 @@
         </div>
     </div>
 </template>
-<script lang="ts">
-export default {
-    name: "LogbookPage",
-    components: { JourneyButton }
-};
-</script>
+
 <script lang="ts" setup>
 import { defineAsyncComponent, onMounted } from "vue";
 
@@ -34,18 +29,10 @@ import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { mapInstance } from "map/JourneysMap";
 import { PointOfInterest } from "types/JourneyDtos";
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
 
 const poiStore = usePoiStore();
 
 onMounted(async () => {
-    journeyModalController.create(
-        "editJourney",
-        defineAsyncComponent({
-            loader: () => import("components/jModals/EditJourneyModal.vue")
-        })
-    );
-
     journeyModalController.create(
         "createJourney",
         defineAsyncComponent({

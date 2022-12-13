@@ -21,7 +21,8 @@
 
                 <img
                     class="object-cover w-1/2 h-[200px] rounded-lg shadow-lg"
-                    v-lazy="{ src: state.url, loading: '/assets/placeholder.png', error: '/assets/placeholder.png' }" />
+                    v-lazy="{ src: state.url, loading: '/assets/placeholder.png', error: '/assets/placeholder.png' }"
+                    alt="thumbnail" />
                 <JourneyInput class="w-full" v-model="state.name" placeholder="Name" />
                 <p v-if="v$.name.$error" class="text-error">{{ v$.name.$errors[0].$message }}</p>
 
@@ -37,7 +38,7 @@
                     </div>
                 </form>
                 <p v-if="v$.tag.$error" class="text-error">{{ v$.tag.$errors[0].$message }}</p>
-                <JourneyButton @click="save">Confirm</JourneyButton>
+                <button class="btn btn-primary" @click="save">Confirm</button>
             </div>
         </template>
         <template v-slot:footer>
@@ -47,7 +48,6 @@
 </template>
 <script lang="ts" setup>
 import GoogleAutoComplete from "components/jAutocomplete/GoogleAutoComplete.vue";
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
 import JourneyInput from "components/UI/Input/JourneyInput.vue";
 import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import { getGeocodedData } from "google/googleGeocoder";

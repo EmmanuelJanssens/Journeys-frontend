@@ -94,10 +94,14 @@ export const useUserStore = defineStore("user", () => {
                 const newUser = {
                     username: name,
                     uid: credentials.user.uid,
-                    completed: credentials.user.emailVerified,
                     visibility: "public"
                 };
-                await axios.post("/api/authentication/register", newUser);
+                const token = await authApp.currentUser?.getIdToken(true);
+                await axios.post("/api/user", newUser, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
             }
 
             return credentials;
@@ -112,12 +116,17 @@ export const useUserStore = defineStore("user", () => {
         const dto = {
             uid: credentials.user.uid,
             username: user.username,
-            firstname: user.firstName,
-            lastname: user.lastName,
-            visibility: "public",
-            completed: false
+            firstname: user.firstname,
+            lastname: user.lastname,
+            visibility: "public"
         };
-        await axios.post("/api/authentication/register", dto);
+        const token = await authApp.currentUser?.getIdToken(true);
+
+        await axios.post("/api/user", dto, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
         await updateProfile(credentials.user, {
             displayName: user.username
         });
@@ -156,17 +165,17 @@ export const useUserStore = defineStore("user", () => {
         }
     }
 
-    async function fetchNextPage(page: number, cursor?: string) {
-        state.value.fetchingMyJourneys = true;
-        const token = await authApp.currentUser?.getIdToken(true);
-        const url = `/api/user/journeys?pages=${page}&cursor=${cursor}`;
-        const response = await axios.get(url, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        return response.data;
-    }
+    // async function fetchNextPage(page: number, cursor?: string) {
+    //     state.value.fetchingMyJourneys = true;
+    //     const token = await authApp.currentUser?.getIdToken(true);
+    //     const url = `/api/user/journeys?pages=${page}&cursor=${cursor}`;
+    //     const response = await axios.get(url, {
+    //         headers: {
+    //             Authorization: `Bearer ${token}`
+    //         }
+    //     });
+    //     return response.data;
+    // }
     //fetch a list of journeys belonging to the current user
     async function fetchMyJourneys() {
         state.value.fetchingMyJourneys = true;
@@ -177,7 +186,7 @@ export const useUserStore = defineStore("user", () => {
                 Authorization: `Bearer ${token}`
             }
         });
-        myJourneys.value = response.data;
+        myJourneys.value.journeys = response.data;
         state.value.fetchingMyJourneys = false;
         return response.data;
     }
@@ -197,15 +206,36 @@ export const useUserStore = defineStore("user", () => {
 
     async function fetchMyStats() {
         const token = await authApp.currentUser?.getIdToken(false);
-        const response = await axios.get("/api/user/stats", {
+        const response = await axios.get("/api/user/profile", {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        myStats.value = response.data;
-        return response.data;
+        myStats.value = {
+            journeys: response.data.journeysAggregate.count,
+            pois: response.data.poisAggregate.count,
+            experiences: response.data.experiencesAggregate.count
+        };
+        const journeys = await axios.get("/api/user/journeys?page=1&limit=10", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        console.log(myStats.value);
+        console.log(response.data);
+        return journeys;
     }
 
+    async function fetchNextJourneyPage(page: number) {
+        const token = await authApp.currentUser?.getIdToken(false);
+        const response = await axios.get(`/api/user/journeys?page=${page}&limit=10`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        myJourneys.value.journeys = myJourneys.value.journeys.concat(response.data);
+        return response.data;
+    }
     //for immediate feedback when removing a journey from our list
     function removeJourney(id: string) {
         myJourneys.value!.journeys = myJourneys.value?.journeys.filter((j) => j.id != id)!;
@@ -216,7 +246,7 @@ export const useUserStore = defineStore("user", () => {
         myPois,
         myStats,
         fetchMyJourneys,
-        fetchNextPage,
+        fetchNextJourneyPage,
         fetchMyPois,
         fetchMyStats,
         login,

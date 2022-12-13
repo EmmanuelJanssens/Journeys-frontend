@@ -34,6 +34,7 @@
                         <div class="relative w-24 h-24 rounded-lg">
                             <img
                                 class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1"
+                                alt="thumbnail"
                                 :src="img.url" />
                             <FontAwesomeIcon
                                 class="absolute top-0 right-1 text-red-600 cursor-pointer"
@@ -67,7 +68,6 @@ import JourneyTextarea from "components/UI/Input/JourneyTextarea.vue";
 import { POSITION, useToast } from "vue-toastification";
 import { drawJourney, drawPoisBetween } from "map/drawOnMap";
 import router from "router/router";
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
 import { Experience, PointOfInterest } from "types/JourneyDtos";
 const state = ref({
     description: "",

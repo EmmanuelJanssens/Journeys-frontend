@@ -9,28 +9,22 @@
 
                 <div v-if="windowSize.width.value > 400" class="z-50 w-full">
                     <div class="flex justify-end p-4 space-x-4">
-                        <JourneyButton
+                        <button
                             v-if="!userStore.state.isLoggedIn"
-                            type="secondary"
-                            fill="fill"
+                            class="btn btn-secondary"
                             @click="journeyModalController.open('login')">
                             LOGIN
-                        </JourneyButton>
+                        </button>
 
-                        <JourneyButton
+                        <button
                             v-if="userStore.state.isLoggedIn"
-                            type="secondary"
-                            fill="fill"
+                            class="btn btn-secondary"
                             @click="router.push('logbook')">
                             LOGBOOK
-                        </JourneyButton>
-                        <JourneyButton
-                            v-if="userStore.state.isLoggedIn"
-                            type="secondary"
-                            fill="fill"
-                            @click="userStore.logout">
+                        </button>
+                        <button v-if="userStore.state.isLoggedIn" class="btn btn-secondary" @click="userStore.logout">
                             LOGOUT
-                        </JourneyButton>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -112,7 +106,7 @@
                         <div
                             class="flex flex-col items-center justify-center space-x-4 rounded-r-md p-2 drop-shadow-lg sm:bg-secondary-light sm:dark:bg-primary-contrast-text sm:flex-row sm:justify-end">
                             <p>{{ poiCount }} pois found!</p>
-                            <JourneyButton type="accent" @click="pushLogbook"> Start now! </JourneyButton>
+                            <button class="btn btn-accent" @click="pushLogbook">Start now!</button>
                         </div>
                     </div>
                 </section>
@@ -154,7 +148,8 @@
                             </p>
                             <img
                                 class="w-4/5 object-cover rounded-xl drop-shadow-lg"
-                                src="/assets/images/features/featureImg1.png" />
+                                src="/assets/images/features/featureImg1.png"
+                                alt="thumbnail" />
                         </div>
                         <div class="flex flex-col space-x-4 max-w-xl p-2 justify-center items-center space-y-4">
                             <p class="text-primary-darker dark:text-primary-dark">
@@ -163,7 +158,8 @@
                             </p>
                             <img
                                 class="w-4/5 object-cover rounded-xl drop-shadow-lg"
-                                src="/assets/images/features/featureImg3.png" />
+                                src="/assets/images/features/featureImg3.png"
+                                alt="thumbnail" />
                         </div>
                     </div>
                 </section>
@@ -206,7 +202,6 @@ import { journeyModalController } from "components/UI/Modal/JourneyModalControll
 
 import GoogleAutoComplete from "components/jAutocomplete/GoogleAutoComplete.vue";
 import CardPreview from "components/CardPreview.vue";
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
 let userStore = useUserStore();
 let poiStore = usePoiStore();
 

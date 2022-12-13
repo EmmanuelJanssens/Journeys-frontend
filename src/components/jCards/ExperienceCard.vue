@@ -46,6 +46,7 @@
                                     loading: '/assets/placeholder.png',
                                     error: '/assets/placeholder.png'
                                 }"
+                                alt="thumbnail"
                                 class="object-cover h-52 w-full rounded-xl shadow-md" />
                         </div>
                     </swiper-slide>
@@ -57,6 +58,7 @@
                                     loading: '/assets/placeholder.png',
                                     error: '/assets/placeholder.png'
                                 }"
+                                alt="thumbnail"
                                 class="object-cover h-52 w-full rounded-xl shadow-md" />
                         </div>
                     </swiper-slide>
@@ -68,6 +70,7 @@
                                     loading: '/assets/placeholder.png',
                                     error: '/assets/placeholder.png'
                                 }"
+                                alt="thumbnail"
                                 class="object-cover h-52 w-full rounded-xl shadow-md" />
                         </div>
                     </swiper-slide>

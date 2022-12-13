@@ -20,7 +20,8 @@
                                             src: poi.thumbnail,
                                             loading: '/assets/placeholder.png',
                                             error: '/assets/placeholder.png'
-                                        }" />img
+                                        }"
+                                        alt="thumbnail" />img
                                 </div>
                             </div>
                         </div>

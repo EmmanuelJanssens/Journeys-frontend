@@ -13,12 +13,8 @@
             <div class="flex flex-col p-4 justify-around h-full bg-secondary-light dark:bg-gray-800 space-y-4">
                 <JourneyInput v-model="state.title" placeholder="Journey title" />
                 <div class="flex space-x-4 justify-between">
-                    <JourneyButton class="grow" type="primary" fill="fill" @click="saveMode('quick')">
-                        Quick Save
-                    </JourneyButton>
-                    <JourneyButton class="grow" type="secondary" fill="fill" @click="saveMode('redirect')">
-                        Save
-                    </JourneyButton>
+                    <button class="btn btn-primary grow" @click="saveMode('quick')">Quick Save</button>
+                    <button class="btn btn-secondary grow" @click="saveMode('redirect')">Save</button>
                 </div>
             </div>
         </template>
@@ -29,7 +25,6 @@
 </template>
 <script lang="ts" setup>
 import JourneyModal from "components/UI/Modal/JourneyModal.vue";
-import JourneyButton from "components/UI/Button/JourneyButton.vue";
 import JourneyInput from "components/UI/Input/JourneyInput.vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { POSITION, useToast } from "vue-toastification";

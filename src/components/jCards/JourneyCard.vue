@@ -27,7 +27,8 @@
                         src: journey.thumbnail,
                         loading: '/assets/placeholder.png',
                         error: '/assets/placeholder.png'
-                    }" />
+                    }"
+                    alt="thumbnail" />
             </figure>
 
             <div

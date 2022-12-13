@@ -38,8 +38,8 @@ export const usePoiStore = defineStore("poi", () => {
 
     //all available tags
     async function getTags() {
-        const result = await axios.get(`/api/tag`);
-        return result.data as { type: string }[];
+        // const result = await axios.get(`/api/tag`);
+        // return result.data as { type: string }[];
     }
 
     async function poiCountBetween(lat: number, lng: number, radius: number): Promise<number> {

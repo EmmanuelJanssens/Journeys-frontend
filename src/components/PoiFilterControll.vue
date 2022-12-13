@@ -1,6 +1,6 @@
 <template>
     <div class="dropdown" ref="filters">
-        <JourneyButton tabindex="0"><FontAwesomeIcon :icon="filterButton.icon" size="2x" /></JourneyButton>
+        <button class="btn btn-primary" tabindex="0"><FontAwesomeIcon :icon="filterButton.icon" size="2x" /></button>
         <div tabindex="0" class="dropdown-content bg-secondary p-2 shadow rounded-lg w-96 mt-4">
             <label class="flex items-center space-x-4 cursor-pointer">
                 <span> keep open </span>
@@ -32,7 +32,6 @@ import { drawPoisBetween } from "map/drawOnMap";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { usePoiStore } from "stores/usePoiStore";
 import { ref } from "vue";
-import JourneyButton from "./UI/Button/JourneyButton.vue";
 const filterButton = ref({
     text: "Filter",
     icon: faFilter,
@@ -40,7 +39,6 @@ const filterButton = ref({
         //
     }
 });
-const tagListContainer = ref();
 
 const filters = ref();
 const filterKeepOpen = ref();
