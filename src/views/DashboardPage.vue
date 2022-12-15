@@ -7,7 +7,7 @@
                 alt="header" />
             <div
                 class="flex z-50 justify-center space-x-4 items-center h-full text-high-contrast-text text-center sm:text-left">
-                <h1 class="text-xl sm:text-6xl">{{ userStore.state.currentUser }}</h1>
+                <h1 class="text-xl sm:text-6xl">{{ userStore.state.userData.username }}</h1>
 
                 <FontAwesomeIcon
                     class="btn btn-circle btn-secondary btn-outline btn-sm"
@@ -74,7 +74,7 @@ import { authApp } from "google/firebase";
 const userStore = useUserStore();
 const totalExperiences = ref(0);
 watch(
-    () => userStore.myJourneys.journeys,
+    () => userStore.myJourneys,
     (newVal) => {
         totalExperiences.value = 0;
         newVal.forEach((journey) => {
@@ -86,7 +86,7 @@ watch(
 onMounted(async () => {
     await userStore.didLogin();
 
-    userStore.myJourneys?.journeys?.forEach((journey) => {
+    userStore.myJourneys?.forEach((journey) => {
         totalExperiences.value += journey.experiencesAggregate?.count ? journey.experiencesAggregate.count : 0;
     });
 

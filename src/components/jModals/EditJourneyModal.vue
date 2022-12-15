@@ -81,10 +81,8 @@ function setActive(img: string) {
 }
 
 onMounted(async () => {
-    journeyStore.journey = userStore.myJourneys.journeys.find((journey) => journey.id == props.journey!.id)!;
-    console.log(userStore.myJourneys.journeys.length);
-    console.log(props.journey);
-    console.log(journeyStore.journey);
+    journeyStore.journey = props.journey!;
+
     selectedThumbnail.value = props.journey?.thumbnail;
     images.value = [];
     journeyStore.journey.thumbnails?.forEach((img) => {
@@ -127,7 +125,7 @@ async function save() {
             });
             return;
         }
-        const edited = userStore.myJourneys?.journeys.find((journey) => journey.id == props.journey?.id);
+        const edited = userStore.myJourneys?.find((journey) => journey.id == props.journey?.id);
         if (edited) {
             edited.title = res.title;
             edited.description = res.description;

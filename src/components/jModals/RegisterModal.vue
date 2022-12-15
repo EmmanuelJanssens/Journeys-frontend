@@ -128,7 +128,7 @@ const toastOptions = {
 
 const rules = {
     username: {
-        minLenght: minLength(5),
+        minLenght: minLength(3),
         noSpecial: helpers.withMessage("Can only contains letters/numbers and -,_", (value: string) =>
             /^[a-zA-Z0-9-_]+$/.test(value)
         ),

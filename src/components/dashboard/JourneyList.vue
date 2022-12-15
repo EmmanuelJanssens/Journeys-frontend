@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col items-center space-y-4">
+    <div class="flex flex-col items-center space-y-4 pb-4">
         <!-- <div class="flex items-center justify-center">
             <select class="select select-primary w-full max-w-xs" ref="sortMode" @change="sort">
                 <option disabled selected>Sort by</option>
@@ -69,7 +69,7 @@
                 </tr>
             </tbody>
         </table>
-        <button class="btn btn-secondary" @click="nextPage">
+        <button v-if="journeyList?.length! < userStore.myStats.journeys" class="btn btn-secondary" @click="nextPage">
             <p>More</p>
         </button>
     </div>
@@ -127,9 +127,10 @@ onMounted(async () => {
     else journeyModalController.open("login");
 });
 async function nextPage() {
-    const fetched = await userStore.fetchNextJourneyPage(currentPage.value + 1);
-
-    journeyList.value = journeyList.value!.concat(...fetched.journeys)!;
+    if (journeyList.value?.length! < userStore.myStats.journeys) {
+        const fetched = await userStore.fetchNextJourneyPage(currentPage.value + 1);
+        journeyList.value = journeyList.value!.concat(...fetched)!;
+    }
 }
 
 const sortMode = ref();
@@ -141,13 +142,13 @@ function sort(event: Event) {
     switch (target.options.selectedIndex) {
         case 1:
             if (order.options.selectedIndex == 2) {
-                userStore.myJourneys.journeys.sort((a, b) => {
+                userStore.myJourneys.sort((a, b) => {
                     if (a.title! < b.title!) return 1;
                     else if (a.title! > b.title!) return -1;
                     else return 0;
                 });
             } else {
-                userStore.myJourneys.journeys.sort((a, b) => {
+                userStore.myJourneys.sort((a, b) => {
                     if (a.title! < b.title!) return -1;
                     else if (a.title! > b.title!) return 1;
                     else return 0;
@@ -157,13 +158,9 @@ function sort(event: Event) {
             break;
         case 2:
             if (order.options.selectedIndex == 2) {
-                userStore.myJourneys.journeys.sort(
-                    (a, b) => b.experiencesAggregate?.count! - a.experiencesAggregate?.count!
-                );
+                userStore.myJourneys.sort((a, b) => b.experiencesAggregate?.count! - a.experiencesAggregate?.count!);
             } else {
-                userStore.myJourneys.journeys.sort(
-                    (a, b) => a.experiencesAggregate?.count! - b.experiencesAggregate?.count!
-                );
+                userStore.myJourneys.sort((a, b) => a.experiencesAggregate?.count! - b.experiencesAggregate?.count!);
             }
             break;
     }

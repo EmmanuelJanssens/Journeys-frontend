@@ -16,7 +16,7 @@ export function drawMyJourneys() {
         type: "FeatureCollection",
         features: []
     };
-    userStore.myJourneys.journeys.forEach((journey) => {
+    userStore.myJourneys.forEach((journey) => {
         geoJSONJourney.features.push(journeyStore.journeyToGeojson(journey)[0]);
         geoJSONJourney.features.push(journeyStore.journeyToGeojson(journey)[1]);
         geoJSONJourney.features.push({
@@ -50,7 +50,7 @@ export function drawJourney(journey: Journey) {
                 type: "Point",
                 coordinates: [experience.poi.location.longitude, experience.poi.location.latitude]
             },
-            properties: experience.data,
+            properties: experience.experience,
             id: experience.poi.id
         });
     });

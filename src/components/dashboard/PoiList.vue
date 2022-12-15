@@ -30,7 +30,7 @@
                         <div class="font-bold">{{ poi.name }}</div>
                     </td>
                     <td>
-                        <div>{{ poi.nExperiences }}</div>
+                        <div>{{ poi.experiencesAggregate?.count }}</div>
                     </td>
                 </tr>
             </tbody>

@@ -79,7 +79,7 @@ export const usePoiStore = defineStore("poi", () => {
         state.value.poiIsLoading = true;
         const result = await axios.get("/api/poi/" + poi.id);
         state.value.poiIsLoading = false;
-        return result.data;
+        return result.data.experiences;
     }
 
     async function addPoi(poi: PointOfInterest) {

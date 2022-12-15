@@ -240,8 +240,9 @@ async function save() {
             isLoading.value = false;
         }
     }
+    drawJourney(journeyStore.journey);
+
     if (router.currentRoute.value.name == "edit") {
-        drawJourney(journeyStore.journey);
         drawPoisBetween();
     }
 }

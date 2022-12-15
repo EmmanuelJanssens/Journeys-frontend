@@ -18,7 +18,7 @@
                     </div>
                 </div>
                 <swiper
-                    v-if="poi?.experiences?.length! > 0"
+                    v-if="experiences?.length! > 0"
                     :slides-per-view="1"
                     :space-between="10"
                     :initial-slide="0"
@@ -31,7 +31,7 @@
                     }"
                     :loop="true"
                     @slide-change="setTitle">
-                    <swiper-slide v-for="experience in poi?.experiences" :key="experience.date">
+                    <swiper-slide v-for="experience in experiences" :key="experience.date">
                         <div class="flex flex-col space-y-4">
                             <img
                                 v-lazy="{
@@ -117,7 +117,7 @@ function add() {
     emit("close");
 }
 onClickOutside(card, () => {
-    // emit("close");
+    emit("close");
 });
 
 const experiences = ref<Experience[]>([]);

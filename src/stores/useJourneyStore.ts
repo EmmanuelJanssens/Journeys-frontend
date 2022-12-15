@@ -37,6 +37,9 @@ export const useJourneyStore = defineStore("journey", () => {
             journey.value.experiences?.push(toAdd);
             updateJourneyDto.value?.connected?.push(toAdd);
             state.value.journeyIsDirty = true;
+            journey.value.experiences?.sort(
+                (a, b) => new Date(a.experience.date).getTime() - new Date(b.experience.date).getTime()
+            );
         }
     }
     function removeFromJourneyLocal(poi_id: string): void {

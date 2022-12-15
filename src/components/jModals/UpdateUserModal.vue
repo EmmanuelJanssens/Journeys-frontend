@@ -22,6 +22,7 @@
                             v-model="state.username"
                             class="col-span-2"
                             placeholder="username"
+                            :error="v$.username.$error ? v$.username.$errors[0].$message as string : ''"
                             @keydown="
                                 ifZero(
                                     $event,
@@ -109,7 +110,7 @@ import { minLength, helpers, email, sameAs, alphaNum, required, requiredIf } fro
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { authApp } from "google/firebase";
 import { useUserStore } from "stores/useUserStore";
-import { computed, ref } from "vue";
+import { onMounted, computed, ref } from "vue";
 import { POSITION, useToast } from "vue-toastification";
 
 import JourneyInput from "components/UI/Input/JourneyInput.vue";
@@ -162,25 +163,35 @@ function ifZero(event: InputEvent, reset: Function, validate: Function) {
     }
 }
 
+onMounted(() => {
+    state.value.username = userStore.state.userData.username;
+    state.value.firstName = userStore.state.userData.firstname;
+    state.value.lastName = userStore.state.userData.lastname;
+});
+
 async function submitForm() {
     v$.value.$validate();
-    if (!v$.value.username.$error) {
+    if (!v$.value.username.$error && authApp.currentUser?.displayName != state.value.username) {
         isLoading.value = true;
-        const response = await userStore.saveUser({
-            firstName: state.value.firstName,
-            lastName: state.value.lastName,
-            username: state.value.username
-        });
-        if (response) {
+        try {
+            await userStore.saveUser({
+                firstName: state.value.firstName,
+                lastName: state.value.lastName,
+                username: state.value.username
+            });
             updateProfile(authApp.currentUser!, {
                 displayName: state.value.username
             });
-            userStore.state.currentUser = state.value.username;
+            userStore.state.userData.username = state.value.username;
 
             dismissRegisterModal();
             toast.success("Modification saved ", toastOptions);
-        } else toast.error("Could not register pleae try again later", toastOptions);
-        isLoading.value = false;
+
+            isLoading.value = false;
+        } catch (e) {
+            toast.error("Could not register please try again later", toastOptions);
+            isLoading.value = false;
+        }
     }
     if (security.value.password) {
         if (!v$.value.password.$error && !v$.value.confirmPassword.$error) {

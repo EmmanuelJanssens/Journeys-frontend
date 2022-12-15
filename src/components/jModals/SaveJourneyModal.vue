@@ -80,7 +80,7 @@ async function save() {
         saved = await journeyStore.updateExperiencesFromJourney();
     } else if (mode.value == "new") {
         saved = await journeyStore.saveJourneyWithExperiences(state.value.title);
-        userStore.myJourneys?.journeys.push(saved.journey);
+        userStore.myJourneys?.push(saved.journey);
     }
     if (saved) {
         Promise.all(saved.uploadTask)

@@ -11,16 +11,14 @@ import {
 } from "firebase/auth";
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
-import { PagedJourneys, PointOfInterest, User } from "types/JourneyDtos";
+import { Journey, PagedJourneys, PointOfInterest, User } from "types/JourneyDtos";
 import { uniqueNamesGenerator, adjectives, colors, animals, Config } from "unique-names-generator";
 import { ref } from "vue";
 
 export class UserDidNotLogIn extends Error {}
 export const useUserStore = defineStore("user", () => {
     //will always be loaded on first logbook render
-    const myJourneys = ref<PagedJourneys>({
-        journeys: []
-    });
+    const myJourneys = ref<Journey[]>([]);
     const myPois = ref<PointOfInterest[]>([]);
 
     const myStats = ref({
@@ -33,7 +31,12 @@ export const useUserStore = defineStore("user", () => {
         fetchingMyPois: false,
         isLoggedIn: false,
         nextPage: "",
-        currentUser: "guest"
+        userData: {
+            username: "guest",
+            firstname: "guest",
+            lastname: "guest",
+            visibility: "public"
+        }
     });
 
     const namesConfig: Config = {
@@ -44,8 +47,8 @@ export const useUserStore = defineStore("user", () => {
 
     authApp.onAuthStateChanged(async (fbuser) => {
         state.value.isLoggedIn = fbuser != undefined;
-        if (fbuser) state.value.currentUser = fbuser.displayName!;
-        else state.value.currentUser = "guest";
+        if (fbuser) state.value.userData.username = fbuser.displayName!;
+        else state.value.userData.username = "guest";
     });
 
     //start a timeout to check if the user loggedin, resolving or rejecting a promise
@@ -137,10 +140,7 @@ export const useUserStore = defineStore("user", () => {
 
     //resets the user to undefined and clears the store
     async function logout() {
-        myJourneys.value = {
-            journeys: [],
-            pageInfo: undefined
-        };
+        myJourneys.value = [];
         myPois.value = [];
         await authApp.signOut();
     }
@@ -150,19 +150,16 @@ export const useUserStore = defineStore("user", () => {
         firstName?: string;
         lastName?: string;
     }): Promise<any | undefined> {
-        try {
-            const token = await authApp.currentUser?.getIdToken(true);
-            if (user.firstName?.length == 0) delete user.firstName;
-            if (user.lastName?.length == 0) delete user.lastName;
-            const response = await axios.put("/api/user", user, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            return response.data;
-        } catch (e) {
-            return undefined;
-        }
+        const token = await authApp.currentUser?.getIdToken(true);
+        if (user.username?.length == 0) delete user.username;
+        if (user.firstName?.length == 0) delete user.firstName;
+        if (user.lastName?.length == 0) delete user.lastName;
+        const response = await axios.patch("/api/user", user, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
     }
 
     // async function fetchNextPage(page: number, cursor?: string) {
@@ -186,7 +183,7 @@ export const useUserStore = defineStore("user", () => {
                 Authorization: `Bearer ${token}`
             }
         });
-        myJourneys.value.journeys = response.data;
+        myJourneys.value = response.data;
         state.value.fetchingMyJourneys = false;
         return response.data;
     }
@@ -216,13 +213,16 @@ export const useUserStore = defineStore("user", () => {
             pois: response.data.poisAggregate.count,
             experiences: response.data.experiencesAggregate.count
         };
+        state.value.userData.username = response.data.username;
+        state.value.userData.firstname = response.data.firstname;
+        state.value.userData.lastname = response.data.lastname;
+        state.value.userData.visibility = response.data.visibility;
         const journeys = await axios.get("/api/user/journeys?page=1&limit=10", {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log(myStats.value);
-        console.log(response.data);
+
         return journeys;
     }
 
@@ -233,12 +233,11 @@ export const useUserStore = defineStore("user", () => {
                 Authorization: `Bearer ${token}`
             }
         });
-        myJourneys.value.journeys = myJourneys.value.journeys.concat(response.data);
         return response.data;
     }
     //for immediate feedback when removing a journey from our list
     function removeJourney(id: string) {
-        myJourneys.value!.journeys = myJourneys.value?.journeys.filter((j) => j.id != id)!;
+        myJourneys.value = myJourneys.value?.filter((j) => j.id != id)!;
     }
 
     return {
