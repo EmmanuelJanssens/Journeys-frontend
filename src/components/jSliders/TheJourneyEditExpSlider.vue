@@ -122,13 +122,12 @@ onMounted(async () => {
             journeyStore.init();
 
             journeyStore.journey.title = query.start + " - " + query.end;
-
-            const start = JSON.parse(query.startLoc as string);
-            const end = JSON.parse(query.endLoc as string);
-
-            journeyStore.journey.start = start;
-            journeyStore.journey.end = end;
         }
+        const start = JSON.parse(query.startLoc as string);
+        const end = JSON.parse(query.endLoc as string);
+
+        journeyStore.journey.start = start;
+        journeyStore.journey.end = end;
         const mid = journeyStore.getJourneyMidPoint(journeyStore.journey);
         await poiStore.searchBetween(mid.center.lat, mid.center.lng, mid.radius);
         //wait for map
@@ -139,6 +138,7 @@ onMounted(async () => {
         //after everything is loaded ensure that we can drag markers only if the journey is newly created
         if (query.mode == "new") enableDrag();
     } catch (e: any) {
+        console.log(e);
         //handle errors
     }
 });

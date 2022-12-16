@@ -20,7 +20,7 @@
                     @complete="filterPois"
                     @focus-out="clear" />
             </div>
-            <div v-if="userStore.state.isLoggedIn">
+            <div>
                 <div class="flex justify-center items-center space-x-4">
                     <!-- <button class="btn btn-primary group" @click="homeButton.handler">
                         <FontAwesomeIcon :icon="homeButton.icon" size="2x" class="group-hover:pr-2" />
@@ -29,28 +29,40 @@
                             {{ homeButton.text }}
                         </p>
                     </button> -->
-                    <button class="btn btn-primary group" @click="userProfileButton.handler">
+                    <button
+                        class="btn btn-primary group"
+                        @click="userProfileButton.handler"
+                        v-if="userStore.state.isLoggedIn">
                         <FontAwesomeIcon :icon="userProfileButton.icon" size="2x" class="group-hover:pr-2" />
                         <p
                             class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
                             {{ userProfileButton.text }}
                         </p>
                     </button>
-                    <button class="btn btn-primary group" @click="logbookButton.handler">
+                    <button
+                        class="btn btn-primary group"
+                        @click="logbookButton.handler"
+                        v-if="userStore.state.isLoggedIn">
                         <FontAwesomeIcon :icon="logbookButton.icon" size="2x" class="group-hover:pr-2" />
                         <p
                             class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
                             {{ logbookButton.text }}
                         </p>
                     </button>
-                    <button class="btn btn-primary group" @click="addJourneyButton.handler">
+                    <button
+                        class="btn btn-primary group"
+                        @click="addJourneyButton.handler"
+                        v-if="router.currentRoute.value.name != 'edit'">
                         <FontAwesomeIcon :icon="addJourneyButton.icon" size="2x" class="group-hover:pr-2" />
                         <p
                             class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">
                             {{ addJourneyButton.text }}
                         </p>
                     </button>
-                    <button class="btn btn-primary group" @click="addPoiButton.handler">
+                    <button
+                        class="btn btn-primary group"
+                        @click="addPoiButton.handler"
+                        v-if="userStore.state.isLoggedIn">
                         <FontAwesomeIcon :icon="addPoiButton.icon" size="2x" class="group-hover:pr-2" />
                         <p
                             class="origin-left transition-all scale-x-0 hidden group:hover:block group-hover:scale-x-100 group-hover:block delay-100">

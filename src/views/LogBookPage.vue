@@ -16,7 +16,11 @@
         </div>
     </div>
 </template>
-
+<script lang="ts">
+export default {
+    name: "LogbookPage"
+};
+</script>
 <script lang="ts" setup>
 import { defineAsyncComponent, onMounted } from "vue";
 

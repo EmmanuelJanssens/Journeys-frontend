@@ -40,6 +40,7 @@ import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import GoogleAutoComplete from "components/jAutocomplete/GoogleAutoComplete.vue";
 import { getGeocodedData } from "google/googleGeocoder";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
+import { val } from "dom7";
 
 const validJourney = ref({
     start: {
@@ -65,6 +66,7 @@ function setEnd(value: string) {
 }
 
 async function gotoJourneyMap() {
+    console.log(validJourney.value);
     if (validJourney.value.start.valid && validJourney.value.end.valid) {
         const geocodedStart = await getGeocodedData(validJourney.value.start.text);
         const geocodedEnd = await getGeocodedData(validJourney.value.end.text);

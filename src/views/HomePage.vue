@@ -1,6 +1,6 @@
 <template>
     <div class="absolute flex flex-col left-0 right-0 top-0 bottom-0 shadow-inner">
-        <div class="relative z-0 h-1/3 sm:h-full">
+        <div class="relative z-10 h-1/3 sm:h-1/3">
             <div class="absolute h-full w-full bg-black bg-opacity-50"></div>
 
             <div class="absolute navbar z-50">
@@ -18,7 +18,10 @@
                         LOGIN
                     </button>
 
-                    <button v-if="userStore.state.isLoggedIn" class="btn btn-secondary" @click="router.push('logbook')">
+                    <button
+                        v-if="userStore.state.isLoggedIn"
+                        class="btn btn-secondary mr-4"
+                        @click="router.push('logbook')">
                         LOGBOOK
                     </button>
                     <button v-if="userStore.state.isLoggedIn" class="btn btn-secondary" @click="userStore.logout">
@@ -121,7 +124,7 @@
             <img class="object-cover h-full w-full" src="/assets/images/map.jpeg" alt="header" />
         </div>
 
-        <div class="sm:relative overflow-auto bg-primary-light dark:bg-gray-800 p-4 sm:p-0">
+        <div class="sm:relative overflow-auto bg-primary-light dark:bg-gray-800 p-4 sm:p-0 z-0">
             <div class="mx-auto container">
                 <section class="flex flex-col sm:flex-row items-start">
                     <div class="w-1/2">
