@@ -3,7 +3,7 @@
         <div class="top-0 p-3 bg-primary-main dark:bg-primary-dark w-full rounded-t-xl">
             <div class="flex space-x-4 justify-between">
                 <p class="text-center text-white">{{ props.poi.name }}: {{ props.experience.title }}</p>
-                <div class="flex space-x-4">
+                <div class="flex space-x-4" v-if="props.mode != 'preview'">
                     <button class="text-white transform hover:scale-110" @click="onEdit">
                         <font-awesome-icon :icon="faPencil" class="text-white" />
                     </button>
@@ -111,7 +111,7 @@ import JourneyCard from "components/UI/Card/JourneyCard.vue";
 const props = defineProps<{
     experience: Experience;
     poi: PointOfInterest;
-    mode: "edit" | "view";
+    mode: "edit" | "view" | "preview";
 }>();
 
 const modules = ref([Navigation, Lazy, Pagination, Autoplay]);

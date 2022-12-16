@@ -98,7 +98,7 @@ module.exports = {
             },
             backgroundImage: {
                 feature: "url('/assets/images/features/featureImg1.png')",
-                header: "url('/assets/images/banner/mountains.jpg')"
+                header: "url('/assets/images/map.jpeg')"
             }
         }
     },
