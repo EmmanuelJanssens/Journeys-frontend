@@ -107,7 +107,6 @@ import { drawJourney, drawPoisBetween } from "map/drawOnMap";
 import router from "router/router";
 import { computed, onMounted } from "vue";
 import { Experience, PointOfInterest } from "types/JourneyDtos";
-import JourneyCard from "components/UI/Card/JourneyCard.vue";
 const props = defineProps<{
     experience: Experience;
     poi: PointOfInterest;

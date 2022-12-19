@@ -1,4 +1,3 @@
-import { type } from "os";
 import { Component, markRaw, ref } from "vue";
 
 export type ModalType =

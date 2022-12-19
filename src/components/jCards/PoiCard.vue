@@ -135,19 +135,3 @@ onMounted(async () => {
 
 rand(0, 1000);
 </script>
-
-<style>
-::-webkit-scrollbar {
-    height: 12px;
-    width: 6px;
-    background: #dae1db;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #a6cabd;
-    -webkit-border-radius: 1ex;
-    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
-    border-radius: 5%;
-    box-shadow: none;
-}
-</style>

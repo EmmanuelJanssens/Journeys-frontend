@@ -92,22 +92,3 @@ function focusOut() {
     focus.value = false;
 }
 </script>
-<style scoped>
-::-webkit-scrollbar {
-    height: 12px;
-    width: 12px;
-    background: #6c9d89;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #687a6e;
-    -webkit-border-radius: 1ex;
-    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
-    border-radius: 5%;
-    box-shadow: none;
-}
-
-::-webkit-scrollbar-corner {
-    background: #000;
-}
-</style>

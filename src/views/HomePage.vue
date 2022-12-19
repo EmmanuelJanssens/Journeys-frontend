@@ -121,7 +121,7 @@
                 </div> -->
             </div>
 
-            <img class="object-cover h-full w-full" src="/assets/images/map.jpeg" alt="header" />
+            <img class="object-cover h-full w-full" src="/assets/images/map_resized.jpeg" alt="header" />
         </div>
 
         <div class="sm:relative overflow-auto bg-primary-light dark:bg-gray-800 p-4 sm:p-0 z-0">
@@ -149,9 +149,7 @@
                                     title: 'At the bar',
                                     description:
                                         'fancy new bar opened in town I had to check it out! I was not deceived',
-                                    images: [
-                                        'https://images.unsplash.com/photo-1543007630-9710e4a00a20?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1335&q=80'
-                                    ]
+                                    images: ['/assets/images/features/feat1.jpeg']
                                 }"
                                 :poi="{
                                     name: 'The bar',
@@ -169,9 +167,7 @@
                                     date: '2021-05-01',
                                     title: 'Eat out',
                                     description: 'Went out eating with some friends',
-                                    images: [
-                                        'https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1335&q=80'
-                                    ]
+                                    images: ['/assets/images/features/feat2.jpeg']
                                 }"
                                 :poi="{
                                     name: 'Restaurant',
@@ -190,9 +186,7 @@
                                     title: 'Out at the museum',
                                     description:
                                         'Never been to an art museum but I must say the paintings where Awesome ',
-                                    images: [
-                                        'https://images.unsplash.com/photo-1554907984-15263bfd63bd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
-                                    ]
+                                    images: ['/assets/images/features/feat3.jpeg']
                                 }"
                                 :poi="{
                                     name: 'Museum',
@@ -231,7 +225,7 @@
                             </p>
                             <img
                                 class="w-4/5 object-cover rounded-xl drop-shadow-lg"
-                                src="/assets/images/features/featureImg1.png"
+                                src="/assets/images/features/featureImg1_thumb.png"
                                 alt="thumbnail" />
                         </div>
                         <div class="flex flex-col space-x-4 max-w-xl p-2 justify-center items-center space-y-4">
@@ -241,7 +235,7 @@
                             </p>
                             <img
                                 class="w-4/5 object-cover rounded-xl drop-shadow-lg"
-                                src="/assets/images/features/featureImg3.png"
+                                src="/assets/images/features/featureImg3_thumb.png"
                                 alt="thumbnail" />
                         </div>
                     </div>
@@ -284,7 +278,6 @@ import { AddressDto } from "types/dtos";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 
 import GoogleAutoComplete from "components/jAutocomplete/GoogleAutoComplete.vue";
-import CardPreview from "components/CardPreview.vue";
 import ExperienceCard from "components/jCards/ExperienceCard.vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { EffectCards } from "swiper";

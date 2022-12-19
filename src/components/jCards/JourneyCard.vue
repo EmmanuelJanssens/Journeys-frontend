@@ -103,37 +103,3 @@ async function goToJourney(id: string) {
     router.push("logbook/journey/" + id);
 }
 </script>
-<style scoped lang="less">
-.thumbnail {
-    height: 200px;
-}
-ion-card-header {
-    cursor: pointer;
-}
-ion-card {
-    max-height: 400px;
-    min-height: 400px;
-    display: flex;
-    flex-direction: column;
-}
-.content {
-    overflow: auto;
-}
-::-webkit-scrollbar {
-    height: 12px;
-    width: 12px;
-    background: #6c9d89;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #687a6e;
-    -webkit-border-radius: 1ex;
-    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
-    border-radius: 5%;
-    box-shadow: none;
-}
-
-::-webkit-scrollbar-corner {
-    background: #000;
-}
-</style>
