@@ -18,10 +18,19 @@ export type Locality = {
 };
 
 export type Experience = {
+    id?: string;
     title?: string;
     description?: string;
-    images?: string[];
+    images?:
+        | {
+              id: string;
+              original: string;
+              thumbnail: string;
+          }[]
+        | string[]
+        | any[];
     imagesToUpload?: any[];
+    poi?: PointOfInterest | string;
     date: string;
 };
 export type PointOfInterest = {
@@ -43,10 +52,7 @@ export type Journey = {
     creator?: string;
     visibility?: "public" | "private";
     experiencesAggregate?: { count: number };
-    experiences?: Array<{
-        experience: Experience;
-        poi: PointOfInterest;
-    }>;
+    experiences?: Experience[];
 
     thumbnails?: string[];
 };

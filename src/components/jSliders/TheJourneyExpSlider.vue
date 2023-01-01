@@ -18,10 +18,12 @@
                 1200: { slidesPerView: 3 },
                 1536: { slidesPerView: 4 }
             }">
-            <swiper-slide v-for="experience in journeyStore.journey.experiences" :key="experience.poi.id">
+            <swiper-slide
+                v-for="experience in journeyStore.journey.experiences"
+                :key="(experience.poi as PointOfInterest).id">
                 <ExperienceCard
-                    :experience="experience.experience"
-                    :poi="experience.poi"
+                    :experience="experience"
+                    :poi="(experience.poi as PointOfInterest)"
                     :mode="'view'"
                     :journey=" journeyStore.journey.id!"
                     class="max-w-[400px] h-full"
@@ -40,6 +42,7 @@ import { onMounted, ref } from "vue";
 import ExperienceCard from "components/jCards/ExperienceCard.vue";
 import { drawJourney } from "map/drawOnMap";
 import router from "router/router";
+import { PointOfInterest } from "types/JourneyDtos";
 
 const modules = ref([Pagination, Navigation, Lazy]);
 

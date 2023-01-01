@@ -19,6 +19,7 @@ export default defineConfig({
             map: path.resolve(__dirname, "./src/map"),
             animation: path.resolve(__dirname, "./src/animation"),
             fontawsome: path.resolve(__dirname, "./src/fontawsome"),
+            config: path.resolve(__dirname, "./src/config"),
             "@": path.resolve(__dirname, "./src")
         }
     },

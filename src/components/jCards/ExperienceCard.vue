@@ -54,7 +54,7 @@
                         <div class="p-4">
                             <img
                                 v-lazy="{
-                                    src: image,
+                                    src: image.thumbnail,
                                     loading: '/assets/placeholder.png',
                                     error: '/assets/placeholder.png'
                                 }"

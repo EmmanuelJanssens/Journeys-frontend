@@ -110,7 +110,8 @@ function add() {
         description: "",
         images: [],
         date: new Date().toISOString(),
-        title: ""
+        title: "",
+        poi: props.poi!
     };
     journeyStore.addToJourneyLocal(experience, props.poi!);
     drawExperiences();

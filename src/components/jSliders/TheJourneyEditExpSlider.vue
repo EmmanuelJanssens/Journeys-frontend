@@ -21,11 +21,11 @@
             @slides-length-change="goToLast">
             <swiper-slide
                 v-for="experience in journeyStore.journey.experiences"
-                :key="experience.poi.id"
+                :key="(experience.poi as PointOfInterest).id"
                 class="h-full pointer-events-auto">
                 <ExperienceCard
-                    :experience="experience.experience"
-                    :poi="experience.poi"
+                    :experience="experience"
+                    :poi="(experience.poi as PointOfInterest)"
                     :mode="'edit'"
                     :journey="journeyStore.journey.id!"
                     class="max-w-[400px] h-full"
@@ -35,8 +35,6 @@
     </section>
 </template>
 <script lang="ts" setup>
-import { useUserStore } from "stores/useUserStore";
-
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Navigation, Lazy, A11y } from "swiper";
 
@@ -55,6 +53,7 @@ import { getLocalityAndCountry, reverseGeocode } from "google/googleGeocoder";
 import router from "router/router";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { LngLat } from "mapbox-gl";
+import { PointOfInterest } from "types/JourneyDtos";
 
 const modules = ref([Pagination, Navigation, Lazy, A11y]);
 
