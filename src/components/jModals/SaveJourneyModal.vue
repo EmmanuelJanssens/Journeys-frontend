@@ -83,7 +83,7 @@ async function save() {
         userStore.myJourneys?.push(saved.journey);
     }
     if (saved) {
-        Promise.all(saved.uploadTask)
+        Promise.all(saved.uploadTask as Promise<any>[])
             .then((tasks) => {
                 if (tasks != undefined && tasks.length > 0) {
                     toast.info("Your images have been uploaded you can now see them", {

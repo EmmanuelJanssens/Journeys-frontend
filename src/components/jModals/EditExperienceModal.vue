@@ -200,26 +200,18 @@ async function save() {
             });
 
             try {
-                journeyStore
-                    .uploadImages(files.value, props.poi.id!, journeyStore.journey.id!)
-                    ?.then(() => {
-                        toast.info("Your images where uploaded you can now view them !", {
-                            position: POSITION.BOTTOM_RIGHT
-                        });
-                    })
-                    .catch(() => {
-                        toast.error("TAn error occured when uploading your images :(", {
-                            position: POSITION.BOTTOM_RIGHT
-                        });
-                    });
-
-                //set deleted images
-                if (currentData.value.experience && currentData.value.experience.images) {
-                    currentData.value.experience.images = currentData.value.experience.images?.filter((img) =>
-                        images.value.find((search) => img == search.url)
-                    );
-                }
-
+                // journeyStore
+                //     .uploadImages(files.value, props.experience.id)
+                //     ?.then(() => {
+                //         toast.info("Your images where uploaded you can now view them !", {
+                //             position: POSITION.BOTTOM_RIGHT
+                //         });
+                //     })
+                //     .catch(() => {
+                //         toast.error("TAn error occured when uploading your images :(", {
+                //             position: POSITION.BOTTOM_RIGHT
+                //         });
+                //     });
                 currentData.value!.experience!.title = state.value.title;
                 currentData.value!.experience!.date = state.value.selectedDate;
                 currentData.value!.experience!.description = state.value.description;

@@ -17,6 +17,12 @@ export type Locality = {
     latitude: number;
 };
 
+export type Image = {
+    id: string;
+    original: string;
+    thumbnail: string;
+};
+
 export type Experience = {
     id?: string;
     title?: string;

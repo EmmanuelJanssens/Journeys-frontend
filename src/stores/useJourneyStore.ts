@@ -1,13 +1,13 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
-import { authApp, storageRef } from "google/firebase";
+import { authApp } from "google/firebase";
 import { getMidPoint, getRadius } from "utils/utils";
 import { LngLat } from "mapbox-gl";
-import { ref as fref, uploadBytesResumable, getDownloadURL, deleteObject, UploadTask } from "firebase/storage";
-import { Experience, Journey, Locality, PointOfInterest, UpdateJourneyDto } from "types/JourneyDtos";
-import { uuidv4 } from "@firebase/util";
+import { Experience, Image, Journey, Locality, PointOfInterest, UpdateJourneyDto } from "types/JourneyDtos";
 import imagekit from "config/imageKit";
+import IKResponse from "imagekit/dist/libs/interfaces/IKResponse";
+import { UploadResponse } from "imagekit/dist/libs/interfaces/UploadResponse";
 
 export const useJourneyStore = defineStore("journey", () => {
     //journey state used accross the application
@@ -115,10 +115,7 @@ export const useJourneyStore = defineStore("journey", () => {
         return response.data as Journey;
     }
 
-    async function updateSingleExperienceFromJourney(
-        experience: Experience,
-        poi: string
-    ): Promise<Journey | undefined> {
+    async function updateSingleExperienceFromJourney(experience: Experience): Promise<Journey | undefined> {
         const token = await authApp.currentUser?.getIdToken(true);
         const url = "/api/experience/" + experience.id;
         const response = await axios.patch(url, experience, {
@@ -215,7 +212,6 @@ export const useJourneyStore = defineStore("journey", () => {
 
     async function saveJourneyWithExperiences(name: string) {
         const token = await authApp.currentUser?.getIdToken(true);
-        const uploading: Array<Promise<void> | undefined> = [];
 
         //save data to database
 
@@ -241,24 +237,23 @@ export const useJourneyStore = defineStore("journey", () => {
 
         const journeyResult = response.data as Journey;
         //then upload files to storage
-        journeyResult.experiences?.forEach(async (experience) => {
-            console.log(experience);
+        const task = journeyResult.experiences?.map((experience) => {
             if (experience.images && experience.images.length > 0) {
-                experience.images.forEach(async (image) => {
+                return experience.images.map(async (image) => {
                     //get blob
                     console.log(image);
                     console.log(image.original);
                     const blob = await fetch(image.original).then((r) => r.blob());
-                    uploadImage(blob, experience.id!, image.id, journeyResult.id!);
+                    const task = await uploadImage(blob, experience.id!, image.id, journeyResult.id!);
+                    return task as Image;
                 });
             }
-            delete experience.imagesToUpload;
         });
 
         state.value.journeyIsDirty = false;
         return {
             journey: response.data as Journey,
-            uploadTask: uploading
+            uploadTask: task
         };
     }
 
@@ -282,16 +277,16 @@ export const useJourneyStore = defineStore("journey", () => {
     }
 
     async function uploadImage(blob: any, experienceId: string, imageId: string, journeyId: string) {
-        return imagekit.upload(
-            {
+        return imagekit
+            .upload({
                 file: blob,
                 fileName: imageId + (blob.type as string).slice(blob.type.lastIndexOf("/")),
                 folder: journeyId + "/" + experienceId
-            },
-            async (err, res) => {
+            })
+            .then(async (res) => {
                 if (res) {
                     const token = await authApp.currentUser?.getIdToken(true);
-                    axios.patch(
+                    const image = await axios.patch(
                         "/api/image/" + imageId,
                         {
                             original: res.url,
@@ -303,10 +298,19 @@ export const useJourneyStore = defineStore("journey", () => {
                             }
                         }
                     );
+                    return {
+                        id: image.data.id as string,
+                        original: image.data.original as string,
+                        thumbnail: image.data.thumbnail as string
+                    };
+                } else {
+                    throw new Error("Image upload failed");
                 }
-            }
-        );
+            });
     }
+
+    /**Upload images for an experience */
+    async function uploadImages(blob: any[], experienceId: string) {}
     function journeyToGeojson(journey: Journey): GeoJSON.Feature[] {
         const obj: GeoJSON.Feature[] = [
             {
