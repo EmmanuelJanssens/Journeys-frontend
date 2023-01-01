@@ -106,7 +106,7 @@ onMounted(() => {
         currentData.value.experience.images?.forEach((image) => {
             images.value.push({
                 isFs: true,
-                url: image
+                url: image as string
             });
         });
         currentData.value.experience.imagesToUpload?.forEach((image) => {
@@ -136,7 +136,7 @@ onMounted(() => {
             currentData.value!.experience.images.forEach((img) => {
                 images.value.push({
                     isFs: true,
-                    url: img
+                    url: img as string
                 });
             });
         }
@@ -176,9 +176,10 @@ async function save() {
             currentData.value!.experience!.date = state.value.selectedDate;
             currentData.value!.experience!.description = state.value.description;
             currentData.value.experience.images = [];
-            images.value.forEach((img) => {
-                if (img.isFs) currentData.value?.experience.images?.push(img.url);
-            });
+            //TODO update this
+            // images.value.forEach((img) => {
+            //     if (img.isFs) currentData.value?.experience.images?.push(img.url);
+            // });
             currentData.value.experience.imagesToUpload = [];
             currentData.value.experience.imagesToUpload = currentData.value.experience.imagesToUpload?.concat(
                 ...files.value
@@ -190,14 +191,16 @@ async function save() {
         journeyModalController.close("editExperience");
     } else {
         if (currentData.value) {
-            const deleted = currentData.value?.experience?.images?.filter(
-                (img) => !images.value.find((search) => img == search.url)
-            );
-            isLoading.value = true;
-            await deleted?.forEach(async (img) => {
-                const imgRef = fref(storageRef.storage, img);
-                await deleteObject(imgRef);
-            });
+            //TODO update this
+
+            // const deleted = currentData.value?.experience?.images?.filter(
+            //     (img) => !images.value.find((search) => img == search.url)
+            // );
+            // isLoading.value = true;
+            // await deleted?.forEach(async (img) => {
+            //     const imgRef = fref(storageRef.storage, img);
+            //     await deleteObject(imgRef);
+            // });
 
             try {
                 // journeyStore
@@ -217,7 +220,7 @@ async function save() {
                 currentData.value!.experience!.description = state.value.description;
                 await journeyStore.updateSingleExperienceFromJourney(
                     currentData.value.experience,
-                    currentData.value.poi.id!
+                    files.value.map((file) => file.url)
                 );
                 journeyModalController.close("editExperience");
                 toast.success("Your modifications were successfuly saved", {

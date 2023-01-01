@@ -27,14 +27,8 @@ export type Experience = {
     id?: string;
     title?: string;
     description?: string;
-    images?:
-        | {
-              id: string;
-              original: string;
-              thumbnail: string;
-          }[]
-        | string[]
-        | any[];
+    images?: Image[] | string[];
+
     imagesToUpload?: any[];
     poi?: PointOfInterest | string;
     date: string;

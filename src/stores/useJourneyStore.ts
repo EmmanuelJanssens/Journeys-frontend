@@ -115,17 +115,36 @@ export const useJourneyStore = defineStore("journey", () => {
         return response.data as Journey;
     }
 
-    async function updateSingleExperienceFromJourney(experience: Experience): Promise<Journey | undefined> {
+    async function updateSingleExperienceFromJourney(
+        experience: Experience,
+        imageAdded?: any[],
+        imageDeleted?: any[]
+    ): Promise<Journey | undefined> {
         const token = await authApp.currentUser?.getIdToken(true);
         const url = "/api/experience/" + experience.id;
-        const response = await axios.patch(url, experience, {
+        const dto = {
+            ...experience,
+            addedImages: imageAdded,
+            removedImages: imageDeleted
+        };
+        const response = await axios.patch(url, dto, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        journey.value.experiences?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-        return response.data as Journey;
+        const updatedExperience = response.data as Experience;
+        journey.value.experiences?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        if (updatedExperience.images?.length! > 0) {
+            updatedExperience.images?.forEach(async (image) => {
+                const img = image as Image;
+                if (img.original.includes("blob")) {
+                    const blob = await fetch(img.original).then((r) => r.blob());
+                    uploadImage(blob, experience.id!, img.id, journey.value.id!);
+                }
+            });
+        }
+        return response.data as Experience;
     }
 
     function setExperienceData(experience: Experience, poi: PointOfInterest) {
@@ -240,11 +259,9 @@ export const useJourneyStore = defineStore("journey", () => {
         const task = journeyResult.experiences?.map((experience) => {
             if (experience.images && experience.images.length > 0) {
                 return experience.images.map(async (image) => {
-                    //get blob
-                    console.log(image);
-                    console.log(image.original);
-                    const blob = await fetch(image.original).then((r) => r.blob());
-                    const task = await uploadImage(blob, experience.id!, image.id, journeyResult.id!);
+                    const img = image as Image;
+                    const blob = await fetch(img.original).then((r) => r.blob());
+                    const task = await uploadImage(blob, experience.id!, img.id, journeyResult.id!);
                     return task as Image;
                 });
             }
