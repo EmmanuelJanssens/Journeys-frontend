@@ -102,9 +102,9 @@ export const useJourneyStore = defineStore("journey", () => {
         return result.data;
     }
 
-    async function removeSingleExperienceFromJourney(poi_id: string): Promise<Journey | undefined> {
+    async function removeSingleExperienceFromJourney(experienceId: string): Promise<Journey | undefined> {
         const token = await authApp.currentUser?.getIdToken(true);
-        const url = "/api/journey/" + journey.value.id! + "/experience/" + poi_id;
+        const url = "/api/experience/" + experienceId;
         const response = await axios.delete(url, {
             headers: {
                 Authorization: `Bearer ${token}`

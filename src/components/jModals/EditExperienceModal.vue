@@ -148,7 +148,6 @@ async function save() {
             images.value.forEach((image) => {
                 if (image.original.includes("blob")) addedImages.push(image.original);
             });
-            // currentData.value!.experience!.journey = { id: journeyStore.journey.journey?.id };
             journeyStore.setExperienceData(
                 currentData.value.experience,
                 currentData.value.poi,

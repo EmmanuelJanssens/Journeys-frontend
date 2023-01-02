@@ -134,7 +134,7 @@ async function onDelete() {
                 {
                     text: "OK",
                     handler: async () => {
-                        const newJ = await journeyStore.removeSingleExperienceFromJourney(props.poi.id!);
+                        const newJ = await journeyStore.removeSingleExperienceFromJourney(props.experience.id!);
                         if (!newJ) {
                             toast.error("Could not delete your experience", {
                                 position: POSITION.BOTTOM_RIGHT
