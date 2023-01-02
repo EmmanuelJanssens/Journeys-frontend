@@ -27,7 +27,7 @@ export type Experience = {
     id?: string;
     title?: string;
     description?: string;
-    images?: Image[] | string[];
+    images: Image[] | string[];
 
     imagesToUpload?: any[];
     poi?: PointOfInterest | string;
@@ -48,13 +48,13 @@ export type Journey = {
     start?: Locality;
     end?: Locality;
     description?: string;
-    thumbnail?: string;
+    thumbnail?: Image;
     creator?: string;
     visibility?: "public" | "private";
     experiencesAggregate?: { count: number };
     experiences?: Experience[];
 
-    thumbnails?: string[];
+    thumbnails?: Image[];
 };
 
 export type PagedJourneys = {

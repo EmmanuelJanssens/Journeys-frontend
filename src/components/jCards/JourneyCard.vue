@@ -24,7 +24,7 @@
                 <img
                     class="rounded-xl object-cover h-52 w-full shadow-lg"
                     v-lazy="{
-                        src: journey.thumbnail,
+                        src: journey.thumbnail?.thumbnail,
                         loading: '/assets/placeholder.png',
                         error: '/assets/placeholder.png'
                     }"

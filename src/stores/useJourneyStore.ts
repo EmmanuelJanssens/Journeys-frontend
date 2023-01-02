@@ -124,8 +124,8 @@ export const useJourneyStore = defineStore("journey", () => {
         const url = "/api/experience/" + experience.id;
         const dto = {
             ...experience,
-            addedImages: imageAdded,
-            removedImages: imageDeleted
+            addedImages: imageAdded ? imageAdded : [],
+            removedImages: imageDeleted ? imageDeleted : []
         };
         const response = await axios.patch(url, dto, {
             headers: {
@@ -261,8 +261,8 @@ export const useJourneyStore = defineStore("journey", () => {
                 return experience.images.map(async (image) => {
                     const img = image as Image;
                     const blob = await fetch(img.original).then((r) => r.blob());
-                    const task = await uploadImage(blob, experience.id!, img.id, journeyResult.id!);
-                    return task as Image;
+                    const task = uploadImage(blob, experience.id!, img.id, journeyResult.id!);
+                    return task;
                 });
             }
         });

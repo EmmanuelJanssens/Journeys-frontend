@@ -10,10 +10,10 @@
         <template #body>
             <div class="bg-secondary-light dark:bg-gray-800 p-4 flex flex-col h-full">
                 <div class="flex space-x-2 flex-wrap max-w-3xl">
-                    <div v-for="img in images" :key="img.url">
-                        <button class="relative" @click="setThumbnail(img.url)">
+                    <div v-for="img in images" :key="img.image.id">
+                        <button class="relative" @click="setThumbnail(img.image.id)">
                             <img
-                                v-lazy="{ src: img.url, loading: '/assets/placeholder.png' }"
+                                v-lazy="{ src: img.image.thumbnail, loading: '/assets/placeholder.png' }"
                                 class="object-cover w-24 h-24 rounded-lg border-2 border-primary-darker p-1"
                                 alt="thumbnail" />
                             <font-awesome-icon
@@ -47,8 +47,7 @@ import { journeyModalController } from "components/UI/Modal/JourneyModalControll
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import { POSITION, useToast } from "vue-toastification";
-import { Journey } from "types/JourneyDtos";
-
+import { Journey, Image } from "types/JourneyDtos";
 const userStore = useUserStore();
 const journeyStore = useJourneyStore();
 const toast = useToast();
@@ -64,7 +63,7 @@ const state = ref({
 
 const images = ref<
     {
-        url: string;
+        image: Image;
         active: string;
     }[]
 >();
@@ -72,7 +71,7 @@ const isLoading = ref(false);
 const selectedThumbnail = ref();
 function setActive(img: string) {
     images.value?.forEach((image) => {
-        if (image.url == img) {
+        if (image.image.id == img) {
             image.active = "checked";
         } else {
             image.active = "unchecked";
@@ -86,14 +85,14 @@ onMounted(async () => {
     selectedThumbnail.value = props.journey?.thumbnail;
     images.value = [];
     journeyStore.journey.thumbnails?.forEach((img) => {
-        if (img == journeyStore.journey?.thumbnail) {
+        if (img.id == journeyStore.journey?.thumbnail?.id) {
             images.value?.push({
-                url: img,
+                image: img,
                 active: "checked"
             });
         } else {
             images.value?.push({
-                url: img,
+                image: img,
                 active: "unchecked"
             });
         }
@@ -102,7 +101,7 @@ onMounted(async () => {
     state.value = {
         title: journeyStore.journey.title!,
         description: journeyStore.journey.description!,
-        selectedThumbnail: journeyStore.journey.thumbnail!
+        selectedThumbnail: journeyStore.journey.thumbnail?.id!
     };
 });
 
