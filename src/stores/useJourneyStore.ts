@@ -83,13 +83,6 @@ export const useJourneyStore = defineStore("journey", () => {
         };
     }
 
-    //----API CALLS----
-
-    async function getJourney(id: string): Promise<Journey | undefined> {
-        const result = await axios.get("/api/journey/" + id + "/experiences");
-        return result.data;
-    }
-
     function getJourneyMidPoint(journey: Journey): {
         center: LngLat;
         radius: number;
@@ -100,6 +93,13 @@ export const useJourneyStore = defineStore("journey", () => {
 
         const radius = getRadius(start, end);
         return { center: new LngLat(center.lng, center.lat), radius };
+    }
+
+    //----API CALLS----
+
+    async function getJourney(id: string): Promise<Journey | undefined> {
+        const result = await axios.get("/api/journey/" + id + "/experiences");
+        return result.data;
     }
 
     async function removeSingleExperienceFromJourney(poi_id: string): Promise<Journey | undefined> {
@@ -144,40 +144,62 @@ export const useJourneyStore = defineStore("journey", () => {
                 }
             });
         }
-        return response.data as Experience;
+        return response.data as Journey;
     }
 
-    function setExperienceData(experience: Experience, poi: PointOfInterest) {
-        const idx = journey.value.experiences?.findIndex((exp) => (exp.poi as PointOfInterest)?.id == poi.id);
-
-        let updateIdx = -1;
-        if (updateJourneyDto.value.updated) {
-            updateIdx = updateJourneyDto.value.updated?.findIndex((exp) => exp.poi.id == poi.id);
-            if (updateIdx < 0) {
-                //create if not exsist
+    function setExperienceData(
+        experience: Experience,
+        poi: PointOfInterest,
+        imageAdded?: string[],
+        imageDeleted?: string[]
+    ) {
+        let expIdx = updateJourneyDto.value.connected?.findIndex((exp) => exp.poi.id == poi.id);
+        //check if experiences is new or already in journey
+        if (expIdx > -1) {
+            //experience is new
+            updateJourneyDto.value.connected[expIdx] = {
+                experience: {
+                    ...experience,
+                    addedImages: imageAdded ? imageAdded : []
+                },
+                poi: poi
+            };
+        } else {
+            //experience is already in journey and needs to be updated
+            expIdx = updateJourneyDto.value.updated?.findIndex((exp) => exp.poi.id == poi.id);
+            if (expIdx < 0) {
+                //add experience to update list
                 updateJourneyDto.value.updated.push({
-                    experience: experience,
+                    experience: {
+                        ...experience,
+                        addedImages: imageAdded ? imageAdded : [],
+                        removedImages: imageDeleted ? imageDeleted : []
+                    },
                     poi: poi
                 });
             } else {
-                //update otherwise
-                updateJourneyDto.value.updated[updateIdx] = {
-                    experience: experience,
+                //update experience in update list
+                updateJourneyDto.value.updated[expIdx] = {
+                    experience: {
+                        ...experience,
+                        addedImages: imageAdded ? imageAdded : [],
+                        removedImages: imageDeleted ? imageDeleted : []
+                    },
                     poi: poi
                 };
             }
-        } else {
-            //only if our update dto is not initialized/ == undefined
-            updateJourneyDto.value.updated = [];
-            updateJourneyDto.value.updated.push({
-                experience: experience,
-                poi: poi
-            });
         }
 
         //for immediate feedback
-        if (idx && idx > 0 && journey.value.experiences) {
-            journey.value.experiences[idx] = experience;
+        if (expIdx > -1) {
+            imageAdded?.forEach((image) => {
+                (experience.images as Image[])?.push({
+                    id: image,
+                    original: image,
+                    thumbnail: image
+                });
+            });
+            journey.value.experiences[expIdx] = experience;
             journey.value.experiences?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         }
         state.value.journeyIsDirty = true;
@@ -196,24 +218,6 @@ export const useJourneyStore = defineStore("journey", () => {
     async function updateExperiencesFromJourney() {
         const uploading: Array<Promise<void> | undefined> = [];
         const token = await authApp.currentUser?.getIdToken(true);
-
-        journey.value.experiences?.forEach((experience) => {
-            if (experience.imagesToUpload && experience.imagesToUpload.length > 0) {
-                // uploading.push(
-                //     uploadImages(experience.imagesToUpload, (experience.poi as PointOfInterest)?.id!, journey.value.id!)
-                // );
-            }
-            delete experience.imagesToUpload;
-        });
-
-        updateJourneyDto.value?.connected?.forEach(async (connected) => {
-            if (connected.experience.imagesToUpload && connected.experience.imagesToUpload.length > 0) {
-                // uploading.push(
-                //     uploadImages(connected.experience.imagesToUpload!, connected.poi.id!, journey.value.id!)
-                // );
-            }
-            delete connected.experience.imagesToUpload;
-        });
         const url = `/api/journey/${journey.value.id}/experiences`;
 
         const response = await axios.patch(url, updateJourneyDto.value, {
@@ -236,10 +240,7 @@ export const useJourneyStore = defineStore("journey", () => {
 
         journey.value.title = name;
         journey.value.visibility = "public";
-        //get url of each image
-        journey.value.experiences?.forEach((experience) => {
-            experience.images = experience.imagesToUpload?.map((image) => image.url);
-        });
+        journey.value.experiences = updateJourneyDto.value.connected?.map((exp) => exp.experience);
 
         //save images to upload later
         /**

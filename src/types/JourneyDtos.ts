@@ -28,8 +28,8 @@ export type Experience = {
     title?: string;
     description?: string;
     images: Image[] | string[];
-
-    imagesToUpload?: any[];
+    addedImages?: string[];
+    removedImages?: string[];
     poi?: PointOfInterest | string;
     date: string;
 };
@@ -52,7 +52,7 @@ export type Journey = {
     creator?: string;
     visibility?: "public" | "private";
     experiencesAggregate?: { count: number };
-    experiences?: Experience[];
+    experiences: Experience[];
 
     thumbnails?: Image[];
 };
@@ -70,12 +70,12 @@ export type PagedJourneys = {
 };
 
 export type UpdateJourneyDto = {
-    updated?: Array<{
+    updated: Array<{
         experience: Experience;
         poi: PointOfInterest;
     }>;
-    deleted?: Array<String>;
-    connected?: Array<{
+    deleted: Array<String>;
+    connected: Array<{
         experience: Experience;
         poi: PointOfInterest;
     }>;

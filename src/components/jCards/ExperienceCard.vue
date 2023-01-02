@@ -34,11 +34,7 @@
                     }"
                     :loop="true"
                     :modules="modules">
-                    <swiper-slide
-                        v-if="
-                            props.experience.images?.length == 0 &&
-                            (!props.experience.imagesToUpload || props.experience.imagesToUpload?.length == 0)
-                        ">
+                    <swiper-slide v-if="props.experience.images?.length == 0">
                         <div class="p-4">
                             <img
                                 v-lazy="{
@@ -50,23 +46,11 @@
                                 class="object-cover h-52 w-full rounded-xl shadow-md" />
                         </div>
                     </swiper-slide>
-                    <swiper-slide v-for="image in props.experience.images" :key="image">
+                    <swiper-slide v-for="image in props.experience.images" :key="(image as Image).id">
                         <div class="p-4">
                             <img
                                 v-lazy="{
-                                    src: image.thumbnail,
-                                    loading: '/assets/placeholder.png',
-                                    error: '/assets/placeholder.png'
-                                }"
-                                alt="thumbnail"
-                                class="object-cover h-52 w-full rounded-xl shadow-md" />
-                        </div>
-                    </swiper-slide>
-                    <swiper-slide v-for="image in props.experience.imagesToUpload" :key="image">
-                        <div class="p-4">
-                            <img
-                                v-lazy="{
-                                    src: image.url,
+                                    src: (image as Image).thumbnail,
                                     loading: '/assets/placeholder.png',
                                     error: '/assets/placeholder.png'
                                 }"
@@ -106,7 +90,7 @@ import { POSITION, useToast } from "vue-toastification";
 import { drawJourney, drawPoisBetween } from "map/drawOnMap";
 import router from "router/router";
 import { computed, onMounted } from "vue";
-import { Experience, PointOfInterest } from "types/JourneyDtos";
+import { Experience, Image, PointOfInterest } from "types/JourneyDtos";
 const props = defineProps<{
     experience: Experience;
     poi: PointOfInterest;

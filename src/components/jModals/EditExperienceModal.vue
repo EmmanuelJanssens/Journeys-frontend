@@ -144,13 +144,17 @@ async function save() {
             currentData.value!.experience!.date = state.value.selectedDate;
             currentData.value!.experience!.description = state.value.description;
             currentData.value.experience.images = [];
-            currentData.value.experience.imagesToUpload = [];
-            currentData.value.experience.imagesToUpload = currentData.value.experience.imagesToUpload?.concat(
-                ...files.value
-            );
-
+            const addedImages: string[] = [];
+            images.value.forEach((image) => {
+                if (image.original.includes("blob")) addedImages.push(image.original);
+            });
             // currentData.value!.experience!.journey = { id: journeyStore.journey.journey?.id };
-            journeyStore.setExperienceData(currentData.value.experience, currentData.value.poi);
+            journeyStore.setExperienceData(
+                currentData.value.experience,
+                currentData.value.poi,
+                addedImages,
+                removedImages.value
+            );
         }
         journeyModalController.close("editExperience");
     } else {
