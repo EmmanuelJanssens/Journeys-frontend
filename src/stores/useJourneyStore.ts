@@ -153,7 +153,9 @@ export const useJourneyStore = defineStore("journey", () => {
         imageAdded?: string[],
         imageDeleted?: string[]
     ) {
-        let expIdx = updateJourneyDto.value.connected?.findIndex((exp) => exp.poi.id == poi.id);
+        let expIdx = updateJourneyDto.value.connected?.findIndex(
+            (exp) => (exp.experience.poi as PointOfInterest)?.id == poi.id
+        );
         //check if experiences is new or already in journey
         if (expIdx > -1) {
             //experience is new
@@ -161,12 +163,11 @@ export const useJourneyStore = defineStore("journey", () => {
                 experience: {
                     ...experience,
                     addedImages: imageAdded ? imageAdded : []
-                },
-                poi: poi
+                }
             };
         } else {
             //experience is already in journey and needs to be updated
-            expIdx = updateJourneyDto.value.updated?.findIndex((exp) => exp.poi.id == poi.id);
+            expIdx = updateJourneyDto.value.updated?.findIndex((exp) => exp.experience.poi == poi.id);
             if (expIdx < 0) {
                 //add experience to update list
                 updateJourneyDto.value.updated.push({
@@ -174,8 +175,7 @@ export const useJourneyStore = defineStore("journey", () => {
                         ...experience,
                         addedImages: imageAdded ? imageAdded : [],
                         removedImages: imageDeleted ? imageDeleted : []
-                    },
-                    poi: poi
+                    }
                 });
             } else {
                 //update experience in update list
@@ -184,8 +184,7 @@ export const useJourneyStore = defineStore("journey", () => {
                         ...experience,
                         addedImages: imageAdded ? imageAdded : [],
                         removedImages: imageDeleted ? imageDeleted : []
-                    },
-                    poi: poi
+                    }
                 };
             }
         }
@@ -218,7 +217,7 @@ export const useJourneyStore = defineStore("journey", () => {
     async function updateExperiencesFromJourney() {
         const uploading: Array<Promise<void> | undefined> = [];
         const token = await authApp.currentUser?.getIdToken(true);
-        const url = `/api/journey/${journey.value.id}/experiences`;
+        const url = `/api/experience/edit/${journey.value.id}`;
 
         const response = await axios.patch(url, updateJourneyDto.value, {
             headers: {

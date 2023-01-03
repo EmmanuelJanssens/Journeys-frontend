@@ -72,11 +72,9 @@ export type PagedJourneys = {
 export type UpdateJourneyDto = {
     updated: Array<{
         experience: Experience;
-        poi: PointOfInterest;
     }>;
     deleted: Array<String>;
     connected: Array<{
         experience: Experience;
-        poi: PointOfInterest;
     }>;
 };

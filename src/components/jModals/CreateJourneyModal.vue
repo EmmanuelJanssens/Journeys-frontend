@@ -66,7 +66,6 @@ function setEnd(value: string) {
 }
 
 async function gotoJourneyMap() {
-    console.log(validJourney.value);
     if (validJourney.value.start.valid && validJourney.value.end.valid) {
         const geocodedStart = await getGeocodedData(validJourney.value.start.text);
         const geocodedEnd = await getGeocodedData(validJourney.value.end.text);

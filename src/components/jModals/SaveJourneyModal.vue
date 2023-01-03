@@ -62,7 +62,10 @@ async function saveMode(mode: "quick" | "redirect") {
         toast.success("Journey saved!", {
             position: POSITION.BOTTOM_RIGHT
         });
-        if (mode == "redirect") router.push("/logbook/journey/" + saved!.id);
+        if (mode == "redirect") {
+            console.log(journeyStore.journey);
+            router.push("/logbook/journey/" + saved.id);
+        }
     } else {
         toast.error("Could not save your journey", {
             position: POSITION.BOTTOM_RIGHT
