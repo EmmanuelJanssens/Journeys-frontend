@@ -52,7 +52,7 @@ import { journeyModalController } from "components/UI/Modal/JourneyModalControll
 import { POSITION, useToast } from "vue-toastification";
 import router from "router/router";
 import { drawMyJourneys } from "map/drawOnMap";
-import { Journey } from "types/JourneyDtos";
+import { Journey } from "types/journey/journey";
 
 const toast = useToast();
 
@@ -80,7 +80,7 @@ async function onDelete() {
                 {
                     text: "OK",
                     handler: async () => {
-                        await journeyStore.removeJourney(props.journey.id!);
+                        await journeyStore.deleteJourney(props.journey.id!);
                         userStore.removeJourney(props.journey.id!);
                         journeyModalController.close("alert");
                         toast.success("Journey deleted", {

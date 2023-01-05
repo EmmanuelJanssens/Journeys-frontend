@@ -40,7 +40,6 @@ import JourneyModal from "components/UI/Modal/JourneyModal.vue";
 import GoogleAutoComplete from "components/jAutocomplete/GoogleAutoComplete.vue";
 import { getGeocodedData } from "google/googleGeocoder";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
-import { val } from "dom7";
 
 const validJourney = ref({
     start: {

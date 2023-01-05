@@ -28,7 +28,7 @@ import { ref, watch } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
 import { mapInstance } from "map/JourneysMap";
-import { PointOfInterest } from "types/JourneyDtos";
+import { PointOfInterest } from "types/poi/point-of-interest";
 
 const poiList = ref();
 const isOpen = ref(false);

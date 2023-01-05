@@ -7,11 +7,14 @@ import {
     signInWithPopup,
     updateCurrentUser,
     updateProfile,
+    User,
     UserCredential
 } from "firebase/auth";
 import { authApp } from "google/firebase";
 import { defineStore } from "pinia";
-import { Journey, PagedJourneys, PointOfInterest, User } from "types/JourneyDtos";
+import { Journey } from "types/journey/journey";
+import { PointOfInterest } from "types/poi/point-of-interest";
+
 import { uniqueNamesGenerator, adjectives, colors, animals, Config } from "unique-names-generator";
 import { ref } from "vue";
 
@@ -113,7 +116,13 @@ export const useUserStore = defineStore("user", () => {
     }
 
     //classic registration with an email and a password
-    async function register(user: User): Promise<UserCredential | undefined> {
+    async function register(user: {
+        email: string;
+        password: string;
+        username?: string;
+        firstname?: string;
+        lastname?: string;
+    }): Promise<UserCredential | undefined> {
         const credentials = await createUserWithEmailAndPassword(authApp, user.email!, user.password!);
         if (!user.username || user.username.length == 0) user.username = uniqueNamesGenerator(namesConfig);
         const dto = {

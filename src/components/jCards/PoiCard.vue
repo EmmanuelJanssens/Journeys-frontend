@@ -31,7 +31,7 @@
                     }"
                     :loop="true"
                     @slide-change="setTitle">
-                    <swiper-slide v-for="experience in experiences" :key="experience.date">
+                    <swiper-slide v-for="experience in experiences" :key="experience.poi.id">
                         <div class="flex flex-col space-y-4">
                             <img
                                 v-lazy="{
@@ -72,14 +72,15 @@
 <script setup lang="ts">
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import JourneyCard from "components/UI/Card/JourneyCard.vue";
 import { usePoiStore } from "stores/usePoiStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, Teleport } from "vue";
 import { onClickOutside, rand } from "@vueuse/core";
 import { useJourneyStore } from "stores/useJourneyStore";
 import { drawExperiences } from "map/drawOnMap";
-import { Experience, PointOfInterest } from "types/JourneyDtos";
+import { PointOfInterest } from "types/poi/point-of-interest";
+import { CreateExperience, Experience } from "types/experience/experience";
+import swiper from "swiper";
 
 const props = defineProps<{
     poi?: PointOfInterest;
@@ -98,22 +99,25 @@ const emit = defineEmits<{
 }>();
 
 function setTitle(value: any) {
-    const titleAt = props.poi?.experiences?.at(value.activeIndex - 1)?.title;
-    if (titleAt && titleAt?.length! > 0) {
-        title.value = titleAt!;
-    } else {
-        title.value = "No title";
-    }
+    // const titleAt = props.poi?.experiences?.at(value.activeIndex - 1)?.title;
+    // if (titleAt && titleAt?.length! > 0) {
+    //     title.value = titleAt!;
+    // } else {
+    //     title.value = "No title";
+    // }
 }
 function add() {
-    const experience: Experience = {
-        description: "",
-        images: [],
-        date: new Date().toISOString(),
-        title: "",
-        poi: props.poi!
+    const experience: CreateExperience = {
+        id: crypto.randomUUID(),
+        poi: props.poi!,
+        title: "Untitled",
+        description: "No description",
+        date: new Date().toDateString(),
+        addedImages: []
     };
-    journeyStore.addToJourneyLocal(experience, props.poi!);
+
+    journeyStore.journeyToEdit.experiences.connect(experience);
+    journeyStore.state.journeyIsEditing = true;
     drawExperiences();
     emit("close");
 }
@@ -131,7 +135,7 @@ onMounted(async () => {
     }
 
     //poi.value = await poiStore.getPoiExperiences(props.poi!);
-    experiences.value = await poiStore.getPoiExperiences(props.poi!);
+    //experiences.value = await poiStore.getPoiExperiences(props.poi!);
 });
 
 rand(0, 1000);

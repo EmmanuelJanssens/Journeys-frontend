@@ -30,8 +30,8 @@ import { mapInstance, mapLayers } from "map/JourneysMap";
 import { onMounted, ref } from "vue";
 
 import "mapbox-gl/dist/mapbox-gl.css";
-import { PointOfInterest } from "types/JourneyDtos";
 import { useDark } from "@vueuse/core";
+import { PointOfInterest } from "types/poi/point-of-interest";
 
 const style = ref("mapbox://styles/heymanuel/clawunauz000814nsgx6d2fjx");
 const isDark = useDark();
@@ -68,12 +68,14 @@ async function loadMap() {
             } & mapboxgl.EventData
         ) => {
             const poi: PointOfInterest = {
-                location: JSON.parse(e.features![0].properties!.location),
-                name: e.features![0].properties!.name,
                 id: e.features![0].properties!.id,
-                experiences: e.features![0].properties!.experiences,
-                tags: JSON.parse(e.features![0].properties!.tags)
+                name: e.features![0].properties!.name,
+                location: JSON.parse(e.features![0].properties!.location),
+                tags: JSON.parse(e.features![0].properties!.tags),
+                thumbnails: [],
+                experiencesAggregate: JSON.parse(e.features![0].properties!.experiencesAggregate)
             };
+
             poiOpened.value = poi;
 
             pos.value = {

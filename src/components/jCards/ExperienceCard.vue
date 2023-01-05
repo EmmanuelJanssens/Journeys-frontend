@@ -2,7 +2,9 @@
     <div class="card bg-base-100 shadow-xl">
         <div class="top-0 p-3 bg-primary-main dark:bg-primary-dark w-full rounded-t-xl">
             <div class="flex space-x-4 justify-between">
-                <p class="text-center text-white">{{ props.poi.name }}: {{ props.experience.title }}</p>
+                <p class="text-center text-white truncate">
+                    {{ props.experience.title }}
+                </p>
                 <div class="flex space-x-4" v-if="props.mode != 'preview'">
                     <button class="text-white transform hover:scale-110" @click="onEdit">
                         <font-awesome-icon :icon="faPencil" class="text-white" />
@@ -17,7 +19,7 @@
         <div class="card-body">
             <div class="px-4">
                 <div class="text-opacity-80 text-gray-600">
-                    <p>{{ new Date(props.experience.date).toDateString() }}</p>
+                    <p>{{ new Date(props.experience.date!).toDateString() }}</p>
                 </div>
             </div>
 
@@ -34,7 +36,7 @@
                     }"
                     :loop="true"
                     :modules="modules">
-                    <swiper-slide v-if="props.experience.images?.length == 0">
+                    <swiper-slide v-if="displayImages.length == 0">
                         <div class="p-4">
                             <img
                                 v-lazy="{
@@ -46,11 +48,11 @@
                                 class="object-cover h-52 w-full rounded-xl shadow-md" />
                         </div>
                     </swiper-slide>
-                    <swiper-slide v-for="image in props.experience.images" :key="(image as Image).id">
+                    <swiper-slide v-for="image in displayImages" :key="image.id">
                         <div class="p-4">
                             <img
                                 v-lazy="{
-                                    src: (image as Image).thumbnail,
+                                    src: (image as JourneyImage).thumbnail,
                                     loading: '/assets/placeholder.png',
                                     error: '/assets/placeholder.png'
                                 }"
@@ -90,10 +92,10 @@ import { POSITION, useToast } from "vue-toastification";
 import { drawJourney, drawPoisBetween } from "map/drawOnMap";
 import router from "router/router";
 import { computed, onMounted } from "vue";
-import { Experience, Image, PointOfInterest } from "types/JourneyDtos";
+import { CreateExperience, Experience, UpdateExperience } from "types/experience/experience";
+import { JourneyImage } from "types/image/image";
 const props = defineProps<{
-    experience: Experience;
-    poi: PointOfInterest;
+    experience: Experience | CreateExperience | UpdateExperience;
     mode: "edit" | "view" | "preview";
 }>();
 
@@ -105,12 +107,11 @@ async function onEdit() {
     journeyModalController.open("editExperience", {
         props: {
             experience: props.experience,
-            poi: props.poi,
             mode: props.mode
         }
     });
 
-    const newExp = await journeyModalController.didClose("editExperience");
+    await journeyModalController.didClose("editExperience");
 }
 
 const route = computed(() => ({
@@ -118,11 +119,22 @@ const route = computed(() => ({
     mode: router.currentRoute.value.query.mode
 }));
 
+const displayImages = computed(() => [
+    ...((props.experience as Experience).images ? (props.experience as Experience).images : []),
+    ...((props.experience as CreateExperience).addedImages
+        ? (props.experience as CreateExperience).addedImages.map((added) => {
+              return {
+                  id: added,
+                  thumbnail: added,
+                  url: added
+              } as JourneyImage;
+          })
+        : [])
+]);
 onMounted(() => {});
 async function onDelete() {
     if (route.value.name == "edit") {
-        journeyStore.removeFromJourneyLocal(props.poi.id!);
-        drawJourney(journeyStore.journey);
+        journeyStore.journeyToEdit.experiences.removeConnected(props.experience.id!);
         drawPoisBetween();
         return;
     }
@@ -134,18 +146,17 @@ async function onDelete() {
                 {
                     text: "OK",
                     handler: async () => {
-                        const newJ = await journeyStore.removeSingleExperienceFromJourney(props.experience.id!);
+                        const newJ = await journeyStore.deleteExperience(props.experience.id!);
                         if (!newJ) {
                             toast.error("Could not delete your experience", {
                                 position: POSITION.BOTTOM_RIGHT
                             });
                         } else {
-                            journeyStore.journey = newJ;
                             journeyModalController.close("alert");
                             toast.success("Experience deleted!", {
                                 position: POSITION.BOTTOM_RIGHT
                             });
-                            drawJourney(journeyStore.journey);
+                            drawJourney(journeyStore.journeyToView!);
                         }
                     }
                 },

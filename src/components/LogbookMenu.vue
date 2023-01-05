@@ -84,8 +84,8 @@
                         :class="{
                             ' btn btn-secondary transition-all origin-left': true,
                             ' animate-pulse transform  duration-300 opacity-100 scale-x-100':
-                                journeyStore.state.journeyIsDirty,
-                            'transform  duration-300 opacity-0 scale-x-0 hidden': !journeyStore.state.journeyIsDirty
+                                journeyStore.state.journeyIsEditing,
+                            'transform  duration-300 opacity-0 scale-x-0 hidden': !journeyStore.state.journeyIsEditing
                         }"
                         @click="saveJourneyButton.handler">
                         <FontAwesomeIcon :icon="saveJourneyButton.icon" size="2x" />
@@ -143,7 +143,6 @@ import { journeyModalController } from "./UI/Modal/JourneyModalController";
 import { useJourneyStore } from "stores/useJourneyStore";
 import AutoComplete from "./jAutocomplete/AutoComplete.vue";
 import { usePoiStore } from "stores/usePoiStore";
-import { Locality } from "types/JourneyDtos";
 import PoiFilterControll from "./PoiFilterControll.vue";
 import { useUserStore } from "stores/useUserStore";
 
@@ -218,7 +217,7 @@ const editJourneyButton = ref({
     icon: faPencil,
     handler: () => {
         if (router.currentRoute.value.name == "view") {
-            router.push("/edit?id=" + journeyStore.journey.id + "&mode=existing");
+            router.push("/edit?id=" + journeyStore.journeyToView!.id + "&mode=existing");
         }
     }
 });
@@ -255,19 +254,25 @@ function filterPois(value: string) {
         key: string | number | any;
         additional?: any;
     }[] = [];
-    poiStore.poisBetween
-        .filter((poi) => poi.name.toLocaleLowerCase().includes(value.toLocaleLowerCase()))
-        .forEach((poi) => {
-            filtered.push({
-                value: poi.name,
-                key: poi.id!,
-                additional: poi.location
-            });
-        });
+    // poiStore.poisBetween
+    //     .filter((poi) => poi.name.toLocaleLowerCase().includes(value.toLocaleLowerCase()))
+    //     .forEach((poi) => {
+    //         filtered.push({
+    //             value: poi.name,
+    //             key: poi.id!,
+    //             additional: poi.location
+    //         });
+    //     });
     predictions.value = filtered;
 }
 
-function flyTo(pred: string, additional: Locality) {
+function flyTo(
+    pred: string,
+    additional: {
+        longitude: number;
+        latitude: number;
+    }
+) {
     predictions.value = [];
     mapInstance.flyTo(additional.longitude, additional.latitude, 16);
 }

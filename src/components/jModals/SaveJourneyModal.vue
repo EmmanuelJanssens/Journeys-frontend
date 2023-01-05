@@ -32,6 +32,7 @@ import { useJourneyStore } from "stores/useJourneyStore";
 import { computed, onMounted, ref } from "vue";
 import router from "router/router";
 import { useUserStore } from "stores/useUserStore";
+import { Journey } from "types/journey/journey";
 
 const state = ref({
     title: ""
@@ -43,7 +44,7 @@ const mode = computed(() => router.currentRoute.value.query.mode);
 const isLoading = ref(false);
 
 onMounted(() => {
-    state.value.title = journeyStore.journey.title!;
+    state.value.title = journeyStore.journeyToEdit.journey.title!;
 });
 
 async function saveMode(mode: "quick" | "redirect") {
@@ -56,15 +57,15 @@ async function saveMode(mode: "quick" | "redirect") {
     if (saved) {
         journeyModalController.close("saveJourney", {
             data: {
-                journey: saved?.id
+                journey: (saved?.journey as Journey).id
             }
         });
         toast.success("Journey saved!", {
             position: POSITION.BOTTOM_RIGHT
         });
         if (mode == "redirect") {
-            console.log(journeyStore.journey);
-            router.push("/logbook/journey/" + saved.id);
+            console.log(saved.journey);
+            router.push("/logbook/journey/" + (saved?.journey as Journey).id);
         }
     } else {
         toast.error("Could not save your journey", {
@@ -78,29 +79,14 @@ async function save() {
     isLoading.value = true;
     let saved;
     if (mode.value == "existing") {
-        journeyStore.journey.title = state.value.title;
-        journeyStore.journey.visibility = "public";
-        saved = await journeyStore.updateExperiencesFromJourney();
+        journeyStore.journeyToEdit.journey.title = state.value.title;
+        journeyStore.journeyToEdit.journey.visibility = "public";
+        saved = await journeyStore.patchExperiences();
     } else if (mode.value == "new") {
-        saved = await journeyStore.saveJourneyWithExperiences(state.value.title);
-        userStore.myJourneys?.push(saved.journey);
-    }
-    if (saved) {
-        Promise.all(saved.uploadTask as Promise<any>[])
-            .then((tasks) => {
-                if (tasks != undefined && tasks.length > 0) {
-                    toast.info("Your images have been uploaded you can now see them", {
-                        position: POSITION.BOTTOM_RIGHT
-                    });
-                }
-            })
-            .catch(() => {
-                toast.error("Could not upload your images", {
-                    position: POSITION.BOTTOM_RIGHT
-                });
-            });
+        saved = await journeyStore.postJourney();
+        // userStore.myJourneys?.push(saved.journey);
     }
     isLoading.value = false;
-    return saved?.journey;
+    return saved;
 }
 </script>

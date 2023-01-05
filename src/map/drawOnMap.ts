@@ -5,8 +5,9 @@ import { usePoiStore } from "stores/usePoiStore";
 import { mapInstance } from "./JourneysMap";
 import { LngLat } from "mapbox-gl";
 import { getMidPoint } from "utils/utils";
-import { Journey } from "types/JourneyDtos";
 
+import { Journey } from "types/journey/journey";
+import { Experience } from "types/experience/experience";
 const userStore = useUserStore();
 const poiStore = usePoiStore();
 const journeyStore = useJourneyStore();
@@ -42,21 +43,18 @@ export function drawJourney(journey: Journey) {
         type: "FeatureCollection",
         features: []
     };
-
-    journey.experiences?.forEach((experience) => {
+    journey.experiences?.forEach((experience: Experience) => {
         featureCollection.features.push({
             type: "Feature",
             geometry: {
                 type: "Point",
                 coordinates: [experience.poi.location.longitude, experience.poi.location.latitude]
             },
-            properties: experience.experience,
-            id: experience.poi.id
+            properties: experience,
+            id: experience.id
         });
     });
-
     const coords = Array<number[]>();
-
     coords.push([journey.start?.longitude!, journey.start?.latitude!]);
     featureCollection.features.forEach((element) => {
         coords.push((element.geometry as GeoJSON.Point).coordinates);
@@ -83,19 +81,26 @@ export function drawJourney(journey: Journey) {
 }
 
 export function drawExperiences() {
-    const array: Array<number[]> = new Array();
-
-    array.push([journeyStore.journey.start?.longitude!, journeyStore.journey.start?.latitude!]);
-    journeyStore.journey.experiences?.forEach((experience) => {
-        array.push([experience.poi.location.longitude, experience.poi.location.latitude]);
+    const coords: Array<number[]> = new Array();
+    coords.push([
+        journeyStore.journeyToEdit!.journey.start?.longitude!,
+        journeyStore.journeyToEdit!.journey.start?.latitude!
+    ]);
+    journeyStore.journeyToEdit!.experiences.connected?.forEach((experience) => {
+        coords.push([experience.poi.location.longitude, experience.poi.location.latitude]);
     });
-    array.push([journeyStore.journey.end?.longitude!, journeyStore.journey.end?.latitude!]);
-
+    journeyStore.journeyToEdit!.experiences.updated?.forEach((experience) => {
+        coords.push([experience.poi!.location.longitude, experience.poi!.location.latitude]);
+    });
+    coords.push([
+        journeyStore.journeyToEdit!.journey.end?.longitude!,
+        journeyStore.journeyToEdit!.journey.end?.latitude!
+    ]);
     const feature: GeoJSON.Feature = {
         type: "Feature",
         geometry: {
             type: "LineString",
-            coordinates: array
+            coordinates: coords
         },
         properties: {}
     };
@@ -122,11 +127,20 @@ export async function drawPoisBetween(zoom?: boolean) {
 
     const coords = Array<number[]>();
 
-    coords.push([journeyStore.journey.start?.longitude!, journeyStore.journey.start?.latitude!]);
-    journeyStore.journey.experiences?.forEach((experience) => {
+    coords.push([
+        journeyStore.journeyToEdit!.journey.start.longitude!,
+        journeyStore.journeyToEdit!.journey.start.latitude!
+    ]);
+    journeyStore.journeyToEdit!.experiences.connected?.forEach((experience) => {
         coords.push([experience.poi.location.longitude, experience.poi.location.latitude]);
     });
-    coords.push([journeyStore.journey.end?.longitude!, journeyStore.journey.end?.latitude!]);
+    journeyStore.journeyToEdit!.experiences.updated?.forEach((experience) => {
+        coords.push([experience.poi!.location.longitude, experience.poi!.location.latitude]);
+    });
+    coords.push([
+        journeyStore.journeyToEdit!.journey.end?.longitude!,
+        journeyStore.journeyToEdit!.journey.end?.latitude!
+    ]);
 
     geoJsonData.features.push({
         type: "Feature",
@@ -135,8 +149,8 @@ export async function drawPoisBetween(zoom?: boolean) {
             coordinates: coords
         },
         properties: {
-            start: journeyStore.journey.start,
-            end: journeyStore.journey.end
+            start: journeyStore.journeyToEdit!.journey.start,
+            end: journeyStore.journeyToEdit!.journey.end
         },
         id: "journey"
     });

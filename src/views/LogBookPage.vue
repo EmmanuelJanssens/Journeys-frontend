@@ -32,7 +32,7 @@ import LogbookMenu from "components/LogbookMenu.vue";
 import ThePoiListSidebar from "components/ThePoiListSidebar.vue";
 import { journeyModalController } from "components/UI/Modal/JourneyModalController";
 import { mapInstance } from "map/JourneysMap";
-import { PointOfInterest } from "types/JourneyDtos";
+import { PointOfInterest } from "types/poi/point-of-interest";
 
 const poiStore = usePoiStore();
 
